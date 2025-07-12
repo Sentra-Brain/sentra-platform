@@ -1,0 +1,28 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Astro Dev (Terminal)",
+      "command": "./node_modules/.bin/astro dev",
+      "request": "launch",
+      "cwd": "${workspaceFolder}/website",
+      "type": "node-terminal"
+    },
+    // {
+    //   "name": "Control Panel Dev",
+    //   "type": "node",
+    //   "request": "launch",
+    //   "runtimeExecutable": "pnpm",
+    //   "runtimeArgs": ["run", "dev"],
+    //   "cwd": "${workspaceFolder}/apps/control-panel",
+    //   "console": "integratedTerminal"
+    // },
+    // {
+    //   "name": "Attach to Node Process",
+    //   "processId": "${command:PickProcess}",
+    //   "request": "attach",
+    //   "type": "node",
+    //   "skipFiles": ["<node_internals>/**"]
+    // }
+  ]
+}
