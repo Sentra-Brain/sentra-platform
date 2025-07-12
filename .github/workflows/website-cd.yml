@@ -20,16 +20,27 @@ jobs:
           submodules: true
           lfs: false
 
-      - name: Build and Deploy
-        id: builddeploy
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: npm ci
+        working-directory: website
+
+      - name: Build Website
+        run: npm run build
+        working-directory: website
+
+      - name: Deploy to Azure Static Web Apps
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.WEB_SITE_DEPLOYMENT_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
           app_location: "website"
-          api_location: ""
-          output_location: "dist"
+          output_location: "website/dist"
 
   close_pull_request_job:
     if: github.event_name == 'pull_request' && github.event.action == 'closed'
@@ -37,9 +48,9 @@ jobs:
     name: Close Pull Request Job
     steps:
       - name: Close Pull Request
-        id: closepullrequest
         uses: Azure/static-web-apps-deploy@v1
         with:
           azure_static_web_apps_api_token: ${{ secrets.WEB_SITE_DEPLOYMENT_TOKEN }}
-          action: "close"
-          app_location: ""
+          action: "close"          
+          app_location: "website"
+          output_location: "website/dist"
