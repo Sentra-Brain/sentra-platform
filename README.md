@@ -1,13 +1,13 @@
-# SentraBrain – Product Description
+# Sentra Brain – Product Description
 
-SentraBrain is a **modular private AI server** designed for professional environments requiring full control over their data, regulatory compliance, and AI infrastructure.
+Sentra Brain is a **modular private AI server** designed for professional environments requiring full control over their data, regulatory compliance, and AI infrastructure.
 
 It operates under an **Open Core + Licensed Hardware/Software** business model:
 
 - The core software is **publicly available** for self-hosting, limited to a maximum of 3 active users/devices.
 - **JGCarmona Consulting S.L.U.** is the sole authorized vendor and integrator for commercial deployments, including:
   - Licensing beyond the free user/device limit.
-  - Deployment on official SentraBrain-certified hardware.
+  - Deployment on official Sentra Brain-certified hardware.
   - Custom integration and support services.
 
 ---
@@ -18,7 +18,7 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 - **LLM Engine:** Optimized llama.cpp server running local LLM models.
 - **RAG Engine:** Private Retrieval Augmented Generation (ChromaDB or Qdrant).
 - **Agent Framework:** Modular, customizable task agents.
-- **MCP Integration Layer:** Connects SentraBrain to external systems (ERP, CRM, WordPress, Outlook, etc.).
+- **MCP Integration Layer:** Connects Sentra Brain to external systems (ERP, CRM, WordPress, Outlook, etc.).
 
 ### 2️⃣ Administration & Control
 - **Web Admin Panel:** React + Tailwind UI.
@@ -46,7 +46,7 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 - **Real Estate Agencies**: Client management, contract generation, CRM integration.
 - **Medical and Health Services**: Where privacy and local control over sensitive data are mandatory.
 
-> SentraBrain is **not limited** to these verticals. It is adaptable to any professional environment requiring **modular, private, and compliant AI automation**.
+> Sentra Brain is **not limited** to these verticals. It is adaptable to any professional environment requiring **modular, private, and compliant AI automation**.
 
 ---
 

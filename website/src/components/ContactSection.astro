@@ -1,0 +1,35 @@
+---
+import { t, defaultLocale, type Locale } from '../i18n.ts';
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+
+<section class="py-16 text-[var(--sentra-text)]">
+  <div class="container mx-auto px-4 text-center max-w-2xl">
+
+    <h1 class="text-3xl md:text-5xl font-bold mb-6">
+      {t(locale, 'contact.hero.title')}
+    </h1>
+
+    <p class="text-lg mb-8">
+      {t(locale, 'contact.hero.subtitle')}
+    </p>
+
+    <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)] shadow-md border border-[var(--sentra-accent-light)]">
+
+      <p class="mb-4">{t(locale, 'contact.emailText')}</p>
+
+      <a href="mailto:juan@jgcarmona.com" class="btn-primary block mb-4">
+        juan@jgcarmona.com
+      </a>
+
+      <p class="mb-2">{t(locale, 'contact.formText')}</p>
+
+      <a href="https://jgcarmona.com/contact" target="_blank" class="btn-secondary">
+        {t(locale, 'contact.formButton')}
+      </a>
+
+    </div>
+
+  </div>
+</section>

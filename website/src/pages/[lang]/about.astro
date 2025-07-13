@@ -1,0 +1,14 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getLocalizedPaths } from "../../utils/localization.ts";
+import { t, defaultLocale, type Locale } from "../../i18n.ts";
+import AboutSection from "../../components/AboutSection.astro";
+export const getStaticPaths = getLocalizedPaths;
+
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+
+<BaseLayout lang={locale} title={t(locale, "about.hero.title")}>
+  <AboutSection />
+</BaseLayout>

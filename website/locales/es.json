@@ -1,0 +1,126 @@
+{
+  "nav": {
+    "about": "Qué es Sentra Brain",
+    "architecture": "Arquitectura Técnica",
+    "use_cases": "Casos de Uso",
+    "contact": "Contacto"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos y Condiciones",
+    "imprint": "Aviso Legal",
+    "ctaText": "¿Buscas una solución de IA privada para tu empresa?",
+    "ctaButton": "Contactar"
+  },
+  "home": {
+    "title": "Sentra Brain: Servidor de IA Privada para Empresas"
+  },
+  "hero": {
+    "title": "Tu Plataforma de IA Privada",
+    "subtitle": "Controla tu información, personaliza tus flujos, integra IA en tu empresa con Sentra Brain: el servidor de inteligencia artificial privada para profesionales, pymes e industrias reguladas.",
+    "cta": "Solicita tu Demo Personalizada"
+  },
+  "about": {
+    "hero": {
+      "title": "Tu IA, tus reglas",
+      "subtitle": "Sentra Brain es el servidor de inteligencia artificial privada que pone el control de la IA en tus manos."
+    },
+    "problem": {
+      "title": "El Problema",
+      "text": "Usar IA basada en la nube significa ceder tus datos, tu propiedad intelectual y exponer a tus clientes. Las normativas como GDPR, HIPAA o ISO27001 son claras: tus datos deben permanecer bajo control."
+    },
+    "solution": {
+      "title": "La Solución",
+      "text": "Con Sentra Brain, instalas tu propio servidor de IA local o híbrido, personalizable y totalmente privado. Sin dependencias externas, sin cuotas ocultas."
+    },
+    "benefits": {
+      "benefit1": {
+        "title": "Privacidad Total",
+        "text": "Tu IA funciona dentro de tu red. Cumple con GDPR, HIPAA y más."
+      },
+      "benefit2": {
+        "title": "Integración Flexible",
+        "text": "Conecta con CRM, ERP, n8n y tus flujos personalizados."
+      },
+      "benefit3": {
+        "title": "Sin Límites",
+        "text": "Modelos locales, sin tokens restringidos ni pagos por uso."
+      }
+    },
+    "cta": "Solicita una Demo"
+  },
+  "architecture": {
+    "hero": {
+      "title": "Arquitectura Modular",
+      "subtitle": "Sentra Brain combina servicio de LLM, integraciones seguras, búsqueda de documentos, automatizaciones y control total en un solo sistema."
+    },
+    "blocks": {
+      "llm": {
+        "title": "Motor de LLM",
+        "text": "Ejecuta modelos de lenguaje grandes de forma local o híbrida. Compatible con GPT privado, Qwen, Llama y más."
+      },
+      "mcp": {
+        "title": "Integración MCP",
+        "text": "Capa API segura para CRM, ERP, plugins de Office y sistemas internos."
+      },
+      "rag": {
+        "title": "Búsqueda de Documentos (RAG)",
+        "text": "Conecta tu base de conocimiento con búsqueda privada mediante tecnología RAG."
+      },
+      "automation": {
+        "title": "Automatizaciones Personalizadas",
+        "text": "Integra flujos y acciones usando herramientas como n8n, adaptadas a tus procesos."
+      },
+      "security": {
+        "title": "Seguridad de Nivel Empresarial",
+        "text": "Despliegue local o híbrido. Cumple totalmente con GDPR, HIPAA, ISO27001."
+      },
+      "support": {
+        "title": "Hardware Certificado y Soporte",
+        "text": "Paquetes oficiales con hardware certificado Sentra Brain y consultoría profesional."
+      }
+    }
+  },
+  "use_cases": {
+    "hero": {
+      "title": "Empresas reales, soluciones reales",
+      "subtitle": "Descubre cómo Sentra Brain se adapta a múltiples sectores con IA que prioriza la privacidad."
+    },
+    "sectors": {
+      "law": {
+        "title": "Despachos de abogados",
+        "text": "Redacta contratos, analiza jurisprudencia, automatiza tareas legales repetitivas y garantiza el cumplimiento del RGPD."
+      },
+      "finance": {
+        "title": "Agencias financieras",
+        "text": "Analiza informes, resume normativas y procesa datos sensibles de forma segura con IA privada."
+      },
+      "industry": {
+        "title": "Pymes industriales",
+        "text": "Optimiza los procesos internos, la atención al cliente y la documentación con modelos locales de IA."
+      },
+      "healthcare": {
+        "title": "Atención médica",
+        "text": "Gestiona los historiales clínicos, el conocimiento interno y el soporte de decisiones sin dependencias externas."
+      },
+      "government": {
+        "title": "Sector Público",
+        "text": "Servicios de IA independientes del proveedor para la administración pública, que respetan las políticas de seguridad nacional."
+      },
+      "other": {
+        "title": "Cualquier entorno profesional",
+        "text": "SentraBrain se adapta a las necesidades de su empresa. Contáctenos para descubrir cómo podemos ayudarle."
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Contacta con Nosotros",
+      "subtitle": "Estamos listos para ayudarte a configurar tu plataforma de IA privada. Escríbenos ahora."
+    },
+    "emailText": "Puedes contactarnos directamente por correo:",
+    "formText": "O usar nuestro formulario de contacto aquí:",
+    "formButton": "Abrir Formulario"
+  }
+}
