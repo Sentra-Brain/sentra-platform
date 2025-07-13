@@ -1,6 +1,6 @@
 {
   "nav": {
-    "about": "Qué es SentraBrain",
+    "about": "Qué es Sentra Brain",
     "architecture": "Arquitectura Técnica",
     "use_cases": "Casos de Uso",
     "contact": "Contacto"
@@ -18,13 +18,13 @@
   },
   "hero": {
     "title": "Tu Plataforma de IA Privada",
-    "subtitle": "Controla tu información, personaliza tus flujos, integra IA en tu empresa con SentraBrain: el servidor de inteligencia artificial privada para profesionales, pymes e industrias reguladas.",
+    "subtitle": "Controla tu información, personaliza tus flujos, integra IA en tu empresa con Sentra Brain: el servidor de inteligencia artificial privada para profesionales, pymes e industrias reguladas.",
     "cta": "Solicita tu Demo Personalizada"
   },
   "about": {
     "hero": {
       "title": "Tu IA, tus reglas",
-      "subtitle": "SentraBrain es el servidor de inteligencia artificial privada que pone el control de la IA en tus manos."
+      "subtitle": "Sentra Brain es el servidor de inteligencia artificial privada que pone el control de la IA en tus manos."
     },
     "problem": {
       "title": "El Problema",
@@ -32,7 +32,7 @@
     },
     "solution": {
       "title": "La Solución",
-      "text": "Con SentraBrain, instalas tu propio servidor de IA local o híbrido, personalizable y totalmente privado. Sin dependencias externas, sin cuotas ocultas."
+      "text": "Con Sentra Brain, instalas tu propio servidor de IA local o híbrido, personalizable y totalmente privado. Sin dependencias externas, sin cuotas ocultas."
     },
     "benefits": {
       "benefit1": {
@@ -49,5 +49,37 @@
       }
     },
     "cta": "Solicita una Demo"
+  },
+   "architecture": {
+    "hero": {
+      "title": "Arquitectura Modular",
+      "subtitle": "Sentra Brain combina servicio de LLM, integraciones seguras, búsqueda de documentos, automatizaciones y control total en un solo sistema."
+    },
+    "blocks": {
+      "llm": {
+        "title": "Motor de LLM",
+        "text": "Ejecuta modelos de lenguaje grandes de forma local o híbrida. Compatible con GPT privado, Qwen, Llama y más."
+      },
+      "mcp": {
+        "title": "Integración MCP",
+        "text": "Capa API segura para CRM, ERP, plugins de Office y sistemas internos."
+      },
+      "rag": {
+        "title": "Búsqueda de Documentos (RAG)",
+        "text": "Conecta tu base de conocimiento con búsqueda privada mediante tecnología RAG."
+      },
+      "automation": {
+        "title": "Automatizaciones Personalizadas",
+        "text": "Integra flujos y acciones usando herramientas como n8n, adaptadas a tus procesos."
+      },
+      "security": {
+        "title": "Seguridad de Nivel Empresarial",
+        "text": "Despliegue local o híbrido. Cumple totalmente con GDPR, HIPAA, ISO27001."
+      },
+      "support": {
+        "title": "Hardware Certificado y Soporte",
+        "text": "Paquetes oficiales con hardware certificado Sentra Brain y consultoría profesional."
+      }
+    }
   }
 }

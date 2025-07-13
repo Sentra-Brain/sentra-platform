@@ -1,6 +1,6 @@
 {
   "nav": {
-    "about": "What is SentraBrain",
+    "about": "What is Sentra Brain",
     "architecture": "Technical Architecture",
     "use_cases": "Use Cases",
     "contact": "Contact"
@@ -18,13 +18,13 @@
   },
   "hero": {
     "title": "Your Own Private AI Platform",
-    "subtitle": "Take control of your data, customize your workflows, and integrate AI into your business with SentraBrain — the private AI server for professionals, SMEs, and regulated industries.",
+    "subtitle": "Take control of your data, customize your workflows, and integrate AI into your business with Sentra Brain — the private AI server for professionals, SMEs, and regulated industries.",
     "cta": "Request Your Personalized Demo"
   },
 "about": {
     "hero": {
       "title": "Your AI, your rules",
-      "subtitle": "SentraBrain is the private AI server that puts control back in your hands."
+      "subtitle": "Sentra Brain is the private AI server that puts control back in your hands."
     },
     "problem": {
       "title": "The Problem",
@@ -32,7 +32,7 @@
     },
     "solution": {
       "title": "The Solution",
-      "text": "With SentraBrain, install your own local or hybrid AI server, customizable and fully private. No external dependencies, no hidden fees."
+      "text": "With Sentra Brain, install your own local or hybrid AI server, customizable and fully private. No external dependencies, no hidden fees."
     },
     "benefits": {
       "benefit1": {
@@ -49,5 +49,37 @@
       }
     },
     "cta": "Request a Demo"
+  },
+  "architecture": {
+    "hero": {
+      "title": "Modular Architecture",
+      "subtitle": "Sentra Brain combines LLM serving, secure integrations, document search, automations, and full control in one system."
+    },
+    "blocks": {
+      "llm": {
+        "title": "LLM Serving Engine",
+        "text": "Run large language models locally or hybrid. Compatible with private GPT, Qwen, Llama and many more."
+      },
+      "mcp": {
+        "title": "MCP Integration",
+        "text": "Secure API layer for CRM, ERP, Office plugins and internal systems."
+      },
+      "rag": {
+        "title": "Document Search (RAG)",
+        "text": "Connect your knowledge base with private document search powered by RAG technology."
+      },
+      "automation": {
+        "title": "Custom Automations",
+        "text": "Integrate workflows and actions using tools like n8n, adapted to your processes."
+      },
+      "security": {
+        "title": "Enterprise-Grade Security",
+        "text": "Deploy on-prem or hybrid. Fully compliant with GDPR, HIPAA, ISO27001."
+      },
+      "support": {
+        "title": "Certified Hardware & Support",
+        "text": "Official packages with Sentra Brain-certified hardware and professional consulting."
+      }
+    }
   }
 }
