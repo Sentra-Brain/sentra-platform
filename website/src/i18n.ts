@@ -8,6 +8,6 @@ export const defaultLocale: Locale = 'en';
 const translations = { en, es };
 
 export function t(lang: Locale, key: string): any {
-  const value = key.split('.').reduce((obj, part) => obj?.[part], translations[lang]);
+  const value = key.split('.').reduce((obj, part) => (obj as Record<string, any>)?.[part], translations[lang]);
   return value ?? key;
 }
