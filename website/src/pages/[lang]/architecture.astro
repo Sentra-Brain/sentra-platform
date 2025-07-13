@@ -10,6 +10,6 @@ const lang = Astro.params.lang ?? defaultLocale;
 const locale = lang as Locale;
 ---
 
-<BaseLayout lang={locale} title={`Sentra Brain: – ${t(locale, "architecture.hero.title")}`}>
+<BaseLayout lang={locale} title={t(locale, "architecture.hero.title")}>
   <ArchitectureSection />
 </BaseLayout>

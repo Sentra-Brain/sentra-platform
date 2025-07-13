@@ -7,16 +7,7 @@ export const defaultLocale: Locale = 'en';
 
 const translations = { en, es };
 
-export function t(lang: Locale, key: string): string {
-
-  const keys = key.split('.');
-  let result: any = translations[lang];
-
-  for (const k of keys) {
-    result = result?.[k];
-    if (result === undefined) break;
-  }
-
-  return typeof result === 'string' ? result : key;
-
+export function t(lang: Locale, key: string): any {
+  const value = key.split('.').reduce((obj, part) => obj?.[part], translations[lang]);
+  return value ?? key;
 }

@@ -9,6 +9,6 @@ const lang = Astro.params.lang ?? defaultLocale;
 const locale = lang as Locale;
 ---
 
-<BaseLayout title={`Sentra Bran: – ${t(locale, "about.hero.title")}`} lang={lang}>
+<BaseLayout lang={locale} title={t(locale, "about.hero.title")}>
   <AboutSection />
 </BaseLayout>

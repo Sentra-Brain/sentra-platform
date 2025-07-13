@@ -13,7 +13,7 @@
     "ctaText": "Looking for a private AI solution for your company?",
     "ctaButton": "Get in Touch"
   },
- "home": {
+  "home": {
     "title": "Sentra Brain: Private AI Server for Enterprises"
   },
   "hero": {
@@ -21,7 +21,7 @@
     "subtitle": "Take control of your data, customize your workflows, and integrate AI into your business with Sentra Brain — the private AI server for professionals, SMEs, and regulated industries.",
     "cta": "Request Your Personalized Demo"
   },
-"about": {
+  "about": {
     "hero": {
       "title": "Your AI, your rules",
       "subtitle": "Sentra Brain is the private AI server that puts control back in your hands."
@@ -81,5 +81,46 @@
         "text": "Official packages with Sentra Brain-certified hardware and professional consulting."
       }
     }
+  },
+  "use_cases": {
+    "hero": {
+      "title": "Real Companies, Real Solutions",
+      "subtitle": "Discover how Sentra Brain adapts to multiple sectors with privacy-first AI."
+    },
+    "sectors": {
+      "law": {
+        "title": "Law Firms",
+        "text": "Draft contracts, analyze jurisprudence, automate repetitive legal tasks while ensuring GDPR compliance."
+      },
+      "finance": {
+        "title": "Financial Agencies",
+        "text": "Analyze reports, summarize regulations, and process sensitive data securely with private AI."
+      },
+      "industry": {
+        "title": "Industrial SMEs",
+        "text": "Optimize internal processes, customer support, and documentation with local AI models."
+      },
+      "healthcare": {
+        "title": "Healthcare",
+        "text": "Handle patient records, internal knowledge, and decision support without external dependencies."
+      },
+      "government": {
+        "title": "Public Sector",
+        "text": "Vendor-independent AI services for public administration, respecting national security policies."
+      },
+      "other": {
+        "title": "Any Professional Environment",
+        "text": "SentraBrain adapts to your company's needs. Contact us to explore how we can help."
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Get in Touch",
+      "subtitle": "We’re ready to help you set up your private AI platform. Contact us now."
+    },
+    "emailText": "You can contact us directly by email:",
+    "formText": "Or use our contact form here:",
+    "formButton": "Open Contact Form"
   }
 }

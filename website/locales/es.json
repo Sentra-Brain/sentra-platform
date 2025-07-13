@@ -13,7 +13,7 @@
     "ctaText": "¿Buscas una solución de IA privada para tu empresa?",
     "ctaButton": "Contactar"
   },
-    "home": {
+  "home": {
     "title": "Sentra Brain: Servidor de IA Privada para Empresas"
   },
   "hero": {
@@ -50,7 +50,7 @@
     },
     "cta": "Solicita una Demo"
   },
-   "architecture": {
+  "architecture": {
     "hero": {
       "title": "Arquitectura Modular",
       "subtitle": "Sentra Brain combina servicio de LLM, integraciones seguras, búsqueda de documentos, automatizaciones y control total en un solo sistema."
@@ -81,5 +81,46 @@
         "text": "Paquetes oficiales con hardware certificado Sentra Brain y consultoría profesional."
       }
     }
+  },
+  "use_cases": {
+    "hero": {
+      "title": "Empresas reales, soluciones reales",
+      "subtitle": "Descubre cómo Sentra Brain se adapta a múltiples sectores con IA que prioriza la privacidad."
+    },
+    "sectors": {
+      "law": {
+        "title": "Despachos de abogados",
+        "text": "Redacta contratos, analiza jurisprudencia, automatiza tareas legales repetitivas y garantiza el cumplimiento del RGPD."
+      },
+      "finance": {
+        "title": "Agencias financieras",
+        "text": "Analiza informes, resume normativas y procesa datos sensibles de forma segura con IA privada."
+      },
+      "industry": {
+        "title": "Pymes industriales",
+        "text": "Optimiza los procesos internos, la atención al cliente y la documentación con modelos locales de IA."
+      },
+      "healthcare": {
+        "title": "Atención médica",
+        "text": "Gestiona los historiales clínicos, el conocimiento interno y el soporte de decisiones sin dependencias externas."
+      },
+      "government": {
+        "title": "Sector Público",
+        "text": "Servicios de IA independientes del proveedor para la administración pública, que respetan las políticas de seguridad nacional."
+      },
+      "other": {
+        "title": "Cualquier entorno profesional",
+        "text": "SentraBrain se adapta a las necesidades de su empresa. Contáctenos para descubrir cómo podemos ayudarle."
+      }
+    }
+  },
+  "contact": {
+    "hero": {
+      "title": "Contacta con Nosotros",
+      "subtitle": "Estamos listos para ayudarte a configurar tu plataforma de IA privada. Escríbenos ahora."
+    },
+    "emailText": "Puedes contactarnos directamente por correo:",
+    "formText": "O usar nuestro formulario de contacto aquí:",
+    "formButton": "Abrir Formulario"
   }
 }
