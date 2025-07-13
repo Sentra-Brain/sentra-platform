@@ -20,5 +20,34 @@
     "title": "Your Own Private AI Platform",
     "subtitle": "Take control of your data, customize your workflows, and integrate AI into your business with SentraBrain — the private AI server for professionals, SMEs, and regulated industries.",
     "cta": "Request Your Personalized Demo"
+  },
+"about": {
+    "hero": {
+      "title": "Your AI, your rules",
+      "subtitle": "SentraBrain is the private AI server that puts control back in your hands."
+    },
+    "problem": {
+      "title": "The Problem",
+      "text": "Using cloud-based AI means giving away your data, intellectual property, and exposing your clients. Regulations like GDPR, HIPAA, or ISO27001 are clear: your data must remain under control."
+    },
+    "solution": {
+      "title": "The Solution",
+      "text": "With SentraBrain, install your own local or hybrid AI server, customizable and fully private. No external dependencies, no hidden fees."
+    },
+    "benefits": {
+      "benefit1": {
+        "title": "Total Privacy",
+        "text": "Your AI runs within your network. Fully compliant with GDPR, HIPAA and more."
+      },
+      "benefit2": {
+        "title": "Flexible Integration",
+        "text": "Connect with CRM, ERP, n8n and your custom workflows."
+      },
+      "benefit3": {
+        "title": "No Limits",
+        "text": "Local models, no restricted tokens or pay-per-use costs."
+      }
+    },
+    "cta": "Request a Demo"
   }
 }

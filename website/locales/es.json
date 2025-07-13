@@ -20,5 +20,34 @@
     "title": "Tu Plataforma de IA Privada",
     "subtitle": "Controla tu información, personaliza tus flujos, integra IA en tu empresa con SentraBrain: el servidor de inteligencia artificial privada para profesionales, pymes e industrias reguladas.",
     "cta": "Solicita tu Demo Personalizada"
+  },
+  "about": {
+    "hero": {
+      "title": "Tu IA, tus reglas",
+      "subtitle": "SentraBrain es el servidor de inteligencia artificial privada que pone el control de la IA en tus manos."
+    },
+    "problem": {
+      "title": "El Problema",
+      "text": "Usar IA basada en la nube significa ceder tus datos, tu propiedad intelectual y exponer a tus clientes. Las normativas como GDPR, HIPAA o ISO27001 son claras: tus datos deben permanecer bajo control."
+    },
+    "solution": {
+      "title": "La Solución",
+      "text": "Con SentraBrain, instalas tu propio servidor de IA local o híbrido, personalizable y totalmente privado. Sin dependencias externas, sin cuotas ocultas."
+    },
+    "benefits": {
+      "benefit1": {
+        "title": "Privacidad Total",
+        "text": "Tu IA funciona dentro de tu red. Cumple con GDPR, HIPAA y más."
+      },
+      "benefit2": {
+        "title": "Integración Flexible",
+        "text": "Conecta con CRM, ERP, n8n y tus flujos personalizados."
+      },
+      "benefit3": {
+        "title": "Sin Límites",
+        "text": "Modelos locales, sin tokens restringidos ni pagos por uso."
+      }
+    },
+    "cta": "Solicita una Demo"
   }
 }
