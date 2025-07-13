@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "about": "What is SentraBrain",
+    "architecture": "Technical Architecture",
+    "use_cases": "Use Cases",
+    "contact": "Contact"
+  },
+  "footer": {
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "imprint": "Imprint",
+    "ctaText": "Looking for a private AI solution for your company?",
+    "ctaButton": "Get in Touch"
+  },
+ "home": {
+    "title": "Sentra Brain: Private AI Server for Enterprises"
+  },
+  "hero": {
+    "title": "Your Own Private AI Platform",
+    "subtitle": "Take control of your data, customize your workflows, and integrate AI into your business with SentraBrain — the private AI server for professionals, SMEs, and regulated industries.",
+    "cta": "Request Your Personalized Demo"
+  }
+}

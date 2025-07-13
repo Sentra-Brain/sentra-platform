@@ -1,0 +1,24 @@
+{
+  "nav": {
+    "about": "Qué es SentraBrain",
+    "architecture": "Arquitectura Técnica",
+    "use_cases": "Casos de Uso",
+    "contact": "Contacto"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados.",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos y Condiciones",
+    "imprint": "Aviso Legal",
+    "ctaText": "¿Buscas una solución de IA privada para tu empresa?",
+    "ctaButton": "Contactar"
+  },
+    "home": {
+    "title": "Sentra Brain: Servidor de IA Privada para Empresas"
+  },
+  "hero": {
+    "title": "Tu Plataforma de IA Privada",
+    "subtitle": "Controla tu información, personaliza tus flujos, integra IA en tu empresa con SentraBrain: el servidor de inteligencia artificial privada para profesionales, pymes e industrias reguladas.",
+    "cta": "Solicita tu Demo Personalizada"
+  }
+}

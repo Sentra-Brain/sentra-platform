@@ -1,0 +1,43 @@
+---
+import { t, defaultLocale, type Locale } from '../i18n.ts';
+const { lang = defaultLocale } = Astro.props;
+const locale = lang as Locale;
+---
+
+<footer class="bg-[var(--sentra-primary)] text-[var(--sentra-text)] border-t border-[var(--sentra-accent-light)] py-10 text-sm">
+  <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between gap-8">
+
+    <!-- Block 1: Info & Branding -->
+    <div class="md:w-1/3 space-y-2 text-center md:text-left">
+      <p class="font-semibold">Sentra Brain</p>
+      <p>© {new Date().getFullYear()} {t(locale, 'footer.rights')}</p>
+      <p>
+        Powered by{' '}
+        <a href="https://jgccarmona.com" class="underline hover:text-[var(--sentra-accent)]">
+          JGCarmona Consulting S.L.U.
+        </a>
+      </p>
+    </div>
+
+    <!-- Block 2: Legal Links -->
+    <div class="md:w-1/3 text-center space-y-2">
+      <div class="flex flex-col sm:flex-row sm:justify-center gap-2 text-xs">
+        <a href={`/${lang}/privacy`} class="hover:underline">{t(locale, 'footer.privacy')}</a>
+        <a href={`/${lang}/terms`} class="hover:underline">{t(locale, 'footer.terms')}</a>
+        <a href={`/${lang}/imprint`} class="hover:underline">{t(locale, 'footer.imprint')}</a>
+      </div>
+    </div>
+
+    <!-- Block 3: CTA -->
+    <div class="md:w-1/3 text-center md:text-right space-y-2">
+      <p>{t(locale, 'footer.ctaText')}</p>
+      <a
+        href={`/${lang}/contact`}
+        class="inline-block mt-1 px-4 py-2 bg-[var(--sentra-accent)] text-[var(--sentra-primary)] rounded hover:bg-[var(--sentra-accent-light)] transition"
+      >
+        {t(locale, 'footer.ctaButton')}
+      </a>
+    </div>
+
+  </div>
+</footer>
