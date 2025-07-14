@@ -28,11 +28,11 @@ graph TD
     VendorPanel --> n8n
     API --> LLM
     API --> RAG
-    API --> MCP
+    API --> MCP Server
     API --> Auth
     AdminPanel --> n8n
     RAG --> DataSources
-    MCP --> CRMs
+    MCP Server --> CRMs
 
 ```
 

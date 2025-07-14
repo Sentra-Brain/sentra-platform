@@ -7,7 +7,7 @@ Sentra Brain is a private, modular AI platform focused on providing SMEs with se
 - Local LLM inference (llama.cpp or vLLM)
 - Custom Model Context Protocol (MCP) Server
 - Retrieval-Augmented Generation (RAG) Layer (ChromaDB or Qdrant)
-- Frontend User Experience (React + Tailwind)
+- User Frontend (React + Tailwind)
 - Admin Panel for Monitoring, Configuration, and Licensing (future phases)
 
 This document follows the arc42 template for systematic software architecture documentation.  
