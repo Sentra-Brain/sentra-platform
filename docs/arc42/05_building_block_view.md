@@ -32,7 +32,7 @@ graph TD
     API --> Auth
     AdminPanel --> n8n
     RAG --> DataSources
-    MCP Server --> CRMs
+    MCP --> CRMs
 
 ```
 
