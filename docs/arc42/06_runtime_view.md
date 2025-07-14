@@ -86,8 +86,6 @@ sequenceDiagram
 
     User->>API: REST/GraphQL Query
     API->>Auth: Validate Token
-    API->>LLM: Process LLM Query
-    LLM-->>API: LLM Response
     API-->>User: Query Result
 
     User->>API: Search Query
