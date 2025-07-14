@@ -179,8 +179,8 @@ The following runtime scenarios are considered relevant for Sentra Brain but are
   - **Flow:** Admin Panel → API Gateway → Auth Service.
 
 - **CRM/ERP Integration via MCP:**  
-  - **Scenario:** Sentra Brain queries or updates CRM/ERP system data through MCP Server.  
-  - **Flow:** Frontend/API → MCP → External CRM/ERP APIs.
+  - **Scenario:** This use case is already documented in detail in section 6.2.2.  
+  - **Reference:** See section 6.2.2 for the flow and step-by-step details.
 
 - **License Validation and Health Monitoring:**  
   - **Scenario:** JGCarmona Consulting performs periodic service health checks and license validation remotely.  
