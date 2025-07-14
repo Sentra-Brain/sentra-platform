@@ -16,7 +16,7 @@ This glossary defines key terms, acronyms, and system components used throughout
 | RAG             | Retrieval-Augmented Generation. Combines document search with LLM query completion.          |
 | ChromaDB        | Default vector database engine used for implementing RAG functionality.                      |
 | Qdrant          | Alternative vector database engine considered for future scaling needs.                       |
-| MCP Server      | Model Context Protocol Server. Custom API layer handling LLM, RAG, and workflow orchestration.|
+| MCP Server      | Model Context Protocol Server. Custom API layer handling LLM, RAG, and workflow orchestration. |
 | n8n             | Embedded workflow automation tool used for internal process configuration and integrations.   |
 | Auth Service    | Internal authentication service implementing OAuth2/OpenID standards.                         |
 | Self-Hosted     | Deployment model where all Sentra Brain services run within the client’s private infrastructure.|
