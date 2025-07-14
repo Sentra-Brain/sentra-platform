@@ -36,13 +36,24 @@ Diagrams use Mermaid syntax for clarity and maintainability.
 
 ```mermaid
 graph TD
-    User[SME User / Admin] -->|Web App| Frontend
-    Frontend -->|API| Gateway[API Gateway]
-    Gateway --> LLM[LLM Server (llama.cpp)]
-    Gateway --> RAG[RAG Engine (ChromaDB/Qdrant)]
-    Gateway --> MCP[MCP Server (Python/.NET)]
+    User["SME User"]
+    Admin["System Administrator"]
+    Frontend["Frontend (React + Tailwind)"]
+    AdminPanel["Admin Panel (Monitoring + Config)"]
+    n8n["n8n Embedded<br/>(Workflow Automation)"]
+    Gateway["API Gateway"]
+    LLM["LLM Server<br/>(llama.cpp)"]
+    RAG["RAG Engine<br/>(ChromaDB/Qdrant)"]
+    MCP["MCP Server<br/>(Python/.NET)"]
+    ExternalTools["External Tools<br/>(CRM, ERP, Office Plugins)"]
 
-    Maintainer: Juan G Carmona
-    Version: v0.1 – Draft Phase
-    Repository Structure Reference: /apps/, /services/, /deploy/, /docs/arc42/, /website/
----
+    User --> Frontend
+    Admin --> AdminPanel
+    Admin --> n8n
+    Frontend --> Gateway
+    AdminPanel --> Gateway
+    Gateway --> LLM
+    Gateway --> RAG
+    Gateway --> MCP
+    MCP --> ExternalTools
+```
