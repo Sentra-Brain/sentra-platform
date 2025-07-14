@@ -10,7 +10,7 @@ This section captures the crosscutting architectural concepts applied throughout
 
 - **Self-Hosted First:** All core services operate within the client’s infrastructure. By default, Sentra Brain is designed for LAN-only or VPN-protected environments.
 - **Internal Authentication Service:** Local auth system managing access to both frontend interfaces and API endpoints.
-- **Admin Tools Protection:** Embedded n8n and Admin Panel are restricted to authenticated administrators. Access to these tools is never exposed publicly.
+- **Admin Tools Protection:** Embedded n8n and Admin Panel are restricted to authenticated client administrators. Vendor Control Panel is restricted to vendor super admins. Access to these tools is never exposed publicly.
 - **Role-Based Access Control:** Only authorized users can access sensitive areas like configuration or monitoring.
 - **Encrypted Communication:** All internal and external API communication uses HTTPS and, where applicable, mutual TLS.
 
@@ -18,19 +18,19 @@ This section captures the crosscutting architectural concepts applied throughout
 
 ## Vendor Monitoring and Support Access
 
-Sentra Brain installations include a controlled vendor-access mechanism to ensure service health monitoring and license validation:
+Sentra Brain installations include a controlled vendor-access mechanism via the Vendor Control Panel to ensure service health monitoring and license validation:
 
 - **Health Monitoring Endpoint:**
-  - Each Sentra Brain instance exposes a secure `/health` or `/sentra-monitor` endpoint.
-  - This endpoint is protected using internal API keys or mutual TLS and is accessible exclusively by JGCarmona Consulting.
+  - Each Sentra Brain instance exposes a secure `/health` or `/sentra-monitor` endpoint, accessible only via the Vendor Control Panel by JGCarmona Consulting.
+  - This endpoint is protected using internal API keys or mutual TLS.
   - Exposed data includes instance status, usage metrics, and license validation tokens — never sensitive client or user data.
 
 - **License Validation:**
-  - Periodic checks to validate licensing status.
+  - Periodic checks to validate licensing status are performed via the Vendor Control Panel.
   - This mechanism is opt-in for Community Edition and mandatory for Commercial Licensed deployments.
 
 - **Client Privacy Assurance:**
-  - Vendor access is limited to technical metadata only.
+  - Vendor access via the Vendor Control Panel is limited to technical metadata only.
   - No operational queries, user data, or private documents are ever transmitted.
 
 ---

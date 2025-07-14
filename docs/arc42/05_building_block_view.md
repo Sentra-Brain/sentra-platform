@@ -12,6 +12,7 @@ This section provides a hierarchical decomposition of the Sentra Brain system in
 graph TD
     Frontend[User Frontend]
     AdminPanel[Admin Panel]
+    VendorPanel[Vendor Control Panel]
     API[API Gateway]
     LLM["LLM Server (llama.cpp/vLLM)"]
     RAG["RAG Engine (ChromaDB/Qdrant)"]
@@ -23,6 +24,8 @@ graph TD
 
     Frontend --> API
     AdminPanel --> API
+    VendorPanel --> API
+    VendorPanel --> n8n
     API --> LLM
     API --> RAG
     API --> MCP
@@ -38,7 +41,8 @@ graph TD
 | Building Block        | Description                                                        |
 |----------------------|--------------------------------------------------------------------|
 | **Frontend**         | User-facing web application (React + Tailwind). LLM queries, RAG searches, admin access. |
-| **Admin Panel**      | Administration interface: service monitoring, configuration, n8n access. |
+| **Admin Panel**      | Client-accessible administration interface for SME Administrators. Service monitoring, configuration, n8n access (client scope). |
+| **Vendor Control Panel** | Vendor-only admin interface for monitoring, licensing, and root configuration. |
 | **API Gateway**      | Central routing point for all internal and external API requests. Handles authentication and forwarding. |
 | **LLM Server**       | Runs local or hybrid large language models (llama.cpp, vLLM). Responds to queries from API Gateway. |
 | **RAG Engine**       | Knowledge retrieval component using ChromaDB or Qdrant. Provides document search functionality. |

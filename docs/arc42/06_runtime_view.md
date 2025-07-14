@@ -138,36 +138,36 @@ sequenceDiagram
 - MCP acts as a security and compatibility layer, avoiding direct exposure of external APIs to the frontend.
 ---
 
-## 6.3 Admin Workflow Execution (n8n) Scenario
+## 6.3 Vendor Workflow Execution (n8n) Scenario
 
 **Scenario:**  
-An administrator triggers or schedules an internal automation workflow via n8n.
+A vendor super admin triggers or schedules an internal automation workflow via n8n using the Vendor Control Panel.
 
 **Step-by-Step Flow:**
 
-1. **Admin Panel → n8n**  
-   - Admin accesses the embedded n8n instance directly (internal network, authenticated).
+1. **Vendor Control Panel → n8n**  
+   - Vendor accesses the embedded n8n instance directly (internal network, authenticated, vendor scope).
 
 2. **n8n → MCP Server / External APIs**  
    - Workflows may trigger actions via MCP Server or direct external API calls.
 
 3. **n8n → Notification Channels**  
-   - Example: webhook call, email notification to admins, or database update.
+   - Example: webhook call, email notification to vendor admins, or database update.
 
 **Notes:**  
-- n8n access is vendor-managed and restricted.  
+- n8n access for vendor-level automations is managed via the Vendor Control Panel and restricted to vendor super admins.  
 - Client administrators may gain access in future versions under controlled conditions.
 ### Sequence
 
 ```mermaid
 sequenceDiagram
-    participant Admin as Admin Panel
+    participant Vendor as Vendor Control Panel
     participant n8n as Embedded n8n
     participant MCP as MCP Server
 
-    Admin->>n8n: Trigger Workflow
+    Vendor->>n8n: Trigger Workflow
     n8n->>MCP: Execute Action
-    n8n-->>Admin: Workflow Outcome
+    n8n-->>Vendor: Workflow Outcome
 
 ```
 ---

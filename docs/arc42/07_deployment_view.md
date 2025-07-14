@@ -32,6 +32,7 @@ flowchart TD
         end
         Frontend["User Frontend (Web App)"]
         AdminPanel[Admin Panel]
+        VendorPanel[Vendor Control Panel]
     end
 
     subgraph External_Connections["Optional External Services"]
@@ -42,6 +43,8 @@ flowchart TD
 
     Frontend --> API
     AdminPanel --> API
+    VendorPanel --> API
+    VendorPanel --> n8n
     API --> LLM
     API --> RAG
     API --> MCP
@@ -58,13 +61,14 @@ flowchart TD
   - Minimum GPU: NVIDIA RTX A6000 or equivalent.
 
 - **Networking:**  
-  - Internal access only for User Frontend and Admin Panel.  
+  - Internal access only for User Frontend and Admin Panel (client-only).  
+  - Vendor Control Panel is accessible only to JGCarmona Consulting/vendor super admins for monitoring, licensing, and root configuration.
   - Vendor monitoring endpoint secured via VPN or restricted IP filtering.
 
 - **Security Controls:**  
   - Internal Auth Service is mandatory.  
   - No public API exposure except optional MCP integrations under strict control.  
-  - Embedded n8n is only accessible via Admin Panel.
+  - Embedded n8n is accessible via Admin Panel (client scope) and Vendor Control Panel (vendor scope).
 
 - **Management and Maintenance:**  
   - JGCarmona Consulting is responsible for initial deployment, configuration, and ongoing monitoring.  

@@ -22,7 +22,8 @@ This glossary defines key terms, acronyms, and system components used throughout
 | Self-Hosted     | Deployment model where all Sentra Brain services run within the client’s private infrastructure.|
 | Hybrid          | Deployment model combining self-hosted core services with optional controlled cloud integrations.|
 | API Gateway     | Main entry point for all HTTP/gRPC requests. Routes traffic to LLM, RAG, MCP, etc.           |
-| Admin Panel     | Web-based interface for system configuration and monitoring, accessed by vendor personnel or client admins.|
+| Admin Panel     | Client-accessible administration interface for SME Administrators (client’s own admins) to manage their Sentra Brain instance.|
+| Vendor Control Panel | Vendor-only interface for license management, system health monitoring, and root configuration.|
 | User Frontend   | Web-based chat or query interface for end users to access Sentra Brain AI capabilities.       |
 | /health Endpoint| Secure vendor-only API endpoint used for license validation and system health monitoring.     |
 | CRM/ERP         | Client Relationship Management / Enterprise Resource Planning systems integrated via MCP.     |
