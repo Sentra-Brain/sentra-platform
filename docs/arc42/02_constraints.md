@@ -34,7 +34,6 @@ These constraints define the framework within which all architectural decisions 
   - LLM Serving: llama.cpp or vLLM (GGUF format models)  
   - RAG Layer: ChromaDB or Qdrant  
   - Frontend: React + Tailwind CSS  
-  - Workflow Automation: Embedded n8n (admin access only)
 
 - **Repository Structure**  
   The project must maintain a single-repository structure, organized as:  
