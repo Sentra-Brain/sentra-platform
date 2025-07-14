@@ -1,14 +1,9 @@
 {
     "recommendations": [
         "astro-build.astro-vscode",
-        "bierner.markdown-preview-github-styles",
-        "biomejs.biome",
         "dbaeumer.vscode-eslint",
-        "eamodio.gitlens",
-        "EditorConfig.EditorConfig",
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker",
-        "ms-python.python",
-        "yzhang.markdown-all-in-one",
+        "ms-python.python"
     ]
 }
