@@ -71,7 +71,3 @@ graph TD
   - `/deploy/`: Docker Compose/Kubernetes manifests, configuration.
   - `/docs/arc42/`: Architecture documentation.
   - `/website/`: Marketing and documentation frontend.
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

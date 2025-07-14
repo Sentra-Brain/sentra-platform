@@ -40,9 +40,3 @@ This section identifies key risks and areas of technical debt that may impact th
 ## 11.3 Continuous Risk Review
 
 Risks and technical debt are reviewed on a regular basis by JGCarmona Consulting during each deployment and product phase update. Mitigation actions are prioritized according to business impact and client requirements.
-
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

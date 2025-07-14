@@ -49,9 +49,3 @@ Sentra Brain installations include a controlled vendor-access mechanism via the 
 - **Unified Error Handling:** Standardized error codes and responses across all services.
 - **Configuration Management:** Centralized configuration files with environment-specific overrides (`/deploy/` folder).
 - **Single Repository Monorepo:** Ensures alignment between services, frontend components, and deployment scripts.
-
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

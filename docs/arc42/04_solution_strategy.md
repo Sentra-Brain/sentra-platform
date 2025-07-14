@@ -57,8 +57,3 @@ Sentra Brain is positioned as a private, modular AI platform designed for SMEs a
 | **Phase 4**    | Hybrid Deployment Support, External Auth (optional), Advanced Security Audits    | 3–4 weeks          |
 | **Phase 5**    | Official Client Launch, Documentation Finalization, Support Channel Setup        | 2 weeks            |
 
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

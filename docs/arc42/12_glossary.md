@@ -43,9 +43,3 @@ This glossary defines key terms, acronyms, and system components used throughout
 | Financial Agencies| Compliance Reports  | Regulatory documents processed via Sentra Brain.     |
 | Industrial SMEs   | Internal Workflows  | Custom automation sequences configured via n8n.      |
 | Healthcare        | Patient Data        | Sensitive information processed securely and privately.|
-
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

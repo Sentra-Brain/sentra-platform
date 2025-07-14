@@ -72,9 +72,3 @@ One of Sentra Brain's foundational constraints is **operating as a standalone, p
   - VPN, firewall, and network segmentation enforcement.  
   - Internal-only API communication between modules.  
   - Embedded n8n and Admin Panel restricted to authorized administrators only.
-
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

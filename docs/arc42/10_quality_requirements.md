@@ -58,9 +58,3 @@ graph TD
 - **System Monitoring:**  
   - *Scenario:* Vendor checks health of all deployed Sentra Brain instances.  
   - *Response:* Vendor-only /health endpoint exposes service status with no sensitive data.
-
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Draft Phase  
-> Last Updated: 2025-07-14

@@ -200,9 +200,3 @@ Sentra Brain must enforce licensing and provide remote health monitoring while r
 ### Consequences  
 - Basic license verification without exposing sensitive client data  
 - Ensures service availability monitoring for support purposes  
-
----
-
-> Maintainer: Juan G Carmona  
-> Version: v0.1 – Consolidated  
-> Last Updated: 2025-07-14
