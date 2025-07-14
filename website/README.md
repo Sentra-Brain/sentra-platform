@@ -47,6 +47,16 @@ All commands are run from the root of the project, from a terminal:
 | `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
 | `npm run astro -- --help` | Get help using the Astro CLI                     |
 
+# Website
+
+This directory contains the source code for the Sentra Brain public website.
+
+## Website Purpose
+- Provides information about the Sentra Brain project, its features, and documentation.
+- Implements the public-facing site as described in `/docs/arc42/03_context_and_scope.md` and `/docs/arc42/04_solution_strategy.md`.
+
+See the website documentation and `/docs/arc42/` for more details on the website's role in the overall system.
+
 ## 👀 Want to learn more?
 
 Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
