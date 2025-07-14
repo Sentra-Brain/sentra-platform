@@ -16,7 +16,7 @@ graph TD
     API[API Gateway]
     LLM["LLM Server (llama.cpp/vLLM)"]
     RAG["RAG Engine (ChromaDB/Qdrant)"]
-    MCP["MCP Server (Python/.NET)"]
+    MCP["MCP Server"]
     Auth[Internal Auth Service]
     n8n[Embedded n8n Workflow Engine]
     DataSources[External Data Sources]
