@@ -26,8 +26,8 @@ graph TD
     User -->|Uses| SentraBrain
     Admin -->|Manages| SentraBrain
     Partner -->|Integrates with| SentraBrain
-
 ```
+
 
 ## Technical Context
 
@@ -64,6 +64,4 @@ graph TD
     API -->|OAuth2/OpenID| Auth
     RAG -->|Fetches| DataSources
     MCP -->|Integrates| CRMs
-
-
 ```
