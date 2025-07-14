@@ -28,7 +28,7 @@ graph TD
     VendorPanel --> n8n
     API --> LLM
     API --> RAG
-    API --> MCP Server
+    API --> MCP
     API --> Auth
     AdminPanel --> n8n
     RAG --> DataSources
