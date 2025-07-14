@@ -31,8 +31,8 @@ flowchart TD
             n8n[Embedded n8n]
         end
         Frontend["User Frontend (Web App)"]
-        AdminPanel[Admin Panel]
-        VendorPanel[Vendor Control Panel]
+        AdminPanel[Admin Panel (client admins only)]
+        VendorPanel[Vendor Control Panel (vendor super admins only)]
     end
 
     subgraph External_Connections["Optional External Services"]
@@ -45,6 +45,7 @@ flowchart TD
     AdminPanel --> API
     VendorPanel --> API
     VendorPanel --> n8n
+    AdminPanel --> n8n
     API --> LLM
     API --> RAG
     API --> MCP
@@ -61,14 +62,21 @@ flowchart TD
   - Minimum GPU: NVIDIA RTX A6000 or equivalent.
 
 - **Networking:**  
-  - Internal access only for User Frontend and Admin Panel (client-only).  
+  - Internal access only for User Frontend and Admin Panel (client admins only).
   - Vendor Control Panel is accessible only to JGCarmona Consulting/vendor super admins for monitoring, licensing, and root configuration.
+  - Embedded n8n is accessible via Admin Panel (client scope) and Vendor Control Panel (vendor scope).
   - Vendor monitoring endpoint secured via VPN or restricted IP filtering.
 
 - **Security Controls:**  
   - Internal Auth Service is mandatory.  
   - No public API exposure except optional MCP integrations under strict control.  
   - Embedded n8n is accessible via Admin Panel (client scope) and Vendor Control Panel (vendor scope).
+
+---
+**Panel Access Notes:**
+- **Admin Panel (client admins only):** For SME Administrators to manage their own Sentra Brain instance, including service monitoring, configuration, and client-scope n8n workflows.
+- **Vendor Control Panel (vendor super admins only):** For JGCarmona Consulting to manage licensing, system health, root configuration, and vendor-scope n8n workflows.
+- For all references to these panels, see [Section 12: Glossary](12_glossary.md).
 
 - **Management and Maintenance:**  
   - JGCarmona Consulting is responsible for initial deployment, configuration, and ongoing monitoring.  

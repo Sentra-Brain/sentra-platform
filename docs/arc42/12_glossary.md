@@ -28,7 +28,12 @@ This glossary defines key terms, acronyms, and system components used throughout
 | /health Endpoint| Secure vendor-only API endpoint used for license validation and system health monitoring.     |
 | CRM/ERP         | Client Relationship Management / Enterprise Resource Planning systems integrated via MCP.     |
 
----
+
+> **Note:** When referencing **Admin Panel** or **Vendor Control Panel** in this document, see this glossary section (12) for precise definitions and access scopes. 
+> 
+> - **Admin Panel:** Client admins only (SME Administrators)
+> - **Vendor Control Panel:** Vendor super admins only (JGCarmona Consulting)
+
 
 ## 12.2 Vertical-Specific Terms (Examples)
 
