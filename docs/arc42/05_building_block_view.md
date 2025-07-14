@@ -11,8 +11,8 @@ This section provides a hierarchical decomposition of the Sentra Brain system in
 ```mermaid
 graph TD
     Frontend[User Frontend]
-    AdminPanel[Admin Panel (client admins only)]
-    VendorPanel[Vendor Control Panel (vendor super admins only)]
+    AdminPanel["Admin Panel (client admins only)"]
+    VendorPanel["Vendor Control Panel (vendor super admins only)"]
     API[API Gateway]
     LLM["LLM Server (llama.cpp/vLLM)"]
     RAG["RAG Engine (ChromaDB/Qdrant)"]
