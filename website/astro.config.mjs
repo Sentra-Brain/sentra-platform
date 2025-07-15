@@ -23,9 +23,6 @@ export default defineConfig({
             filenameBase: 'sitemap'
         }),
     ],
-  redirects: {
-    '/': '/en/',         // redirige raíz al inglés
-  },
   vite: {
     plugins: [tailwindcss()],
   },
