@@ -1,0 +1,26 @@
+---
+import { t, defaultLocale, type Locale } from "../i18n.ts";
+import FeatureBox from "./FeatureBox.astro";
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+<section class="py-12 text-[var(--sentra-text)]">
+  <div class="container mx-auto px-4">
+    <h2 class="text-3xl font-bold mb-4 flex items-center">
+      {t(locale, "use_cases.sectors.law-firms.icon")} {t(locale, "use_cases.sectors.law-firms.title")}
+    </h2>
+    <p class="mb-8 text-lg">{t(locale, "use_cases.sectors.law-firms.text")}</p>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {
+        Object.entries(t(locale, "law_firms.features")).map(([key, feature]: any) => (
+          <FeatureBox
+            key={key}
+            icon={feature.icon}
+            title={feature.title}
+            desc={feature.text}
+          />
+        ))
+      }
+    </div>
+  </div>
+</section>

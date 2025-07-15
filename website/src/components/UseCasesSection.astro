@@ -18,12 +18,17 @@ const locale = lang as Locale;
     <div class="grid md:grid-cols-3 gap-8">
       {
         Object.entries(t(locale, "use_cases.sectors")).map(([key, sector]) => (
-          <FeatureBox
+          <a
+            href={`/${lang}/for-${key}`}
+            class="block transition-transform hover:scale-[1.02]"
             key={key}
-            icon={sector.icon}
-            title={sector.title}
-            desc={sector.text}
-          />
+          >
+            <FeatureBox
+              icon={sector.icon}
+              title={sector.title}
+              desc={sector.text}
+            />
+          </a>
         ))
       }
     </div>
