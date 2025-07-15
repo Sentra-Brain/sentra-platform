@@ -221,5 +221,19 @@
         "text": "Summarize key figures, deductions, and amounts from uploaded tax declaration files."
       }
     }
+  },
+  "industrial_smes": {
+    "features": {
+      "customer_support_faq_assistant": {
+        "icon": "🤖",
+        "title": "Customer Support FAQ Assistant",
+        "text": "Provide automated answers to common customer inquiries using AI-powered FAQ support."
+      },
+      "search_technical_manuals": {
+        "icon": "📘",
+        "title": "Search Technical Manuals",
+        "text": "Quickly search through product manuals, technical guides, and documentation stored locally or in the knowledge base."
+      }
+    }
   }
 }
