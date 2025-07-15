@@ -88,29 +88,35 @@
       "subtitle": "Descubre cómo Sentra Brain se adapta a múltiples sectores con IA que prioriza la privacidad."
     },
     "sectors": {
-      "law": {
-        "title": "Despachos de abogados",
-        "text": "Redacta contratos, analiza jurisprudencia, automatiza tareas legales repetitivas y garantiza el cumplimiento del RGPD."
+      "law-firms": {
+        "icon": "⚖️",
+        "title": "Despachos de Abogados",
+        "text": "Redacta contratos, analiza jurisprudencia y automatiza tareas legales repetitivas garantizando el cumplimiento del RGPD."
       },
-      "finance": {
-        "title": "Agencias financieras",
+      "financial-agencies": {
+        "icon": "💼",
+        "title": "Agencias Financieras",
         "text": "Analiza informes, resume normativas y procesa datos sensibles de forma segura con IA privada."
       },
-      "industry": {
-        "title": "Pymes industriales",
-        "text": "Optimiza los procesos internos, la atención al cliente y la documentación con modelos locales de IA."
+      "industrial-smes": {
+        "icon": "🏭",
+        "title": "Pymes Industriales",
+        "text": "Optimiza procesos internos, soporte al cliente y documentación con modelos de IA locales."
       },
       "healthcare": {
-        "title": "Atención médica",
-        "text": "Gestiona los historiales clínicos, el conocimiento interno y el soporte de decisiones sin dependencias externas."
+        "icon": "🩺",
+        "title": "Sanidad",
+        "text": "Gestiona historiales médicos, conocimiento interno y soporte a la decisión sin depender de servicios externos."
       },
-      "government": {
+      "public-sector": {
+        "icon": "🏛️",
         "title": "Sector Público",
-        "text": "Servicios de IA independientes del proveedor para la administración pública, que respetan las políticas de seguridad nacional."
+        "text": "Servicios de IA independientes para la administración pública, respetando las políticas nacionales de seguridad."
       },
-      "other": {
-        "title": "Cualquier entorno profesional",
-        "text": "SentraBrain se adapta a las necesidades de su empresa. Contáctenos para descubrir cómo podemos ayudarle."
+      "general-business": {
+        "icon": "🌐",
+        "title": "Cualquier Entorno Profesional",
+        "text": "SentraBrain se adapta a las necesidades de tu empresa. Contáctanos para explorar cómo podemos ayudarte."
       }
     }
   },
@@ -122,5 +128,112 @@
     "emailText": "Puedes contactarnos directamente por correo:",
     "formText": "O usar nuestro formulario de contacto aquí:",
     "formButton": "Abrir Formulario"
+  },
+  "law_firms": {
+    "features": {
+      "compare_two_legal_documents": {
+        "icon": "📑",
+        "title": "Compara dos documentos legales",
+        "text": "Selecciona y compara dos documentos legales para identificar diferencias, similitudes y cambios clave mediante análisis con IA."
+      },
+      "draft_contract_template": {
+        "icon": "📝",
+        "title": "Plantilla de borrador de contrato",
+        "text": "Genera borradores de contratos con contexto de tu base de conocimientos y plantillas legales, listos para su revisión y personalización."
+      },
+      "find_similar_contracts": {
+        "icon": "🔍",
+        "title": "Buscar contratos similares",
+        "text": "Busca contratos o documentos legales similares a un ejemplo o extracto mediante la búsqueda avanzada por similitud."
+      },
+      "precedent_similarity_search": {
+        "icon": "📚",
+        "title": "Búsqueda de similitud de precedentes",
+        "text": "Encuentre casos precedentes con patrones de hechos similares mediante la búsqueda basada en incrustaciones en jurisprudencia indexada."
+      },
+      "search_across_local_legal_folders": {
+        "icon": "🗂️",
+        "title": "Buscar en carpetas legales locales",
+        "text": "Consulte y localice documentos en carpetas compartidas o almacenamiento NAS sin importarlos completamente a la base de conocimientos."
+      },
+      "search_jurisprudence": {
+        "icon": "⚖️",
+        "title": "Buscar jurisprudencia",
+        "text": "Busque precedentes legales, jurisprudencia o registros de jurisprudencia mediante bases de datos legales conectadas o API."
+      },
+      "summarize_uploaded_case_files": {
+        "icon": "🗒️",
+        "title": "Resumir expedientes cargados",
+        "text": "Cargue documentos legales y reciba resúmenes ejecutivos o detallados mediante la función de resumen con IA."
+      }
+    }
+  },
+  "financial_agencies": {
+    "features": {
+      "analyze_financial_report": {
+        "icon": "📊",
+        "title": "Analizar informe financiero",
+        "text": "Extraiga información clave, tendencias y anomalías de los informes financieros cargados mediante análisis con IA."
+      },
+      "checklist_company_incorporation": {
+        "icon": "✅",
+        "title": "Lista de verificación: Constitución de empresas",
+        "text": "Genere una lista de verificación paso a paso para los procedimientos de constitución de empresas, adaptada a su jurisdicción."
+      },
+      "fetch_client_financial_data_from_holded": {
+        "icon": "🔄",
+        "title": "Obtener datos financieros del cliente de Holded",
+        "text": "Recuperar información financiera actualizada del cliente directamente de Holded o plataformas similares."
+      },
+      "generate_client_invoice_summary": {
+        "icon": "🧾",
+        "title": "Generar resumen de facturas del cliente",
+        "text": "Resumir y consolidar las facturas de un cliente durante un período seleccionado para una revisión rápida."
+      },
+      "generate_employment_contract_template": {
+        "icon": "📄",
+        "title": "Generar plantilla de contrato de trabajo",
+        "text": "Crear borradores de contratos de trabajo predefinidos, adaptados a las plantillas legales y las políticas de la empresa."
+      },
+      "lookup_active_aids_and_subsidies": {
+        "icon": "💰",
+        "title": "Consultar ayudas y subvenciones activas",
+        "text": "Encuentre ayudas y subvenciones públicas vigentes aplicables al sector y la región de su cliente."
+      },
+      "lookup_compliance_regulation": {
+        "icon": "📜",
+        "title": "Consultar normativa de cumplimiento",
+        "text": "Busque y recupere los requisitos de cumplimiento aplicables para auditorías financieras, fiscales o legales."
+      },
+      "lookup_legal_representation_requirements": {
+        "icon": "🕴️",
+        "title": "Consultar requisitos de representación legal",
+        "text": "Identifique las obligaciones de representación legal para las empresas en procesos o jurisdicciones específicos."
+      },
+      "lookup_social_security_procedures": {
+        "icon": "👥",
+        "title": "Consultar procedimientos de la Seguridad Social",
+        "text": "Encuentre los pasos y requisitos detallados para el registro y las actualizaciones de la Seguridad Social de los empleados."
+      },
+      "summarize_tax_declaration": {
+        "icon": "🗂️",
+        "title": "Resumir la declaración de impuestos",
+        "text": "Resumir las cifras clave, las deducciones y los importes de los archivos de declaración de impuestos cargados."
+      }
+    }
+  },
+  "industrial_smes": {
+    "features": {
+      "customer_support_faq_assistant": {
+        "icon": "🤖",
+        "title": "Asistente de preguntas frecuentes de atención al cliente",
+        "text": "Proporcione respuestas automatizadas a las consultas frecuentes de los clientes mediante el soporte de preguntas frecuentes basado en IA."
+      },
+      "search_technical_manuals": {
+        "icon": "📘",
+        "title": "Buscar manuales técnicos",
+        "text": "Busque rápidamente manuales de productos, guías técnicas y documentación almacenada localmente o en la base de conocimientos."
+      }
+    }
   }
 }

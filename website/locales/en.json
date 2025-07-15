@@ -14,7 +14,7 @@
     "ctaButton": "Get in Touch"
   },
   "home": {
-    "title": "Sentra Brain: Private AI Server for Enterprises"
+    "title": "Private AI Server for Enterprises"
   },
   "hero": {
     "title": "Your Own Private AI Platform",
@@ -88,27 +88,33 @@
       "subtitle": "Discover how Sentra Brain adapts to multiple sectors with privacy-first AI."
     },
     "sectors": {
-      "law": {
+      "law-firms": {
+        "icon": "⚖️",
         "title": "Law Firms",
         "text": "Draft contracts, analyze jurisprudence, automate repetitive legal tasks while ensuring GDPR compliance."
       },
-      "finance": {
+      "financial-agencies": {
+        "icon": "💼",
         "title": "Financial Agencies",
         "text": "Analyze reports, summarize regulations, and process sensitive data securely with private AI."
       },
-      "industry": {
+      "industrial-smes": {
+        "icon": "🏭",
         "title": "Industrial SMEs",
         "text": "Optimize internal processes, customer support, and documentation with local AI models."
       },
       "healthcare": {
+        "icon": "🩺",
         "title": "Healthcare",
         "text": "Handle patient records, internal knowledge, and decision support without external dependencies."
       },
-      "government": {
+      "public-sector": {
+        "icon": "🏛️",
         "title": "Public Sector",
         "text": "Vendor-independent AI services for public administration, respecting national security policies."
       },
-      "other": {
+      "general-business": {
+        "icon": "🌐",
         "title": "Any Professional Environment",
         "text": "SentraBrain adapts to your company's needs. Contact us to explore how we can help."
       }
@@ -122,5 +128,112 @@
     "emailText": "You can contact us directly by email:",
     "formText": "Or use our contact form here:",
     "formButton": "Open Contact Form"
+  },
+  "law_firms": {
+    "features": {
+      "compare_two_legal_documents": {
+        "icon": "📑",
+        "title": "Compare Two Legal Documents",
+        "text": "Select and compare two legal documents to highlight differences, similarity scores, and key changes using AI-powered analysis."
+      },
+      "draft_contract_template": {
+        "icon": "📝",
+        "title": "Draft Contract Template",
+        "text": "Generate contract drafts with context from your knowledge base and legal templates, ready for review and customization."
+      },
+      "find_similar_contracts": {
+        "icon": "🔍",
+        "title": "Find Similar Contracts",
+        "text": "Search for contracts or legal documents similar to a given example or excerpt using advanced similarity search."
+      },
+      "precedent_similarity_search": {
+        "icon": "📚",
+        "title": "Precedent Similarity Search",
+        "text": "Find precedent cases with similar fact patterns using embedding-based search across indexed case law."
+      },
+      "search_across_local_legal_folders": {
+        "icon": "🗂️",
+        "title": "Search Across Local Legal Folders",
+        "text": "Query and locate documents in shared folders or NAS storage without full import into the knowledge base."
+      },
+      "search_jurisprudence": {
+        "icon": "⚖️",
+        "title": "Search Jurisprudence",
+        "text": "Search for legal precedents, case law, or jurisprudence records via connected legal databases or APIs."
+      },
+      "summarize_uploaded_case_files": {
+        "icon": "🗒️",
+        "title": "Summarize Uploaded Case Files",
+        "text": "Upload legal documents and receive executive or detailed summaries using AI-powered summarization."
+      }
+    }
+  },
+  "financial_agencies": {
+    "features": {
+      "analyze_financial_report": {
+        "icon": "📊",
+        "title": "Analyze Financial Report",
+        "text": "Extract key insights, trends, and anomalies from uploaded financial reports using AI-powered analysis."
+      },
+      "checklist_company_incorporation": {
+        "icon": "✅",
+        "title": "Checklist: Company Incorporation",
+        "text": "Generate a step-by-step checklist for company incorporation procedures tailored to your jurisdiction."
+      },
+      "fetch_client_financial_data_from_holded": {
+        "icon": "🔄",
+        "title": "Fetch Client Financial Data from Holded",
+        "text": "Retrieve up-to-date client financial information directly from Holded or similar platforms."
+      },
+      "generate_client_invoice_summary": {
+        "icon": "🧾",
+        "title": "Generate Client Invoice Summary",
+        "text": "Summarize and consolidate invoices for a client over a selected period for quick review."
+      },
+      "generate_employment_contract_template": {
+        "icon": "📄",
+        "title": "Generate Employment Contract Template",
+        "text": "Create pre-filled employment contract drafts adapted to legal templates and company policies."
+      },
+      "lookup_active_aids_and_subsidies": {
+        "icon": "💰",
+        "title": "Lookup Active Aids and Subsidies",
+        "text": "Find current public aids and subsidies applicable to a client’s business sector and region."
+      },
+      "lookup_compliance_regulation": {
+        "icon": "📜",
+        "title": "Lookup Compliance Regulation",
+        "text": "Search and retrieve applicable compliance requirements for financial, tax, or legal audits."
+      },
+      "lookup_legal_representation_requirements": {
+        "icon": "🕴️",
+        "title": "Lookup Legal Representation Requirements",
+        "text": "Identify legal representation obligations for businesses in specific processes or jurisdictions."
+      },
+      "lookup_social_security_procedures": {
+        "icon": "👥",
+        "title": "Lookup Social Security Procedures",
+        "text": "Find detailed steps and requirements for social security registration and updates for employees."
+      },
+      "summarize_tax_declaration": {
+        "icon": "🗂️",
+        "title": "Summarize Tax Declaration",
+        "text": "Summarize key figures, deductions, and amounts from uploaded tax declaration files."
+      }
+    }
+  },
+  "industrial_smes": {
+    "features": {
+      "customer_support_faq_assistant": {
+        "icon": "🤖",
+        "title": "Customer Support FAQ Assistant",
+        "text": "Provide automated answers to common customer inquiries using AI-powered FAQ support."
+      },
+      "search_technical_manuals": {
+        "icon": "📘",
+        "title": "Search Technical Manuals",
+        "text": "Quickly search through product manuals, technical guides, and documentation stored locally or in the knowledge base."
+      }
+    }
   }
 }

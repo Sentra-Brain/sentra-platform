@@ -1,0 +1,13 @@
+---
+import FinancialAgenciesSection from "../../components/FinancialAgenciesSection.astro";
+import { defaultLocale, type Locale } from "../../i18n";
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getLocalizedPaths } from "../../utils/localization";
+export const getStaticPaths = getLocalizedPaths;
+
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+<BaseLayout>
+  <FinancialAgenciesSection />
+</BaseLayout>
