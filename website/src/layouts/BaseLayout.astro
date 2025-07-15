@@ -1,27 +1,70 @@
 ---
 // src/layouts/BaseLayout.astro
-import '../styles/global.css'; 
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
 const { title = "TFST", lang = "en" } = Astro.props;
 ---
 
 <html lang={lang}>
   <head>
+    <!-- Standard Meta -->
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Sentra Brain – Private AI Server for Enterprises. Business, finance, legal automation with full data control."
+    />
+
+    <!-- Open Graph (Facebook, LinkedIn, WhatsApp, Slack) -->
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Sentra Brain – Private AI Server for Enterprises"
+    />
+    <meta
+      property="og:description"
+      content="Sentra Brain helps law firms, financial agencies, SMEs, and more. Local AI, full privacy, real results."
+    />
+    <meta
+      property="og:image"
+      content="https://sentrabrain.com/sentra_brain_logo_512.png"
+    />
+    <meta property="og:url" content="https://sentrabrain.com/" />
+
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Sentra Brain – Private AI Server for Enterprises"
+    />
+    <meta
+      name="twitter:description"
+      content="Sentra Brain helps law firms, financial agencies, SMEs, and more. Local AI, full privacy, real results."
+    />
+    <meta
+      name="twitter:image"
+      content="https://sentrabrain.com/sentra_brain_logo_512.png"
+    />
     <title>{`Sentra Brain - ${title}`}</title>
+
+    <!-- Canonical -->
     <link rel="canonical" href={`https://sentrabrain.com/${lang}/`} />
+
+    <!-- Language -->
+    <meta name="language" content="${lang}" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="icon" href="/favicon.svg" />
+    <!-- Theme color (browser UI) -->
+    <meta name="theme-color" content="#0f172a" />
+    <link rel="icon" href="/favicon.svg"  type="image/svg+xml" />
   </head>
   <body class="min-h-screen flex flex-col bg-white text-gray-900">
     <Header lang={lang} />
     <main class="flex-1 px-4 sm:px-6 lg:px-8 py-12">
-       <div class="max-w-3xl mx-auto">
-         <slot />
-       </div>
+      <div class="max-w-3xl mx-auto">
+        <slot />
+      </div>
     </main>
     <Footer lang={lang} />
-  </body>  
+  </body>
 </html>
