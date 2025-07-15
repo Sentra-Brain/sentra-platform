@@ -1,18 +1,13 @@
 ---
-import { redirect } from 'astro/runtime/server';
+// src/pages/index.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { t, defaultLocale, type Locale } from '../i18n.ts';
+import Hero from '../components/Hero.astro';
 
-redirect('/en/');
+const lang = "en";
+const locale = lang as Locale;
 ---
 
-<!-- Open Graph Meta Tags -->
-<meta property="og:title" content="Sentra Brain – Private AI Server for Enterprises" />
-<meta property="og:description" content="Sentra Brain helps you with business, finance, and more. Try it now!" />
-<meta property="og:image" content="/public/sentra_brain_logo_512.png" />
-<meta property="og:url" content="https://sentrabrain.com/" />
-<meta property="og:type" content="website" />
-
-<!-- Twitter Card Meta Tags -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Sentra Brain – Private AI Server for Enterprises" />
-<meta name="twitter:description" content="Sentra Brain helps you with business, finance, and more. Try it now!" />
-<meta name="twitter:image" content="/public/sentra_brain_logo_512.png" />
+<BaseLayout lang={locale} title={t(locale, 'home.title')}>
+  <Hero />
+</BaseLayout>
