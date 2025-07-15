@@ -14,7 +14,7 @@
     "ctaButton": "Get in Touch"
   },
   "home": {
-    "title": "Sentra Brain: Private AI Server for Enterprises"
+    "title": "Private AI Server for Enterprises"
   },
   "hero": {
     "title": "Your Own Private AI Platform",
@@ -88,27 +88,33 @@
       "subtitle": "Discover how Sentra Brain adapts to multiple sectors with privacy-first AI."
     },
     "sectors": {
-      "law": {
+      "law-firms": {
+        "icon": "⚖️",
         "title": "Law Firms",
         "text": "Draft contracts, analyze jurisprudence, automate repetitive legal tasks while ensuring GDPR compliance."
       },
-      "finance": {
+      "financial-agencies": {
+        "icon": "💼",
         "title": "Financial Agencies",
         "text": "Analyze reports, summarize regulations, and process sensitive data securely with private AI."
       },
-      "industry": {
+      "industrial-smes": {
+        "icon": "🏭",
         "title": "Industrial SMEs",
         "text": "Optimize internal processes, customer support, and documentation with local AI models."
       },
       "healthcare": {
+        "icon": "🩺",
         "title": "Healthcare",
         "text": "Handle patient records, internal knowledge, and decision support without external dependencies."
       },
-      "government": {
+      "public-sector": {
+        "icon": "🏛️",
         "title": "Public Sector",
         "text": "Vendor-independent AI services for public administration, respecting national security policies."
       },
-      "other": {
+      "general-business": {
+        "icon": "🌐",
         "title": "Any Professional Environment",
         "text": "SentraBrain adapts to your company's needs. Contact us to explore how we can help."
       }

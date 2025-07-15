@@ -88,29 +88,35 @@
       "subtitle": "Descubre cómo Sentra Brain se adapta a múltiples sectores con IA que prioriza la privacidad."
     },
     "sectors": {
-      "law": {
-        "title": "Despachos de abogados",
-        "text": "Redacta contratos, analiza jurisprudencia, automatiza tareas legales repetitivas y garantiza el cumplimiento del RGPD."
+      "law-firms": {
+        "icon": "⚖️",
+        "title": "Despachos de Abogados",
+        "text": "Redacta contratos, analiza jurisprudencia y automatiza tareas legales repetitivas garantizando el cumplimiento del RGPD."
       },
-      "finance": {
-        "title": "Agencias financieras",
+      "financial-agencies": {
+        "icon": "💼",
+        "title": "Agencias Financieras",
         "text": "Analiza informes, resume normativas y procesa datos sensibles de forma segura con IA privada."
       },
-      "industry": {
-        "title": "Pymes industriales",
-        "text": "Optimiza los procesos internos, la atención al cliente y la documentación con modelos locales de IA."
+      "industrial-smes": {
+        "icon": "🏭",
+        "title": "Pymes Industriales",
+        "text": "Optimiza procesos internos, soporte al cliente y documentación con modelos de IA locales."
       },
       "healthcare": {
-        "title": "Atención médica",
-        "text": "Gestiona los historiales clínicos, el conocimiento interno y el soporte de decisiones sin dependencias externas."
+        "icon": "🩺",
+        "title": "Sanidad",
+        "text": "Gestiona historiales médicos, conocimiento interno y soporte a la decisión sin depender de servicios externos."
       },
-      "government": {
+      "public-sector": {
+        "icon": "🏛️",
         "title": "Sector Público",
-        "text": "Servicios de IA independientes del proveedor para la administración pública, que respetan las políticas de seguridad nacional."
+        "text": "Servicios de IA independientes para la administración pública, respetando las políticas nacionales de seguridad."
       },
-      "other": {
-        "title": "Cualquier entorno profesional",
-        "text": "SentraBrain se adapta a las necesidades de su empresa. Contáctenos para descubrir cómo podemos ayudarle."
+      "general-business": {
+        "icon": "🌐",
+        "title": "Cualquier Entorno Profesional",
+        "text": "SentraBrain se adapta a las necesidades de tu empresa. Contáctanos para explorar cómo podemos ayudarte."
       }
     }
   },
