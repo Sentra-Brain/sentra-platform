@@ -167,5 +167,59 @@
         "text": "Upload legal documents and receive executive or detailed summaries using AI-powered summarization."
       }
     }
+  },
+  "financial_agencies": {
+    "features": {
+      "analyze_financial_report": {
+        "icon": "📊",
+        "title": "Analyze Financial Report",
+        "text": "Extract key insights, trends, and anomalies from uploaded financial reports using AI-powered analysis."
+      },
+      "checklist_company_incorporation": {
+        "icon": "✅",
+        "title": "Checklist: Company Incorporation",
+        "text": "Generate a step-by-step checklist for company incorporation procedures tailored to your jurisdiction."
+      },
+      "fetch_client_financial_data_from_holded": {
+        "icon": "🔄",
+        "title": "Fetch Client Financial Data from Holded",
+        "text": "Retrieve up-to-date client financial information directly from Holded or similar platforms."
+      },
+      "generate_client_invoice_summary": {
+        "icon": "🧾",
+        "title": "Generate Client Invoice Summary",
+        "text": "Summarize and consolidate invoices for a client over a selected period for quick review."
+      },
+      "generate_employment_contract_template": {
+        "icon": "📄",
+        "title": "Generate Employment Contract Template",
+        "text": "Create pre-filled employment contract drafts adapted to legal templates and company policies."
+      },
+      "lookup_active_aids_and_subsidies": {
+        "icon": "💰",
+        "title": "Lookup Active Aids and Subsidies",
+        "text": "Find current public aids and subsidies applicable to a client’s business sector and region."
+      },
+      "lookup_compliance_regulation": {
+        "icon": "📜",
+        "title": "Lookup Compliance Regulation",
+        "text": "Search and retrieve applicable compliance requirements for financial, tax, or legal audits."
+      },
+      "lookup_legal_representation_requirements": {
+        "icon": "🕴️",
+        "title": "Lookup Legal Representation Requirements",
+        "text": "Identify legal representation obligations for businesses in specific processes or jurisdictions."
+      },
+      "lookup_social_security_procedures": {
+        "icon": "👥",
+        "title": "Lookup Social Security Procedures",
+        "text": "Find detailed steps and requirements for social security registration and updates for employees."
+      },
+      "summarize_tax_declaration": {
+        "icon": "🗂️",
+        "title": "Summarize Tax Declaration",
+        "text": "Summarize key figures, deductions, and amounts from uploaded tax declaration files."
+      }
+    }
   }
 }
