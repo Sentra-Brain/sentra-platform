@@ -2,7 +2,7 @@
 
 ## Overview
 
-This section defines the key quality attributes (non-functional requirements) that Sentra Brain must fulfill to ensure it meets both business and technical objectives. Each quality goal is linked to the core principles of privacy, modularity, reliability, and maintainability.
+This section defines the key quality attributes (non-functional requirements) that Sentra Brain must fulfill to ensure it meets both business and technical objectives. Each quality goal is linked to the core principles of privacy, modularity, reliability, and maintainability, in alignment with Sentra Brain Phase 1 scope.
 
 ---
 
@@ -29,32 +29,36 @@ graph TD
 ```
 ## 10.2 Prioritized Quality Goals
 
-| Priority | Quality Attribute | Description                                                                                   |
-|----------|-------------------|-----------------------------------------------------------------------------------------------|
-| 1        | Privacy           | All data must remain under client control: no external data sharing or telemetry by default.    |
-| 1        | Security          | Internal authentication, encrypted communication, vendor-only monitoring endpoints.            |
-| 2        | Modularity        | Each service (LLM, RAG, MCP, Frontend) must operate independently and be replaceable/upgradable. |
-| 2        | Reliability       | Services must operate predictably under defined loads, including hardware failure contingencies. |
-| 2        | Maintainability   | Clear code structure, Docker Compose orchestration, structured logs, and vendor-managed updates. |
-| 3        | Performance       | Fast response times for queries (sub-second for RAG, <5 seconds for LLM in standard queries).  |
-| 3        | Usability         | Simple admin interface, pre-configured workflows per client vertical, easy-to-use frontend UI.  |
+| Priority | Quality Attribute | Description                                                                                      |
+|----------|-------------------|--------------------------------------------------------------------------------------------------|
+| 1        | Privacy           | All client data, chat histories, and configuration remain under full local control. No telemetry. |
+| 1        | Security          | Internal authentication, encrypted communication, vendor-restricted health endpoints only.        |
+| 2        | Modularity        | LLM, RAG, MCP Servers (split by capability) must operate independently and be replaceable.        |
+| 2        | Reliability       | Services must operate predictably under defined loads, with clear failure recovery mechanisms.    |
+| 2        | Maintainability   | Clean code structure, Docker Compose orchestration, structured logs, and vendor-managed updates.  |
+| 3        | Performance       | Acceptable response times: sub-second for RAG, <5 seconds for LLM under standard load conditions. |
+| 3        | Usability         | Simple admin interface, streamlined user frontend, minimal configuration effort required.         |
 
 ---
 
 ## 10.3 Quality Scenarios (Examples)
 
 - **Privacy Compliance:**  
-  - *Scenario:* Client requests confirmation that no user queries are sent outside their network.  
-  - *Response:* Demonstrated through system logs, configuration audits, and self-contained deployment.
+  - *Scenario:* Client requests confirmation that no user queries leave their infrastructure.  
+  - *Response:* Verified via deployment audits, system logs, and self-contained deployment.
 
 - **Security Incident Response:**  
-  - *Scenario:* Detection of unauthorized access attempt.  
-  - *Response:* Auth Service triggers alert, endpoint lockdown mechanisms activate automatically.
+  - *Scenario:* Unauthorized access attempt detected.  
+  - *Response:* Auth Service triggers alert, admin receives notification, access restrictions activate.
 
-- **Modular Service Replacement:**  
-  - *Scenario:* Upgrade RAG Engine from ChromaDB to Qdrant without affecting LLM or Frontend.  
-  - *Response:* MCP Server adapts via configuration change; system continues operating.
+- **MCP Server Isolation:**  
+  - *Scenario:* Only sentra-crm needs to be updated or redeployed.  
+  - *Response:* No impact on sentra-doc, sentra-action, LLM, RAG, or Frontend. Modular architecture allows isolated updates.
 
 - **System Monitoring:**  
-  - *Scenario:* Vendor checks health of all deployed Sentra Brain instances.  
-  - *Response:* Vendor-only /health endpoint exposes service status with no sensitive data.
+  - *Scenario:* Vendor performs periodic health checks.  
+  - *Response:* Vendor-only /health endpoint exposes service status, excluding sensitive client data.
+
+- **Service Replacement (Modularity):**  
+  - *Scenario:* Upgrade RAG Engine from ChromaDB to Qdrant.  
+  - *Response:* MCP Client adapts via configuration or environment change; other services remain unaffected.

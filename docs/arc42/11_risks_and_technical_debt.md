@@ -24,16 +24,17 @@ This section identifies key risks and areas of technical debt that may impact th
 ## 11.2 Technical Debt Areas
 
 - **LLM Service Bootstrapping:**  
-  Current deployments require manual llama.cpp compilation and service setup. Automating this via scripts is pending.
+  As of Phase 1, llama.cpp deployment requires manual compilation and service setup. Automating this via scripts and installer packages is planned.
 
 - **MCP API Specification:**  
-  Initial versions may lack full OpenAPI/Swagger documentation. Must be addressed to improve integration ease.
+  Initial MCP servers may lack complete OpenAPI/Swagger specifications. This will be formalized to improve integration and maintainability.
 
-- **Frontend and Admin UI Separation:**  
-  Both user frontend and admin panel share some assets and configurations. Clean separation is planned for Phase 2.
+- **Frontend and Admin UI Modularization:**  
+  User Frontend and Admin Panel share deployment artifacts. Full modular separation (independent apps and services) is scheduled for future phases.
 
-- **Embedded n8n Update Management:**  
-  Updating the n8n instance requires manual intervention and is tied to vendor-managed access policies.
+- **Embedded n8n Update Management (Future Phase):**  
+  If activated, n8n updates require vendor-managed processes. Update handling and client-side access policies will be defined in Phase 2.
+
 
 ---
 

@@ -1,202 +1,143 @@
-# 9. Architectural Decisions – Sentra Brain
+# 9. Architectural Decisions – Sentra Brain (Phase 1 Baseline)
 
 ## Overview
 
-This section documents the key architectural decisions that shape the design and implementation of Sentra Brain. Each decision includes context, alternatives, and implications to ensure traceability and clarity.
+This section summarizes and documents the core architectural decisions that define the Sentra Brain system for Phase 1. These decisions cover service structure, orchestration, deployment, and licensing mechanisms.
+
+All items here are considered fixed for Phase 1. Future enhancements like workflow automation (n8n) and vendor control features will be addressed in later phases.
 
 ---
 
-## ADR 001 – Use llama.cpp as LLM Serving Engine
+## Architectural Decision Table (Phase 1 Baseline)
 
-- **Status:** Decided  
-- **Date:** 2025-07-14  
-
-### Context  
-Sentra Brain requires a private, self-hosted LLM serving engine with GPU acceleration, full local control, and no dependency on external SaaS services.
-
-### Decision  
-Use **llama.cpp** compiled and optimized for target GPUs (RTX A6000) as the LLM backend.
-
-### Alternatives Considered  
-- vLLM (Python-based, better batching but more resource-heavy)  
-- GPT-4-turbo via API (rejected for privacy/compliance reasons)
-
-### Consequences  
-- Local GPU management required  
-- MCP must handle HTTP requests to llama.cpp directly  
+| ADR #  | Topic                                         | Status    | Phase 1 Scope? | Notes                                      |
+|--------|-----------------------------------------------|-----------|----------------|--------------------------------------------|
+| 001    | LLM Backend Engine: llama.cpp Host-Based      | Final     | ✅ Yes         | Direct host execution for GPU efficiency    |
+| 002    | Sentra API: Modular Orchestrator Design       | Final     | ✅ Yes         | FastAPI-based, layered (Chat, Auth, MCP Client) |
+| 003    | MCP Server Architecture: Split Per Capability | Final     | ✅ Yes         | sentra-doc, sentra-crm, sentra-action       |
+| 004    | RAG Engine: ChromaDB Default                  | Final     | ✅ Yes         | Local vector store                          |
+| 005    | Auth Service: Internal Only (SQL + NoSQL)     | Final     | ✅ Yes         | Self-hosted Auth DB + Conversations DB      |
+| 006    | Service Orchestration: Docker Compose         | Final     | ✅ Yes         | Small install model                         |
+| 007    | Workflow Engine (n8n): Future Phase           | Planned   | ❌ No          | Explicitly postponed to Phase 2             |
+| 008    | Deployment Model: Self-Hosted First           | Final     | ✅ Yes         | Hybrid optional, vendor-managed             |
+| 009    | Monitoring & Licensing Mechanism              | Final     | ✅ Yes         | Health endpoint, no telemetry               |
 
 ---
 
-## ADR 002 – MCP Server Will Be Custom-Built Using FastAPI + LlamaIndex  
+## ADR 001 – LLM Backend Engine: llama.cpp Host-Based
 
-- **Status:** Decided  
-- **Date:** 2025-07-14  
+**Decision:**  
+Use llama.cpp running directly on the host OS (Ubuntu preferred) as the primary LLM server.
 
-### Context  
-We need a middle layer for routing requests, orchestrating RAG + LLM + Automations, and exposing a unified API for frontend and other systems.  
-
-After reviewing multiple options for quick PoC and maintainability:  
-
-| Stack                | Pros                                       | Cons                            |
-|---------------------|--------------------------------------------|---------------------------------|
-| FastAPI + LlamaIndex | Maximum control, fast setup, modular       | Manual flow handling required   |
-| LangChain Agents    | Integrated tool-use, active community      | Heavier, more dependencies      |
-| Haystack            | Focused Q&A pipelines                      | Less flexible for custom logic  |
-
-### Decision  
-We will build the **custom MCP Server using FastAPI combined with LlamaIndex** as the RAG orchestration library.  
-
-This maximizes control and clarity while keeping the initial stack lightweight and manageable.
-
-### Alternatives Considered  
-- LangChain (kept as optional integration for future tools)  
-- Haystack (not flexible enough for custom workflows)
-
-### Consequences  
-- Total control over orchestration logic and endpoints  
-- Responsibility for building API specs, RAG logic, and admin interface falls on us  
-- Simple and modular approach that aligns with Sentra Brain’s self-hosted philosophy
-
+**Rationale:**  
+- Maximize GPU efficiency and simplicity.
+- Avoid Docker GPU binding complexities in Phase 1.
 
 ---
 
-## ADR 003 – Use Docker Compose for Service Orchestration  
+## ADR 002 – Sentra API: Modular Orchestrator Design
 
-- **Status:** Decided  
-- **Date:** 2025-07-14  
+**Decision:**  
+Implement Sentra API using FastAPI, structured into:
 
-### Context  
-Sentra Brain comprises several components that need to be deployed consistently: MCP Server, RAG Engine, Frontend, Admin Panel, and optional services.
+- **HTTP API Layer:** OpenAI-compatible endpoints, Admin UI, Auth endpoints.
+- **Chat Orchestrator Layer:**  
+  - ContextRouter (LLM / RAG / MCP dispatch)
+  - PromptBuilder (history + system prompts)
+  - ToolExecutor (MCP Client manager)
+- **Knowledge Layer:**  
+  - DocumentUploader  
+  - IndexationManager (Embeddings → ChromaDB)
+- **Auth Layer:**  
+  - UserSlotManager (5 fixed slots max)  
+  - SessionHandler (JWT or cookies)
 
-### Decision  
-Use **Docker Compose v3+** for orchestrating these services in initial deployments.
-
-### Alternatives Considered  
-- Kubernetes (planned for future scaling phases)
-
-### Consequences  
-- Simpler setup for SME environments  
-- Manual GPU binding required for llama.cpp (see ADR 004)
-
----
-
-## ADR 004 – LLM Server (llama.cpp) Runs on Host OS, Not Docker  
-
-- **Status:** Decided  
-- **Date:** 2025-07-14  
-
-### Context  
-Direct GPU access and simpler system resource management are essential.
-
-### Decision  
-Run llama.cpp **directly on the host OS (Ubuntu 24.04 preferred)** instead of containerized.
-
-### Alternatives Considered  
-- Docker + NVIDIA runtime (adds complexity and overhead)
-
-### Consequences  
-- Deployment scripts must handle llama.cpp as a system service  
-- MCP connects via host IP/port  
+**Rationale:**  
+Clear separation of concerns, maintainability, SME-friendly stack.
 
 ---
 
-## ADR 005 – ChromaDB as Default RAG Engine  
+## ADR 003 – MCP Server Architecture: Split Per Capability
 
-- **Status:** Tentative  
-- **Date:** 2025-07-14  
+**Decision:**  
+Split MCP functionality into three independent services:
 
-### Context  
-A local vector database is needed to enable document retrieval and knowledge base search.
+- **sentra-doc:** Document Search Tools  
+- **sentra-crm:** CRM Lookup Tools  
+- **sentra-action:** Email and Action Triggers  
 
-### Decision  
-Use **ChromaDB** as the initial RAG engine due to simplicity and Python ecosystem alignment.
-
-### Alternatives Considered  
-- Qdrant (better clustering but heavier)  
-- Weaviate (overkill for initial scope)
-
-### Consequences  
-- MCP must integrate using ChromaDB’s Python client  
-- Migration to Qdrant or Weaviate may be evaluated for larger clients  
+**Rationale:**  
+- Security: Isolate sensitive tool access per MCP server.  
+- Deployment: Flexible hybrid setups (local + remote MCP servers).  
+- Maintenance: Simpler versioning and debugging per MCP capability.
 
 ---
 
-## ADR 006 – Internal Authentication Service  
+## ADR 004 – RAG Engine: ChromaDB Default
 
-- **Status:** Final  
-- **Date:** 2025-07-14  
+**Decision:**  
+Use ChromaDB as the default local vector store in Phase 1.
 
-### Context  
-Sentra Brain must manage access control independently of external providers.
-
-### Decision  
-Use an **Internal Auth Service** implementing OAuth2 or OpenID standards, self-hosted alongside core services.
-
-### Alternatives Considered  
-- Google, Microsoft, or Okta integration (postponed)
-
-### Consequences  
-- Total control over user access  
-- Simpler compliance alignment (GDPR, HIPAA)
+**Rationale:**  
+- Python ecosystem alignment.
+- Simpler setup than alternatives like Qdrant or Weaviate.
 
 ---
 
-## ADR 007 – Embedded n8n Access Model  
+## ADR 005 – Auth Service: Internal Only (SQL + NoSQL)
 
-- **Status:** Final  
-- **Date:** 2025-07-14  
+**Decision:**  
+Implement an Internal Auth Service using:
 
-### Context  
-Sentra Brain includes embedded workflow automation via n8n, but unrestricted admin access could compromise system integrity.
+- **SQL DB:** User credentials, configuration.
+- **NoSQL DB:** Conversation logs, chat histories (JSON format).
 
-### Decision  
-**Restrict n8n access to JGCarmona Consulting personnel by default.**  
-Client administrators may be granted access in controlled environments in future versions.
-
-### Alternatives Considered  
-- Fully open access (rejected for security and licensing control reasons)
-
-### Consequences  
-- Protects vendor-managed service model  
-- Reduces support overhead in SME environments  
+**Rationale:**  
+- Local data control.  
+- Aligns with self-hosted privacy requirements.
 
 ---
 
-## ADR 008 – Deployment Model: Self-Hosted First, Hybrid Optional  
+## ADR 006 – Service Orchestration: Docker Compose
 
-- **Status:** Final  
-- **Date:** 2025-07-14  
+**Decision:**  
+Use Docker Compose as the default orchestration tool for all services except llama.cpp.
 
-### Context  
-Sentra Brain’s value proposition is based on full data control and privacy.
-
-### Decision  
-**Self-hosted deployment is mandatory.** Hybrid/cloud integrations are optional and must be vendor-managed.
-
-### Alternatives Considered  
-- Cloud-first model (rejected due to privacy non-compliance)
-
-### Consequences  
-- Hardware and setup included in service package  
-- Monitoring and licensing mechanisms must operate independently from public cloud services  
+**Rationale:**  
+- Simple deployment for SMEs.  
+- Consistency with Phase 1 “Small Install” scenario.
 
 ---
 
-## ADR 009 – Monitoring and Licensing Mechanism  
+## ADR 007 – Workflow Engine (n8n): Future Phase
 
-- **Status:** Draft  
-- **Date:** 2025-07-14  
+**Decision:**  
+Workflow automation (n8n) will not be included in Phase 1 deployments.
 
-### Context  
-Sentra Brain must enforce licensing and provide remote health monitoring while respecting client privacy.
+**Rationale:**  
+- Keep Phase 1 lean and focused.  
+- Avoid unnecessary security exposure before admin workflows are formalized.
 
-### Decision  
-**Implement a vendor-controlled `/health` endpoint** accessible only by JGCarmona Consulting via VPN or secure IP whitelisting.
+---
 
-### Alternatives Considered  
-- Full telemetry (rejected)  
-- Manual offline validation (less practical)
+## ADR 008 – Deployment Model: Self-Hosted First
 
-### Consequences  
-- Basic license verification without exposing sensitive client data  
-- Ensures service availability monitoring for support purposes  
+**Decision:**  
+Self-hosted deployment is mandatory. Hybrid deployment is optional under vendor control.
+
+**Rationale:**  
+- Full data control for SMEs.  
+- Consistent with Sentra Brain’s value proposition.
+
+---
+
+## ADR 009 – Monitoring & Licensing Mechanism
+
+**Decision:**  
+Implement a health monitoring and license validation endpoint (`/health`), only accessible by JGCarmona Consulting.
+
+**Rationale:**  
+- Enforce licensing.  
+- Provide basic support monitoring without privacy compromises.
+
+---

@@ -8,10 +8,11 @@ This section describes how the Sentra Brain system is deployed in real-world env
 
 ## 7.1 Deployment Models
 
-| Model                | Description                                      | Notes                                   |
-|---------------------|--------------------------------------------------|-----------------------------------------|
-| Self-Hosted         | Installed on client-owned hardware within private network. | Primary and recommended deployment.     |
-| Hybrid (Optional)   | Core services self-hosted, some integrations via cloud (e.g., CRM, external data). | Under vendor-managed agreement only.    |
+| Model          | Description                                                                  | Notes               |
+| -------------- | ---------------------------------------------------------------------------- | ------------------- |
+| Small Install  | All containers on the same host/server using Docker Compose.                 | Phase 1 baseline.   |
+| Hybrid Install | Core services self-hosted; some MCP servers deployed remotely via VPN/proxy. | For larger clients. |
+
 
 ---
 
@@ -31,8 +32,8 @@ flowchart TD
             n8n[Embedded n8n]
         end
         Frontend["User Frontend (Web App)"]
-        AdminPanel[Admin Panel (client admins only)]
-        VendorPanel[Vendor Control Panel (vendor super admins only)]
+        AdminPanel["Admin Panel (client admins only)"]
+        VendorPanel["Vendor Control Panel (vendor super admins only)"]
     end
 
     subgraph External_Connections["Optional External Services"]
@@ -62,15 +63,14 @@ flowchart TD
   - Minimum GPU: NVIDIA RTX A6000 or equivalent.
 
 - **Networking:**  
-  - Internal access only for User Frontend and Admin Panel (client admins only).
-  - Vendor Control Panel is accessible only to JGCarmona Consulting/vendor super admins for monitoring, licensing, and root configuration.
-  - Embedded n8n is accessible via Admin Panel (client scope) and Vendor Control Panel (vendor scope).
+  - Internal access only for User Frontend and Admin Panel.
+  - Sentra API orchestrates all backend service communication.
+  - MCP servers may be deployed locally or remotely (hybrid setup) under secured channels (VPN, reverse proxy).
   - Vendor monitoring endpoint secured via VPN or restricted IP filtering.
 
 - **Security Controls:**  
-  - Internal Auth Service is mandatory.  
-  - No public API exposure except optional MCP integrations under strict control.  
-  - Embedded n8n is accessible via Admin Panel (client scope) and Vendor Control Panel (vendor scope).
+  - Internal Auth Service via SQL + NoSQL backend is mandatory.
+  - No public API exposure except optional MCP integrations under strict control.
 
 ---
 **Panel Access Notes:**
