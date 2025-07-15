@@ -40,11 +40,11 @@ graph TD
     Admin["System Administrator"]
     Frontend["Frontend (React + Tailwind)"]
     AdminPanel["Admin Panel (Monitoring + Config)"]
-    n8n["n8n Embedded<br/>(Workflow Automation)"]
+    n8n["n8n Embedded<br/>(Workflow Automation – future phase)"]
     Gateway["API Gateway"]
     LLM["LLM Server<br/>(llama.cpp)"]
     RAG["RAG Engine<br/>(ChromaDB/Qdrant)"]
-    MCP["MCP Server<br/>(Python/.NET)"]
+    MCP["MCP Servers (per capability)<br/>(sentra-doc, sentra-crm, sentra-action)"]
     ExternalTools["External Tools<br/>(CRM, ERP, Office Plugins)"]
 
     User --> Frontend

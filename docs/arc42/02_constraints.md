@@ -30,10 +30,12 @@ These constraints define the framework within which all architectural decisions 
 
 - **Technology Stack Standardization**  
   Core technologies are pre-defined and locked-in:  
-  - Backend: Python (FastAPI) and/or C# (.NET)  
-  - LLM Serving: llama.cpp or vLLM (GGUF format models)  
-  - RAG Layer: ChromaDB or Qdrant  
-  - Frontend: React + Tailwind CSS  
+  - Backend: Python (FastAPI)
+  - LLM Serving: llama.cpp or vLLM (GGUF format models)
+  - RAG Layer: ChromaDB
+  - Frontend: React + Tailwind CSS
+  - MCP Layer: Explicitly split into dedicated services (`sentra-doc`, `sentra-crm`, `sentra-action`) per capability.
+
 
 - **Repository Structure**  
   The project must maintain a single-repository structure, organized as:  
@@ -46,7 +48,7 @@ These constraints define the framework within which all architectural decisions 
 
 - **Security Policies**  
   - VPN or LAN-only access by default  
-  - Admin tools such as n8n and Admin Panel restricted to authenticated system administrators  
+  - Admin tools such as the Admin Panel (and optionally n8n for future workflow automation) restricted to authenticated system administrators  
   - Internal API keys must control access between components  
 
 ---
@@ -71,4 +73,5 @@ One of Sentra Brain's foundational constraints is **operating as a standalone, p
 - **Security Assurance Measures**  
   - VPN, firewall, and network segmentation enforcement.  
   - Internal-only API communication between modules.  
-  - Embedded n8n and Admin Panel restricted to authorized administrators only.
+  - Admin Panel (and optionally future workflow automation via embedded n8n) restricted to authorized administrators only.
+
