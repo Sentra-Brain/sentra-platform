@@ -2,7 +2,7 @@
 
 ## Overview
 
-This section describes typical runtime scenarios in Sentra Brain, focusing on how the system’s main components interact at runtime. It highlights request flows for core use cases: LLM Query Processing, Document Retrieval (RAG), and Workflow Execution via n8n.
+This section describes typical runtime scenarios in Sentra Brain, focusing on how the system’s main components interact at runtime. It highlights request flows for core use cases: LLM Query Processing, Document Retrieval (RAG), .and (future) Workflow Execution via n8n.
 
 ---
 
@@ -13,21 +13,21 @@ A user submits a question that may require both knowledge retrieval (RAG) and LL
 
 **Step-by-Step Flow:**
 
-1. **User Frontend → API Gateway**
+1. **User Frontend → Sentra API**
     - REST/GraphQL request with the user query.
-    - Authenticated via Internal Auth Service.
+    - Authenticated via Sentra API against Auth DB (SQL).
     - User may specify active datasources or knowledge contexts via UI.
 
-2. **API Gateway → RAG Engine (Conditional)**
+2. **Sentra API → RAG Engine (Conditional)**
     - If one or more datasources are selected, the API submits a search query to retrieve relevant documents or context snippets from the RAG Engine.
     - If no datasources are selected, this step is skipped.
 
-3. **API Gateway → LLM Server (llama.cpp)**
+3. **Sentra API → LLM Server (llama.cpp)**
     - API forwards the original query plus any retrieved RAG context as a combined prompt.
     - If RAG was bypassed, only the raw query is forwarded.
     - LLM processes the input and generates the final answer.
 
-4. **LLM Server → API Gateway → User Frontend**
+4. **LLM Server → Sentra API → User Frontend**
     - LLM response is sent back to the user.
 
 ### Sequence
@@ -35,7 +35,7 @@ A user submits a question that may require both knowledge retrieval (RAG) and LL
 ```mermaid
 sequenceDiagram
     participant User as User Frontend
-    participant API as API Gateway
+    participant API as Sentra API
     participant Auth as Auth Service
     participant RAG as RAG Engine
     participant LLM as LLM Server
@@ -63,23 +63,23 @@ A user requests information that requires document search via the RAG Engine.
 
 **Step-by-Step Flow:**
 
-1. **User Frontend → API Gateway**  
+1. **User Frontend → Sentra API**  
    - Search query submitted.
 
-2. **API Gateway → RAG Engine (ChromaDB/Qdrant)**  
+2. **Sentra API → RAG Engine (ChromaDB/Qdrant)**  
    - API forwards the request to RAG for document similarity search.
 
 3. **RAG Engine → External Data Sources (Optional)**  
    - If configured, RAG may fetch or update indices using external data sources.
 
-4. **RAG Engine → API Gateway → User Frontend**  
+4. **RAG Engine → Sentra API → User Frontend**  
    - Search results returned through the API.
 ### Sequence
 
 ```mermaid
 sequenceDiagram
     participant User as User Frontend
-    participant API as API Gateway
+    participant API as Sentra API
     participant Auth as Auth Service
     participant LLM as LLM Server
     participant RAG as RAG Engine
@@ -98,37 +98,48 @@ sequenceDiagram
 ### 6.2.2 CRM/ERP Data Retrieval (MCP) Scenario
 
 **Scenario:**  
-A user or automated workflow requests structured business data (e.g., customer details, sales orders) via the MCP Server.
+ A user or an automated workflow (future feature) requests structured business data (e.g., customer details, sales orders) via Sentra Brain’s dedicated MCP Servers.
 
 **Step-by-Step Flow:**
 
-1. **User Frontend or n8n → API Gateway**  
-   - Request for CRM/ERP data initiated.
+1. **User Frontend or (Future) n8n → Sentra API**  
+   - Request for CRM/ERP data is initiated by a user through the frontend or, in future phases, via an automated workflow (n8n integration).
 
-2. **API Gateway → MCP Server**  
-   - API forwards request using gRPC or REST to the MCP Server.
+2. **Sentra API → MCP Servers (sentra-crm / sentra-action)**  
+   - Sentra API forwards the request using gRPC or REST to the appropriate MCP Server, depending on the requested capability:
+      - sentra-crm for structured CRM/ERP data queries.
+      - sentra-action for triggerable actions or automations.
 
 3. **MCP Server → CRM/ERP APIs**  
    - MCP performs necessary queries or actions on behalf of Sentra Brain.
 
-4. **MCP Server → API Gateway → User Frontend or n8n**  
-   - Response is routed back to the originator.
+4. **MCP Server → Sentra API → User Frontend or n8n**  
+   - The response is routed back to the originator, maintaining access control and auditability.
 
 ### Sequence
 
 ```mermaid
 sequenceDiagram
     participant User as User Frontend
-    participant API as API Gateway
-    participant MCP as MCP Server
+    participant API as Sentra API (FastAPI)
+    participant MCP_CRM as Sentra-CRM MCP
+    participant MCP_Action as Sentra-Action MCP
     participant CRM as CRM/ERP APIs
 
     User->>API: Request CRM/ERP Data
-    API->>MCP: Forward Request
-    MCP->>CRM: Query CRM/ERP System
-    CRM-->>MCP: Response
-    MCP-->>API: Forward Response
+    alt CRM Data Request
+        API->>MCP_CRM: Forward Request
+        MCP_CRM->>CRM: Query CRM/ERP System
+        CRM-->>MCP_CRM: Response
+        MCP_CRM-->>API: Forward Response
+    else Action Request
+        API->>MCP_Action: Forward Request
+        MCP_Action->>CRM: Trigger Action
+        CRM-->>MCP_Action: Acknowledge
+        MCP_Action-->>API: Forward Response
+    end
     API-->>User: Data Result
+
 ```
 
 **Notes:**
@@ -176,7 +187,7 @@ The following runtime scenarios are considered relevant for Sentra Brain but are
 
 - **User Account Management:**  
   - **Scenario:** A system administrator creates, updates, or disables user accounts via the Admin Panel.  
-  - **Flow:** Admin Panel → API Gateway → Auth Service.
+  - **Flow:** Admin Panel → Sentra API → Auth Service.
 
 - **CRM/ERP Integration via MCP:**  
   - **Scenario:** This use case is already documented in detail in section 6.2.2.  
@@ -184,7 +195,7 @@ The following runtime scenarios are considered relevant for Sentra Brain but are
 
 - **License Validation and Health Monitoring:**  
   - **Scenario:** JGCarmona Consulting performs periodic service health checks and license validation remotely.  
-  - **Flow:** Monitoring Client → API Gateway → Secure /health Endpoint.
+  - **Flow:** Monitoring Client → Sentra API → Secure /health Endpoint.
 
 **Notes:**  
 - These scenarios follow the same core architecture principles: self-hosted first, vendor-managed access strictly controlled, modular service separation.

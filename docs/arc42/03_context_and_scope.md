@@ -31,23 +31,28 @@ graph TD
 
 ## Technical Context
 
-Sentra Brain operates as a modular system composed of loosely coupled services, exposed through a central API Gateway. Its primary deployment model is self-hosted within the client's private infrastructure. Interaction with external services, such as external data sources or third-party APIs, is optional and always controlled. Hybrid deployment models may be considered in future phases.
+Sentra Brain operates as a modular system composed of loosely coupled services, exposed through a central API Gateway. Its primary deployment model is self-hosted within the client's private infrastructure. Interaction with external services, such as external data sources or third-party APIs, is optional and always controlled. Hybrid deployment models are fully supported in Phase 1, with core services deployed locally and optional MCP servers hosted remotely via secured channels (VPN or reverse proxy).
 
 ### Technical Context Diagram
 
 ```mermaid
 graph TD
     subgraph Client_Interface["Sentra Brain UI"]
-        Frontend[User Frontend]
-        AdminPanel[Admin Panel]
+        Frontend["User Frontend (sentra-web)"]
+        AdminPanel["Admin Panel (sentra-admin)"]
     end
 
     subgraph Sentra_Brain_System["Sentra Brain System"]
-        API[API Gateway]
-        LLM[LLM Server llama.cpp]
-        RAG[RAG Engine ChromaDB/Qdrant]
-        MCP[MCP Server Python or .NET]
-        Auth[Internal Auth Service]
+        API["Sentra API (FastAPI)<br/>(Orchestrator + Auth)"]
+        LLM["LLM Server (llama.cpp)"]
+        Conversations["NoSQL DB (MongoDB) — Chat Histories"]
+        RAG["RAG Engine (ChromaDB)"]
+        subgraph MCP_Servers["MCP Servers"]
+            MCP_Doc[Sentra-Doc MCP Server]
+            MCP_CRM[Sentra-CRM MCP Server]
+            MCP_Action[Sentra-Action MCP Server]
+        end
+        Auth["Internal Auth DB (Postgres/MariaDB)"]
     end
 
     subgraph External_Services["External Services"]
@@ -55,13 +60,20 @@ graph TD
         CRMs[Third Party CRM or ERP APIs]
     end
 
-    Frontend -->|REST/GraphQL| API
-    AdminPanel -->|REST/GraphQL| API
+    Frontend -->|REST| API
+    AdminPanel -->|REST| API
 
-    API -->|gRPC/REST| LLM
-    API -->|gRPC/REST| RAG
-    API -->|gRPC/REST| MCP
-    API -->|OAuth2/OpenID| Auth
+    API -->|HTTP/gRPC| LLM
+    API --> Conversations
+    API -->|HTTP/gRPC| RAG
+    API --> MCP_Doc
+    API --> MCP_CRM
+    API --> MCP_Action
+    API -->|SQL| Auth
+
     RAG -->|Fetches| DataSources
-    MCP -->|Integrates| CRMs
+    MCP_Doc -->|Integrates| CRMs
+    MCP_CRM -->|Integrates| CRMs
+    MCP_Action -->|Integrates| CRMs
+
 ```
