@@ -1,18 +1,103 @@
----
-import { redirect } from 'astro/runtime/server';
+<html lang="en">
+  <head>
+    <link rel="sitemap" href="/sitemap-index.xml" />
+    <link rel="icon" href="/favicon.svg" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-redirect('/en/');
----
+    <title>Sentra Brain – Private AI Server for Enterprises</title>
+    <meta
+      name="description"
+      content="Sentra Brain helps you with business, finance, and more. Try it now!"
+    />
 
-<!-- Open Graph Meta Tags -->
-<meta property="og:title" content="Sentra Brain – Private AI Server for Enterprises" />
-<meta property="og:description" content="Sentra Brain helps you with business, finance, and more. Try it now!" />
-<meta property="og:image" content="/public/sentra_brain_logo_512.png" />
-<meta property="og:url" content="https://sentrabrain.com/" />
-<meta property="og:type" content="website" />
+    <meta
+      property="og:title"
+      content="Sentra Brain – Private AI Server for Enterprises"
+    />
+    <meta
+      property="og:description"
+      content="Sentra Brain helps you with business, finance, and more. Try it now!"
+    />
+    <meta property="og:image" content="/sentra_brain_logo_512.png" />
+    <meta property="og:url" content="https://sentrabrain.com/" />
+    <meta property="og:type" content="website" />
 
-<!-- Twitter Card Meta Tags -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="Sentra Brain – Private AI Server for Enterprises" />
-<meta name="twitter:description" content="Sentra Brain helps you with business, finance, and more. Try it now!" />
-<meta name="twitter:image" content="/public/sentra_brain_logo_512.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Sentra Brain – Private AI Server for Enterprises"
+    />
+    <meta
+      name="twitter:description"
+      content="Sentra Brain helps you with business, finance, and more. Try it now!"
+    />
+    <meta name="twitter:image" content="/sentra_brain_logo_512.png" />
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: var(--sentra-primary, #0f172a);
+        color: var(--sentra-text, #f8fafc);
+      }
+
+      .brain-spinner {
+        display: inline-block;
+        position: relative;
+        width: 220px;
+        height: 220px;
+      }
+      .brain-spinner div {
+        position: absolute;
+        border: 10px solid var(--sentra-accent, #38bdf8);
+        opacity: 1;
+        border-radius: 50%;
+        animation: brain-ring 1.2s cubic-bezier(0, 0.4, 0.8, 1) infinite;
+      }
+      .brain-spinner div:nth-child(2) {
+        animation-delay: -0.4s;
+      }
+      .brain-spinner div:nth-child(3) {
+        animation-delay: -0.8s;
+      }
+      .brain-spinner div:nth-child(4) {
+        animation-delay: -1.2s;
+      }
+
+      @keyframes brain-ring {
+        0% {
+          top: 100px;
+          left: 100px;
+          width: 0;
+          height: 0;
+          opacity: 1;
+        }
+        100% {
+          top: 0;
+          left: 0;
+          width: 200px;
+          height: 200px;
+          opacity: 0;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <main class="text-center">
+      <div class="brain-spinner">
+        <div></div><div></div><div></div><div></div>
+      </div>
+    </main>
+    <script src="/js/redirect-by-language.js" is:inline></script>
+    <script >
+      redirectByLanguage("en", 50);
+    </script>
+  </body>
+</html>
