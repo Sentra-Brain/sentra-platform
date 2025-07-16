@@ -1,2 +1,2 @@
 FROM alpine:latest
-CMD ["echo", "Sentra Brain Service Placeholder"]
+CMD ["echo", "Sentra Admin Web App Placeholder"]

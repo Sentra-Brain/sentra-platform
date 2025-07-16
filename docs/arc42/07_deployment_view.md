@@ -73,6 +73,29 @@ flowchart TD
   - No public API exposure except optional MCP integrations under strict control.
 
 ---
+
+## 7.4 Service Ports and Volumes Reference
+
+| Service Name       | Purpose                                | Port  | Volume Name          |
+|--------------------|----------------------------------------|-------|---------------------|
+| sentra-web         | Chat UI                                | 3000  | —                   |
+| sentra-admin       | Admin UI                               | 3001  | —                   |
+| sentra-api         | Orchestrator + API + Auth + MCP Client | 8000  | —                   |
+| llama-server       | LLM Backend                            | 11434 | —                   |
+| sentra-vector-db   | Vector Store (RAG)                     | 8001  | sentra-vector-data  |
+| sentra-sql-db      | SQL Persistent Storage (Users/Configs) | 5432  | sentra-sql-data     |
+| sentra-nosql-db    | NoSQL Chat History Storage             | 27017 | sentra-nosql-data   |
+| sentra-doc         | MCP: Document Search Tools            | 5001  | —                   |
+| sentra-crm         | MCP: CRM Lookup Tools                 | 5002  | —                   |
+| sentra-action      | MCP: Email/Actions                    | 5003  | —                   |
+
+---
+
+- All services are connected via the `sentrabrain-dev-net` Docker network in development.
+- Persistent data volumes apply only to SQL, NoSQL, and Vector Store services.
+- Ensure GPU passthrough is configured for `llama-server` in production environments.
+
+---
 **Panel Access Notes:**
 - **Admin Panel (client admins only):** For SME Administrators to manage their own Sentra Brain instance, including service monitoring, configuration, and client-scope n8n workflows.
 - **Vendor Control Panel (vendor super admins only):** For JGCarmona Consulting to manage licensing, system health, root configuration, and vendor-scope n8n workflows.
