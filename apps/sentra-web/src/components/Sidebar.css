@@ -1,0 +1,60 @@
+
+.sidebar {
+  width: 260px;
+  background: var(--sentra-primary);
+  color: var(--sentra-text);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--sentra-primary-dark);
+  min-height: 100vh;
+  padding: 0 0.5rem;
+}
+
+.sidebar-title {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 1.5rem 0 1rem 0;
+  text-align: center;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+.new-conv-btn {
+  background: var(--sentra-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.new-conv-btn:hover {
+  background: var(--sentra-accent-light);
+}
+
+.conversation-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+  overflow-y: auto;
+}
+
+.conversation-list li {
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  margin-bottom: 0.3rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.conversation-list li.active, .conversation-list li:hover {
+  background: var(--sentra-accent-light);
+  color: var(--sentra-primary-dark);
+}
