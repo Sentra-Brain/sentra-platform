@@ -1,0 +1,145 @@
+version: '3.8'
+
+services:
+  sentra-web:
+    build:
+      context: ./apps/sentra-web
+      dockerfile: Dockerfile
+    container_name: sentra-web
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./apps/sentra-web:/app
+      - /app/node_modules
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  sentra-admin:
+    build:
+      context: ./apps/sentra-admin
+      dockerfile: Dockerfile
+    container_name: sentra-admin
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./apps/sentra-admin:/app
+      - /app/node_modules
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  sentra-api:
+    build:
+      context: ./services/sentra-api
+      dockerfile: Dockerfile
+    container_name: sentra-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/sentra-api:/app
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  sentra-doc:
+    build:
+      context: ./services/sentra-doc
+      dockerfile: Dockerfile
+    container_name: sentra-doc
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./services/sentra-doc:/app
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  sentra-crm:
+    build:
+      context: ./services/sentra-crm
+      dockerfile: Dockerfile
+    container_name: sentra-crm
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./services/sentra-crm:/app
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  sentra-action:
+    build:
+      context: ./services/sentra-action
+      dockerfile: Dockerfile
+    container_name: sentra-action
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./services/sentra-action:/app
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  llama-server:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama-server
+    ports:
+      - "11434:11434"
+    networks:
+      - sentrabrain-dev-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    runtime: nvidia
+
+  sentra-vector-db:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: sentra-vector-db
+    ports:
+      - "8001:8001"
+    volumes:
+      - sentra-vector-data:/chroma/.chroma/index
+    networks:
+      - sentrabrain-dev-net
+
+  sentra-sql-db:
+    image: postgres:16-alpine
+    container_name: sentra-sql-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - sentra-sql-data:/var/lib/postgresql/data
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+  sentra-nosql-db:
+    image: mongo:7
+    container_name: sentra-nosql-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - sentra-nosql-data:/data/db
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - .dev.env
+
+volumes:
+  sentra-sql-data:
+  sentra-nosql-data:
+  sentra-vector-data:
+
+networks:
+  sentrabrain-dev-net:
+    driver: bridge
