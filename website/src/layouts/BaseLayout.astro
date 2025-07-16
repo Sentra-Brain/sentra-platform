@@ -28,7 +28,7 @@ const { title = "TFST", lang = "en" } = Astro.props;
     />
     <meta
       property="og:image"
-      content="https://sentrabrain.com/sentra_brain_logo_512.png"
+      content="https://sentrabrain.com/sentra_brain.png"
     />
     <meta property="og:url" content="https://sentrabrain.com/" />
 
@@ -44,7 +44,7 @@ const { title = "TFST", lang = "en" } = Astro.props;
     />
     <meta
       name="twitter:image"
-      content="https://sentrabrain.com/sentra_brain_logo_512.png"
+      content="https://sentrabrain.com/sentra_brain.png"
     />
     <title>{`Sentra Brain - ${title}`}</title>
 
@@ -52,8 +52,9 @@ const { title = "TFST", lang = "en" } = Astro.props;
     <link rel="canonical" href={`https://sentrabrain.com/${lang}/`} />
 
     <!-- Language -->
-    <meta name="language" content="${lang}" />
+    <meta name="language" content={`${lang}`} />
     <link rel="sitemap" href="/sitemap-index.xml" />
+    
     <!-- Theme color (browser UI) -->
     <meta name="theme-color" content="#0f172a" />
     <link rel="icon" href="/favicon.svg"  type="image/svg+xml" />
