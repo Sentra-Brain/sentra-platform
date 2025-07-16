@@ -1,84 +1,51 @@
-name: Sentra Brain – Sentra Admin CI/CD
+name: Website
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'apps/sentra-admin/**'
+      - 'website/**'
   pull_request:
+    types: [opened, synchronize, reopened, closed]
     branches:
       - main
     paths:
-      - 'apps/sentra-admin/**'
-  push:
-    tags:
-      - 'v*.*.*'
-    paths:
-      - 'apps/sentra-admin/**'
+      - 'website/**'
   workflow_dispatch:
 
 jobs:
-  ci:
-    name: Build, Lint, Test
+  build_and_deploy_job:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action != 'closed')
+    runs-on: ubuntu-latest    
+    permissions:
+      contents: read
+      pull-requests: write
+    name: Build and Deploy Website
+    steps:      
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+          lfs: false
+      - name: Deploy to Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.WEB_SITE_DEPLOYMENT_TOKEN }}
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          action: "upload"
+          app_location: "website"
+          api_location: ""
+          output_location: "dist"
+
+  close_pull_request_job:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed'
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/sentra-admin
+    name: Close Pull Request
     steps:
-      - uses: actions/checkout@v4
-      - name: Use Node.js 20.x
-        uses: actions/setup-node@v4
+      - uses: Azure/static-web-apps-deploy@v1
         with:
-          node-version: 20
-          cache: 'npm'
-      - name: Install dependencies
-        run: npm ci
-      - name: Lint
-        run: npm run lint
-      - name: Test
-        run: npm test -- --watchAll=false
-      - name: Build
-        run: npm run build
-      - name: Upload build artifact
-        if: github.event_name != 'pull_request'
-        uses: actions/upload-artifact@v4
-        with:
-          name: sentra-admin-build
-          path: apps/sentra-admin/dist
-
-  docker:
-    name: Docker Build & Push
-    needs: ci
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: apps/sentra-admin
-    if: >
-      github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-    steps:
-      - uses: actions/checkout@v4
-
-      # Extract version for tagging (tag, or fallback to "latest")
-      - name: Extract Docker image version
-        id: version
-        run: |
-          if [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/v}"
-          else
-            VERSION="latest"
-          fi
-          echo "version=$VERSION" >> $GITHUB_OUTPUT
-
-      - name: Log in to Azure Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ secrets.AZURE_ACR_LOGIN_SERVER }}
-          username: ${{ secrets.AZURE_ACR_USERNAME }}
-          password: ${{ secrets.AZURE_ACR_PASSWORD }}
-
-      - name: Build Docker image
-        run: docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:${{ steps.version.outputs.version }} .
-
-      - name: Push Docker image
-        run: docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:${{ steps.version.outputs.version }}
+          azure_static_web_apps_api_token: ${{ secrets.WEB_SITE_DEPLOYMENT_TOKEN }}
+          action: "close"
+          app_location: "website"
+          api_location: ""
+          output_location: "dist"

@@ -15,11 +15,13 @@ const App: React.FC = () => {
 
   return (
     <ChatProvider>
-      <div className="app-root dark-mode">
+      <div className="app-root dark-mode" style={{ display: 'flex', height: '100vh', width: '100vw' }}>
         <Sidebar />
-        <div className="main-content">
+        <div className="main-content" style={{ flex: 1, display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <TopBar onSettings={() => setSettingsOpen(true)} />
-          <ChatArea />
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+            <ChatArea />
+          </div>
           <MessageInput />
         </div>
         <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />

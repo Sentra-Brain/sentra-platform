@@ -1,15 +1,15 @@
-name: Sentra Admin
+name: Sentra Web
 
 on:
   push:
     branches: [main]
     paths:
-      - 'apps/sentra-admin/**'
-      - '.github/workflows/cicd-sentra-admin.yml'
+      - 'apps/sentra-web/**'
+      - '.github/workflows/cicd-sentra-web.yml'
   pull_request:
     paths:
-      - 'apps/sentra-admin/**'
-      - '.github/workflows/cicd-sentra-admin.yml'
+      - 'apps/sentra-web/**'
+      - '.github/workflows/cicd-sentra-web.yml'
   workflow_dispatch:
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/sentra-admin
+        working-directory: apps/sentra-web
     steps:
       - uses: actions/checkout@v4
 
@@ -42,8 +42,8 @@ jobs:
       - name: Upload production build
         uses: actions/upload-artifact@v4
         with:
-          name: sentra-admin-build
-          path: apps/sentra-admin/dist
+          name: sentra-web-build
+          path: apps/sentra-web/dist
 
   docker-build-and-push:
     if: github.ref == 'refs/heads/main'
@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/sentra-admin
+        working-directory: apps/sentra-web
     steps:
       - uses: actions/checkout@v4
 
@@ -69,14 +69,14 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:${{ steps.get_version.outputs.version }} .
+          docker build -t ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-web:${{ steps.get_version.outputs.version }} .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:${{ steps.get_version.outputs.version }}
+          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-web:${{ steps.get_version.outputs.version }}
 
       - name: Tag and push 'latest'
         run: |
-          docker tag ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:${{ steps.get_version.outputs.version }} \
-            ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:latest
-          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-admin:latest
+          docker tag ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-web:${{ steps.get_version.outputs.version }} \
+            ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-web:latest
+          docker push ${{ secrets.AZURE_ACR_LOGIN_SERVER }}/sentra-web:latest
