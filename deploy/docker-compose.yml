@@ -1,0 +1,125 @@
+version: '3.8'
+
+services:
+  sentra-web:
+    image: sentrabrain.azurecr.io/sentra-web:latest
+    container_name: sentra-web
+    ports:
+      - "3000:3000"
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  sentra-admin:
+    image: sentrabrain.azurecr.io/sentra-admin:latest
+    container_name: sentra-admin
+    ports:
+      - "3001:3001"
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  sentra-api:
+    image: sentrabrain.azurecr.io/sentra-api:latest
+    container_name: sentra-api
+    ports:
+      - "8000:8000"
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  sentra-doc:
+    image: sentrabrain.azurecr.io/sentra-doc:latest
+    container_name: sentra-doc
+    ports:
+      - "5001:5001"
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  sentra-crm:
+    image: sentrabrain.azurecr.io/sentra-crm:latest
+    container_name: sentra-crm
+    ports:
+      - "5002:5002"
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  sentra-action:
+    image: sentrabrain.azurecr.io/sentra-action:latest
+    container_name: sentra-action
+    ports:
+      - "5003:5003"
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  llama-server:
+    image: ghcr.io/ggml-org/llama.cpp:server-cuda
+    container_name: llama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      - /opt/sentra-brain/models:/models:ro
+    command: >
+      -m /models/capybara-mistral-7b/CapybaraHermes-2.5-Mistral-7B.Q4_K_M.gguf
+      --port 11434
+      --host 0.0.0.0
+    networks:
+      - sentrabrain-net
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    runtime: nvidia
+
+  sentra-vector-db:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: sentra-vector-db
+    ports:
+      - "8001:8001"
+    volumes:
+      - sentra-vector-data:/chroma/.chroma/index
+    networks:
+      - sentrabrain-net
+
+  sentra-sql-db:
+    image: postgres:16-alpine
+    container_name: sentra-sql-db
+    ports:
+      - "5432:5432"
+    volumes:
+      - sentra-sql-data:/var/lib/postgresql/data
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+  sentra-nosql-db:
+    image: mongo:7
+    container_name: sentra-nosql-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - sentra-nosql-data:/data/db
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .env.prod
+
+volumes:
+  sentra-sql-data:
+  sentra-nosql-data:
+  sentra-vector-data:
+
+networks:
+  sentrabrain-net:
+    driver: bridge

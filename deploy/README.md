@@ -80,3 +80,17 @@ This directory contains deployment scripts, manifests, and configuration files f
         --host 0.0.0.0
     ```
 
+## Accessing Sentra Web and Admin in Production
+
+- The following ports are exposed for LAN access:
+  - `http://<server-ip>:3000` → Sentra Web (User Chat UI)
+  - `http://<server-ip>:3001` → Sentra Admin (Admin Panel)
+
+- No public internet exposure is assumed by default.
+
+- For secured access, it is recommended to place a reverse proxy (e.g., NGINX or Traefik) in front of Sentra Web and Sentra Admin:
+  - Handles SSL termination (HTTPS).
+  - Controls IP allowlists or VPN access.
+
+- Database and internal services are only exposed inside the Docker network (`sentrabrain-net`).
+
