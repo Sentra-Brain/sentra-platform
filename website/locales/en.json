@@ -14,11 +14,12 @@
     "ctaButton": "Get in Touch"
   },
   "home": {
-    "title": "Private AI Server for Enterprises"
+    "title": "Your Data. Your AI. Your Rules.",
+    "subtitle": "Deploy your own AI platform, fully private and modular. Your data stays in your hands — your models, your knowledge, your infrastructure. No external servers, no hidden costs."
   },
   "hero": {
-    "title": "Your Own Private AI Platform",
-    "subtitle": "Take control of your data, customize your workflows, and integrate AI into your business with Sentra Brain — the private AI server for professionals, SMEs, and regulated industries.",
+    "title": "Your Data. Your AI. Your Rules.",
+    "subtitle": "Deploy your own AI platform, fully private and modular. Your data stays in your hands — your models, your knowledge, your infrastructure. No external servers, no hidden costs.",
     "cta": "Request Your Personalized Demo"
   },
   "about": {

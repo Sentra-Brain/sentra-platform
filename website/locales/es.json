@@ -14,12 +14,13 @@
     "ctaButton": "Contactar"
   },
   "home": {
-    "title": "Sentra Brain: Servidor de IA Privada para Empresas"
+    "title": "Tus datos. Tu IA. Tus reglas.",
+    "subtitle": "Despliega tu propia plataforma de IA, totalmente privada y modular. Tus datos siempre bajo control: tus modelos, tu conocimiento, tu infraestructura. Sin servidores externos ni costes ocultos."
   },
   "hero": {
-    "title": "Tu Plataforma de IA Privada",
-    "subtitle": "Controla tu información, personaliza tus flujos, integra IA en tu empresa con Sentra Brain: el servidor de inteligencia artificial privada para profesionales, pymes e industrias reguladas.",
-    "cta": "Solicita tu Demo Personalizada"
+    "title": "Tus datos. Tu IA. Tus reglas.",
+    "subtitle": "Despliega tu propia plataforma de IA, totalmente privada y modular. Tus datos siempre bajo control: tus modelos, tu conocimiento, tu infraestructura. Sin servidores externos ni costes ocultos.",
+    "cta": "Solicita tu demo personalizada"
   },
   "about": {
     "hero": {
