@@ -1,31 +1,35 @@
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import RedirectResponse
-import logging
 import os
+from mediatr import Mediator
 import uvicorn
 
-from sentra_brain_api.features.auth.controller import router as auth_router
-from sentra_brain_api.features.admin.controller import router as admin_router
-from sentra_brain_api.features.conversations.controller import router as conversations_router
+from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE
+from sentra_brain_api.core.constants import DESCRIPTION
+from sentra_brain_api.core.constants import CONTACT
+from sentra_brain_api.core.constants import LICENSE_INFO
+from sentra_brain_api.crosscutting import logging
+from sentra_brain_api.features.auth.auth_service import AuthService
+from sentra_brain_api.features.auth.controller import AuthController
+from sentra_brain_api.features.admin.controller import AdminController
+from sentra_brain_api.features.user.controller import UserController
+from sentra_brain_api.features.user.repository import UserRepository
+from sentra_brain_api.infra import postgres_service
 
-TITLE = "Sentra Brain API"
-DESCRIPTION = "API for Sentra Brain platform."
-CONTACT = {"name": "Sentra Brain Team", "email": "support@sentra.com"}
-LICENSE_INFO = {"name": "MIT"}
-SWAGGER_UI_PARAMETERS = {"defaultModelsExpandDepth": -1}
-SWAGGER_FAVICON_URL = "https://fastapi.tiangolo.com/img/favicon.png"
-
-logger = logging.getLogger("sentra_brain_api")
-logging.basicConfig(level=logging.INFO)
+logger = logging.get_logger("sentra_brain_api")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Place for DB init, etc.
     logger.info("App startup: initializing resources...")
+    postgres_service.init_db()
     yield
 
-def create_app():
+def create_app(
+        mediator=None,
+        auth_service=None,
+        notification_service=None):
     app = FastAPI(
         title=TITLE,
         description=DESCRIPTION,
@@ -36,10 +40,14 @@ def create_app():
         swagger_favicon_url=SWAGGER_FAVICON_URL,
         lifespan=lifespan
     )
+    
+    auth_controller = AuthController()
+    user_controller = UserController()
+    admin_controller = AdminController()
 
-    app.include_router(auth_router, prefix="/api/v1/auth", tags=["auth"])
-    app.include_router(admin_router, prefix="/api/v1/admin", tags=["admin"])
-    app.include_router(conversations_router, prefix="/api/v1/conversations", tags=["conversations"])
+    app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
+    app.include_router(user_controller.router, prefix="/users", tags=["users"])
+    app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
 
     return app
 
@@ -55,4 +63,4 @@ if __name__ == "__main__":
         import debugpy
         debugpy.listen(("0.0.0.0", 5678))
         debugpy.wait_for_client()
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")

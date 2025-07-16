@@ -8,21 +8,29 @@
       "cwd": "${workspaceFolder}/website",
       "type": "node-terminal"
     },
-    // {
-    //   "name": "Control Panel Dev",
-    //   "type": "node",
-    //   "request": "launch",
-    //   "runtimeExecutable": "pnpm",
-    //   "runtimeArgs": ["run", "dev"],
-    //   "cwd": "${workspaceFolder}/apps/control-panel",
-    //   "console": "integratedTerminal"
-    // },
-    // {
-    //   "name": "Attach to Node Process",
-    //   "processId": "${command:PickProcess}",
-    //   "request": "attach",
-    //   "type": "node",
-    //   "skipFiles": ["<node_internals>/**"]
-    // }
+    {
+      "name": "Sentra Web Dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm run dev",
+      "cwd": "${workspaceFolder}/apps/sentra-web"
+    },
+    {
+      "name": "Sentra Admin Dev",
+      "type": "node-terminal",
+      "request": "launch",
+      "command": "pnpm run dev",
+      "cwd": "${workspaceFolder}/apps/sentra-admin"
+    },
+    {
+      "name": "Sentra API (Debug)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/services/sentra-api/sentra_brain_api/main.py",
+      "cwd": "${workspaceFolder}/services/sentra-api",
+      "console": "integratedTerminal",
+      "env": { "DEBUG_MODE": "true" },
+      "justMyCode": false
+    }
   ]
 }
