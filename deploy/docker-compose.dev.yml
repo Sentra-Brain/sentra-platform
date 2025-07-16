@@ -3,13 +3,14 @@ version: '3.8'
 services:
   sentra-web:
     build:
-      context: ./apps/sentra-web
+      context: ../apps/sentra-web
       dockerfile: Dockerfile
+    image: sentra-web:dev
     container_name: sentra-web
     ports:
       - "3000:3000"
     volumes:
-      - ./apps/sentra-web:/app
+      - ../apps/sentra-web:/app
       - /app/node_modules
     networks:
       - sentrabrain-dev-net
@@ -18,13 +19,14 @@ services:
 
   sentra-admin:
     build:
-      context: ./apps/sentra-admin
+      context: ../apps/sentra-admin
       dockerfile: Dockerfile
+    image: sentra-admin:dev
     container_name: sentra-admin
     ports:
       - "3001:3001"
     volumes:
-      - ./apps/sentra-admin:/app
+      - ../apps/sentra-admin:/app
       - /app/node_modules
     networks:
       - sentrabrain-dev-net
@@ -33,13 +35,14 @@ services:
 
   sentra-api:
     build:
-      context: ./services/sentra-api
+      context: ../services/sentra-api
       dockerfile: Dockerfile
+    image: sentra-api:dev
     container_name: sentra-api
     ports:
       - "8000:8000"
     volumes:
-      - ./services/sentra-api:/app
+      - ../services/sentra-api:/app
     networks:
       - sentrabrain-dev-net
     env_file:
@@ -47,13 +50,14 @@ services:
 
   sentra-doc:
     build:
-      context: ./services/sentra-doc
+      context: ../services/sentra-doc
       dockerfile: Dockerfile
+    image: sentra-doc:dev
     container_name: sentra-doc
     ports:
       - "5001:5001"
     volumes:
-      - ./services/sentra-doc:/app
+      - ../services/sentra-doc:/app
     networks:
       - sentrabrain-dev-net
     env_file:
@@ -61,13 +65,14 @@ services:
 
   sentra-crm:
     build:
-      context: ./services/sentra-crm
+      context: ../services/sentra-crm
       dockerfile: Dockerfile
+    image: sentra-crm:dev
     container_name: sentra-crm
     ports:
       - "5002:5002"
     volumes:
-      - ./services/sentra-crm:/app
+      - ../services/sentra-crm:/app
     networks:
       - sentrabrain-dev-net
     env_file:
@@ -75,13 +80,14 @@ services:
 
   sentra-action:
     build:
-      context: ./services/sentra-action
+      context: ../services/sentra-action
       dockerfile: Dockerfile
+    image: sentra-action:dev
     container_name: sentra-action
     ports:
       - "5003:5003"
     volumes:
-      - ./services/sentra-action:/app
+      - ../services/sentra-action:/app
     networks:
       - sentrabrain-dev-net
     env_file:
@@ -92,6 +98,12 @@ services:
     container_name: llama-server
     ports:
       - "11434:11434"
+    volumes:
+      - D:\models:/models:ro
+    command: >
+      -m /models/tiny-llama/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+      --port 11434
+      --host 0.0.0.0
     networks:
       - sentrabrain-dev-net
     deploy:
@@ -100,7 +112,7 @@ services:
           devices:
             - capabilities: [gpu]
     runtime: nvidia
-
+    
   sentra-vector-db:
     image: ghcr.io/chroma-core/chroma:latest
     container_name: sentra-vector-db
