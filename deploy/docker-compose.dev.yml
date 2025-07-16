@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   sentra-web:
     build:
@@ -112,7 +110,7 @@ services:
           devices:
             - capabilities: [gpu]
     runtime: nvidia
-    
+
   sentra-vector-db:
     image: ghcr.io/chroma-core/chroma:latest
     container_name: sentra-vector-db

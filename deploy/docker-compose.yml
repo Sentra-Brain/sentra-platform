@@ -1,65 +1,69 @@
-version: '3.8'
-
 services:
   sentra-web:
     image: sentrabrain.azurecr.io/sentra-web:latest
     container_name: sentra-web
+    pull_policy: always
     ports:
       - "3000:3000"
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   sentra-admin:
     image: sentrabrain.azurecr.io/sentra-admin:latest
     container_name: sentra-admin
+    pull_policy: always
     ports:
       - "3001:3001"
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   sentra-api:
     image: sentrabrain.azurecr.io/sentra-api:latest
     container_name: sentra-api
+    pull_policy: always
     ports:
       - "8000:8000"
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   sentra-doc:
     image: sentrabrain.azurecr.io/sentra-doc:latest
     container_name: sentra-doc
+    pull_policy: always
     ports:
       - "5001:5001"
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   sentra-crm:
     image: sentrabrain.azurecr.io/sentra-crm:latest
     container_name: sentra-crm
+    pull_policy: always
     ports:
       - "5002:5002"
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   sentra-action:
     image: sentrabrain.azurecr.io/sentra-action:latest
     container_name: sentra-action
+    pull_policy: always
     ports:
       - "5003:5003"
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   llama-server:
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
@@ -101,7 +105,7 @@ services:
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
   sentra-nosql-db:
     image: mongo:7
@@ -113,7 +117,7 @@ services:
     networks:
       - sentrabrain-net
     env_file:
-      - .env.prod
+      - .prod.env
 
 volumes:
   sentra-sql-data:
