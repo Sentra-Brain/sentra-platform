@@ -72,6 +72,9 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      - name: Docker login using Azure CLI
+        run: az acr login --name sentrabrain
+
       - name: Build Docker image
         run: |
           docker build -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-admin:${{ steps.get_version.outputs.version }} .
