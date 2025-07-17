@@ -18,4 +18,4 @@ EXPOSE 8000
 EXPOSE 5678 
 
 
-CMD ["uvicorn", "sentra_brain_api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["python", "-m", "sentra_brain_api.main"]

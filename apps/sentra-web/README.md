@@ -56,7 +56,7 @@ npm install
 npm run dev
 ```
 
-- Uses port `3000` in development (see `docker-compose.dev.yml`).
+- Uses port `3100` in development (see `docker-compose.dev.yml`).
 - Mounted volumes enabled for live reload via Docker.
 
 ---

@@ -389,7 +389,6 @@ MigrationBackup/
 FodyWeavers.xsd
 
 # VS Code files for those working on multiple tools
-.vscode/*
 *.code-workspace
 
 # Local History for Visual Studio Code
@@ -418,7 +417,6 @@ FodyWeavers.xsd
 *.iml
 
 # VSCode specific files
-.vscode/
 *.code-workspace
 
 # Environment files (Common)
