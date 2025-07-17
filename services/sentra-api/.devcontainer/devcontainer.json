@@ -5,7 +5,7 @@
   ],
   "service": "sentra-api",
   "workspaceFolder": "/app",
-  "forwardPorts": [8000],
+  "forwardPorts": [8100],
   "customizations": {
     "vscode": {
       "settings": {

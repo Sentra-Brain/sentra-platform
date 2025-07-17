@@ -11,3 +11,5 @@ class UserRepository(BaseRepository[UserEntity]):
     def get_by_username(self, username: str) -> UserEntity:
         return self.db.query(UserEntity).filter(UserEntity.username == username).first()
 
+    def get_by_email(self, email: str) -> UserEntity:
+        return self.db.query(UserEntity).filter(UserEntity.email == email).first()

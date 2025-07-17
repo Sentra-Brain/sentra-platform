@@ -18,10 +18,19 @@ class FakeUserRepository():
     
     def get_by_username(self, username: str) -> UserEntity | None:
         return self.users.get(username)
+
+    def get_by_email(self, email: str) -> UserEntity | None:
+        for user in self.users.values():
+            if user.email == email:
+                return user
+        return None
     
 @pytest.fixture
 def user_repo():
-    return MagicMock(spec=FakeUserRepository)
+    repo = MagicMock(spec=FakeUserRepository)
+    repo.get_by_username.return_value = None
+    repo.get_by_email.return_value = None
+    return repo
 
 @pytest.fixture
 def auth_service(user_repo):

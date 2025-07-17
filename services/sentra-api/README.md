@@ -57,10 +57,10 @@ For detailed runtime diagrams, see `/docs/arc42/06_runtime_view.md`.
 
 ```bash
 pip install -r requirements.txt
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+uvicorn main:app --reload --host 0.0.0.0 --port 8100
 ```
 
-- Uses port `8000` in development (see `docker-compose.dev.yml`).
+- Uses port `8100` in development (see `docker-compose.dev.yml`).
 - Supports live reload when mounted via Docker volume.
 
 ---

@@ -79,15 +79,15 @@ flowchart TD
 | Service Name       | Purpose                                | Port  | Volume Name          |
 |--------------------|----------------------------------------|-------|---------------------|
 | sentra-web         | Chat UI                                | 3100  | —                   |
-| sentra-admin       | Admin UI                               | 3001  | —                   |
-| sentra-api         | Orchestrator + API + Auth + MCP Client | 8000  | —                   |
+| sentra-admin       | Admin UI                               | 3200  | —                   |
+| sentra-api         | Orchestrator + API + Auth + MCP Client | 8100  | —                   |
 | llama-server       | LLM Backend                            | 11434 | —                   |
 | sentra-vector-db   | Vector Store (RAG)                     | 8001  | sentra-vector-data  |
 | sentra-sql-db      | SQL Persistent Storage (Users/Configs) | 5432  | sentra-sql-data     |
 | sentra-nosql-db    | NoSQL Chat History Storage             | 27017 | sentra-nosql-data   |
 | sentra-doc         | MCP: Document Search Tools            | 5100  | —                   |
 | sentra-crm         | MCP: CRM Lookup Tools                 | 5200  | —                   |
-| sentra-action      | MCP: Email/Actions                    | 5003  | —                   |
+| sentra-action      | MCP: Email/Actions                    | 5300  | —                   |
 
 ---
 

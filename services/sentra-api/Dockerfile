@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 WORKDIR /app
 COPY . /app
 
-EXPOSE 8000
+EXPOSE 8100
  # Expose the debugpy port
 EXPOSE 5678 
 
