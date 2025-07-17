@@ -44,7 +44,7 @@ services:
     networks:
       - sentrabrain-dev-net
     env_file:
-      - .dev.env
+      - ../services/sentra-api/.env
 
   sentra-doc:
     build:

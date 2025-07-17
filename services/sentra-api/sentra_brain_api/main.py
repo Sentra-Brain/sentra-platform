@@ -58,9 +58,14 @@ async def redirect_to_swagger():
     logger.info("Redirect to swagger...")
     return RedirectResponse(url="/docs")
 
+
 if __name__ == "__main__":
-    if os.getenv("DEBUG_MODE") == "true":
+    debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
+
+    if debug_mode:
+        logger.info("✅ Debug mode enabled: waiting for debugger on port 5678")
         import debugpy
         debugpy.listen(("0.0.0.0", 5678))
         debugpy.wait_for_client()
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug")
+
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug" if debug_mode else "info")

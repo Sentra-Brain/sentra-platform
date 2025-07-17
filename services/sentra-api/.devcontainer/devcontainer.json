@@ -1,7 +1,7 @@
 {
   "name": "Sentra API DevContainer",
   "dockerComposeFile": [
-    "../../deploy/docker-compose.dev.yml"
+    "../../../deploy/docker-compose.dev.yml"
   ],
   "service": "sentra-api",
   "workspaceFolder": "/app",
