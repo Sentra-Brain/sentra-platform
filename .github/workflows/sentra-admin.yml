@@ -29,15 +29,19 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+        working-directory: apps/sentra-admin
 
       - name: Run linter
         run: npm run lint
+        working-directory: apps/sentra-admin
 
       - name: Run tests
         run: npm test -- --watchAll=false
+        working-directory: apps/sentra-admin
 
       - name: Build app
         run: npm run build
+        working-directory: apps/sentra-admin
 
       - name: Upload production build
         uses: actions/upload-artifact@v4
