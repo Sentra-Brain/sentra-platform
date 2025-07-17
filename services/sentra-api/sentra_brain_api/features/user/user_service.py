@@ -36,7 +36,7 @@ class UserService:
             email=user_data.email,
             full_name=user_data.full_name,
             hashed_password=auth_service_cls.get_password_hash(user_data.password),
-            disabled=True
+            disabled=False
         )
         user.set_roles([Role.USER])
 
