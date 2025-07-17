@@ -1,50 +1,46 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Sentra API (Local)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/sentra_brain_api/main.py",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": ["run"]
+    },
+    {
+      "name": "pytest Sentra API",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "env": {
+        "PYTEST_ADDOPTS": "--no-cov"
+      },
+      "module": "pytest",
+      "cwd": "${workspaceRoot}/tests",
+      "envFile": "${workspaceFolder}/tests/.env",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Remote Attach",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5678
+      },
+      "pathMappings": [
         {
-            "name": "Sentra API (Local)",
-            "type": "debugpy",
-            "request": "launch",
-            "program": "${workspaceFolder}/sentra_brain_api/main.py",
-            "console": "integratedTerminal",
-            "env": {
-                "PYTHONUNBUFFERED": "1",
-                "PYTHONPATH": "${workspaceFolder}"
-            },
-            "args": [
-                "run"
-            ]
-        },
-        {
-            "name": "pytest Sentra API",
-            "type": "debugpy",
-            "request": "launch",
-            "purpose": [
-                "debug-test"
-            ],
-            "env": {
-                "PYTEST_ADDOPTS": "--no-cov"
-            },
-            "module": "pytest",
-            "cwd": "${workspaceRoot}/tests",
-            "envFile": "${workspaceFolder}/tests/.env",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Sentra API (Remote Attach)",
-            "type": "debugpy",
-            "request": "attach",
-            "connect": {
-                "host": "localhost",
-                "port": 5678
-            },
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "/app"
-                }
-            ]
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app"
         }
-    ]
+      ],
+    //   "preLaunchTask": "Docker: Build and Run"
+    },
+  ]
 }

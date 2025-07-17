@@ -14,6 +14,8 @@ class AuthService:
 
     def authenticate_user(self, username: str, password: str) -> UserEntity | None:
         user = self.user_repo.get_by_username(username)
+        if not user:
+            user = self.user_repo.get_by_email(username.lower())
         if not user or not self._verify_password(password, user.hashed_password):
             return None
         return user

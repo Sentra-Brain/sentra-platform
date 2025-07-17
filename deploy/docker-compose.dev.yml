@@ -14,7 +14,7 @@ services:
     networks:
       - sentrabrain-dev-net
     env_file:
-      - .dev.env
+      - ../apps/sentra-web/.env
 
   sentra-admin:
     build:
@@ -31,7 +31,7 @@ services:
     networks:
       - sentrabrain-dev-net
     env_file:
-      - .dev.env
+      - ../apps/sentra-admin/.env
 
   sentra-api:
     build:
@@ -40,7 +40,7 @@ services:
     image: sentra-api:dev
     container_name: sentra-api
     ports:
-      - "8100:8000"   # API
+      - "8100:8100"   # API
       - "5678:5678"   # Python debugpy
     volumes:
       - ../services/sentra-api:/app

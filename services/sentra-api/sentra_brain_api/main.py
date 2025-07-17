@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import asynccontextmanager
 from fastapi.responses import RedirectResponse
 import os
@@ -40,7 +41,15 @@ def create_app(
         swagger_favicon_url=SWAGGER_FAVICON_URL,
         lifespan=lifespan
     )
-    
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origin_regex=r"https?://(127\.0\.0\.1|localhost)(:\d{1,5})?",
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"]
+    )
+
     auth_controller = AuthController()
     user_controller = UserController()
     admin_controller = AdminController()
@@ -68,4 +77,4 @@ if __name__ == "__main__":
         debugpy.listen(("0.0.0.0", 5678))
         debugpy.wait_for_client()
 
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="debug" if debug_mode else "info")
+    uvicorn.run(app, host="0.0.0.0", port=8100, log_level="debug" if debug_mode else "info")

@@ -1,5 +1,6 @@
 # sentra_brain_api/infra/postgres_service.py
 
+import time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from sentra_brain_api.core.config import settings
@@ -26,14 +27,30 @@ def get_db():
 def init_db():
     from sentra_brain_api.domain.user import UserEntity
     from sentra_brain_api.features.user.repository import UserRepository
+    from sqlalchemy.exc import OperationalError
 
-    try:
-        # Create tables (using BaseEntity to include all inherited models)
-        BaseEntity.metadata.create_all(bind=engine)
-        logger.info("Database initialized successfully.")
-    except Exception as e:
-        logger.exception(f"Database initialization failed: {e}")
-        raise
+    MAX_RETRIES = 30
+    RETRY_DELAY_SECONDS = 2
+
+    attempt = 0
+    while attempt < MAX_RETRIES:
+        try:
+            # Create tables (using BaseEntity to include all inherited models)
+            BaseEntity.metadata.create_all(bind=engine)
+            logger.info("Database initialized successfully.")
+            break
+        except OperationalError as e:
+            attempt += 1
+            logger.warning(f"[init_db] Database not ready, attempt {attempt}/{MAX_RETRIES}: {e}")
+            time.sleep(RETRY_DELAY_SECONDS)
+        except Exception as e:
+            logger.exception("[init_db] Unexpected error initializing database.")
+            raise
+
+    if attempt == MAX_RETRIES:
+        logger.error("[init_db] Database could not be initialized after maximum retries.")
+        raise RuntimeError("Database initialization failed after retries.")
+
     # Create initial admin user if none exists
     db = SessionLocal()
     user_repo = UserRepository(db)
@@ -48,4 +65,6 @@ def init_db():
         )
         admin_user.set_roles([Role.ADMIN, Role.USER])
         user_repo.create(admin_user)
+        logger.info("[init_db] Initial admin user created.")
+
     db.close()

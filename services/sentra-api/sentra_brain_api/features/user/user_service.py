@@ -43,7 +43,7 @@ class UserService:
         try:
             user_repository.create(user)
             verification_token = auth_service.create_verification_token(user.id)
-            verification_url = f"http://localhost:8000/user/validate?token={verification_token}"
+            verification_url = f"http://localhost:8100/user/validate?token={verification_token}"
             email_sent = asyncio.run(notification_service.send_email_verification(user.email, verification_url))
 
             message = (
