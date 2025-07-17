@@ -4,7 +4,8 @@
   "version": "0.0.1",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --port 3100 --host --strictPort",
+    "dev:inspect": "node --inspect=0.0.0.0:9229 node_modules/vite/bin/vite.js --port 3100 --host --strictPort",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",

@@ -17,15 +17,15 @@ This directory contains deployment scripts, manifests, and configuration files f
 
 | Service Name     | Purpose                                | Port  | Image                                  |
 | ---------------- | -------------------------------------- | ----- | -------------------------------------- |
-| sentra-web       | Chat UI                                | 3000  | Custom build (React/Next.js)           |
+| sentra-web       | Chat UI                                | 3100  | Custom build (React/Next.js)           |
 | sentra-admin     | Admin UI                               | 3001  | Custom build (React/Next.js)           |
 | sentra-api       | Orchestrator + API + Auth + MCP Client | 8000  | Custom (Python/Node.js)                |
 | llama-server     | LLM Backend                            | 11434 | ghcr.io/ggml-org/llama.cpp:server-cuda |
 | sentra-vector-db | Vector Store (RAG)                     | 8001  | ghcr.io/chroma-core/chroma:latest      |
 | sentra-sql-db    | SQL Persistent Storage (Users/Configs) | 5432  | postgres:16-alpine                     |
 | sentra-nosql-db  | NoSQL Chat History Storage             | 27017 | mongo:7                                |
-| sentra-doc       | MCP: Document Search Tools             | 5001  | Custom MCP server                      |
-| sentra-crm       | MCP: CRM Lookup Tools                  | 5002  | Custom MCP server                      |
+| sentra-doc       | MCP: Document Search Tools             | 5100  | Custom MCP server                      |
+| sentra-crm       | MCP: CRM Lookup Tools                  | 5200  | Custom MCP server                      |
 | sentra-action    | MCP: Email/Actions                     | 5003  | Custom MCP server                      |
 
 ---
@@ -83,7 +83,7 @@ This directory contains deployment scripts, manifests, and configuration files f
 ## Accessing Sentra Web and Admin in Production
 
 - The following ports are exposed for LAN access:
-  - `http://<server-ip>:3000` → Sentra Web (User Chat UI)
+  - `http://<server-ip>:3100` → Sentra Web (User Chat UI)
   - `http://<server-ip>:3001` → Sentra Admin (Admin Panel)
 
 - No public internet exposure is assumed by default.

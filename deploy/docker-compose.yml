@@ -4,7 +4,7 @@ services:
     container_name: sentra-web
     pull_policy: always
     ports:
-      - "3000:3000"
+      - "3100:3100"
     networks:
       - sentrabrain-net
     env_file:
@@ -15,7 +15,7 @@ services:
     container_name: sentra-admin
     pull_policy: always
     ports:
-      - "3001:3001"
+      - "3200:3200"
     networks:
       - sentrabrain-net
     env_file:
@@ -26,7 +26,7 @@ services:
     container_name: sentra-api
     pull_policy: always
     ports:
-      - "8000:8000"
+      - "8100:8100"
     networks:
       - sentrabrain-net
     env_file:
@@ -37,7 +37,7 @@ services:
     container_name: sentra-doc
     pull_policy: always
     ports:
-      - "5001:5001"
+      - "5100:5100"
     networks:
       - sentrabrain-net
     env_file:
@@ -48,7 +48,7 @@ services:
     container_name: sentra-crm
     pull_policy: always
     ports:
-      - "5002:5002"
+      - "5200:5200"
     networks:
       - sentrabrain-net
     env_file:
@@ -59,7 +59,7 @@ services:
     container_name: sentra-action
     pull_policy: always
     ports:
-      - "5003:5003"
+      - "5300:5300"
     networks:
       - sentrabrain-net
     env_file:
@@ -89,7 +89,7 @@ services:
     image: ghcr.io/chroma-core/chroma:latest
     container_name: sentra-vector-db
     ports:
-      - "8001:8001"
+      - "8500:8001"
     volumes:
       - sentra-vector-data:/chroma/.chroma/index
     networks:

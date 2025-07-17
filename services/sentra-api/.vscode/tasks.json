@@ -1,0 +1,19 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Docker: Build and Run",
+            "type": "shell",
+            "command": "docker build -t sentra_api . && docker run -d -p 8000:8000 -p 5678:5678 --name sentra-api-container -e DEBUG_MODE=true sentra_api",
+            "problemMatcher": [],
+            "isBackground": false
+        },
+        {
+            "label": "Docker: Stop and Remove",
+            "type": "shell",
+            "command": "docker stop sentra-api-container && docker rm sentra-api-container",
+            "problemMatcher": [],
+            "isBackground": false
+        }
+    ]
+}

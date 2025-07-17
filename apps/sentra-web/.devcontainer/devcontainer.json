@@ -1,11 +1,11 @@
 {
   "name": "Sentra Web DevContainer",
   "dockerComposeFile": [
-    "../../deploy/docker-compose.dev.yml"
+    "../../../deploy/docker-compose.dev.yml"
   ],
   "service": "sentra-web",
   "workspaceFolder": "/app",
-  "forwardPorts": [3000, 9229],
+  "forwardPorts": [3100, 9229],
   "customizations": {
     "vscode": {
       "settings": {

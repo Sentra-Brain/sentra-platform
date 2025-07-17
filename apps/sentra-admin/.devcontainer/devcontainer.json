@@ -1,11 +1,11 @@
 {
   "name": "Sentra Admin DevContainer",
   "dockerComposeFile": [
-    "../../deploy/docker-compose.dev.yml"
+    "../../../deploy/docker-compose.dev.yml"
   ],
   "service": "sentra-admin",
   "workspaceFolder": "/app",
-  "forwardPorts": [3001, 9229],
+  "forwardPorts": [3200, 9329],
   "customizations": {
     "vscode": {
       "settings": {

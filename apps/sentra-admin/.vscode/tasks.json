@@ -1,0 +1,21 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Sentra Admin: Rebuild & Up (dev)",
+      "type": "shell",
+      "command": "docker-compose -f ../deploy/docker-compose.dev.yml up --build -d sentra-admin",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Sentra Admin: Down (dev)",
+      "type": "shell",
+      "command": "docker-compose",
+      "args": ["-f", "../../deploy/docker-compose.dev.yml", "down"],
+      "problemMatcher": []
+    }
+  ]
+}

@@ -1,12 +1,13 @@
 services:
   sentra-web:
     build:
-      context: ../apps/sentra-web
-      dockerfile: Dockerfile
+      context: ../apps/sentra-web    
+    command: ["npm", "run", "dev:inspect"]
     image: sentra-web:dev
     container_name: sentra-web
     ports:
-      - "3000:3000"
+      - "3100:3100"   # App
+      - "3129:9229"   # Node.js Inspect
     volumes:
       - ../apps/sentra-web:/app
       - /app/node_modules
@@ -17,12 +18,13 @@ services:
 
   sentra-admin:
     build:
-      context: ../apps/sentra-admin
-      dockerfile: Dockerfile
+      context: ../apps/sentra-admin 
+    command: ["npm", "run", "dev:inspect"]
     image: sentra-admin:dev
     container_name: sentra-admin
     ports:
-      - "3001:3001"
+      - "3200:3200"   # App
+      - "3229:9329"   # Node.js Inspect
     volumes:
       - ../apps/sentra-admin:/app
       - /app/node_modules
@@ -38,7 +40,8 @@ services:
     image: sentra-api:dev
     container_name: sentra-api
     ports:
-      - "8000:8000"
+      - "8100:8000"   # API
+      - "5678:5678"   # Python debugpy
     volumes:
       - ../services/sentra-api:/app
     networks:
@@ -53,7 +56,7 @@ services:
     image: sentra-doc:dev
     container_name: sentra-doc
     ports:
-      - "5001:5001"
+      - "5100:5100"
     volumes:
       - ../services/sentra-doc:/app
     networks:
@@ -68,7 +71,7 @@ services:
     image: sentra-crm:dev
     container_name: sentra-crm
     ports:
-      - "5002:5002"
+      - "5200:5200"
     volumes:
       - ../services/sentra-crm:/app
     networks:
@@ -83,7 +86,7 @@ services:
     image: sentra-action:dev
     container_name: sentra-action
     ports:
-      - "5003:5003"
+      - "5300:5300"
     volumes:
       - ../services/sentra-action:/app
     networks:
@@ -115,7 +118,7 @@ services:
     image: ghcr.io/chroma-core/chroma:latest
     container_name: sentra-vector-db
     ports:
-      - "8001:8001"
+      - "8500:8001"
     volumes:
       - sentra-vector-data:/chroma/.chroma/index
     networks:

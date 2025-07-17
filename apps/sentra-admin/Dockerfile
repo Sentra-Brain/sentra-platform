@@ -9,7 +9,9 @@ RUN npm ci
 COPY . .
 
 # Expose Vite dev server port (matches docker-compose.dev.yml)
-EXPOSE 3001
+EXPOSE 3200
+EXPOSE 9329
 
-# Start Vite dev server
-CMD ["npm", "run", "dev", "--", "--port", "3001", "--host"]
+# Start Vite dev server with debugging enabled
+# The --inspect flag allows for remote debugging on port 9229
+CMD ["npm", "run", "dev"]
