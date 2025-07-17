@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Dashboard from '../pages/Dashboard';
+import Chat from '../pages/Chat';
 import Users from '../pages/Users';
 import Settings from '../pages/Settings';
 import LoginPage from '../pages/LoginPage';
@@ -8,10 +8,10 @@ import PrivateRoute from './PrivateRoute';
 
 const AppRoutes: React.FC = () => (
   <Routes>
-    <Route path="/" element={<Navigate to="/dashboard" replace />} />
-    <Route path="/dashboard" element={
+    <Route path="/" element={<Navigate to="/chat" replace />} />
+    <Route path="/chat" element={
       <PrivateRoute>
-        <Dashboard />
+        <Chat />
       </PrivateRoute>
     } />
     <Route path="/users" element={
