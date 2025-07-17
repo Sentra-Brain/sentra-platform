@@ -12,6 +12,10 @@ on:
       - '.github/workflows/cicd-sentra-api.yml'
   workflow_dispatch:
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest

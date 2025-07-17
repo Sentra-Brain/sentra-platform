@@ -4,7 +4,6 @@ import axios from 'axios';
 
 // Set axios base URL for all API requests
 axios.defaults.baseURL = import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100';
-console.log('[AuthContext] axios baseURL:', axios.defaults.baseURL);
 import { AuthContext } from './AuthContextInstance';
 
 export interface User {
