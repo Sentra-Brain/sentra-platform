@@ -1,4 +1,4 @@
-name: Sentra Brain – Website Deployment
+name: Website
 
 on:
   push:

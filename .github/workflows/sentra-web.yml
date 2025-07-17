@@ -1,0 +1,83 @@
+name: Sentra Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/sentra-web/**'
+      - '.github/workflows/cicd-sentra-web.yml'
+  pull_request:
+    paths:
+      - 'apps/sentra-web/**'
+      - '.github/workflows/cicd-sentra-web.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/sentra-web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js 20.x
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: apps/sentra-web/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # - name: Run linter
+      #   run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+      - name: Build app
+        run: npm run build
+
+      - name: Upload production build
+        uses: actions/upload-artifact@v4
+        with:
+          name: sentra-web-build
+          path: apps/sentra-web/dist
+
+  docker-build-and-push:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/sentra-web
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract version from package.json
+        id: get_version
+        run: |
+          echo "version=$(jq -r .version package.json)" >> $GITHUB_OUTPUT
+
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-web:${{ steps.get_version.outputs.version }} .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-web:${{ steps.get_version.outputs.version }}
+
+      - name: Tag and push 'latest'
+        run: |
+          docker tag ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-web:${{ steps.get_version.outputs.version }} \
+            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-web:latest
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-web:latest

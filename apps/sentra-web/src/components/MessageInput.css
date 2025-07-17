@@ -1,0 +1,44 @@
+.message-input-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: var(--sentra-primary);
+  border-top: 1px solid var(--sentra-primary-dark);
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+}
+
+.message-input {
+  flex: 1;
+  min-height: 40px;
+  max-height: 120px;
+  border-radius: 8px;
+  border: none;
+  padding: 0.8rem 1rem;
+  font-size: 1rem;
+  resize: vertical;
+  background: var(--sentra-neutral);
+  color: var(--sentra-primary-dark);
+  outline: none;
+}
+
+.send-btn, .file-upload-btn {
+  background: var(--sentra-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.6rem 1rem;
+  font-size: 1.2rem;
+  cursor: pointer;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.send-btn:hover, .file-upload-btn:hover {
+  background: var(--sentra-accent-light);
+  color: var(--sentra-primary-dark);
+}
