@@ -1,6 +1,16 @@
 from unittest.mock import MagicMock
 import pytest
 from fastapi.testclient import TestClient
+import os
+os.environ.update({
+    "DATABASE_URL": "sqlite:///./test_qna.db",
+    "INITIAL_ADMIN_USERNAME": "admin",
+    "INITIAL_ADMIN_EMAIL": "admin@example.com",
+    "INITIAL_ADMIN_PASSWORD": "P@ssw0rd!",
+    "SECRET_KEY": "dummy_secret_key",
+    "ALGORITHM": "HS256",
+    "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+})
 from sentra_brain_api.core.config import settings
 from sentra_brain_api.infra.postgres_service import get_db, init_db
 
