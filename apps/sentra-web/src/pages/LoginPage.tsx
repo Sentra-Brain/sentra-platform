@@ -17,7 +17,7 @@ export default function LoginPage() {
       setError("Email and password are required.");
       return;
     }
-    const success = await login(email, password);
+    const success = await login(email, password, remember);
     if (success) {
       navigate("/chat");
     } else {
