@@ -19,7 +19,7 @@ export default function LoginPage() {
     }
     const success = await login(email, password);
     if (success) {
-      navigate("/dashboard");
+      navigate("/chat");
     } else {
       setError("Invalid credentials.");
     }
