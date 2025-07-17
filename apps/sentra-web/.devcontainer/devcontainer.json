@@ -1,0 +1,23 @@
+{
+  "name": "Sentra Web DevContainer",
+  "dockerComposeFile": [
+    "../../deploy/docker-compose.dev.yml"
+  ],
+  "service": "sentra-web",
+  "workspaceFolder": "/app",
+  "forwardPorts": [3000, 9229],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker",
+        "ms-vscode.vscode-typescript-next"
+      ]
+    }
+  },
+  "postCreateCommand": "npm install"
+}
