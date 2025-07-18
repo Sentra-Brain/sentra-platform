@@ -1,16 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
-import { AuthContext } from './AuthContextInstance';
 import { authService } from '../services/authService';
+import { userService } from '../services/userService';
+import { AuthContext } from './AuthContextInstance';
 import type { User } from '../models/user';
-
-export interface AuthContextType {
-  user: User | null;
-  setUser: React.Dispatch<React.SetStateAction<User | null>>;
-  login: (email: string, password: string, remember?: boolean) => Promise<boolean>;
-  logout: () => void;
-  loading: boolean;
-}
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -26,10 +19,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    authService.getUser(token)
+    userService.getCurrentUser(token)
       .then(setUser)
-      .catch((err) => {
-        console.error('[AuthContext] getUser error', err);
+      .catch(err => {
+        console.error('[AuthContext] getCurrentUser error', err);
         setUser(null);
       })
       .finally(() => setLoading(false));
@@ -38,6 +31,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (email: string, password: string, remember = true) => {
     try {
       const token = await authService.login(email, password);
+
       if (remember) {
         localStorage.setItem('jwt', token);
         sessionStorage.removeItem('jwt');
@@ -46,8 +40,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         localStorage.removeItem('jwt');
       }
 
-      const userData = await authService.getUser(token);
-      setUser(userData);
+      const user = await userService.getCurrentUser(token);
+      setUser(user);
+
       return true;
     } catch (err) {
       console.error('[AuthContext] login error', err);
