@@ -81,7 +81,7 @@ export default function LoginPage() {
 
         <div className="text-center text-sm">
           Don't have an account?{' '}
-          <a href="#" className="card-link font-medium">
+          <a href="/register" className="card-link font-medium">
             Sign up
           </a>
         </div>
