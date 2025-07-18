@@ -9,8 +9,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
-    "tailwind:init": "tailwindcss init -p"
+    "test": "vitest run"
   },
   "dependencies": {
     "@tailwindcss/typography": "^0.5.16",

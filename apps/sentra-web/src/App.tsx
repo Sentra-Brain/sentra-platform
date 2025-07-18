@@ -10,7 +10,7 @@ export default function App() {
       <div className="app-root" style={{ display: "flex", height: "100vh", width: "100vw" }}>
         <Sidebar />
         <div className="main-content" style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
-          <TopBar onSettings={() => setSettingsOpen(true)} />
+          <TopBar />
           <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: 0 }}>
             <ChatArea />
           </div>
