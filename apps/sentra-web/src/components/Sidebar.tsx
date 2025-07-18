@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useChat } from '../context/ChatContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import UserMenu from './UserMenu';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
@@ -13,7 +14,7 @@ const Sidebar: React.FC = () => {
       <div className="sidebar-top-row">
         {!collapsed && (
           <div className="sidebar-logo">
-            <img src="/sentra_brain_logo_64.png" alt="Sentra Brain Logo"  />
+            <img src="/sentra_brain_logo_64.png" alt="Sentra Brain Logo" />
           </div>
         )}
         <button
@@ -45,6 +46,9 @@ const Sidebar: React.FC = () => {
           </ul>
         </div>
       )}
+      <div className="sidebar-footer">
+        <UserMenu />
+      </div>
     </aside>
   );
 };

@@ -4,12 +4,13 @@
   flex-direction: column;
   padding: 1.5rem;
   overflow-y: auto;
-  background: var(--sentra-primary-dark);
+
 }
 
 .server-info-card {
   background: var(--sentra-primary);
   color: var(--sentra-accent-light);
+  border: 1px solid var(--sentra-accent);
   border-radius: 8px;
   padding: 1rem;
   margin-bottom: 1.5rem;

@@ -7,6 +7,12 @@
   flex-direction: column;
   border-right: 1px solid var(--sentra-accent-light);
   transition: width 0.2s ease;
+    height: 100vh;
+}
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Required for overflow-y to work in flex children */
 }
 
 .sidebar.collapsed {
@@ -84,4 +90,10 @@
 
 .conversation-list li:hover {
   background: var(--sentra-accent-light);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem;
+  border-top: 1px solid var(--sentra-accent-light);
 }
