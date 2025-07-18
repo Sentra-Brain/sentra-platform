@@ -28,10 +28,7 @@ export default function LoginPage() {
 
   return (
     <div className="login-page">
-      <form
-        className="login-card relative  bg-[var(--sentra-primary-dark)] text-[var(--sentra-text)] p-8 rounded-2xl border-2 border-[var(--sentra-accent-light)] hover:border-[var(--sentra-accent)] transition-all duration-300 shadow-sentra w-full max-w-md"
-        onSubmit={handleSubmit}
-      >
+      <form className="card relative" onSubmit={handleSubmit}>
         <img
           src="/sentra_brain_logo_512.png"
           alt="Sentra Brain Logo"
@@ -39,7 +36,7 @@ export default function LoginPage() {
           loading="lazy"
         />
 
-        <h2 className="text-xl font-bold mb-4 text-center">Login</h2>
+        <h2 className="card-title">Login</h2>
 
         {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
 
@@ -50,7 +47,7 @@ export default function LoginPage() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="w-full p-2 rounded-md bg-black/30 border border-[var(--sentra-accent-light)] text-white mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--sentra-accent)]"
+          className="card-input"
         />
 
         <input
@@ -60,40 +57,31 @@ export default function LoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
-          className="w-full p-2 rounded-md bg-black/30 border border-[var(--sentra-accent-light)] text-white mb-4 focus:outline-none focus:ring-2 focus:ring-[var(--sentra-accent)]"
+          className="card-input"
         />
 
         <div className="flex justify-between items-center text-sm mb-6 whitespace-nowrap">
-          <label className="flex items-center gap-2 ">
+          <label className="flex items-center gap-2">
             <input
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
-              className="accent-[var(--sentra-accent)] mt-0.5"
+              className="accent-[var(--sentra-accent)]"
             />
             Remember me
           </label>
-          <a
-            href="#"
-            className="text-[var(--sentra-accent-light)] hover:text-[var(--sentra-accent)] transition"
-          >
+          <a href="#" className="card-link">
             Forgot password?
           </a>
         </div>
 
-        <button
-          type="submit"
-          className="w-full py-2 bg-[var(--sentra-accent)] text-[var(--sentra-primary)] font-semibold rounded-lg hover:bg-[var(--sentra-accent-light)] transition mb-4"
-        >
+        <button type="submit" className="card-button mb-4">
           LOGIN
         </button>
 
         <div className="text-center text-sm">
           Don't have an account?{' '}
-          <a
-            href="#"
-            className="text-[var(--sentra-accent-light)] hover:text-[var(--sentra-accent)] font-medium transition"
-          >
+          <a href="#" className="card-link font-medium">
             Sign up
           </a>
         </div>
