@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '../context/useAuth';
+import './LoginPage.css';
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -26,41 +27,22 @@ export default function LoginPage() {
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      {error && <div>{error}</div>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="email">Email:</label>
+        <div className="login-page">
+      <form className="login-card" onSubmit={handleSubmit}>
+        <h2>Login</h2>
+        {error && <div style={{ color: 'red', marginBottom: '1rem' }}>{error}</div>}
+        <label>Email</label>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} required />
+        <label>Password</label>
+        <input type="password" value={password} onChange={e => setPassword(e.target.value)} required />
+        <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <input
-            id="email"
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            required
+            type="checkbox"
+            checked={remember}
+            onChange={e => setRemember(e.target.checked)}
           />
-        </div>
-        <div>
-          <label htmlFor="password">Password:</label>
-          <input
-            id="password"
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-          />
-        </div>
-        <div>
-          <label>
-            <input
-              type="checkbox"
-              checked={remember}
-              onChange={e => setRemember(e.target.checked)}
-            />
-            Remember me
-          </label>
-          <a href="#">Forgot Password?</a>
-        </div>
+          Remember me
+        </label>
         <button type="submit">LOGIN</button>
       </form>
     </div>
