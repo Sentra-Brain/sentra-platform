@@ -11,7 +11,7 @@ const MODEL_OPTIONS = [
 
 export default function TopBar() {
   const { user } = useAuth();
-  if (!user) throw new Error("AuthContext: user unexpectedly null");
+  if (!user) throw new Error("TopBar: user unexpectedly null");
 
   const [menuOpen, setMenuOpen] = useState(false);
 
