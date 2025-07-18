@@ -1,4 +1,5 @@
 import { useAuth } from "../context/useAuth";
+import './TopBar.css'; 
 
 const MODEL_OPTIONS = [
   { value: "tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf", label: "TinyLLaMA 1.1B" },

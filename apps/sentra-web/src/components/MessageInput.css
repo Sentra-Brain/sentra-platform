@@ -1,44 +1,54 @@
 .message-input-bar {
   display: flex;
-  align-items: flex-end;
-  gap: 0.5rem;
+  align-items: center;
   padding: 1rem;
   background: var(--sentra-primary);
-  border-top: 1px solid var(--sentra-primary-dark);
+  border-top: 1px solid var(--sentra-accent-light);
   position: sticky;
   bottom: 0;
   z-index: 10;
+  gap: 0.5rem;
 }
 
 .message-input {
   flex: 1;
   min-height: 40px;
   max-height: 120px;
-  border-radius: 8px;
-  border: none;
   padding: 0.8rem 1rem;
   font-size: 1rem;
-  resize: vertical;
+  border-radius: 8px;
   background: var(--sentra-neutral);
   color: var(--sentra-primary-dark);
+  border: none;
   outline: none;
+  resize: vertical;
 }
 
-.send-btn, .file-upload-btn {
+.send-btn,
+.file-upload-btn {
   background: var(--sentra-accent);
   color: #fff;
   border: none;
   border-radius: 6px;
-  padding: 0.6rem 1rem;
+  padding: 0.6rem;
   font-size: 1.2rem;
-  cursor: pointer;
-  transition: background 0.2s;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
 }
 
-.send-btn:hover, .file-upload-btn:hover {
+.send-btn:hover,
+.file-upload-btn:hover {
   background: var(--sentra-accent-light);
   color: var(--sentra-primary-dark);
+}
+
+.send-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

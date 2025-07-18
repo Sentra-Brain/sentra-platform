@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useChat } from '../context/ChatContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
   const { conversations, currentConversationId, setCurrentConversationId, newConversation } =

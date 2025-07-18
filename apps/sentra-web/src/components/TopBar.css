@@ -1,0 +1,31 @@
+
+.topbar {
+  height: 48px;
+  background: var(--sentra-primary);
+  border-bottom: 1px solid var(--sentra-accent-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.model-selector {
+  background: var(--sentra-primary-dark);
+  color: var(--sentra-text);
+  border: 1px solid var(--sentra-accent-light);
+  border-radius: 6px;
+  padding: 0.2rem 0.6rem;
+  font-size: 0.8rem;
+}
