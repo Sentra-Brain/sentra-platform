@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useChat } from '../context/ChatContext';
+import { ArrowUp } from 'lucide-react';
 import './MessageInput.css';
 
 const MessageInput: React.FC = () => {
@@ -28,25 +29,29 @@ const MessageInput: React.FC = () => {
 
   return (
     <div className="message-input-bar">
+      <button
+        className="file-upload-btn"
+        onClick={() => fileInputRef.current?.click()}
+        title="Upload file"
+      >
+        <ArrowUp size={18} />
+      </button>
+
       <textarea
         className="message-input"
         value={value}
-        onChange={e => setValue(e.target.value)}
+        onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
         placeholder="Type a message..."
         rows={1}
       />
-      <button className="file-upload-btn" onClick={() => fileInputRef.current?.click()} title="Upload file">
-        <span role="img" aria-label="upload">📎</span>
-      </button>
-      <input
-        type="file"
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-        onChange={handleFileUpload}
-      />
-      <button className="send-btn" onClick={handleSend} title="Send">
-        <span role="img" aria-label="send">➤</span>
+
+      <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
+
+      <button className="send-btn" onClick={handleSend} title="Send" disabled={!value.trim()}>
+        <span role="img" aria-label="send">
+          ➤
+        </span>
       </button>
     </div>
   );

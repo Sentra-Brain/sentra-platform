@@ -1,39 +1,53 @@
-
 import React, { useState } from 'react';
 import { useChat } from '../context/ChatContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import UserMenu from './UserMenu';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
-  const { conversations, currentConversationId, setCurrentConversationId, newConversation } = useChat();
+  const { conversations, currentConversationId, setCurrentConversationId, newConversation } =
+    useChat();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <aside className={`sidebar${collapsed ? ' collapsed' : ''}`}> 
+    <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-top-row">
-        <button className="sidebar-toggle" onClick={() => setCollapsed(c => !c)} title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}>
-          <span>{collapsed ? '→' : '←'}</span>
-        </button>
         {!collapsed && (
-          <div className="sidebar-title" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginBottom: '2rem' }}>
-            <img src="/sentra_brain_logo_64.png" alt="Sentra Brain Logo" style={{ width: 48, height: 48 }} />
+          <div className="sidebar-logo">
+            <img src="/sentra_brain_logo_64.png" alt="Sentra Brain Logo" />
           </div>
         )}
+        <button
+          className="sidebar-toggle"
+          onClick={() => setCollapsed((c) => !c)}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+        </button>
       </div>
-      <div style={{ display: collapsed ? 'none' : 'block', flex: 1, minHeight: 0 }}>
-        <div className="sidebar-header">
-          <button className="new-conv-btn" onClick={newConversation}>+ New Chat</button>
+
+      {!collapsed && (
+        <div id="sidebar-content" className="sidebar-content">
+          <div className="sidebar-header">
+            <button className="new-conv-btn" onClick={newConversation}>
+              + New Chat
+            </button>
+          </div>
+          <ul className="conversation-list">
+            {conversations.map((conv) => (
+              <li
+                key={conv.id}
+                className={`conversation-item ${conv.id === currentConversationId ? 'active' : ''}`}
+                onClick={() => setCurrentConversationId(conv.id)}
+              >
+                {conv.name}
+              </li>
+            ))}
+          </ul>
         </div>
-        <ul className="conversation-list">
-          {conversations.map(conv => (
-            <li
-              key={conv.id}
-              className={conv.id === currentConversationId ? 'active' : ''}
-              onClick={() => setCurrentConversationId(conv.id)}
-            >
-              {conv.name}
-            </li>
-          ))}
-        </ul>
+      )}
+      <div className="sidebar-footer">
+        <UserMenu />
       </div>
     </aside>
   );

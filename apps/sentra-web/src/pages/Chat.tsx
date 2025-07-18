@@ -9,7 +9,7 @@ const Chat: React.FC = () => {
     <div className="flex h-screen">
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
-        <TopBar onSettings={() => {}} />
+        <TopBar />
         <div className="flex-1 flex flex-col p-4 overflow-auto">
           <ChatArea />
         </div>

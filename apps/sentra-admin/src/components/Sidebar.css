@@ -1,3 +1,99 @@
+
 .sidebar {
-  /* Placeholder for custom sidebar styles if needed */
+  width: 220px;
+  background: var(--sentra-primary);
+  color: var(--sentra-text);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--sentra-accent-light);
+  transition: width 0.2s ease;
+    height: 100vh;
+}
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0; /* Required for overflow-y to work in flex children */
+}
+
+.sidebar.collapsed {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  overflow: hidden;
+}
+
+.sidebar-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem;
+}
+
+.sidebar-logo img {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.sidebar-toggle {
+  background: none;
+  border: none;
+  padding: 0.25rem;
+  cursor: pointer;
+  margin-left: 8px;
+  color: var(--sentra-text);
+}
+
+.sidebar-toggle:hover {
+  background: var(--sentra-accent-light);
+  color: var(--sentra-primary-dark);
+}
+
+.sidebar-header {
+  padding: 1rem;
+}
+
+.new-conv-btn {
+  width: 100%;
+  background: var(--sentra-accent);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.new-conv-btn:hover {
+  background: var(--sentra-accent-light);
+}
+
+.conversation-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 0.5rem;
+}
+
+.conversation-list li {
+  padding: 0.5rem;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  color: var(--sentra-text);
+}
+
+.conversation-list li.active {
+  background: var(--sentra-accent-light);
+  color: var(--sentra-primary-dark);
+}
+
+.conversation-list li:hover {
+  background: var(--sentra-accent-light);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem;
+  border-top: 1px solid var(--sentra-accent-light);
 }
