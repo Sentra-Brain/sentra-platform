@@ -1,17 +1,26 @@
 // src/RootApp.tsx
 // This file sets up the main application routing and authentication context
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
-import { useAuth } from "./context/useAuth";
-import App from "./App";
-import LoginPage from "./pages/LoginPage";
-import RegisterPage from "./pages/RegisterPage";
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { useAuth } from './context/useAuth';
+import App from './App';
+import LoginPage from './pages/LoginPage';
+import RegisterPage from './pages/RegisterPage';
+import Spinner from './components/Spinner';
 
 function AppGuard() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner />
+      </div>
+    );
+  }
 
   if (!user) {
-    console.warn("User not authenticated, redirecting to login");
+    console.warn('User not authenticated, redirecting to login');
     return <Navigate to="/login" replace />;
   }
 
