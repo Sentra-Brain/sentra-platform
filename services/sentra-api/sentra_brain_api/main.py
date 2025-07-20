@@ -11,6 +11,7 @@ from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.crosscutting import logging
+from sentra_brain_api.features.admin.settings_controller import SettingsController
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.admin.controller import AdminController
@@ -53,10 +54,12 @@ def create_app(
     auth_controller = AuthController()
     user_controller = UserController()
     admin_controller = AdminController()
+    settinsgs_controller = SettingsController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
+    app.include_router(settinsgs_controller.router, prefix="/admin", tags=["admin"])
 
     return app
 

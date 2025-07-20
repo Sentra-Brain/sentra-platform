@@ -57,3 +57,15 @@ def get_admin_user(
             detail="You do not have the necessary permissions",
         )
     return user
+
+def get_superadmin_user(
+    token: str = Depends(oauth2_scheme),
+    db: Session = Depends(get_db)
+):
+    user = get_authenticated_user(token=token, db=db)
+    if 'superadmin' not in user.roles:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have the necessary permissions",
+        )
+    return user

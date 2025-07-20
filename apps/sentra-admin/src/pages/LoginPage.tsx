@@ -1,3 +1,4 @@
+// src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
@@ -20,7 +21,7 @@ export default function LoginPage() {
     }
     const success = await login(email, password, remember);
     if (success) {
-      navigate('/chat');
+      navigate('/dashboard', { replace: true });
     } else {
       setError('Invalid credentials.');
     }
@@ -78,13 +79,6 @@ export default function LoginPage() {
         <button type="submit" className="card-button mb-4">
           LOGIN
         </button>
-
-        <div className="text-center text-sm">
-          Don't have an account?{' '}
-          <a href="/register" className="card-link font-medium">
-            Sign up
-          </a>
-        </div>
       </form>
     </div>
   );

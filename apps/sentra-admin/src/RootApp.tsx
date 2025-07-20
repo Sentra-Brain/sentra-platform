@@ -5,7 +5,6 @@ import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
 import App from './App';
 import LoginPage from './pages/LoginPage';
-import RegisterPage from './pages/RegisterPage';
 import Spinner from './components/Spinner';
 
 function AppGuard() {
@@ -33,7 +32,6 @@ export default function RootApp() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
           <Route path="/*" element={<AppGuard />} />
         </Routes>
       </BrowserRouter>

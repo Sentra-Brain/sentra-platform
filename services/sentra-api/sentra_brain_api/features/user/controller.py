@@ -28,8 +28,8 @@ class UserController:
 
         @self.router.get("/me", response_model=User, description=ME_DESCRIPTION)
         def me(current_user: User = Depends(get_authenticated_user)):
-            return current_user
-
+            return User.model_validate(current_user)
+    
         @self.router.put("/{user_to_update_id}", response_model=User, description=UPDATE_USER_DESCRIPTION)
         def update_user(user_to_update_id: int, user_update: UserUpdate, current_user: User = Depends(get_authenticated_user), db: Session = Depends(get_db)):
             try:

@@ -1,15 +1,16 @@
-
-import os
-from sentra_brain_api.features.user.repository import UserRepository
-from sentra_brain_api.crosscutting.logging import get_logger
-from sqlalchemy.orm import Session
-from sentra_brain_api.domain.role import Role
-from sentra_brain_api.domain.user import UserEntity
-from sentra_brain_api.features.user.models import SignupResponse, User
-from sentra_brain_api.crosscutting.notification_service import NotificationService
-from sentra_brain_api.features.auth.auth_service import AuthService
+# sentra_brain_api/features/user/user_service.py
 from fastapi import HTTPException, status
+from sentra_brain_api.crosscutting.logging import get_logger
+from sentra_brain_api.crosscutting.notification_service import NotificationService
+from sentra_brain_api.domain.role import Role
+from sentra_brain_api.domain.system_settings import SystemSettings
+from sentra_brain_api.domain.user import UserEntity
+from sentra_brain_api.features.auth.auth_service import AuthService
+from sentra_brain_api.features.user.models import SignupResponse, User
+from sentra_brain_api.features.user.repository import UserRepository
+from sqlalchemy.orm import Session
 import asyncio
+import os
 
 logger = get_logger(__name__)
 
@@ -24,6 +25,11 @@ class UserService:
         """
         Handles user signup, creates user, sends verification email if SMTP is configured.
         """
+        current_user_count = db.query(UserEntity).count()
+        settings = db.query(SystemSettings).first()
+        if current_user_count >= settings.max_users:
+            raise ValueError("User limit reached. Please contact support.")
+        
         notification_service_cls = notification_service_cls or NotificationService
         auth_service_cls = auth_service_cls or AuthService
 

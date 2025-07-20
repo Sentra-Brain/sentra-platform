@@ -31,5 +31,16 @@
         "titleBar.activeForeground": "#e7e7e7",
         "titleBar.inactiveBackground": "#1e1e2f99",
         "titleBar.inactiveForeground": "#e7e7e799"
-    }
+    },
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 5432,
+            "driver": "PostgreSQL",
+            "name": "SentraDB",
+            "database": "sentra_brain",
+            "username": "sentra_admin"
+        }
+    ]
 }

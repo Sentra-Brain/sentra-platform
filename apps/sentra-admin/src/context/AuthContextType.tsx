@@ -1,3 +1,4 @@
+// src/context/AuthContextType.tsx
 import type { User } from "../models/user";
 
 export interface AuthContextType {
