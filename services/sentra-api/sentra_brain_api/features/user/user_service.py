@@ -25,9 +25,11 @@ class UserService:
         """
         Handles user signup, creates user, sends verification email if SMTP is configured.
         """
-        current_user_count = db.query(UserEntity).count()
+        user_count = db.query(UserEntity).filter(~UserEntity.roles.contains("superadmin")).count()
         settings = db.query(SystemSettings).first()
-        if current_user_count >= settings.max_users:
+
+        # Check if user limit is reached
+        if settings.max_users != -1 and user_count >= settings.max_users:
             raise ValueError("User limit reached. Please contact support.")
         
         notification_service_cls = notification_service_cls or NotificationService
