@@ -1,3 +1,4 @@
+// src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/useAuth';
@@ -20,7 +21,7 @@ export default function LoginPage() {
     }
     const success = await login(email, password, remember);
     if (success) {
-      navigate('/chat');
+      navigate('/dashboard', { replace: true });
     } else {
       setError('Invalid credentials.');
     }
@@ -60,31 +61,28 @@ export default function LoginPage() {
           className="card-input"
         />
 
-        <div className="flex justify-between items-center text-sm mb-6 whitespace-nowrap">
-          <label className="flex items-center gap-2">
+        <div className="flex  mb-6 text-sm">
+          <label className="flex gap-2">
             <input
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
               className="accent-[var(--sentra-accent)]"
+              style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
             />
             Remember me
           </label>
-          <a href="#" className="card-link">
-            Forgot password?
-          </a>
+          &nbsp; &nbsp; &nbsp; &nbsp;
+                  <a href="#" className="card-link">
+          Forgot password?
+        </a>
         </div>
 
         <button type="submit" className="card-button mb-4">
           LOGIN
         </button>
 
-        <div className="text-center text-sm">
-          Don't have an account?{' '}
-          <a href="/register" className="card-link font-medium">
-            Sign up
-          </a>
-        </div>
+
       </form>
     </div>
   );

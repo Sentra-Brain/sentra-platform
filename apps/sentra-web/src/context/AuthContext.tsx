@@ -4,6 +4,7 @@ import { authService } from '../services/authService';
 import { userService } from '../services/userService';
 import { AuthContext } from './AuthContextInstance';
 import type { User } from '../models/user';
+import { notifyError } from '../lib/notify';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -22,6 +23,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     userService.getCurrentUser(token)
       .then(setUser)
       .catch(err => {
+        notifyError(err);
         console.error('[AuthContext] getCurrentUser error', err);
         setUser(null);
       })
@@ -45,6 +47,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       return true;
     } catch (err) {
+      notifyError(err);
       console.error('[AuthContext] login error', err);
       setUser(null);
       return false;

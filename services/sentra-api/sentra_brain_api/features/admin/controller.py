@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.authorization import get_admin_user
 from sentra_brain_api.features.user.models import User
 from sentra_brain_api.infra.postgres_service import get_db
@@ -23,7 +24,13 @@ class AdminController:
                 users = self.admin_service.get_all_users(db)
                 return [User.model_validate(user, from_attributes=True) for user in users]
             except ValueError as e:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+                raise SentraHTTPException(
+                        status_code=400,
+                        code="INVALID_REQUEST",
+                        message=str(e),
+                        path=f"/users/",
+                        suggestion="Check request payload"
+                    )
 
         @self.router.put("/users/{user_id}/enable", response_model=User)
         def enable_user(user_id: int, db: Session = Depends(get_db)):
@@ -32,7 +39,13 @@ class AdminController:
                 enabled_user = self.admin_service.enable_user(user_id, db)
                 return User.model_validate(enabled_user, from_attributes=True)
             except ValueError as e:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+                raise SentraHTTPException(
+                    status_code=400,
+                    code="INVALID_REQUEST",
+                    message=str(e),
+                    path=f"/users/{user_id}/enable",
+                    suggestion="Check request payload"
+                )
 
         @self.router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
         def delete_user(user_id: int, db: Session = Depends(get_db)):
@@ -40,4 +53,10 @@ class AdminController:
             try:
                 self.admin_service.delete_user(user_id, db)
             except ValueError as e:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+                raise SentraHTTPException(
+                    status_code=400,
+                    code="INVALID_REQUEST",
+                    message=str(e),
+                    path=f"/users/{user_id}",
+                    suggestion="Check request payload"
+                )

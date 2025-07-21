@@ -1,3 +1,4 @@
+// src/services/authService.ts
 import axios from 'axios';
 
 axios.defaults.baseURL = import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100';

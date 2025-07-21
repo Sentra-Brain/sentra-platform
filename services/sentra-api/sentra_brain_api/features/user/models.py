@@ -13,9 +13,17 @@ class User(BaseModel):
     email: EmailStr | None = None
     full_name: str | None = None
     disabled: bool | None = None
+    roles: list[str] = []
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
+        
+    @classmethod
+    def model_validate(cls, obj, **kwargs):
+        data = obj.__dict__.copy()
+        data["roles"] = obj.get_roles() if hasattr(obj, "get_roles") else []
+        return super().model_validate(data, **kwargs)
 
 
 class SignupModel(BaseModel):
@@ -24,15 +32,17 @@ class SignupModel(BaseModel):
     full_name: str
     password: str 
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class SignupResponse(BaseModel):
     user: User
     message: str
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserUpdate(User):
     password: str | None = None

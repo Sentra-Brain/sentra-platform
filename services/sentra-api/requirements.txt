@@ -3,7 +3,6 @@ debugpy
 email-validator
 fastapi
 httpx
-mediatr
 passlib 
 passlib[bcrypt]
 psycopg2-binary

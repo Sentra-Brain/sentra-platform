@@ -2,7 +2,7 @@
   --sentra-primary: #1e1e2f;
   --sentra-primary-dark: #161625;
   --sentra-accent: #4b9fff;
-  --sentra-accent-light: #a3cfff;
+  --sentra-accent-light: #6a3071;
   --sentra-neutral: #f4f4f7;
   --sentra-text: #f4f4f4;
   --sentra-grid-bg: 
@@ -29,3 +29,27 @@ body {
   background-size: 40px 40px;
   color: var(--sentra-text);
 }
+
+.main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: #10101a;
+  color: #f0f0f0;
+}
+
+.page-section {
+  max-width: 800px;
+  padding: 2rem 0;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--sentra-text);
+}
+

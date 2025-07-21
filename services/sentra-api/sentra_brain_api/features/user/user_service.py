@@ -1,17 +1,19 @@
-
-import os
-from sentra_brain_api.features.user.repository import UserRepository
-from sentra_brain_api.crosscutting.logging import get_logger
-from sqlalchemy.orm import Session
-from sentra_brain_api.domain.role import Role
-from sentra_brain_api.domain.user import UserEntity
-from sentra_brain_api.features.user.models import SignupResponse, User
-from sentra_brain_api.crosscutting.notification_service import NotificationService
-from sentra_brain_api.features.auth.auth_service import AuthService
+# sentra_brain_api/features/user/user_service.py
 from fastapi import HTTPException, status
+from sentra_brain_api.core.exceptions import SentraHTTPException
+from sentra_brain_api.crosscutting import logging
+from sentra_brain_api.crosscutting.notification_service import NotificationService
+from sentra_brain_api.domain.role import Role
+from sentra_brain_api.domain.system_settings import SystemSettings
+from sentra_brain_api.domain.user import UserEntity
+from sentra_brain_api.features.auth.auth_service import AuthService
+from sentra_brain_api.features.user.models import SignupResponse, User
+from sentra_brain_api.features.user.repository import UserRepository
+from sqlalchemy.orm import Session
 import asyncio
+import os
 
-logger = get_logger(__name__)
+logger = logging.get_logger("sentra_brain_api")
 
 class UserService:
     def __init__(self, user_repository: UserRepository):
@@ -24,6 +26,18 @@ class UserService:
         """
         Handles user signup, creates user, sends verification email if SMTP is configured.
         """
+        user_count = db.query(UserEntity).filter(~UserEntity.roles.contains("superadmin")).count()
+        settings = db.query(SystemSettings).first()
+
+        # Check if user limit is reached
+        if settings.max_users != -1 and user_count >= settings.max_users:
+            raise SentraHTTPException(
+                status_code=403,
+                code="USER_LIMIT_REACHED",
+                message="User limit reached",
+                path="/users/signup",
+                suggestion="Upgrade your license or contact support"
+            )
         notification_service_cls = notification_service_cls or NotificationService
         auth_service_cls = auth_service_cls or AuthService
 
@@ -51,7 +65,7 @@ class UserService:
             message = (
                 "A verification email has been sent. Please check your inbox."
                 if email_sent else
-                "Your account requires admin validation."
+                "Your account has been created."
             )
 
             return SignupResponse(
@@ -60,16 +74,28 @@ class UserService:
             )
 
         except ValueError as e:
-            raise ValueError(f"Error creating user: {str(e)}")
-
+            logger.error(f"Error creating user: {str(e)}")
+            raise SentraHTTPException(
+                status_code=400,
+                code="INVALID_REQUEST",
+                message=str(e),
+                path="/users/signup",
+                suggestion="Check request payload"
+            )
     def update_user(self, current_user_id: int, user_to_update_id: int, user_update, db: Session):
         """
         Handles updating a user. Only allows self-update or admin update.
         """
         user_repository = self.user_repository(db)
         user = user_repository.get(user_to_update_id)
-        if not user:
-            raise ValueError("User not found")
+        if not user:            
+            raise SentraHTTPException(
+                status_code=404,
+                code="USER_NOT_FOUND",
+                message=f"User with id {user_to_update_id} not found",
+                path=f"/users/{user_to_update_id}",
+                suggestion="Check user ID or contact support"
+            )
         # Add permission checks as needed
         if user_update.full_name is not None:
             user.full_name = user_update.full_name
@@ -90,14 +116,34 @@ class UserService:
             payload = auth_service.decode_verification_token(token)
             user_id = payload.get("user_id")
             if not user_id:
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
+                logger.error("Invalid token: user_id not found in payload")
+                raise SentraHTTPException(
+                    status_code=400,
+                    code="INVALID_TOKEN",
+                    message="Invalid token",
+                    path="/users/validate",
+                    suggestion="Request a new verification email"
+                )
             user = user_repository.get(user_id)
             if not user:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+                raise SentraHTTPException(
+                    status_code=404,
+                    code="USER_NOT_FOUND",
+                    message="User not found",
+                    path="/users/validate",
+                    suggestion="Check user ID"
+                )
             user.disabled = False
             user_repository.update(user)
             return User.model_validate(user, from_attributes=True)
         except HTTPException:
             raise
         except Exception as e:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            logger.error(f"Error validating user: {str(e)}")
+            raise SentraHTTPException(
+                status_code=400,
+                code="INVALID_REQUEST",
+                message=str(e),
+                path="/users/validate",
+                suggestion="Check request payload"
+            )

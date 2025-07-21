@@ -1,0 +1,38 @@
+.sentra-toast {
+  background-color: var(--sentra-primary-dark);
+  border-left: 4px solid var(--sentra-accent);
+  color: var(--sentra-text);
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  font-size: 0.875rem;
+  font-family: inherit;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.sentra-toast-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0;
+  margin: 0;
+  line-height: 1.4;
+  white-space: pre-line;
+  word-break: break-word;
+}
+
+.sentra-toast .Toastify__close-button {
+  color: var(--sentra-text);
+  opacity: 0.5;
+}
+
+.sentra-toast .Toastify__close-button:hover {
+  opacity: 1;
+}
+
+.sentra-toast .sentra-toast-id {
+  font-size: 0.7rem;
+  opacity: 0.6;
+}

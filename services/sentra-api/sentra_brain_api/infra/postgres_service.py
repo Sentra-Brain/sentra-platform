@@ -7,6 +7,7 @@ from sentra_brain_api.core.config import settings
 from sentra_brain_api.crosscutting.logging import get_logger
 from sentra_brain_api.domain.base_entity import BaseEntity
 from sentra_brain_api.domain.role import Role
+from sentra_brain_api.domain.system_settings import SystemSettings
 from sentra_brain_api.infra.security import pwd_context
 
 logger = get_logger(__name__)
@@ -66,5 +67,10 @@ def init_db():
         admin_user.set_roles([Role.ADMIN, Role.USER])
         user_repo.create(admin_user)
         logger.info("[init_db] Initial admin user created.")
+
+    if not db.query(SystemSettings).first():
+        db.add(SystemSettings(max_users=3))
+        db.commit()
+        logger.info("[init_db] Default system settings created.")
 
     db.close()

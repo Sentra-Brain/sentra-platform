@@ -1,48 +1,47 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { userService } from '../services/userService';
+import { publicService } from '../services/publicService';
+import type { SentraError } from '../lib/httpClient';
+import { notifyError, notifySuccess } from '../lib/notify';
+
 
 export default function RegisterPage() {
+  const [username, setUsername] = useState('');
+  const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
+  const [slots, setSlots] = useState<number | null>(null);
+  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    publicService.getSettings()
+      .then(data => setSlots(data.available_slots))
+      .catch(() => setSlots(null));
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
+    setMessage('');
 
-    if (!email || !password || !fullName) {
+    if (!username || !fullName || !email || !password) {
       setError('All fields are required.');
-      return;
-    }
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      setError('Invalid email format.');
-      return;
-    }
-    if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
       return;
     }
 
     try {
-      const res = await fetch('/api/v1/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, full_name: fullName }),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        setError(data.detail || 'Registration failed.');
-        return;
+      const response = await userService.signup({ username, email, full_name: fullName, password });
+      setMessage(response.message);
+      notifySuccess(response.message);
+      setTimeout(() => navigate('/login'), 5000);
+      } catch (err) {
+        const e = err as SentraError;
+        notifyError(err);
+        setError(e.message || 'Registration failed.');
       }
-      setSuccess('Registration successful! Redirecting...');
-      setTimeout(() => navigate('/dashboard'), 1500);
-    } catch {
-      setError('Registration failed. Try again.');
-    }
   };
 
   return (
@@ -57,9 +56,23 @@ export default function RegisterPage() {
 
         <h2 className="card-title">Register</h2>
 
-        {error && <div className="text-red-500 text-sm mb-4">{error}</div>}
-        {success && <div className="text-green-500 text-sm mb-4">{success}</div>}
+        {slots !== null && (
+          <div className="text-sm text-sentra-accent mb-2">
+            {slots === -1 ? 'Unlimited slots available' : `Slots available: ${slots}`}
+          </div>
+        )}
 
+        {error && <div className="text-red-500 text-sm mb-3">{error}</div>}
+        {message && <div className="text-green-500 text-sm mb-3">{message}</div>}
+
+        <input
+          type="text"
+          placeholder="Username"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+          required
+          className="card-input"
+        />
         <input
           type="text"
           placeholder="Full Name"
@@ -85,7 +98,7 @@ export default function RegisterPage() {
           className="card-input"
         />
 
-        <button type="submit" className="card-button mb-4">
+        <button type="submit" className="card-button mb-4" disabled={slots === 0}>
           Register
         </button>
 

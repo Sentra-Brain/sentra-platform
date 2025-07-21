@@ -1,3 +1,4 @@
+// src/services/userService.ts
 import axios from 'axios';
 import type { User } from '../models/user';
 
@@ -10,8 +11,4 @@ export const userService = {
     });
     return res.data;
   },
-
-  // Future examples:
-  // async getUsersList() { ... }
-  // async updateUser(userId: string, data: Partial<User>) { ... }
 };

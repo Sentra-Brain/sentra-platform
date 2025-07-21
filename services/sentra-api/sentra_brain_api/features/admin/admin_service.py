@@ -1,3 +1,4 @@
+from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.user.repository import UserRepository
 from sentra_brain_api.crosscutting.logging import get_logger
 from sqlalchemy.orm import Session
@@ -14,15 +15,35 @@ class AdminService:
         try:
             user_repo.delete(user_id)
         except Exception as e:
-            raise ValueError(f"Error deleting user: {str(e)}")
-
+            logger.error(f"Error deleting user with id {user_id}: {str(e)}")
+            raise SentraHTTPException(
+                status_code=400,
+                code="DELETE_FAILED",
+                message="Could not delete user",
+                details=str(e),
+                path=f"/admin/users/{user_id}",
+                suggestion="Ensure the user exists and is not referenced elsewhere"
+            )       
+            
     def enable_user(self, user_id: int, db: Session):
         user_repo = self.user_repository(db)
         user = user_repo.get(user_id)
         if not user:
-            raise ValueError(f"User with id {user_id} not found")
+            raise SentraHTTPException(
+                status_code=404,
+                code="USER_NOT_FOUND",
+                message=f"User with id {user_id} not found",
+                path=f"/admin/users/{user_id}",
+                suggestion="Check if the user ID is correct"
+            )
         if not user.disabled:
-            raise ValueError(f"User with id {user_id} is already enabled")
+            raise SentraHTTPException(
+                status_code=400,
+                code="USER_ALREADY_ENABLED",
+                message=f"User with id {user_id} is already enabled",
+                path=f"/admin/users/{user_id}/enable",
+                suggestion="No action needed, user is already active"
+            )
         user.disabled = False
         user_repo.update(user)
         logger.info(f"User {user.username} has been enabled.")
@@ -32,5 +53,11 @@ class AdminService:
         user_repo = self.user_repository(db)
         users = user_repo.get_all()
         if not users:
-            raise ValueError("No users found")
+            raise SentraHTTPException(
+                status_code=404,
+                code="NO_USERS_FOUND",
+                message="No users found in the system",
+                path="/admin/users",
+                suggestion="Ensure there are users created in the system"
+            )
         return users

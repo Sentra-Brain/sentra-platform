@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from sentra_brain_api.core.config import settings
+from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.logging import get_logger
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.auth.models import Token
@@ -27,11 +28,13 @@ class AuthController:
             logger.info(f"Logging in user: {form_data.username}")
             user = auth_service.authenticate_user(form_data.username, form_data.password)
             if not user:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="Incorrect username or password",
-                    headers={"WWW-Authenticate": "Bearer"},
-                )
+                raise SentraHTTPException(
+                        status_code=401,
+                        code="AUTH_FAILED",
+                        message="Incorrect username or password",
+                        path="/auth/token",
+                        suggestion="Check your credentials",
+                    )
             access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
             access_token = auth_service.create_access_token(
                 data={"sub": user.username, "roles": user.roles},
