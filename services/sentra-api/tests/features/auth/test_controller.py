@@ -58,7 +58,6 @@ class TestAuthController:
         mock_authenticate_user.return_value = None
 
         response = client.post("/auth/token", data={"username": "wronguser", "password": "wrongpass"})
-        print(response.json())
         assert response.status_code == 401
     
         body = response.json()["detail"]
