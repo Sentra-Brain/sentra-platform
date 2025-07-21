@@ -26,5 +26,5 @@ class PublicSettingsController:
                 workspace_name=settings.workspace_name,
                 max_users=settings.max_users,
                 available_slots=available
-    )
+            )
 
