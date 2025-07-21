@@ -18,7 +18,7 @@ class PublicSettingsController:
             total_users = db.query(UserEntity).filter(~UserEntity.username.in_(["superadmin", "admin"])).count()
 
             if settings.max_users == -1:
-                available = -1  # señal de "ilimitado"
+                available = -1  # indicates "unlimited"
             else:
                 available = max(0, settings.max_users - total_users)
 
