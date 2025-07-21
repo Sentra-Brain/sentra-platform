@@ -1,5 +1,6 @@
 // src/lib/httpClient.ts
 import axios from 'axios';
+import type { ApiErrorResponse } from './errorTypes';
 
 export type SentraError = {
   status: number;
@@ -7,6 +8,7 @@ export type SentraError = {
   message: string;
   suggestion?: string;
   path?: string;
+  requestId?: string;
 };
 
 type RequestHeaders = Record<string, string>;
@@ -22,7 +24,7 @@ const client = axios.create({
   timeout: 10000,
 });
 
-// Inyección de token
+
 client.interceptors.request.use((config) => {
   const token = localStorage.getItem('access_token');
   if (token && config.headers) {
@@ -32,25 +34,25 @@ client.interceptors.request.use((config) => {
   return config;
 });
 
-// Mapeo de errores
 client.interceptors.response.use(
   (response) => response,
   (error) => {
-    const r = error?.response;
-    const d = r?.data ?? {};
+    const data = error?.response?.data as ApiErrorResponse | undefined;
 
-    const err: SentraError = {
-      status: r?.status ?? 500,
-      code: typeof d.code === 'string' ? d.code : 'UNKNOWN_ERROR',
-      message: typeof d.message === 'string' ? d.message : 'Unexpected error',
-      suggestion: typeof d.suggestion === 'string' ? d.suggestion : undefined,
-      path: typeof d.path === 'string' ? d.path : r?.config?.url,
+    const detail = data?.detail?.error;
+
+    const mapped: SentraError = {
+      status: data?.detail?.statusCode || error?.response?.status || 500,
+      code: detail?.code || 'UNKNOWN_ERROR',
+      message: detail?.message || 'Unexpected error',
+      suggestion: detail?.suggestion,
+      path: detail?.path,
+      requestId: detail?.requestId,
     };
 
-    return Promise.reject(err);
+    return Promise.reject(mapped);
   }
 );
-
 export const httpClient = {
   get<TResponse>(url: string, config?: RequestConfig): Promise<TResponse> {
     return client.get(url, config).then((r) => r.data as TResponse);

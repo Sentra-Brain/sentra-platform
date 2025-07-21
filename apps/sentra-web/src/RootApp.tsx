@@ -7,13 +7,16 @@ import App from './App';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Spinner from './components/Spinner';
+import { ToastContainer } from 'react-toastify';
 
 function AppGuard() {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      >
         <Spinner />
       </div>
     );
@@ -37,6 +40,18 @@ export default function RootApp() {
           <Route path="/*" element={<AppGuard />} />
         </Routes>
       </BrowserRouter>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar
+        newestOnTop
+        closeOnClick
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        toastClassName="sentra-toast"
+        className="sentra-toast-body"
+      />
     </AuthProvider>
   );
 }

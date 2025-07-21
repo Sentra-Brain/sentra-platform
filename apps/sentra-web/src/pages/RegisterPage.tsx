@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { userService } from '../services/userService';
 import { publicService } from '../services/publicService';
 import type { SentraError } from '../lib/httpClient';
+import { notifyError, notifySuccess } from '../lib/notify';
 
 
 export default function RegisterPage() {
@@ -34,9 +35,11 @@ export default function RegisterPage() {
     try {
       const response = await userService.signup({ username, email, full_name: fullName, password });
       setMessage(response.message);
+      notifySuccess(response.message);
       setTimeout(() => navigate('/login'), 5000);
       } catch (err) {
         const e = err as SentraError;
+        notifyError(err);
         setError(e.message || 'Registration failed.');
       }
   };
