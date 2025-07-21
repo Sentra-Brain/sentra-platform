@@ -1,4 +1,5 @@
 import { useSettings } from '../hooks/useSettings';
+import { notifySuccess } from '../libs/notify';
 
 export default function Settings() {
   const token = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');
@@ -9,7 +10,7 @@ export default function Settings() {
 
   const handleSave = async () => {
     await save(settings!);
-    alert('Settings saved!');
+    notifySuccess('Settings saved successfully!');
   };
 
   if (loading || !settings)
