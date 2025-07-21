@@ -57,8 +57,8 @@ jobs:
     defaults:
       run:
         working-directory: apps/sentra-web
+      
     steps:
-      - uses: actions/checkout@v4
 
       - name: Extract version from package.json
         id: get_version
@@ -71,6 +71,9 @@ jobs:
           client-id: ${{ secrets.AZURE_CLIENT_ID }}
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Docker login with ACR admin credentials
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
 
       - name: Build Docker image
         run: |
