@@ -7,7 +7,7 @@ export const notifyError = (err: unknown): void => {
   const suggestion = e.suggestion ? ` – ${e.suggestion}` : '';
   const id = e.requestId ? ` (#${e.requestId.slice(0, 8)})` : '';
 
-  toast.error(`${msg}<br/> ${suggestion}${id}`);
+  toast.error(`${msg}\n${suggestion}${id}`);
 };
 
 export const notifySuccess = (msg: string): void => {
