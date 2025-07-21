@@ -1,24 +1,21 @@
-import axios from 'axios';
+// src/services/userService.ts
+import { httpClient } from '../lib/httpClient';
 import type { User } from '../models/user';
 import type { SignupResponse } from '../models/signupResponse';
-
-axios.defaults.baseURL = import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100';
+import type { SignupRequest } from '../models/signupRequest';
 
 export const userService = {
-  async getCurrentUser(token: string): Promise<User> {
-    const res = await axios.get<User>('/users/me', {
+  // getCurrentUser(): Promise<User> {
+  //   return httpClient.get<User>('/users/me');
+  // },
+
+  getCurrentUser(token: string): Promise<User> {
+    return httpClient.get<User>('/users/me', {
       headers: { Authorization: `Bearer ${token}` },
     });
-    return res.data;
   },
 
-  async signup(data: {
-    username: string;
-    email: string;
-    full_name: string;
-    password: string;
-  }): Promise<SignupResponse> {
-    const res = await axios.post<SignupResponse>('/users/signup', data);
-    return res.data;
+  signup(data: SignupRequest): Promise<SignupResponse> {
+    return httpClient.post<SignupResponse, SignupRequest>('/users/signup', data);
   },
 };
