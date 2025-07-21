@@ -15,7 +15,7 @@ class PublicSettingsController:
         @self.router.get("/settings", response_model=PublicSettingsModel, tags=["public"])
         def get_public_settings(db: Session = Depends(get_db)):
             settings = db.query(SystemSettings).first()
-            total_users = db.query(UserEntity).filter(~UserEntity.username.in_(["superadmin", "admin"])).count()
+            total_users = db.query(UserEntity).filter(~UserEntity.roles.contains("superadmin")).count()
 
             if settings.max_users == -1:
                 available = -1  # indicates "unlimited"
