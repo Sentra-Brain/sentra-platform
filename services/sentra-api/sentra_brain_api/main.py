@@ -1,29 +1,25 @@
+# main.py
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import asynccontextmanager
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-import os
-from mediatr import Mediator
-import uvicorn
-
-from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE
-from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import CONTACT
+from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
+from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE
 from sentra_brain_api.crosscutting import logging
-from sentra_brain_api.features.admin.settings_controller import SettingsController
-from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.admin.controller import AdminController
+from sentra_brain_api.features.admin.settings.controller import SettingsController
+from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.user.controller import UserController
-from sentra_brain_api.features.user.repository import UserRepository
 from sentra_brain_api.infra import postgres_service
+import os
+import uvicorn
 
 logger = logging.get_logger("sentra_brain_api")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Place for DB init, etc.
     logger.info("App startup: initializing resources...")
     postgres_service.init_db()
     yield
@@ -54,12 +50,12 @@ def create_app(
     auth_controller = AuthController()
     user_controller = UserController()
     admin_controller = AdminController()
-    settinsgs_controller = SettingsController()
+    settings_controller = SettingsController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
-    app.include_router(settinsgs_controller.router, prefix="/admin", tags=["admin"])
+    app.include_router(settings_controller.router, prefix="/admin", tags=["admin"])
 
     return app
 
@@ -73,6 +69,7 @@ async def redirect_to_swagger():
 
 if __name__ == "__main__":
     debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
+    logging.configure_logging(debug=debug_mode)
 
     if debug_mode:
         logger.info("✅ Debug mode enabled: waiting for debugger on port 5678")

@@ -1,15 +1,18 @@
+// src/hooks/useSettings.ts
 import { useEffect, useState } from 'react';
 import { settingsService } from '../services/settingsService';
+import type { SystemSettings } from '../models/systemSettings';
 
 export function useSettings(token: string) {
-  const [maxUsers, setMaxUsers] = useState<number | null>(null);
+  const [settings, setSettings] = useState<SystemSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!token) return;
+
     settingsService.getSettings(token)
-      .then(data => setMaxUsers(data.max_users))
+      .then(setSettings)
       .catch(err => {
         console.error(err);
         setError('Failed to load settings');
@@ -17,10 +20,10 @@ export function useSettings(token: string) {
       .finally(() => setLoading(false));
   }, [token]);
 
-  const save = async (newMax: number) => {
-    await settingsService.updateSettings(token, { max_users: newMax });
-    setMaxUsers(newMax);
+  const save = async (updated: SystemSettings) => {
+    const saved = await settingsService.updateSettings(token, updated);
+    setSettings(saved);
   };
 
-  return { maxUsers, setMaxUsers, save, loading, error };
+  return { settings, setSettings, save, loading, error };
 }

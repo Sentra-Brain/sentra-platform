@@ -40,7 +40,8 @@
             "driver": "PostgreSQL",
             "name": "SentraDB",
             "database": "sentra_brain",
-            "username": "sentra_admin"
+            "username": "sentra_admin",
+            "password": "changeit"
         }
     ]
 }
