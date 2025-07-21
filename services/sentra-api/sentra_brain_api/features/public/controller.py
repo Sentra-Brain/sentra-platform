@@ -2,18 +2,17 @@
 from fastapi import APIRouter, Depends
 from sentra_brain_api.domain.system_settings import SystemSettings
 from sentra_brain_api.domain.user import UserEntity
-from sentra_brain_api.features.admin.settings.models import SystemSettingsModel
 from sentra_brain_api.features.public.models import PublicSettingsModel
 from sentra_brain_api.infra.postgres_service import get_db
 from sqlalchemy.orm import Session
 
-class PublicController:
+class PublicSettingsController:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()
 
     def _add_routes(self):
-        @self.router.get("/settings", response_model=SystemSettingsModel, tags=["public"])
+        @self.router.get("/settings", response_model=PublicSettingsModel, tags=["public"])
         def get_public_settings(db: Session = Depends(get_db)):
             settings = db.query(SystemSettings).first()
             total_users = db.query(UserEntity).filter(~UserEntity.username.in_(["superadmin", "admin"])).count()

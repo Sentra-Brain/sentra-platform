@@ -61,24 +61,28 @@ export default function LoginPage() {
           className="card-input"
         />
 
-        <div className="flex justify-between items-center text-sm mb-6 whitespace-nowrap">
-          <label className="flex items-center gap-2">
+        <div className="flex  mb-6 text-sm">
+          <label className="flex gap-2">
             <input
               type="checkbox"
               checked={remember}
               onChange={(e) => setRemember(e.target.checked)}
               className="accent-[var(--sentra-accent)]"
+              style={{ width: '1rem', height: '1rem', marginRight: '0.5rem' }}
             />
             Remember me
           </label>
-          <a href="#" className="card-link">
-            Forgot password?
-          </a>
+          &nbsp; &nbsp; &nbsp; &nbsp;
+                  <a href="#" className="card-link">
+          Forgot password?
+        </a>
         </div>
 
         <button type="submit" className="card-button mb-4">
           LOGIN
         </button>
+
+
       </form>
     </div>
   );

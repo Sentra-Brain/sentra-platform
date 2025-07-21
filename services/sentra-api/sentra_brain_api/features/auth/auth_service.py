@@ -3,8 +3,12 @@ from fastapi import HTTPException, status
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 from sentra_brain_api.core.config import settings
+from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.domain.user import UserEntity
 from sentra_brain_api.features.user.repository import UserRepository
+from sentra_brain_api.crosscutting import logging
+
+logger = logging.get_logger("sentra_brain_api")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -40,11 +44,25 @@ class AuthService:
             payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
             return payload
         except ExpiredSignatureError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Token has expired")
+            logger.error(f"Token has expired: {token}")
+            raise SentraHTTPException(
+                status_code=400,
+                code="TOKEN_EXPIRED",
+                message="Token has expired",
+                path="/users/validate",
+                suggestion="Request a new verification email"
+            )
         except JWTError:
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid token")
-    
-    
+            logger.error(f"Invalid token: {token}")
+            raise SentraHTTPException(
+                status_code=400,
+                code="INVALID_TOKEN",
+                message="Invalid token",
+                path="/users/validate",
+                suggestion="Request a new verification email"
+            )
+
+
     @staticmethod
     def get_password_hash(password: str) -> str:
         return pwd_context.hash(password)

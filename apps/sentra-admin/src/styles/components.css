@@ -4,7 +4,6 @@
   padding: 2rem;
   max-width: 360px;
   width: 100%;
-  margin: 0 auto;
   color: var(--sentra-text);
   border: 1px solid var(--sentra-accent-light);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
@@ -94,3 +93,4 @@
   color: var(--sentra-accent);
   text-decoration: underline;
 }
+

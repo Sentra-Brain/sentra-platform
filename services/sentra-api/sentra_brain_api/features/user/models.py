@@ -15,8 +15,9 @@ class User(BaseModel):
     disabled: bool | None = None
     roles: list[str] = []
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
         
     @classmethod
     def model_validate(cls, obj, **kwargs):
@@ -31,15 +32,17 @@ class SignupModel(BaseModel):
     full_name: str
     password: str 
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class SignupResponse(BaseModel):
     user: User
     message: str
     
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True
+    }
 
 class UserUpdate(User):
     password: str | None = None

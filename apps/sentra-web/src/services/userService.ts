@@ -1,5 +1,6 @@
 import axios from 'axios';
 import type { User } from '../models/user';
+import type { SignupResponse } from '../models/signupResponse';
 
 axios.defaults.baseURL = import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100';
 
@@ -11,7 +12,13 @@ export const userService = {
     return res.data;
   },
 
-  // Future examples:
-  // async getUsersList() { ... }
-  // async updateUser(userId: string, data: Partial<User>) { ... }
+  async signup(data: {
+    username: string;
+    email: string;
+    full_name: string;
+    password: string;
+  }): Promise<SignupResponse> {
+    const res = await axios.post<SignupResponse>('/users/signup', data);
+    return res.data;
+  },
 };

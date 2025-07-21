@@ -16,9 +16,10 @@ class Settings(BaseSettings):
     algorithm: str = Field(..., json_schema_extra={"env": "ALGORITHM"})
     access_token_expire_minutes: int = Field(..., json_schema_extra={"env": "ACCESS_TOKEN_EXPIRE_MINUTES"})
 
-    class Config:
-        env_file = ".env"
-        extra = "allow"  # Allow extra fields in the environment file
+    model_config = {
+        "env_file": ".env",
+        "extra": "allow",
+    }
 
 try:
     settings = Settings()

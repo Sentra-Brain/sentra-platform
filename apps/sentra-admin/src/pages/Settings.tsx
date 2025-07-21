@@ -12,6 +12,9 @@ export default function Settings() {
     alert('Settings saved!');
   };
 
+  if (loading || !settings)
+    return <p className="text-sm text-sentra-accent-light">Loading settings...</p>;
+
   return (
     <section className="page-section">
       <h2 className="page-title">System Settings</h2>

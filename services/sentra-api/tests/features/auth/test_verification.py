@@ -4,6 +4,7 @@ from datetime import datetime, timedelta, timezone
 from jose import jwt
 from fastapi import HTTPException, status
 from sentra_brain_api.core.config import settings
+from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.domain.user import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.user.repository import UserRepository
@@ -71,15 +72,22 @@ def test_decode_verification_token_expired(auth_service):
     user_id = 1
     expires_delta = timedelta(seconds=1)
     token = auth_service.create_verification_token(user_id, expires_delta)
-    import time; time.sleep(2)  # Ensure the token has expired
-    with pytest.raises(HTTPException) as exc_info:
+    import time; time.sleep(2)
+
+    with pytest.raises(SentraHTTPException) as exc_info:
         auth_service.decode_verification_token(token)
-    assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert exc_info.value.detail == "Token has expired"
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail["error"]["code"] == "TOKEN_EXPIRED"
+    assert exc_info.value.detail["error"]["message"] == "Token has expired"
+
 
 def test_decode_verification_token_invalid(auth_service):
     invalid_token = jwt.encode({"some": "data"}, "wrong_secret", algorithm=settings.algorithm)
-    with pytest.raises(HTTPException) as exc_info:
+
+    with pytest.raises(SentraHTTPException) as exc_info:
         auth_service.decode_verification_token(invalid_token)
-    assert exc_info.value.status_code == status.HTTP_400_BAD_REQUEST
-    assert exc_info.value.detail == "Invalid token"
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail["error"]["code"] == "INVALID_TOKEN"
+    assert exc_info.value.detail["error"]["message"] == "Invalid token"

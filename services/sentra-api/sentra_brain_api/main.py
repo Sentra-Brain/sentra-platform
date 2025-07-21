@@ -11,10 +11,13 @@ from sentra_brain_api.crosscutting import logging
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
+from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.infra import postgres_service
 import os
 import uvicorn
+
+from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 
 logger = logging.get_logger("sentra_brain_api")
 
@@ -39,6 +42,8 @@ def create_app(
         lifespan=lifespan
     )
 
+    app.add_middleware(ErrorHandlerMiddleware)
+
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=r"https?://(127\.0\.0\.1|localhost)(:\d{1,5})?",
@@ -51,11 +56,13 @@ def create_app(
     user_controller = UserController()
     admin_controller = AdminController()
     settings_controller = SettingsController()
+    public_settings_controller = PublicSettingsController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(settings_controller.router, prefix="/admin", tags=["admin"])
+    app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
 
     return app
 
