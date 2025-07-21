@@ -1,7 +1,7 @@
 # sentra_brain_api/features/public/public_controller.py
 from fastapi import APIRouter, Depends
 from sentra_brain_api.domain.system_settings import SystemSettings
-from sentra_brain_api.domain.user import UserEntity
+from sentra_brain_api.domain.user_entity import UserEntity
 from sentra_brain_api.features.public.models import PublicSettingsModel
 from sentra_brain_api.infra.postgres_service import get_db
 from sqlalchemy.orm import Session

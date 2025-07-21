@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from sentra_brain_api.core.base_repository import BaseRepository
-from sentra_brain_api.domain.user import UserEntity
+from sentra_brain_api.domain.user_entity import UserEntity
 from sentra_brain_api.infra import postgres_service
 
 class UserRepository(BaseRepository[UserEntity]):

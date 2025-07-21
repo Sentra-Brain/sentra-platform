@@ -1,6 +1,6 @@
-from sentra_brain_api.features.user.models import SignupResponse, User
+from sentra_brain_api.features.user.models import SignupResponse, UserModel
 
-mock_user = User(
+mock_user = UserModel(
     id=1,
     username="testuser",
     email="testuser@example.com",
@@ -9,7 +9,7 @@ mock_user = User(
 )
 
 mock_new_user = SignupResponse(
-    user=User(
+    user=UserModel(
         id=2,
         username="newuser",
         email="newuser@example.com",
@@ -19,7 +19,7 @@ mock_new_user = SignupResponse(
     message="User created successfully"
 )
 
-mock_updated_user = User(
+mock_updated_user = UserModel(
     id=1,
     username="updateduser",
     email="updateduser@example.com",

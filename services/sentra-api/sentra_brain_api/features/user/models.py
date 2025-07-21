@@ -7,7 +7,7 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str | None = None
 
-class User(BaseModel):
+class UserModel(BaseModel):
     id: int | None = None
     username: str
     email: EmailStr | None = None
@@ -37,12 +37,12 @@ class SignupModel(BaseModel):
     }
 
 class SignupResponse(BaseModel):
-    user: User
+    user: UserModel
     message: str
     
     model_config = {
         "from_attributes": True
     }
 
-class UserUpdate(User):
+class UserUpdate(UserModel):
     password: str | None = None

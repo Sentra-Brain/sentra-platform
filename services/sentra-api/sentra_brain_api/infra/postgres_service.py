@@ -26,7 +26,7 @@ def get_db():
 
 # 3. DB initialization for app startup
 def init_db():
-    from sentra_brain_api.domain.user import UserEntity
+    from sentra_brain_api.domain.user_entity import UserEntity
     from sentra_brain_api.features.user.repository import UserRepository
     from sqlalchemy.exc import OperationalError
 

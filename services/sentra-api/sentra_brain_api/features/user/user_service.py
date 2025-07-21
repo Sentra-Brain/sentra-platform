@@ -5,9 +5,9 @@ from sentra_brain_api.crosscutting import logging
 from sentra_brain_api.crosscutting.notification_service import NotificationService
 from sentra_brain_api.domain.role import Role
 from sentra_brain_api.domain.system_settings import SystemSettings
-from sentra_brain_api.domain.user import UserEntity
+from sentra_brain_api.domain.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_brain_api.features.user.models import SignupResponse, User
+from sentra_brain_api.features.user.models import SignupResponse, UserModel
 from sentra_brain_api.features.user.repository import UserRepository
 from sqlalchemy.orm import Session
 import asyncio
@@ -69,7 +69,7 @@ class UserService:
             )
 
             return SignupResponse(
-                user=User.model_validate(user, from_attributes=True),
+                user=UserModel.model_validate(user, from_attributes=True),
                 message=message
             )
 
@@ -104,7 +104,7 @@ class UserService:
         if user_update.password is not None:
             user.hashed_password = AuthService.get_password_hash(user_update.password)
         user_repository.update(user)
-        return User.model_validate(user, from_attributes=True)
+        return UserModel.model_validate(user, from_attributes=True)
 
     def validate_user(self, token: str, db: Session):
         """
@@ -135,7 +135,7 @@ class UserService:
                 )
             user.disabled = False
             user_repository.update(user)
-            return User.model_validate(user, from_attributes=True)
+            return UserModel.model_validate(user, from_attributes=True)
         except HTTPException:
             raise
         except Exception as e:

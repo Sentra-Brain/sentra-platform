@@ -1,5 +1,4 @@
-# domain/system_settings.py
-
+# sentra_brain_api/domain/system_settings.py
 from sqlalchemy import Column, Integer, String, Boolean, JSON
 from sentra_brain_api.domain.base_entity import BaseEntity
 
