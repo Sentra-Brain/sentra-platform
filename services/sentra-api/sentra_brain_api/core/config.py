@@ -1,29 +1,38 @@
+import os
 from dotenv import load_dotenv
 from pydantic import Field, ValidationError
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from sentra_brain_api.crosscutting.logging import get_logger
 
-load_dotenv()  
+
+load_dotenv()
 
 logger = get_logger(__name__)
 
+
 class Settings(BaseSettings):
-    database_url: str = Field(..., json_schema_extra={"env": "DATABASE_URL"})
-    initial_admin_username: str = Field(..., json_schema_extra={"env": "INITIAL_ADMIN_USERNAME"})
-    initial_admin_email: str = Field(..., json_schema_extra={"env": "INITIAL_ADMIN_EMAIL"})
-    initial_admin_password: str = Field(..., json_schema_extra={"env": "INITIAL_ADMIN_PASSWORD"})
-    secret_key: str = Field(..., json_schema_extra={"env": "SECRET_KEY"})
-    algorithm: str = Field(..., json_schema_extra={"env": "ALGORITHM"})
-    access_token_expire_minutes: int = Field(..., json_schema_extra={"env": "ACCESS_TOKEN_EXPIRE_MINUTES"})
+    # MongoDB
+    mongo_user: str = Field(default="", env="MONGO_INITDB_ROOT_USERNAME")
+    mongo_password: str = Field(default="", env="MONGO_INITDB_ROOT_PASSWORD")
+    mongo_host: str = Field(default="localhost", env="MONGO_HOST")
+    mongo_port: int = Field(default=27017, env="MONGO_PORT")
+    mongo_db_name: str = Field(default="sentra_brain", env="MONGO_DATABASE")
+    # PostgreSQL
+    database_url: str = Field(..., env="DATABASE_URL")
+    initial_admin_username: str = Field(..., env="INITIAL_ADMIN_USERNAME")
+    initial_admin_email: str = Field(..., env="INITIAL_ADMIN_EMAIL")
+    initial_admin_password: str = Field(..., env="INITIAL_ADMIN_PASSWORD")
+    secret_key: str = Field(..., env="SECRET_KEY")
+    algorithm: str = Field(..., env="ALGORITHM")
+    access_token_expire_minutes: int = Field(..., env="ACCESS_TOKEN_EXPIRE_MINUTES")
 
-    model_config = {
-        "env_file": ".env",
-        "extra": "allow",
-    }
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        extra="allow"
+    )
 
-try:
-    settings = Settings()
-except ValidationError as e:
-    logger.error("Error loading settings: %s", e.json())
-    raise
+    
 
+
+
+settings = Settings()
