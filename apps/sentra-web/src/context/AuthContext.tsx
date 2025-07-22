@@ -5,6 +5,7 @@ import { userService } from '../services/userService';
 import { AuthContext } from './AuthContextInstance';
 import type { User } from '../models/user';
 import { notifyError } from '../lib/notify';
+import { setAuthToken } from '../lib/httpClient';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -14,6 +15,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const token = getToken();
+    
+    setAuthToken(token);
+    
     if (!token) {
       setUser(null);
       setLoading(false);

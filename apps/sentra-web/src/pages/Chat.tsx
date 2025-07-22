@@ -1,3 +1,5 @@
+// src/pages/Chat.tsx
+// This file defines the main chat interface of the application
 import React from 'react';
 import ChatArea from '../components/ChatArea';
 import MessageInput from '../components/MessageInput';

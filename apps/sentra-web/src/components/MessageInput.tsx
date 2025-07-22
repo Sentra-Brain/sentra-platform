@@ -1,18 +1,28 @@
+// src/components/MessageInput.tsx
 import React, { useState, useRef } from 'react';
-import { useChat } from '../context/ChatContext';
+import { useChat } from '../hooks/useChat';
 import { ArrowUp } from 'lucide-react';
 import './MessageInput.css';
 
 const MessageInput: React.FC = () => {
-  const { addMessage } = useChat();
+  const { currentConversation, updateConversation } = useChat();
   const [value, setValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSend = () => {
-    if (value.trim()) {
-      addMessage({ role: 'user', content: value });
-      setValue('');
-    }
+  const handleSend = async () => {
+    if (!value.trim() || !currentConversation) return;
+
+    // Here you'd normally call the backend to send a message
+    // For now, just simulate adding a user message
+    // This could later call: conversationService.addMessage(conversation_id, { ... })
+    console.warn('TODO: integrate message sending API');
+
+    // Temporary mock logic (to simulate frontend-only messaging):
+    await updateConversation(currentConversation.conversation_id, {
+      initial_prompt: value, // ← TEMP HACK, replace with real message handler later
+    });
+
+    setValue('');
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -42,13 +52,21 @@ const MessageInput: React.FC = () => {
         value={value}
         onChange={(e) => setValue(e.target.value)}
         onKeyDown={handleKeyDown}
-        placeholder="Type a message..."
+        placeholder={
+          currentConversation ? 'Type a message...' : 'Select or create a conversation first...'
+        }
         rows={1}
+        disabled={!currentConversation}
       />
 
       <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
 
-      <button className="send-btn" onClick={handleSend} title="Send" disabled={!value.trim()}>
+      <button
+        className="send-btn"
+        onClick={handleSend}
+        title="Send"
+        disabled={!value.trim() || !currentConversation}
+      >
         <span role="img" aria-label="send">
           ➤
         </span>

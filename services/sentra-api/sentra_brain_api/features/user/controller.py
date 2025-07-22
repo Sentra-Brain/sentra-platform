@@ -29,11 +29,11 @@ class UserController:
             return self.user_service.signup(user, db)
         
         @self.router.get("/me", response_model=UserModel, description=ME_DESCRIPTION)
-        def me(current_user: UserModel = Depends(get_authenticated_user)):
-            return UserModel.model_validate(current_user)
+        def me(current_user: UserEntity = Depends(get_authenticated_user)):
+            return UserModel.from_entity(current_user)
     
         @self.router.put("/{user_to_update_id}", response_model=UserModel, description=UPDATE_USER_DESCRIPTION)
-        def update_user(user_to_update_id: int, user_update: UserUpdate, current_user: UserEntity = Depends(get_authenticated_user), db: Session = Depends(get_db)):
+        def update_user(user_to_update_id: str, user_update: UserUpdate, current_user: UserEntity = Depends(get_authenticated_user), db: Session = Depends(get_db)):
             logger.info(f"Updating user {user_to_update_id} by {current_user.id}")
             return self.user_service.update_user(current_user.id, user_to_update_id, user_update, db)
 
