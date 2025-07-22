@@ -7,21 +7,11 @@ from sentra_brain_api.crosscutting.logging import get_logger
 
 logger = get_logger("sentra_brain_api.mongo_service")
 
-
 class MongoConversationRepository:
-    def __init__(self):        
-        mongo_url = self._build_mongo_url()
-        self.client = MongoClient(mongo_url)
-        self.db = self.client[settings.mongo_db_name]
-    
-    def _build_mongo_url(self) -> str:
-        return (
-            f"mongodb://{settings.mongo_user}:"
-            f"{settings.mongo_password}@"
-            f"{settings.mongo_host}:"
-            f"{settings.mongo_port}/"
-            f"{settings.mongo_db_name}"
-        )
+    def __init__(self):
+        self.client = MongoClient(settings.mongo_url)
+        self.db = self.client[settings.mongo_database]
+        logger.info(f"[Mongo] Connected to database {settings.mongo_database} at {settings.mongo_host}:{settings.mongo_port}")
 
     def get_conversations_collection(self):
         return self.db["conversations"]

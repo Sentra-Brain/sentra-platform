@@ -49,50 +49,50 @@ services:
     env_file:
       - ../services/sentra-api/.env
 
-  sentra-doc:
-    build:
-      context: ../services/sentra-doc
-      dockerfile: Dockerfile
-    image: sentra-doc:dev
-    container_name: sentra-doc
-    ports:
-      - "5100:5100"
-    volumes:
-      - ../services/sentra-doc:/app
-    networks:
-      - sentrabrain-dev-net
-    env_file:
-      - .dev.env
+  # sentra-doc:
+  #   build:
+  #     context: ../services/sentra-doc
+  #     dockerfile: Dockerfile
+  #   image: sentra-doc:dev
+  #   container_name: sentra-doc
+  #   ports:
+  #     - "5100:5100"
+  #   volumes:
+  #     - ../services/sentra-doc:/app
+  #   networks:
+  #     - sentrabrain-dev-net
+  #   env_file:
+  #     - .dev.env
 
-  sentra-crm:
-    build:
-      context: ../services/sentra-crm
-      dockerfile: Dockerfile
-    image: sentra-crm:dev
-    container_name: sentra-crm
-    ports:
-      - "5200:5200"
-    volumes:
-      - ../services/sentra-crm:/app
-    networks:
-      - sentrabrain-dev-net
-    env_file:
-      - .dev.env
+  # sentra-crm:
+  #   build:
+  #     context: ../services/sentra-crm
+  #     dockerfile: Dockerfile
+  #   image: sentra-crm:dev
+  #   container_name: sentra-crm
+  #   ports:
+  #     - "5200:5200"
+  #   volumes:
+  #     - ../services/sentra-crm:/app
+  #   networks:
+  #     - sentrabrain-dev-net
+  #   env_file:
+  #     - .dev.env
 
-  sentra-action:
-    build:
-      context: ../services/sentra-action
-      dockerfile: Dockerfile
-    image: sentra-action:dev
-    container_name: sentra-action
-    ports:
-      - "5300:5300"
-    volumes:
-      - ../services/sentra-action:/app
-    networks:
-      - sentrabrain-dev-net
-    env_file:
-      - .dev.env
+  # sentra-action:
+  #   build:
+  #     context: ../services/sentra-action
+  #     dockerfile: Dockerfile
+  #   image: sentra-action:dev
+  #   container_name: sentra-action
+  #   ports:
+  #     - "5300:5300"
+  #   volumes:
+  #     - ../services/sentra-action:/app
+  #   networks:
+  #     - sentrabrain-dev-net
+  #   env_file:
+  #     - .dev.env
 
   llama-server:
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
@@ -114,15 +114,15 @@ services:
             - capabilities: [gpu]
     runtime: nvidia
 
-  sentra-vector-db:
-    image: ghcr.io/chroma-core/chroma:latest
-    container_name: sentra-vector-db
-    ports:
-      - "8500:8001"
-    volumes:
-      - sentra-vector-data:/chroma/.chroma/index
-    networks:
-      - sentrabrain-dev-net
+  # sentra-vector-db:
+  #   image: ghcr.io/chroma-core/chroma:latest
+  #   container_name: sentra-vector-db
+  #   ports:
+  #     - "8500:8001"
+  #   volumes:
+  #     - sentra-vector-data:/chroma/.chroma/index
+  #   networks:
+  #     - sentrabrain-dev-net
 
   sentra-sql-db:
     image: postgres:16-alpine

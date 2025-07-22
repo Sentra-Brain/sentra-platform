@@ -16,7 +16,6 @@ from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.infra import postgres_service
 import os
-import uvicorn
 
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 
@@ -78,6 +77,7 @@ async def redirect_to_swagger():
 
 
 if __name__ == "__main__":
+    import uvicorn
     debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
     logging.configure_logging(debug=debug_mode)
 

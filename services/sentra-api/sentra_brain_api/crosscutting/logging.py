@@ -28,6 +28,9 @@ def configure_logging(debug: bool = False):
     logging.getLogger("uvicorn.error").propagate = False
     logging.getLogger("uvicorn.access").propagate = False
 
+    # Silence noisy pymongo heartbeat logs
+    logging.getLogger("pymongo.topology").setLevel(logging.WARNING)
+
 
 def get_logger(name: str | None = None) -> logging.Logger:
     """
