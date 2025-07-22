@@ -1,5 +1,4 @@
 # sentra_brain_api/infra/mongo_service.py
-
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from sentra_brain_api.core.config import settings
@@ -21,7 +20,7 @@ class MongoConversationRepository:
         result = collection.update_one(
             {"_id": conversation_id},
             {"$push": {"messages": message}},
-            upsert=True  # In case the conversation doc doesn't exist yet
+            upsert=True
         )
         return result.modified_count
 
@@ -36,7 +35,7 @@ class MongoConversationRepository:
         logger.info(f"[Mongo] Created conversation document {conversation_id} for user {user_id}")
         return doc
     
-    def create_conversation_with_messages(self, conversation_id: str, user_id: str, messages: list[dict]):
+    def create_conversation_with_messages(self, conversation_id: str, user_id: str, messages: list[dict], metadata: dict = None):
         collection = self.get_conversations_collection()
         doc = {
             "_id": conversation_id,
@@ -44,11 +43,21 @@ class MongoConversationRepository:
             "created_at": datetime.now(timezone.utc).isoformat(),
             "messages": messages
         }
+        if metadata:
+            doc["metadata"] = metadata
         collection.insert_one(doc)
         logger.info(f"[Mongo] Created conversation with {len(messages)} messages")
         return doc
-
-
+    
+    def update_conversation(self, conversation_id: str, updates: dict):
+        collection = self.get_conversations_collection()
+        result = collection.update_one(
+            {"_id": conversation_id},
+            {"$set": updates}
+        )
+        if result.modified_count == 0:
+            logger.warning(f"[Mongo] No conversation found to update with ID {conversation_id}")
+        return result.modified_count
 
 mongo_service_instance = MongoConversationRepository()
 

@@ -25,7 +25,7 @@ from sentra_brain_api.features.conversation.conversation_service import Conversa
 logger = logging.get_logger("sentra_brain_api")
 
 
-class ConversationController:
+class ConversationManagementController:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()
@@ -40,7 +40,7 @@ class ConversationController:
             body: CreateConversationRequest,
             current_user: UserEntity = Depends(get_authenticated_user),
             db: Session = Depends(get_db),
-            mongo: MongoConversationRepository = Depends(get_conversation_mongo_repository)
+            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository)
         ):
                 logger.info(f"Creating conversation for user {current_user.id}")
 
@@ -53,8 +53,8 @@ class ConversationController:
                         initial_prompt=body.initial_prompt
                     )
 
-                    repo = ConversationRepository(db)
-                    service = ConversationService(repo)
+                    sql_repo = ConversationRepository(db)
+                    service = ConversationService(sql_repo)
                     conversation = service.create_conversation(conversation)
 
                 except Exception as e:
@@ -86,10 +86,16 @@ class ConversationController:
                         "timestamp": (datetime.now(timezone.utc) + delta).isoformat()
                     })
 
-                    mongo.create_conversation_with_messages(
+                    nosql_repo.create_conversation_with_messages(
                         conversation_id=str(conversation.id),
                         user_id=str(current_user.id),
-                        messages=messages
+                        messages=messages,
+                        metadata={
+                            "title": body.title,
+                            "description": body.description,
+                            "initial_prompt": body.initial_prompt,
+                            "created_at": datetime.now(timezone.utc).isoformat()
+                        }
                     )
 
 
@@ -115,8 +121,8 @@ class ConversationController:
             db: Session = Depends(get_db),
         ):
             logger.info(f"Retrieving conversations for user {current_user.id}")
-            repo = ConversationRepository(db)
-            service = ConversationService(repo)
+            sql_repo = ConversationRepository(db)
+            service = ConversationService(sql_repo)
             conversations = service.get_user_conversations(user_id=current_user.id)
             
             return [
@@ -136,12 +142,12 @@ class ConversationController:
         def get_conversation_by_id(
             conversation_id: str,
             current_user: UserEntity = Depends(get_authenticated_user),
-            conversation_repository: MongoConversationRepository = Depends(get_conversation_mongo_repository),
+            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
         ):
             logger.info(f"Retrieving conversation {conversation_id} for user {current_user.id}")
 
             # Fetch from MongoDB
-            conversation_doc = conversation_repository.get_conversations_collection().find_one({"_id": conversation_id})
+            conversation_doc = nosql_repo.get_conversations_collection().find_one({"_id": conversation_id, "user_id": str(current_user.id)})
 
             if not conversation_doc:
                 raise SentraHTTPException(
@@ -175,57 +181,39 @@ class ConversationController:
             
         @self.router.put(
             "/{conversation_id}",
-            response_model=ConversationModel,
+            response_model=UpdateConversationResponse,
             description="Update title and description of a conversation"
         )
         def update_conversation(
             conversation_id: str,
             request: UpdateConversationRequest,
             current_user: UserEntity = Depends(get_authenticated_user),
-            mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
+            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
             db: Session = Depends(get_db)
         ):
-            logger.info(f"Updating conversation {conversation_id} for user {current_user.id}")
+            try:
+                logger.info(f"Updating conversation {conversation_id} for user {current_user.id}")
 
-            # SQL check + update
-            sql_repo = ConversationRepository(db)
-            service = ConversationService(sql_repo)
-            conversation = service.get_conversation_by_id(conversation_id)
+                # SQL check + update
+                sql_repo = ConversationRepository(db)
+                service = ConversationService(sql_repo)
 
-            if not conversation or str(conversation.user_id) != str(current_user.id):
+                updated_sql = service.update_conversation(
+                    conversation_id=conversation_id,
+                    title=request.title,
+                    description=request.description
+                )
+                nosql_repo.update_conversation(conversation_id, request.dict(exclude_unset=True))
+            except Exception as e:
+                logger.error(f"SQL update failed: {str(e)}")
                 raise SentraHTTPException(
                     status_code=404,
                     code="CONVERSATION_NOT_FOUND",
                     message="Conversation not found.",
-                    details=f"No conversation found with ID {conversation_id} for user {current_user.id}",
+                    details=str(e),
                     path=f"/conversations/{conversation_id}",
                     suggestion="Check the conversation ID and try again."
                 )
-
-            updated_sql = service.update_conversation(
-                conversation_id=conversation_id,
-                title=request.title,
-                description=request.description
-            )
-
-            # Mongo update
-            mongo_doc = mongo_repo.get_conversations_collection().find_one({"_id": conversation_id})
-            if not mongo_doc:
-                raise SentraHTTPException(
-                    status_code=404,
-                    code="CONVERSATION_NOT_FOUND",
-                    message="Conversation not found.",
-                    details=f"No conversation found with ID {conversation_id} in MongoDB",
-                    path=f"/conversations/{conversation_id}",
-                    suggestion="Check the conversation ID and try again."
-                )
-
-            update_fields = request.dict(exclude_unset=True)
-            mongo_repo.get_conversations_collection().update_one(
-                {"_id": conversation_id},
-                {"$set": update_fields}
-            )
-
             return UpdateConversationResponse(
                 conversation_id=str(updated_sql.id),
                 title=updated_sql.title,
@@ -266,7 +254,7 @@ class ConversationController:
                 service.delete_conversation(conversation_id)
                 logger.info(f"Deleted conversation {conversation_id} from SQL")
                 sql_deleted = True
-            except ValueError as e:
+            except Exception as e:
                 logger.error(f"SQL delete failed: {str(e)}")
  
             # Mongo delete
