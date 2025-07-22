@@ -10,7 +10,7 @@ class TokenData(BaseModel):
     username: str | None = None
     
 class UserModel(BaseModel):
-    id: str | None = None  # 👈 UUID como string para frontend
+    id: str | None = None  # UUID as string for frontend compatibility
     username: str
     email: EmailStr | None = None
     full_name: str | None = None
