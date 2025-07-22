@@ -37,5 +37,5 @@ class ConversationService:
         if not conversation:
             raise ValueError("Conversation not found")
         
-        self.repository.delete(conversation)
+        self.repository.delete(conversation_id)
         return {"message": "Conversation deleted successfully"}

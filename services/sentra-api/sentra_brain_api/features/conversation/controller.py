@@ -243,38 +243,50 @@ class ConversationController:
             nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
             db: Session = Depends(get_db)
         ):
-            logger.info(f"Deleting conversation {conversation_id} for user {current_user.id}")
+            sql_deleted = False
+            nosql_deleted = False
+            try:
+                logger.info(f"Deleting conversation {conversation_id} for user {current_user.id}")
 
-            # SQL check + delete
-            sql_repo = ConversationRepository(db)
-            service = ConversationService(sql_repo)
-            conversation = service.get_conversation(conversation_id)
+                # SQL check + delete
+                sql_repo = ConversationRepository(db)
+                service = ConversationService(sql_repo)
+                conversation = service.get_conversation(conversation_id)
 
-            if not conversation or str(conversation.user_id) != str(current_user.id):
+                if not conversation or str(conversation.user_id) != str(current_user.id):
+                    raise SentraHTTPException(
+                        status_code=404,
+                        code="CONVERSATION_NOT_FOUND",
+                        message="Conversation not found.",
+                        details=f"No conversation found with ID {conversation_id} for user {current_user.id}",
+                        path=f"/conversations/{conversation_id}",
+                        suggestion="Check the conversation ID and try again."
+                    )
+
+                service.delete_conversation(conversation_id)
+                logger.info(f"Deleted conversation {conversation_id} from SQL")
+                sql_deleted = True
+            except ValueError as e:
+                logger.error(f"SQL delete failed: {str(e)}")
+ 
+            # Mongo delete
+            try:
+                nosql_repo.get_conversations_collection().delete_one({"_id": conversation_id})
+                nosql_deleted = True
+                logger.info(f"Deleted conversation {conversation_id} from NoSQL")
+            except Exception as e:
+                logger.error(f"NoSQL delete failed: {str(e)}")
+
+            if not sql_deleted and not nosql_deleted:
                 raise SentraHTTPException(
                     status_code=404,
                     code="CONVERSATION_NOT_FOUND",
-                    message="Conversation not found.",
-                    details=f"No conversation found with ID {conversation_id} for user {current_user.id}",
+                    message="Conversation not found in both SQL nor NoSQL.",
+                    details=f"No conversation found with ID {conversation_id}",
                     path=f"/conversations/{conversation_id}",
                     suggestion="Check the conversation ID and try again."
                 )
-
-            service.delete_conversation(conversation_id)
-
-            # Mongo delete
-            try:
-                nosql_repo.get_conversations_collection().delete_one({"_id": conversation_id})                
-            except Exception as e:
-                raise SentraHTTPException(
-                    status_code=500,
-                    code="MONGO_DELETE_FAILED",
-                    message="Failed to delete conversation from MongoDB.",
-                    details=str(e),
-                    path=f"/conversations/{conversation_id}",
-                    suggestion="Check MongoDB connection and try again."
-                )
-
+            logger.info(f"Successfully deleted conversation {conversation_id} for user {current_user.id}")
             return DeleteConversationResponse(
                 success=True,
                 message="Conversation deleted successfully"
