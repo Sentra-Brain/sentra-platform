@@ -1,12 +1,17 @@
+// src/components/Sidebar.tsx
 import React, { useState } from 'react';
-import { useChat } from '../context/ChatContext';
+import { useChat } from '../hooks/useChat';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import UserMenu from './UserMenu';
 import './Sidebar.css';
 
 const Sidebar: React.FC = () => {
-  const { conversations, currentConversationId, setCurrentConversationId, newConversation } =
-    useChat();
+  const {
+    conversations,
+    currentConversation,
+    selectConversation,
+    createConversation,
+  } = useChat();
   const [collapsed, setCollapsed] = useState(false);
 
   return (
@@ -29,7 +34,10 @@ const Sidebar: React.FC = () => {
       {!collapsed && (
         <div id="sidebar-content" className="sidebar-content">
           <div className="sidebar-header">
-            <button className="new-conv-btn" onClick={newConversation}>
+            <button
+              className="new-conv-btn"
+              onClick={() => createConversation({ content: 'Hi!' })}
+            >
               + New Chat
             </button>
           </div>
@@ -37,15 +45,18 @@ const Sidebar: React.FC = () => {
             {conversations.map((conv) => (
               <li
                 key={conv.id}
-                className={`conversation-item ${conv.id === currentConversationId ? 'active' : ''}`}
-                onClick={() => setCurrentConversationId(conv.id)}
+                className={`conversation-item ${
+                  currentConversation?.id === conv.id ? 'active' : ''
+                }`}
+                onClick={() => selectConversation(conv.id)}
               >
-                {conv.name}
+                {conv.title || 'Untitled'}
               </li>
             ))}
           </ul>
         </div>
       )}
+
       <div className="sidebar-footer">
         <UserMenu />
       </div>

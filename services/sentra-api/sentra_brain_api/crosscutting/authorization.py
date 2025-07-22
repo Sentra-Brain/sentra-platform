@@ -6,6 +6,7 @@ from sqlalchemy.orm import Session
 from sentra_brain_api.core.config import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.logging import get_logger
+from sentra_brain_api.domain.user_entity import UserEntity
 from sentra_brain_api.features.auth.models import TokenData
 from sentra_brain_api.features.user.repository import UserRepository
 from sentra_brain_api.infra.postgres_service import get_db
@@ -16,7 +17,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 
 def get_authenticated_user(token: str = Depends(oauth2_scheme),
-                            db: Session = Depends(get_db)):
+                            db: Session = Depends(get_db)) -> UserEntity:
     user_repo = UserRepository(db)
 
     try:

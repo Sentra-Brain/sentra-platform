@@ -1,14 +1,16 @@
 from pydantic import BaseModel, EmailStr
 
+from sentra_brain_api.domain.user_entity import UserEntity
+
 class Token(BaseModel):
     access_token: str
     token_type: str
 
 class TokenData(BaseModel):
     username: str | None = None
-
-class User(BaseModel):
-    id: int | None = None
+    
+class UserModel(BaseModel):
+    id: str | None = None  # UUID as string for frontend compatibility
     username: str
     email: EmailStr | None = None
     full_name: str | None = None
@@ -18,12 +20,17 @@ class User(BaseModel):
     model_config = {
         "from_attributes": True
     }
-        
+
     @classmethod
-    def model_validate(cls, obj, **kwargs):
-        data = obj.__dict__.copy()
-        data["roles"] = obj.get_roles() if hasattr(obj, "get_roles") else []
-        return super().model_validate(data, **kwargs)
+    def from_entity(cls, user: UserEntity) -> "UserModel":
+        return cls(
+            id=str(user.id) if user.id else None,
+            username=user.username,
+            email=user.email,
+            full_name=user.full_name,
+            disabled=user.disabled,
+            roles=user.get_roles() if hasattr(user, "get_roles") else []
+        )
 
 
 class SignupModel(BaseModel):
@@ -37,12 +44,12 @@ class SignupModel(BaseModel):
     }
 
 class SignupResponse(BaseModel):
-    user: User
+    user: UserModel
     message: str
     
     model_config = {
         "from_attributes": True
     }
 
-class UserUpdate(User):
+class UserUpdate(UserModel):
     password: str | None = None

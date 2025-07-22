@@ -1,4 +1,4 @@
-# constants.py
+# core/constants.py
 APP_NAME = "sentra_brain_api"
 TITLE = "Sentra Brain API"
 DESCRIPTION = "API for Sentra Brain platform."

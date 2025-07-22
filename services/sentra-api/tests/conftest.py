@@ -10,6 +10,7 @@ os.environ.update({
     "SECRET_KEY": "dummy_secret_key",
     "ALGORITHM": "HS256",
     "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
+    "MONGO_URL": "mongodb://localhost:27017"
 })
 from sentra_brain_api.core.config import settings
 from sentra_brain_api.infra.postgres_service import get_db, init_db
@@ -24,8 +25,8 @@ def load_settings():
     settings.initial_admin_username = "admin"
     settings.initial_admin_email = "admin@example.com"
     settings.initial_admin_password = "P@ssw0rd!"
+    settings.mongo_url = "mongodb://localhost:27017"
 
-    
     # Mock init_db to avoid its execution
     # monkeypatch.setattr('sentra_brain_api.infra.postgres_service.init_db', lambda: None)
     yield

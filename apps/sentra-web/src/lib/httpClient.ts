@@ -1,4 +1,6 @@
 // src/lib/httpClient.ts
+// This file defines the HTTP client for making API requests 
+// to the Sentra Brain API
 import axios from 'axios';
 import type { ApiErrorResponse } from './errorTypes';
 
@@ -24,14 +26,19 @@ const client = axios.create({
   timeout: 10000,
 });
 
+// Token runtime in memory
+let runtimeToken: string | null = null;
+
+export function setAuthToken(token: string | null) {
+  runtimeToken = token;
+}
 
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token && config.headers) {
-    config.headers.set?.('Authorization', `Bearer ${token}`);
-  }
-
-  return config;
+  const token = runtimeToken ?? localStorage.getItem('jwt') ?? sessionStorage.getItem('jwt');
+    if (token && config.headers) {
+      config.headers.set?.('Authorization', `Bearer ${token}`);
+    }
+    return config;
 });
 
 client.interceptors.response.use(

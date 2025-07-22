@@ -11,11 +11,11 @@ from sentra_brain_api.crosscutting import logging
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
+from sentra_brain_api.features.conversation.conversation_management_controller import ConversationManagementController
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.infra import postgres_service
 import os
-import uvicorn
 
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 
@@ -57,12 +57,14 @@ def create_app(
     admin_controller = AdminController()
     settings_controller = SettingsController()
     public_settings_controller = PublicSettingsController()
+    conversation_management_controller = ConversationManagementController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(settings_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
+    app.include_router(conversation_management_controller.router, prefix="/conversations", tags=["conversations"])
 
     return app
 
@@ -75,8 +77,10 @@ async def redirect_to_swagger():
 
 
 if __name__ == "__main__":
+    import uvicorn
     debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
     logging.configure_logging(debug=debug_mode)
+    logger = logging.get_logger("sentra_brain_api")
 
     if debug_mode:
         logger.info("✅ Debug mode enabled: waiting for debugger on port 5678")

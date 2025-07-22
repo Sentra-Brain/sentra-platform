@@ -5,7 +5,7 @@ from jose import jwt
 from fastapi import HTTPException, status
 from sentra_brain_api.core.config import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.domain.user import UserEntity
+from sentra_brain_api.domain.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.user.repository import UserRepository
 
