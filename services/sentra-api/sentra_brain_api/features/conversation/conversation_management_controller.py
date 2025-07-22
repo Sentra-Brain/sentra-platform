@@ -83,7 +83,8 @@ class ConversationManagementController:
             nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
         ):
             service = self._get_service(mongo_repo=nosql_repo)
-            return service.get_conversation(current_user, conversation_id)
+            conversation_data = service.get_conversation(current_user, conversation_id)
+            return ConversationModel(**conversation_data)
 
         @self.router.put(
             "/{conversation_id}",

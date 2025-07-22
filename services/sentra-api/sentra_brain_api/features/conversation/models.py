@@ -43,14 +43,15 @@ class MessageModel(BaseModel):
 
 class ConversationModel(BaseModel):
     id: str = Field(..., alias="_id")
-    title: Optional[str]
-    description: Optional[str]
-    initial_prompt: Optional[str]
+    title: Optional[str] = None
+    description: Optional[str] = None
+    initial_prompt: Optional[str] = None
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None 
     messages: List[MessageModel]
 
     model_config = {
+        "populate_by_name": True,
         "from_attributes": True
     }
 
