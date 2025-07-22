@@ -12,14 +12,14 @@ const MessageInput: React.FC = () => {
   const handleSend = async () => {
     if (!value.trim() || !currentConversation) return;
 
-    // Here you'd normally call the backend to send a message
+    // TODO: Here you'd normally call the backend to send a message
     // For now, just simulate adding a user message
     // This could later call: conversationService.addMessage(conversation_id, { ... })
     console.warn('TODO: integrate message sending API');
 
-    // Temporary mock logic (to simulate frontend-only messaging):
+    // TODO: Temporary mock logic (to simulate frontend-only messaging):
     await updateConversation(currentConversation.id, {
-      messages: [...(currentConversation.messages || []), { sender: 'user', content: value }],
+      initial_prompt: value, // ← TEMP HACK, replace with real message handler later
     });
 
     setValue('');
