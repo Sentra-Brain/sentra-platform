@@ -37,5 +37,6 @@ class Settings(BaseSettings):
 try: # Validate settings on import
     settings = Settings()
 except ValidationError as e:
-    logger.error(f"Configuration error: {e}")
+    error_details = "; ".join([f"{err['loc'][0]}: {err['msg']}" for err in e.errors()])
+    logger.error(f"Configuration error: {error_details}")
     raise
