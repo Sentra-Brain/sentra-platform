@@ -19,7 +19,7 @@ const MessageInput: React.FC = () => {
 
     // Temporary mock logic (to simulate frontend-only messaging):
     await updateConversation(currentConversation.id, {
-      initial_prompt: value, // ← TEMP HACK, replace with real message handler later
+      messages: [...(currentConversation.messages || []), { sender: 'user', content: value }],
     });
 
     setValue('');
