@@ -4,6 +4,7 @@ from datetime import datetime
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
 
+from sentra_brain_api.core.base_mongo_model import BaseMongoModel
 
 
 class CreateConversationRequest(BaseModel):
@@ -17,19 +18,21 @@ class CreateConversationRequest(BaseModel):
 
 
 class CreateConversationResponse(BaseModel):
-    conversation_id: str = Field(..., description="Unique identifier of the conversation")
-    
+    conversation_id: str = Field(..., alias="id", description="Unique identifier of the conversation")
+
     model_config = {
-        "from_attributes": True
+        "from_attributes": True,
+        "populate_by_name": True
     }
 
 class ConversationListItemModel(BaseModel):
-    conversation_id: str = Field(..., description="Unique identifier of the conversation")
+    conversation_id: str = Field(..., alias="id", description="Unique identifier of the conversation")
     title: str = Field(..., description="Conversation title")
     created_at: datetime = Field(..., description="Creation timestamp")
 
     model_config = {
-        "from_attributes": True
+        "from_attributes": True,
+        "populate_by_name": True
     }
 class MessageModel(BaseModel):
     role: Literal["user", "assistant", "system"] = Field(..., description="Role of the message sender")
@@ -40,21 +43,13 @@ class MessageModel(BaseModel):
         "from_attributes": True
     }
 
-
-class ConversationModel(BaseModel):
-    id: str = Field(..., alias="_id")
+class ConversationModel(BaseMongoModel):   
     title: Optional[str] = None
     description: Optional[str] = None
     initial_prompt: Optional[str] = None
     created_at: datetime
     updated_at: Optional[datetime] = None 
     messages: List[MessageModel]
-
-    model_config = {
-        "populate_by_name": True,
-        "from_attributes": True
-    }
-
 
 class UpdateConversationRequest(BaseModel):
     title: Optional[str] = Field(None, description="Updated title for the conversation")
@@ -66,7 +61,8 @@ class UpdateConversationResponse(BaseModel):
     description: Optional[str] = Field(None, description="Updated description of the conversation")
 
     model_config = {
-        "from_attributes": True
+        "from_attributes": True,
+        "populate_by_name": True
     }
 
 class DeleteConversationResponse(BaseModel):

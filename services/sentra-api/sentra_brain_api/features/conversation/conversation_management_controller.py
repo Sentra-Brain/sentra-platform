@@ -84,7 +84,8 @@ class ConversationManagementController:
         ):
             service = self._get_service(mongo_repo=nosql_repo)
             conversation_data = service.get_conversation(current_user, conversation_id)
-            return ConversationModel(**conversation_data)
+            model = ConversationModel.from_mongo(conversation_data)
+            return model.model_dump()
 
         @self.router.put(
             "/{conversation_id}",
