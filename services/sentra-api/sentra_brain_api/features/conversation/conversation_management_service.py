@@ -2,6 +2,7 @@ from datetime import datetime, timezone, timedelta
 from typing import List
 
 from sentra_brain_api.core.exceptions import SentraHTTPException
+from sentra_brain_api.crosscutting.logging import get_logger
 from sentra_brain_api.domain.conversation_entity import ConversationEntity
 from sentra_brain_api.domain.user_entity import UserEntity
 from sentra_brain_api.features.conversation.repository import ConversationRepository
@@ -11,6 +12,8 @@ from sentra_brain_api.features.conversation.models import (
     UpdateConversationRequest,
 )
 from sentra_brain_api.infra.mongo_conversation_repository import MongoConversationRepository
+
+logger = get_logger("sentra_brain_api")
 
 class ConversationManagementService:
     def __init__(self, sql_repo: ConversationRepository, mongo_repo: MongoConversationRepository):
@@ -27,6 +30,7 @@ class ConversationManagementService:
             )
             conversation = self.sql_service.create_conversation(conversation)
         except Exception as e:
+            logger.error(f"Failed to create conversation in SQL: {str(e)}")
             raise SentraHTTPException(
                 status_code=500,
                 code="PG_SAVE_FAILED",
@@ -53,18 +57,18 @@ class ConversationManagementService:
                 "timestamp": (datetime.now(timezone.utc) + delta).isoformat()
             })
 
-            self.mongo_repo.create_conversation_with_messages(
+            self.mongo_repo.create_conversation(
                 conversation_id=str(conversation.id),
                 user_id=str(user.id),
                 messages=messages,
-                metadata={
-                    "title": request.title,
-                    "description": request.description,
-                    "initial_prompt": request.initial_prompt,
-                    "created_at": datetime.now(timezone.utc).isoformat()
-                }
+                title=request.title,
+                description=request.description,
+                initial_prompt=request.initial_prompt,
+                created_at=datetime.now(timezone.utc).isoformat()
             )
+
         except Exception as e:
+            logger.error(f"Failed to store conversation messages in MongoDB: {str(e)}")
             raise SentraHTTPException(
                 status_code=500,
                 code="MONGO_INSERT_FAILED",
@@ -79,11 +83,8 @@ class ConversationManagementService:
     def get_user_conversations(self, user: UserEntity) -> List[ConversationEntity]:
         return self.sql_service.get_user_conversations(user_id=user.id)
 
-    def get_conversation_data(self, user: UserEntity, conversation_id: str) -> dict:
-        doc = self.mongo_repo.get_conversations_collection().find_one({
-            "_id": conversation_id,
-            "user_id": str(user.id)
-        })
+    def get_conversation(self, user: UserEntity, conversation_id: str) -> dict:
+        doc = self.mongo_repo.get_conversation_by_id(conversation_id, str(user.id))
 
         if not doc:
             raise SentraHTTPException(
@@ -122,6 +123,7 @@ class ConversationManagementService:
             return updated_sql
 
         except Exception as e:
+            logger.error(f"Failed to update conversation {conversation_id}: {str(e)}")
             raise SentraHTTPException(
                 status_code=500,
                 code="UPDATE_FAILED",
@@ -147,8 +149,9 @@ class ConversationManagementService:
                 )
             self.sql_service.delete_conversation(conversation_id)
             sql_deleted = True
-        except Exception:
-            pass  # log if needed
+        except Exception as e:
+            logger.error(f"Failed to delete conversation {conversation_id} from SQL: {str(e)}")
+            pass  
 
         try:
             result = self.mongo_repo.get_conversations_collection().delete_one({
@@ -156,8 +159,9 @@ class ConversationManagementService:
                 "user_id": str(user.id)
             })
             mongo_deleted = result.deleted_count > 0
-        except Exception:
-            pass  # log if needed
+        except Exception as e:
+            logger.error(f"Failed to delete conversation {conversation_id} from MongoDB: {str(e)}")
+            pass
 
         if not sql_deleted and not mongo_deleted:
             raise SentraHTTPException(

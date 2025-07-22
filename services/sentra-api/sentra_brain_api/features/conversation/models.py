@@ -42,7 +42,7 @@ class MessageModel(BaseModel):
 
 
 class ConversationModel(BaseModel):
-    conversation_id: str
+    id: str = Field(..., alias="_id")
     title: Optional[str]
     description: Optional[str]
     initial_prompt: Optional[str]

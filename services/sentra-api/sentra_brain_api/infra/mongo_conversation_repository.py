@@ -15,6 +15,18 @@ class MongoConversationRepository:
     def get_conversations_collection(self):
         return self.db["conversations"]
 
+    def get_conversation_by_id(self, conversation_id: str, user_id: str) -> dict:
+        collection = self.get_conversations_collection()
+        doc = collection.find_one({
+            "_id": conversation_id,
+            "user_id": user_id
+        })
+
+        if not doc:
+            logger.warning(f"[Mongo] Conversation not found with ID {conversation_id} for user {user_id}")
+        return doc
+
+
     def add_message_to_conversation(self, conversation_id: str, message: dict):
         collection = self.get_conversations_collection()
         result = collection.update_one(
@@ -23,28 +35,16 @@ class MongoConversationRepository:
             upsert=True
         )
         return result.modified_count
-
-    def create_conversation(self, conversation_id: str, user_id: int, first_message: dict):
-        collection = self.get_conversations_collection()
-        doc = {
-            "_id": conversation_id,
-            "user_id": user_id,
-            "messages": [first_message],
-        }
-        collection.insert_one(doc)
-        logger.info(f"[Mongo] Created conversation document {conversation_id} for user {user_id}")
-        return doc
     
-    def create_conversation_with_messages(self, conversation_id: str, user_id: str, messages: list[dict], metadata: dict = None):
+    def create_conversation(self, conversation_id: str, user_id: str, messages: list[dict], **fields):
         collection = self.get_conversations_collection()
         doc = {
             "_id": conversation_id,
             "user_id": user_id,
             "created_at": datetime.now(timezone.utc).isoformat(),
-            "messages": messages
+            "messages": messages,
+            **{k: v for k, v in fields.items() if v is not None} 
         }
-        if metadata:
-            doc["metadata"] = metadata
         collection.insert_one(doc)
         logger.info(f"[Mongo] Created conversation with {len(messages)} messages")
         return doc
