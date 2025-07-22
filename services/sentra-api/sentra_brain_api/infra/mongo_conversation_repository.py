@@ -1,4 +1,4 @@
-# sentra_brain_api/infra/mongo_service.py
+# sentra_brain_api/infra/mongo_conversation_repository.py
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from sentra_brain_api.core.config import settings
