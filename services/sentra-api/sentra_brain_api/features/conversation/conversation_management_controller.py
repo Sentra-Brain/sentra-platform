@@ -50,7 +50,7 @@ class ConversationManagementController:
         ):
             service = self._get_service(db=db, mongo_repo=nosql_repo)
             conversation_id = service.create_conversation(current_user, body)
-            return CreateConversationResponse(conversation_id=conversation_id)
+            return CreateConversationResponse(id=conversation_id)
 
         @self.router.get(
             "/",
