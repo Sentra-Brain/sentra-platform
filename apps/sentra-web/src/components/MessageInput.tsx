@@ -18,7 +18,7 @@ const MessageInput: React.FC = () => {
     console.warn('TODO: integrate message sending API');
 
     // Temporary mock logic (to simulate frontend-only messaging):
-    await updateConversation(currentConversation.conversation_id, {
+    await updateConversation(currentConversation.id, {
       initial_prompt: value, // ← TEMP HACK, replace with real message handler later
     });
 

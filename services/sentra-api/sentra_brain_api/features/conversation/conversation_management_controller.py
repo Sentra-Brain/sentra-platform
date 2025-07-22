@@ -65,7 +65,7 @@ class ConversationManagementController:
             conversations = service.get_user_conversations(current_user)
             return [
                 ConversationListItemModel(
-                    conversation_id=str(conv.id),
+                    id=str(conv.id),
                     title=conv.title or "Untitled",
                     created_at=conv.created_at
                 )

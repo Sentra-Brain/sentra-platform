@@ -44,11 +44,11 @@ const Sidebar: React.FC = () => {
           <ul className="conversation-list">
             {conversations.map((conv) => (
               <li
-                key={conv.conversation_id}
+                key={conv.id}
                 className={`conversation-item ${
-                  currentConversation?.conversation_id === conv.conversation_id ? 'active' : ''
+                  currentConversation?.id === conv.id ? 'active' : ''
                 }`}
-                onClick={() => selectConversation(conv.conversation_id)}
+                onClick={() => selectConversation(conv.id)}
               >
                 {conv.title || 'Untitled'}
               </li>

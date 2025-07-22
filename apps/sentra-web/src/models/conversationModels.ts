@@ -1,13 +1,13 @@
 // src/models/conversationModels.ts
 // This file defines the models for conversation-related data structures
 export type ConversationListItem = {
-  conversation_id: string;
+  id: string;
   title: string;
   created_at: string;
 };
 
 export type ConversationDetails = {
-  conversation_id: string;
+  id: string;
   title: string;
   description?: string;
   initial_prompt?: string;
@@ -27,7 +27,7 @@ export type CreateConversationRequest = {
 };
 
 export type CreateConversationResponse = {
-  conversation_id: string;
+  id: string;
 };
 
 export type UpdateConversationRequest = {

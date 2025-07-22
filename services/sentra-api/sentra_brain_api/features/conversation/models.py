@@ -18,7 +18,7 @@ class CreateConversationRequest(BaseModel):
 
 
 class CreateConversationResponse(BaseModel):
-    conversation_id: str = Field(..., alias="id", description="Unique identifier of the conversation")
+    id: str = Field(..., alias="id", description="Unique identifier of the conversation")
 
     model_config = {
         "from_attributes": True,
@@ -26,7 +26,7 @@ class CreateConversationResponse(BaseModel):
     }
 
 class ConversationListItemModel(BaseModel):
-    conversation_id: str = Field(..., alias="id", description="Unique identifier of the conversation")
+    id: str = Field(..., alias="id", description="Unique identifier of the conversation")
     title: str = Field(..., description="Conversation title")
     created_at: datetime = Field(..., description="Creation timestamp")
 

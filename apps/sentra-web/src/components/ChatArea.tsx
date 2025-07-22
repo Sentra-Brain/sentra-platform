@@ -15,7 +15,7 @@ const ChatArea: React.FC = () => {
       {currentConversation ? (
         <div className="messages">
           {messages.map((msg) => (
-            <div key={msg.id} className={`message-bubble ${msg.role}`}>
+            <div key={msg.timestamp.toString()} className={`message-bubble ${msg.role}`}>
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
             </div>
           ))}

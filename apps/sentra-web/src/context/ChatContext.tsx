@@ -33,7 +33,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const createConversation = async (data: CreateConversationRequest) => {
-    const { conversation_id } = await conversationService.create(data);
+    const { id: conversation_id } = await conversationService.create(data);
     await loadConversations();
     await selectConversation(conversation_id);
   };
@@ -41,7 +41,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const updateConversation = async (id: string, data: UpdateConversationRequest) => {
     await conversationService.update(id, data);
     await loadConversations();
-    if (currentConversation?.conversation_id === id) {
+    if (currentConversation?.id === id) {
       await selectConversation(id);
     }
   };
@@ -49,7 +49,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const deleteConversation = async (id: string) => {
     await conversationService.remove(id);
     await loadConversations();
-    if (currentConversation?.conversation_id === id) {
+    if (currentConversation?.id === id) {
       setCurrentConversation(null);
     }
   };
