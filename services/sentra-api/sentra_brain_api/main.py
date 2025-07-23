@@ -6,7 +6,7 @@ from fastapi.responses import RedirectResponse
 from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
-from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE
+from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
 from sentra_brain_api.crosscutting import logging
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController
@@ -34,7 +34,7 @@ def create_app(
     app = FastAPI(
         title=TITLE,
         description=DESCRIPTION,
-        version="0.1",
+        version=VERSION,
         contact=CONTACT,
         license_info=LICENSE_INFO,
         swagger_ui_parameters=SWAGGER_UI_PARAMETERS,

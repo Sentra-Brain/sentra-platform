@@ -59,6 +59,7 @@ jobs:
         working-directory: apps/sentra-web
       
     steps:
+      - uses: actions/checkout@v4
 
       - name: Extract version from package.json
         id: get_version
