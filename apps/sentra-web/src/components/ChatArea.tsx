@@ -1,5 +1,5 @@
 // src/components/ChatArea.tsx
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useChat } from '../hooks/useChat';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -10,6 +10,12 @@ const ChatArea: React.FC = () => {
 
   const messages = currentConversation?.messages || [];
 
+  const endOfMessagesRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [currentConversation?.messages.length]);
+  
   return (
     <main className="chat-area">
       {currentConversation ? (
@@ -19,6 +25,7 @@ const ChatArea: React.FC = () => {
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
             </div>
           ))}
+          <div ref={endOfMessagesRef} />
         </div>
       ) : (
         <div className="no-conversation-message">
