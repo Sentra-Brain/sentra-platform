@@ -64,9 +64,7 @@ class ConversationEngine:
 
 
     async def _llama_stream(self, payload: dict):
-        response = await self.llama_client.chat_completion(payload)
-
-        async for line in response.aiter_lines():
+        async for line in self.llama_client.chat_completion(payload):
             if not line.strip():
                 continue
 
@@ -82,6 +80,8 @@ class ConversationEngine:
                 logger.warning(f"Streaming JSON parse error: {e} | line: {line!r}")
             except Exception as e:
                 logger.error(f"Unexpected error in streaming loop: {e}")
+
+
 
 
     async def _load_context(self, user_id: str, conversation_id: str) -> list[dict]:
