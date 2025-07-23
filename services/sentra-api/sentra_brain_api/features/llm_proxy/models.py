@@ -1,4 +1,4 @@
-# sentra_brain_api/features/openai_proxy/models.py
+# sentra_brain_api/features/llm_proxy/models.py
 
 from datetime import datetime
 from typing import List, Optional, Union, Literal, Dict, Any

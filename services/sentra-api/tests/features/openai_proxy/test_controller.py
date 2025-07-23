@@ -4,7 +4,7 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from fastapi.testclient import TestClient
 from sentra_brain_api.main import create_app
-from sentra_brain_api.core.conversation_engine.openai_proxy.models import (
+from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatMessage,
