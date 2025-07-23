@@ -55,7 +55,9 @@ class PromptFactory:
         # 5. Final payload
         return {
             "messages": messages,
-            "stream": stream,
+            # "stream": stream,
+            "stream": True,  # Always stream for LlamaServerClient
+            # TODO: Add support for non-streaming if needed
             "temperature": temperature,
             "top_p": top_p,
             "presence_penalty": presence_penalty,
