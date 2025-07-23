@@ -1,4 +1,4 @@
-import React, {  useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { conversationService } from '../services/conversationService';
 import type {
   ConversationListItem,
@@ -16,6 +16,10 @@ export type ChatContextType = {
   createConversation: (data: CreateConversationRequest) => Promise<void>;
   updateConversation: (id: string, data: UpdateConversationRequest) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
+  appendUserMessage: (text: string) => void;
+  appendEmptyAssistantMessage: () => void;
+  appendToLastAssistantMessage: (delta: string) => void;
+  replaceLastAssistantMessage: (fullContent: string) => void;
 };
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
@@ -54,6 +58,78 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const appendUserMessage = (text: string) => {
+    if (!currentConversation) return;
+
+    setCurrentConversation({
+      ...currentConversation,
+      messages: [
+        ...currentConversation.messages,
+        {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          role: 'user',
+          content: text,
+        },
+      ],
+    });
+  };
+
+  const appendEmptyAssistantMessage = () => {
+    if (!currentConversation) return;
+
+    setCurrentConversation({
+      ...currentConversation,
+      messages: [
+        ...currentConversation.messages,
+        {
+          id: crypto.randomUUID(),
+          timestamp: Date.now(),
+          role: 'assistant',
+          content: '',
+        },
+      ],
+    });
+  };
+
+  const appendToLastAssistantMessage = (delta: string) => {
+    if (!currentConversation) return;
+
+    const messages = [...currentConversation.messages];
+    const lastIndex = messages.length - 1;
+
+    if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return;
+
+    messages[lastIndex] = {
+      ...messages[lastIndex],
+      content: messages[lastIndex].content + delta,
+    };
+
+    setCurrentConversation({
+      ...currentConversation,
+      messages,
+    });
+  };
+
+  const replaceLastAssistantMessage = (fullContent: string) => {
+    if (!currentConversation) return;
+
+    const messages = [...currentConversation.messages];
+    const lastIndex = messages.length - 1;
+
+    if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return;
+
+    messages[lastIndex] = {
+      ...messages[lastIndex],
+      content: fullContent,
+    };
+
+    setCurrentConversation({
+      ...currentConversation,
+      messages,
+    });
+  };
+
   useEffect(() => {
     loadConversations();
   }, []);
@@ -68,6 +144,10 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         createConversation,
         updateConversation,
         deleteConversation,
+        appendUserMessage,
+        appendEmptyAssistantMessage,
+        appendToLastAssistantMessage,
+        replaceLastAssistantMessage,
       }}
     >
       {children}

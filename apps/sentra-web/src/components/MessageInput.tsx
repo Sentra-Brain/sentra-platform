@@ -3,27 +3,43 @@ import React, { useState, useRef } from 'react';
 import { useChat } from '../hooks/useChat';
 import { ArrowUp } from 'lucide-react';
 import './MessageInput.css';
+import { chatService } from '../services/chatService';
 
 const MessageInput: React.FC = () => {
-  const { currentConversation, updateConversation } = useChat();
+  const { currentConversation, appendUserMessage, appendEmptyAssistantMessage, appendToLastAssistantMessage } = useChat();
   const [value, setValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleSend = async () => {
     if (!value.trim() || !currentConversation) return;
 
-    // TODO: Here you'd normally call the backend to send a message
-    // For now, just simulate adding a user message
-    // This could later call: conversationService.addMessage(conversation_id, { ... })
-    console.warn('TODO: integrate message sending API');
-
-    // TODO: Temporary mock logic (to simulate frontend-only messaging):
-    await updateConversation(currentConversation.id, {
-      initial_prompt: value, // ← TEMP HACK, replace with real message handler later
-    });
-
+    const userInput = value.trim();
     setValue('');
+
+    // Paso 1: Añadir mensaje de usuario
+    appendUserMessage(userInput);
+
+    // Paso 2: Añadir mensaje de assistant vacío
+    appendEmptyAssistantMessage();
+
+    // Paso 3: Consumir el stream y actualizar la respuesta
+    chatService.sendMessageStream(
+      {
+        conversation_id: currentConversation.id,
+        content: userInput,
+      },
+      (delta) => {
+        if (!delta.final) {
+          appendToLastAssistantMessage(delta.content);
+        }
+      },
+      (err) => {
+        console.error('Streaming error:', err);
+        appendToLastAssistantMessage('\n[Error generando respuesta]');
+      }
+    );
   };
+
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
