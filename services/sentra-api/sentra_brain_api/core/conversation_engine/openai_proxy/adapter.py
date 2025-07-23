@@ -1,4 +1,4 @@
-# sentra_brain_api/features/openai_proxy/adapter.py
+# sentra_brain_api/core/conversation_engine/openai_proxy/adapter.py
 
 import json
 import time
@@ -6,7 +6,8 @@ import uuid
 from typing import AsyncGenerator, Dict, Any, Optional
 import httpx
 from sentra_brain_api.crosscutting import logging
-from sentra_brain_api.features.openai_proxy.models import (
+from sentra_brain_api.core.config import settings
+from sentra_brain_api.core.conversation_engine.openai_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatCompletionChoice,
@@ -19,8 +20,8 @@ logger = logging.get_logger("openai_proxy")
 
 
 class LlamaServerClient:
-    def __init__(self, base_url: str = "http://localhost:11434"):
-        self.base_url = base_url.rstrip("/")
+    def __init__(self, base_url: str = None):
+        self.base_url = (base_url or settings.llama_server_url).rstrip("/")
         self.client = httpx.AsyncClient(timeout=300.0)  # 5 minute timeout
     
     async def close(self):

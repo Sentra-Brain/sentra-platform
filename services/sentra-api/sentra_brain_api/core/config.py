@@ -28,6 +28,9 @@ class Settings(BaseSettings):
     secret_key: str = Field(..., json_schema_extra={"env": "SECRET_KEY"})
     algorithm: str = Field(..., json_schema_extra={"env": "ALGORITHM"})
     access_token_expire_minutes: int = Field(..., json_schema_extra={"env": "ACCESS_TOKEN_EXPIRE_MINUTES"})
+    
+    # LLM/AI Services
+    llama_server_url: str = Field(default="http://localhost:11434", json_schema_extra={"env": "LLAMA_SERVER_URL"})
 
     model_config = SettingsConfigDict(
         env_file=".env",

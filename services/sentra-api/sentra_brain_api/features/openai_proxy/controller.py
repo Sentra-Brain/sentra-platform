@@ -3,22 +3,20 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting import logging
-from sentra_brain_api.features.openai_proxy.models import (
+from sentra_brain_api.core.config import settings
+from sentra_brain_api.core.conversation_engine.openai_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse
 )
-from sentra_brain_api.features.openai_proxy.adapter import LlamaServerClient
+from sentra_brain_api.core.conversation_engine.openai_proxy.adapter import LlamaServerClient
 import json
-import os
 
 logger = logging.get_logger("openai_proxy")
 
 
 def get_llama_client() -> LlamaServerClient:
     """Dependency function to get LlamaServerClient instance"""
-    return LlamaServerClient(
-        base_url=os.getenv("LLAMA_SERVER_URL", "http://localhost:11434")
-    )
+    return LlamaServerClient()
 
 
 class OpenAIProxyController:
