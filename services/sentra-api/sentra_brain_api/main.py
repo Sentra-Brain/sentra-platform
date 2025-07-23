@@ -12,7 +12,7 @@ from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.conversation.conversation_management_controller import ConversationManagementController
-from sentra_brain_api.features.openai_proxy.controller import OpenAIProxyController
+from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.infra import postgres_service
@@ -59,7 +59,7 @@ def create_app(
     settings_controller = SettingsController()
     public_settings_controller = PublicSettingsController()
     conversation_management_controller = ConversationManagementController()
-    openai_proxy_controller = OpenAIProxyController()
+    llm_proxy_controller = LLMProxyController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
@@ -67,7 +67,7 @@ def create_app(
     app.include_router(settings_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
     app.include_router(conversation_management_controller.router, prefix="/conversations", tags=["conversations"])
-    app.include_router(openai_proxy_controller.router, prefix="/v1", tags=["openai-proxy"])
+    app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
 
     return app
 

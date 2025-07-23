@@ -11,7 +11,7 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionChoice,
     ChatCompletionUsage
 )
-from sentra_brain_api.features.openai_proxy.controller import get_llama_client
+from sentra_brain_api.features.llm_proxy.controller import get_llama_client
 
 
 @pytest.fixture

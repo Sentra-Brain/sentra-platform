@@ -1,4 +1,4 @@
-# sentra_brain_api/features/openai_proxy/controller.py
+# sentra_brain_api/features/llm_proxy/controller.py
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
@@ -19,7 +19,7 @@ def get_llama_client() -> LlamaServerClient:
     return LlamaServerClient()
 
 
-class OpenAIProxyController:
+class LLMProxyController:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()
