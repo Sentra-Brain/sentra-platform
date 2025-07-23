@@ -8,3 +8,8 @@ LICENSE_INFO = {"name": "AGPLv3", "url": "https://www.gnu.org/licenses/agpl-3.0.
 
 SWAGGER_UI_PARAMETERS = {"defaultModelsExpandDepth": -1}
 SWAGGER_FAVICON_URL = "https://sentrabrain.com/favicon.svg"
+
+# Llama server and conversation engine constants
+LLAMA_SERVER_URL = "http://localhost:11434"  # Default, override via settings if needed
+USER_CONVERSATION_CACHE_SIZE = 5
+CONTEXT_WINDOW_SIZE = 20
