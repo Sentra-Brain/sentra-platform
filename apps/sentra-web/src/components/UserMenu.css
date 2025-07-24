@@ -2,21 +2,96 @@
   position: relative;
 }
 
+.user-menu-trigger {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0.5rem;
+  color: var(--sentra-text);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.user-menu-trigger:hover {
+  background: var(--sentra-primary);
+}
+
+.user-menu.collapsed .user-menu-trigger {
+  justify-content: center;
+  padding: 0.5rem 0.25rem;
+}
+
+.user-name {
+  flex: 1;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
 .user-menu-dropdown {
   position: fixed;
-  bottom: 54px; /* Or whatever makes sense */
-  left: 32px;
-  width: 220px;
+  bottom: 70px;
+  left: 16px;
+  width: 280px;
   background: var(--sentra-primary-dark);
-  z-index: 100;
   border: 1px solid var(--sentra-accent-light);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  padding: 0.5rem 0;
 }
 
 .sidebar.collapsed .user-menu-dropdown {
-  min-width: 64px;
+  left: 72px;
+  width: 240px;
 }
 
-.user-menu-dropdown button {
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.user-avatar {
+  color: var(--sentra-accent);
+}
+
+.user-details {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-full-name {
+  font-weight: 600;
+  color: var(--sentra-text);
+  font-size: 0.9rem;
+}
+
+.user-email {
+  color: var(--sentra-text);
+  opacity: 0.7;
+  font-size: 0.8rem;
+  margin-top: 0.25rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menu-separator {
+  height: 1px;
+  background: var(--sentra-primary);
+  margin: 0.5rem 0;
+}
+
+.menu-item {
   width: 100%;
   background: none;
   border: none;
@@ -28,9 +103,10 @@
   gap: 0.75rem;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.user-menu-dropdown button:hover {
+.menu-item:hover {
   background: var(--sentra-accent-light);
   color: var(--sentra-primary-dark);
 }
