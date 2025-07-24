@@ -32,6 +32,16 @@ class Settings(BaseSettings):
     # LLM/AI Services
     llama_server_url: str = Field(default="http://localhost:11434", json_schema_extra={"env": "LLAMA_SERVER_URL"})
 
+    # RabbitMQ
+    rabbitmq_host: str = Field(default="rabbitmq", json_schema_extra={"env": "RABBITMQ_HOST"})
+    rabbitmq_port: int = Field(default=5672, json_schema_extra={"env": "RABBITMQ_PORT"})
+    rabbitmq_user: str = Field(default="sentra", json_schema_extra={"env": "RABBITMQ_USER"})
+    rabbitmq_password: str = Field(default="sentra", json_schema_extra={"env": "RABBITMQ_PASSWORD"})
+    rabbitmq_queue: str = Field(default="indexation_queue", json_schema_extra={"env": "RABBITMQ_QUEUE"})
+
+    # Knowledge Base
+    knowledge_mount_path: str = Field(default="/mnt/sentra_knowledge", json_schema_extra={"env": "KNOWLEDGE_MOUNT_PATH"})
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="allow"

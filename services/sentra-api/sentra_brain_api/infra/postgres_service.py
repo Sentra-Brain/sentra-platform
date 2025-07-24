@@ -28,6 +28,8 @@ def get_db():
 def init_db():
     from sentra_brain_api.domain.user_entity import UserEntity
     from sentra_brain_api.domain.conversation_entity import ConversationEntity
+    from sentra_brain_api.domain.knowledge_source_entity import KnowledgeSourceEntity
+    from sentra_brain_api.domain.document_entity import DocumentEntity
     from sentra_brain_api.features.user.repository import UserRepository
     from sqlalchemy.exc import OperationalError
 

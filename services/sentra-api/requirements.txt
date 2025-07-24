@@ -5,6 +5,7 @@ fastapi
 httpx
 passlib 
 passlib[bcrypt]
+pika
 psycopg2-binary
 pydantic
 pydantic-settings
