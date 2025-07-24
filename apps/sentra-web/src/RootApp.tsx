@@ -3,7 +3,12 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { useAuth } from './context/useAuth';
-import App from './App';
+import AppShell from './layout/AppShell';
+import ChatPage from './pages/ChatPage';
+import KnowledgePage from './pages/KnowledgePage';
+import PromptsPage from './pages/PromptsPage';
+import SkillsPage from './pages/SkillsPage';
+import Settings from './pages/Settings';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Spinner from './components/Spinner';
@@ -27,7 +32,19 @@ function AppGuard() {
     return <Navigate to="/login" replace />;
   }
 
-  return <App />;
+  return (
+    <Routes>
+      <Route element={<AppShell />}>
+        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/c/:conversationId" element={<ChatPage />} />
+        <Route path="/knowledge" element={<KnowledgePage />} />
+        <Route path="/prompts" element={<PromptsPage />} />
+        <Route path="/skills" element={<SkillsPage />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="*" element={<Navigate to="/chat" />} />
+      </Route>
+    </Routes>
+  );
 }
 
 export default function RootApp() {
