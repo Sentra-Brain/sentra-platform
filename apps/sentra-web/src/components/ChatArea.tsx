@@ -29,7 +29,7 @@ const ChatArea: React.FC = () => {
           <div ref={endOfMessagesRef} />
         </div>
       ) : (
-        <div className="no-conversation-message">
+        <div>
           <p>No conversation selected.</p>
         </div>
       )}

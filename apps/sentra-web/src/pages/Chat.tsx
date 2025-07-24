@@ -12,7 +12,7 @@ const Chat: React.FC = () => {
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <TopBar />
-        <div className="flex-1 flex flex-col p-4 overflow-auto">
+        <div className="flex-1 flex flex-col p-4 overflow-auto chat-wrapper">
           <ChatArea />
         </div>
         <div className="p-4">

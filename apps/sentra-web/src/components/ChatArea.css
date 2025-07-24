@@ -5,14 +5,19 @@
   padding: 1rem;
   align-self: center  ;
   overflow-y: auto;
-  background-color: #1e1e2f; /* matches --sentra-primary */
-  color: #f4f4f4; /* matches --sentra-text */
+  /* matches --sentra-primary */
+  color: var(--sentra-text);
+  /* background: var(--sentra-primary); */
 }
 
 .messages {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-width: 1024px;
+  background-color: var(--sentra-primary);
+  padding: 16px;
+  border: 1px solid var(--sentra-primary-light);
 }
 
 .message-bubble {
@@ -35,11 +40,7 @@
   color: #f4f4f4;
 }
 
-.no-conversation-message {
-  margin-top: 2rem;
-  text-align: center;
-  opacity: 0.6;
-}
+
 
 .waiting-bubble {
   display: inline-block;
