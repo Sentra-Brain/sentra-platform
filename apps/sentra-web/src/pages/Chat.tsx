@@ -18,6 +18,10 @@ const Chat: React.FC = () => {
         <div className="p-4">
           <MessageInput />
         </div>
+
+        <div className="text-xs text-center text-muted-foreground pb-4">
+          Sentra can make mistakes. Check important info.
+        </div>
       </div>
     </div>
   );

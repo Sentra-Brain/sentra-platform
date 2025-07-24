@@ -25,16 +25,6 @@ class MongoConversationRepository:
         if not doc:
             logger.warning(f"[Mongo] Conversation not found with ID {conversation_id} for user {user_id}")
         return doc
-
-
-    def add_message_to_conversation(self, conversation_id: str, message: dict):
-        collection = self.get_conversations_collection()
-        result = collection.update_one(
-            {"_id": conversation_id},
-            {"$push": {"messages": message}},
-            upsert=True
-        )
-        return result.modified_count
     
     def create_conversation(self, conversation_id: str, user_id: str, messages: list[dict], **fields):
         collection = self.get_conversations_collection()
@@ -58,6 +48,22 @@ class MongoConversationRepository:
         if result.modified_count == 0:
             logger.warning(f"[Mongo] No conversation found to update with ID {conversation_id}")
         return result.modified_count
+    
+    def append_message(self, conversation_id: str, user_id: str, message: dict):
+        collection = self.get_conversations_collection()
+        result = collection.update_one(
+            {
+                "_id": conversation_id,
+                "user_id": user_id
+            },
+            {
+                "$push": {"messages": message}
+            }
+        )
+        if result.modified_count == 0:
+            logger.warning(f"[Mongo] Failed to append message. Conversation not found: {conversation_id} for user: {user_id}")
+        return result.modified_count
+
 
 mongo_service_instance = MongoConversationRepository()
 

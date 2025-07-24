@@ -1,5 +1,5 @@
 // src/lib/httpClient.ts
-// This file defines the HTTP client for making API requests 
+// This file defines the HTTP client for making API requests
 // to the Sentra Brain API
 import axios from 'axios';
 import type { ApiErrorResponse } from './errorTypes';
@@ -20,13 +20,11 @@ type RequestConfig = {
   params?: Record<string, unknown>;
 };
 
-// Setup del cliente
 const client = axios.create({
   baseURL: import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100',
   timeout: 10000,
 });
 
-// Token runtime in memory
 let runtimeToken: string | null = null;
 
 export function setAuthToken(token: string | null) {
@@ -35,10 +33,10 @@ export function setAuthToken(token: string | null) {
 
 client.interceptors.request.use((config) => {
   const token = runtimeToken ?? localStorage.getItem('jwt') ?? sessionStorage.getItem('jwt');
-    if (token && config.headers) {
-      config.headers.set?.('Authorization', `Bearer ${token}`);
-    }
-    return config;
+  if (token && config.headers) {
+    config.headers.set?.('Authorization', `Bearer ${token}`);
+  }
+  return config;
 });
 
 client.interceptors.response.use(
@@ -56,6 +54,18 @@ client.interceptors.response.use(
       path: detail?.path,
       requestId: detail?.requestId,
     };
+
+    if (
+      mapped.status === 401 &&
+      ['INVALID_TOKEN', 'EXPIRED_TOKEN', 'TOKEN_REVOKED'].includes(mapped.code)
+    ) {
+      console.error('[HTTP Client] Unauthorized access', mapped);
+      runtimeToken = null;
+      localStorage.removeItem('jwt');
+      sessionStorage.removeItem('jwt');
+    } else {
+      console.error('[HTTP Client] Error response', mapped);
+    }
 
     return Promise.reject(mapped);
   }

@@ -1,28 +1,27 @@
-// src/components/MessageInput.tsx
 import React, { useState, useRef } from 'react';
 import { useChat } from '../hooks/useChat';
-import { ArrowUp } from 'lucide-react';
+import { Plus, Settings, Mic, Send, X, ChevronDown } from 'lucide-react';
 import './MessageInput.css';
 
 const MessageInput: React.FC = () => {
-  const { currentConversation, updateConversation } = useChat();
+  const {
+    currentConversation,
+    isStreaming,
+    sendMessage,
+    stopMessage,
+  } = useChat();
+
   const [value, setValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSend = async () => {
-    if (!value.trim() || !currentConversation) return;
-
-    // TODO: Here you'd normally call the backend to send a message
-    // For now, just simulate adding a user message
-    // This could later call: conversationService.addMessage(conversation_id, { ... })
-    console.warn('TODO: integrate message sending API');
-
-    // TODO: Temporary mock logic (to simulate frontend-only messaging):
-    await updateConversation(currentConversation.id, {
-      initial_prompt: value, // ← TEMP HACK, replace with real message handler later
-    });
-
+  const handleSend = () => {
+    if (!value.trim() || !currentConversation || isStreaming) return;
+    sendMessage(value.trim());
     setValue('');
+  };
+
+  const handleStop = () => {
+    if (isStreaming) stopMessage();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -33,44 +32,65 @@ const MessageInput: React.FC = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // File upload logic placeholder
+    // TODO: Implement
     e.target.value = '';
   };
 
   return (
-    <div className="message-input-bar">
-      <button
-        className="file-upload-btn"
-        onClick={() => fileInputRef.current?.click()}
-        title="Upload file"
-      >
-        <ArrowUp size={18} />
+    <div className="message-input-container">
+      <button className="icon-btn" disabled title="Coming soon">
+        <Plus size={18} />
       </button>
 
-      <textarea
-        className="message-input"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={
-          currentConversation ? 'Type a message...' : 'Select or create a conversation first...'
-        }
-        rows={1}
-        disabled={!currentConversation}
-      />
+      <button className="icon-btn" disabled title="Tools (coming soon)">
+        <Settings size={18} />
+      </button>
+
+      <div className="message-input-wrapper">
+        <textarea
+          className="message-input"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={
+            currentConversation
+              ? 'Type a message...'
+              : 'Select or create a conversation first...'
+          }
+          rows={1}
+          disabled={!currentConversation || isStreaming}
+        />
+      </div>
 
       <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
 
-      <button
-        className="send-btn"
-        onClick={handleSend}
-        title="Send"
-        disabled={!value.trim() || !currentConversation}
-      >
-        <span role="img" aria-label="send">
-          ➤
-        </span>
+      <button className="icon-btn" disabled title="Dictate (coming soon)">
+        <Mic size={18} />
       </button>
+
+      {isStreaming ? (
+        <button className="icon-btn" onClick={handleStop} title="Stop">
+          <X size={18} />
+        </button>
+      ) : (
+        <button
+          className="icon-btn send"
+          onClick={handleSend}
+          title="Send"
+          disabled={!value.trim() || !currentConversation}
+        >
+          <Send size={18} />
+        </button>
+      )}
+
+      
+        <button
+          className="scroll-to-bottom-btn"         
+          title="Scroll to bottom"
+        >
+          <ChevronDown size={20} />
+        </button>
+      
     </div>
   );
 };

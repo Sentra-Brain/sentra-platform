@@ -1,6 +1,7 @@
 :root {
   --sentra-primary: #1e1e2f;
-  --sentra-primary-dark: #161625;
+  --sentra-primary-light: #2a2a3c;
+  --sentra-primary-dark: #16161c;
   --sentra-accent: #4b9fff;
   --sentra-accent-light: #a3cfff;
   --sentra-neutral: #f4f4f7;
@@ -29,3 +30,4 @@ body {
   background-size: 40px 40px;
   color: var(--sentra-text);
 }
+

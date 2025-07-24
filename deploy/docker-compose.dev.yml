@@ -101,8 +101,13 @@ services:
       - "11434:11434"
     volumes:
       - D:\models:/models:ro
+    # Uncomment the following line to use a specific model (small example model)
+    # command: >
+    #   -m /models/tiny-llama/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+    #   --port 11434
+    # --host 0.0.0.0
     command: >
-      -m /models/tiny-llama/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
+      -m /models/capybara-mistral-7b/capybarahermes-2.5-mistral-7b.Q4_K_S.gguf
       --port 11434
       --host 0.0.0.0
     networks:

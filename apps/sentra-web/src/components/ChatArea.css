@@ -3,15 +3,21 @@
   flex-direction: column;
   height: 100%;
   padding: 1rem;
+  align-self: center  ;
   overflow-y: auto;
-  background-color: #1e1e2f; /* matches --sentra-primary */
-  color: #f4f4f4; /* matches --sentra-text */
+  /* matches --sentra-primary */
+  color: var(--sentra-text);
+  /* background: var(--sentra-primary); */
 }
 
 .messages {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  max-width: 1024px;
+  background-color: var(--sentra-primary);
+  padding: 16px;
+  border: 1px solid var(--sentra-primary-light);
 }
 
 .message-bubble {
@@ -25,18 +31,41 @@
 
 .message-bubble.user {
   align-self: flex-end;
-  background-color: #4b9fff; /* --sentra-accent */
+  background-color: var(--sentra-primary-light);
   color: #fff;
 }
 
 .message-bubble.assistant {
   align-self: flex-start;
-  background-color: #2c2c44;
   color: #f4f4f4;
 }
 
-.no-conversation-message {
-  margin-top: 2rem;
-  text-align: center;
-  opacity: 0.6;
+
+
+.waiting-bubble {
+  display: inline-block;
+  font-style: italic;
+  background: linear-gradient(
+    90deg,
+    #1e1e2f 0%,
+    #a3cfff 20%,
+    #f4f4f4 40%,
+    #a3cfff 60%,
+    #1e1e2f 80%
+  );
+  background-size: 200% auto;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shimmer-sentra 2.5s linear infinite;
 }
+
+@keyframes shimmer-sentra {
+  0% {
+    background-position: 200% center;
+  }
+  100% {
+    background-position: -200% center;
+  }
+}
+
