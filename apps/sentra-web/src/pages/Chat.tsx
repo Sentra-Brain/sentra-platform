@@ -12,11 +12,15 @@ const Chat: React.FC = () => {
       <Sidebar />
       <div className="flex flex-col flex-1 min-w-0">
         <TopBar />
-        <div className="flex-1 flex flex-col p-4 overflow-auto chat-wrapper">
+        <div className="flex-1 flex flex-col p-4 overflow-auto">
           <ChatArea />
         </div>
         <div className="p-4">
           <MessageInput />
+        </div>
+
+        <div className="text-xs text-center text-muted-foreground pb-4">
+          Sentra can make mistakes. Check important info.
         </div>
       </div>
     </div>

@@ -84,6 +84,7 @@
 
 .conversation-list li.active {
   background: var(--sentra-primary);
+  color: var(--sentra-accent);
 }
 
 .conversation-list li:hover {

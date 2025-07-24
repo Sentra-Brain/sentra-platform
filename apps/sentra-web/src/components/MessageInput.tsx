@@ -1,9 +1,7 @@
-// src/components/MessageInput.tsx
 import React, { useState, useRef } from 'react';
 import { useChat } from '../hooks/useChat';
-import { ArrowUp } from 'lucide-react';
+import { Plus, Settings, Mic, Send, X, ChevronDown } from 'lucide-react';
 import './MessageInput.css';
-
 
 const MessageInput: React.FC = () => {
   const {
@@ -23,9 +21,7 @@ const MessageInput: React.FC = () => {
   };
 
   const handleStop = () => {
-    if (isStreaming) {
-      stopMessage();
-    }
+    if (isStreaming) stopMessage();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -36,52 +32,65 @@ const MessageInput: React.FC = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // Placeholder for file upload logic
+    // TODO: Implement
     e.target.value = '';
   };
 
   return (
-    <div className="message-input-bar">
-      <button
-        className="file-upload-btn"
-        onClick={() => fileInputRef.current?.click()}
-        title="Upload file"
-      >
-        <ArrowUp size={18} />
+    <div className="message-input-container">
+      <button className="icon-btn" disabled title="Coming soon">
+        <Plus size={18} />
       </button>
 
-      <textarea
-        className="message-input"
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={
-          currentConversation ? 'Type a message...' : 'Select or create a conversation first...'
-        }
-        rows={1}
-        disabled={!currentConversation || isStreaming}
-      />
+      <button className="icon-btn" disabled title="Tools (coming soon)">
+        <Settings size={18} />
+      </button>
+
+      <div className="message-input-wrapper">
+        <textarea
+          className="message-input"
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={
+            currentConversation
+              ? 'Type a message...'
+              : 'Select or create a conversation first...'
+          }
+          rows={1}
+          disabled={!currentConversation || isStreaming}
+        />
+      </div>
 
       <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
 
+      <button className="icon-btn" disabled title="Dictate (coming soon)">
+        <Mic size={18} />
+      </button>
+
       {isStreaming ? (
-        <button className="stop-btn" onClick={handleStop} title="Stop">
-          <span role="img" aria-label="stop">
-            ⏹
-          </span>
+        <button className="icon-btn" onClick={handleStop} title="Stop">
+          <X size={18} />
         </button>
       ) : (
         <button
-          className="send-btn"
+          className="icon-btn send"
           onClick={handleSend}
           title="Send"
           disabled={!value.trim() || !currentConversation}
         >
-          <span role="img" aria-label="send">
-            ➤
-          </span>
+          <Send size={18} />
         </button>
       )}
+
+      
+        <button
+          className="scroll-to-bottom-btn"         
+          title="Scroll to bottom"
+        >
+          <ChevronDown size={20} />
+        </button>
+      
     </div>
   );
 };
