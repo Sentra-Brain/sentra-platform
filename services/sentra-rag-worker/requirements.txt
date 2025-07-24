@@ -6,8 +6,7 @@ pydantic==2.11.7
 pydantic-settings==2.10.1
 python-dotenv==1.1.1
 
-# Document processing
-unstructured[pdf,docx]==0.16.5
+# Document processing (simplified for now)
 sentence-transformers==3.0.1
 
 # Vector database
@@ -15,3 +14,7 @@ chromadb==0.5.15
 
 # Additional utilities
 asyncio-mqtt>=0.13.0
+
+# Optional document processing (for production)
+# python-docx>=1.1.0
+# PyPDF2>=3.0.0

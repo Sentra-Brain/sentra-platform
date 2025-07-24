@@ -65,6 +65,21 @@ services:
     env_file:
       - .prod.env
 
+  sentra-rag-worker:
+    image: sentrabrain.azurecr.io/sentra-rag-worker:latest
+    container_name: sentra-rag-worker
+    pull_policy: always
+    volumes:
+      - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
+    networks:
+      - sentrabrain-net
+    env_file:
+      - .prod.env
+    depends_on:
+      - sentra-sql-db
+      - sentra-vector-db
+      - rabbitmq
+
   llama-server:
     image: ghcr.io/ggml-org/llama.cpp:server-cuda
     container_name: llama-server
