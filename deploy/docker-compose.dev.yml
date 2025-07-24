@@ -153,6 +153,18 @@ services:
     env_file:
       - .dev.env
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Web UI
+    environment:
+      RABBITMQ_DEFAULT_USER: sentra
+      RABBITMQ_DEFAULT_PASS: sentra
+    networks:
+      - sentrabrain-dev-net
+
 volumes:
   sentra-sql-data:
   sentra-nosql-data:

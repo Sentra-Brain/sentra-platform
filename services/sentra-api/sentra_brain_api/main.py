@@ -15,6 +15,7 @@ from sentra_brain_api.features.admin.settings.controller import SettingsControll
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.conversation_management_controller import ConversationManagementController
+from sentra_brain_api.features.knowledge.controller import KnowledgeController
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
@@ -66,6 +67,7 @@ def create_app(
     settings_controller = SettingsController()
     public_settings_controller = PublicSettingsController()
     conversation_management_controller = ConversationManagementController()
+    knowledge_controller = KnowledgeController()
     llm_proxy_controller = LLMProxyController()
     chat_controller = ChatController()
 
@@ -75,6 +77,7 @@ def create_app(
     app.include_router(settings_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
     app.include_router(conversation_management_controller.router, prefix="/conversations", tags=["conversations"])
+    app.include_router(knowledge_controller.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
 
