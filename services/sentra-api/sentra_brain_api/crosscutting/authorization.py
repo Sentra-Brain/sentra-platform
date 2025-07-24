@@ -37,7 +37,7 @@ def get_authenticated_user(token: str = Depends(oauth2_scheme),
     except JWTError as e:
         logger.warning(f"Invalid JWT token: {str(e)}")
         raise SentraHTTPException(
-            status_code=400,
+            status_code=401,
             code="INVALID_TOKEN",
             message="Invalid token",
             path="/auth/validate",
