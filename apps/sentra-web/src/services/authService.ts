@@ -1,9 +1,4 @@
-// src/services/authService.ts
-import { httpClient } from '../lib/httpClient';
-
-type AuthTokenResponse = {
-  access_token: string;
-};
+import axios from 'axios';
 
 export const authService = {
   login(email: string, password: string): Promise<string> {
@@ -12,12 +7,13 @@ export const authService = {
     body.append('username', email);
     body.append('password', password);
 
-    return httpClient
-      .post<AuthTokenResponse>('/auth/token', body, {
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
+    // Bypass httpClient to avoid token interception in this concrete case
+    // since this is a direct login request.
+    return axios
+      .post('/auth/token', body, {
+        baseURL: import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
       })
-      .then((res) => res.access_token);
+      .then((res) => res.data.access_token);
   },
 };

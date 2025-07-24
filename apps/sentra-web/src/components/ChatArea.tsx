@@ -6,7 +6,7 @@ import remarkGfm from 'remark-gfm';
 import './ChatArea.css';
 
 const ChatArea: React.FC = () => {
-  const { currentConversation } = useChat();
+  const { currentConversation, waitingForAnswer } = useChat();
 
   const messages = currentConversation?.messages || [];
 
@@ -15,7 +15,7 @@ const ChatArea: React.FC = () => {
   useEffect(() => {
     endOfMessagesRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [currentConversation?.messages.length]);
-  
+
   return (
     <main className="chat-area">
       {currentConversation ? (
@@ -25,6 +25,7 @@ const ChatArea: React.FC = () => {
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
             </div>
           ))}
+          {waitingForAnswer && <div className="waiting-bubble">Waiting...</div>}
           <div ref={endOfMessagesRef} />
         </div>
       ) : (

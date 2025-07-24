@@ -1,5 +1,8 @@
-import React, { useState, useEffect } from 'react';
+// ✅ Refactored ChatProvider with streaming orchestration logic (safe setState)
+
+import React, { useState, useEffect, useRef } from 'react';
 import { conversationService } from '../services/conversationService';
+import { chatService } from '../services/chatService';
 import type {
   ConversationListItem,
   ConversationDetails,
@@ -7,24 +10,28 @@ import type {
   UpdateConversationRequest,
 } from '../models/conversationModels';
 import { ChatContext } from './ChatContextInstance';
+import { notifyError } from '../lib/notify';
 
 export type ChatContextType = {
   conversations: ConversationListItem[];
   currentConversation: ConversationDetails | null;
+  isStreaming: boolean;
+  waitingForAnswer: boolean;
   loadConversations: () => Promise<void>;
   selectConversation: (id: string) => Promise<void>;
   createConversation: (data: CreateConversationRequest) => Promise<void>;
   updateConversation: (id: string, data: UpdateConversationRequest) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
-  appendUserMessage: (text: string) => void;
-  appendEmptyAssistantMessage: () => void;
-  appendToLastAssistantMessage: (delta: string) => void;
-  replaceLastAssistantMessage: (fullContent: string) => void;
+  sendMessage: (text: string) => void;
+  stopMessage: () => void;
 };
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [conversations, setConversations] = useState<ConversationListItem[]>([]);
   const [currentConversation, setCurrentConversation] = useState<ConversationDetails | null>(null);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [waitingForAnswer, setWaitingForAnswer] = useState(false);
+  const controllerRef = useRef<() => void | null>(null);
 
   const loadConversations = async () => {
     const list = await conversationService.list();
@@ -58,75 +65,89 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const appendUserMessage = (text: string) => {
-    if (!currentConversation) return;
+  const sendMessage = (text: string) => {
+    if (!text.trim() || !currentConversation || isStreaming) return;
 
-    setCurrentConversation({
-      ...currentConversation,
-      messages: [
-        ...currentConversation.messages,
-        {
-          id: crypto.randomUUID(),
-          timestamp: Date.now(),
-          role: 'user',
-          content: text,
-        },
-      ],
+    const userMessage = {
+      id: crypto.randomUUID(),
+      timestamp: Date.now(),
+      role: 'user',
+      content: text,
+    };
+
+    setCurrentConversation(prev => {
+      if (!prev) return null;
+      return { ...prev, messages: [...prev.messages, userMessage] };
     });
+
+    setWaitingForAnswer(true);
+    setIsStreaming(true);
+    let assistantStarted = false;
+
+    controllerRef.current = chatService.sendMessageStream(
+      { conversation_id: currentConversation.id, content: text },
+      (delta) => {
+        if (!assistantStarted && !delta.final) {
+          // Start the assistant message if not already started
+          setWaitingForAnswer(false);
+          startAssistantMessage();
+          assistantStarted = true;
+        }
+
+        if (!delta.final) {
+          appendToLastAssistantMessage(delta.content);
+        } else {
+          setIsStreaming(false);
+          controllerRef.current = null;
+        }
+      },
+      (err) => {
+        appendToLastAssistantMessage('\n[Error generating response]');
+        setIsStreaming(false);
+        console.error('[ChatProvider] sendMessage error', err);
+        notifyError(err);
+        controllerRef.current = null;
+      }
+    );
   };
 
-  const appendEmptyAssistantMessage = () => {
-    if (!currentConversation) return;
+  const stopMessage = () => {
+    controllerRef.current?.();
+    controllerRef.current = null;
+    setIsStreaming(false);
+  };
 
-    setCurrentConversation({
-      ...currentConversation,
-      messages: [
-        ...currentConversation.messages,
-        {
-          id: crypto.randomUUID(),
-          timestamp: Date.now(),
-          role: 'assistant',
-          content: '',
-        },
-      ],
+  const startAssistantMessage = () => {
+    setCurrentConversation(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        messages: [
+          ...prev.messages,
+          {
+            id: crypto.randomUUID(),
+            timestamp: Date.now(),
+            role: 'assistant',
+            content: '',
+          },
+        ],
+      };
     });
   };
 
   const appendToLastAssistantMessage = (delta: string) => {
-    if (!currentConversation) return;
+    setCurrentConversation(prev => {
+      if (!prev) return null;
+      const messages = [...prev.messages];
+      const lastIndex = messages.length - 1;
+      if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return prev;
 
-    const messages = [...currentConversation.messages];
-    const lastIndex = messages.length - 1;
+      messages[lastIndex] = {
+        ...messages[lastIndex],
+        content: messages[lastIndex].content + delta,
+      };
 
-    if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return;
-
-    messages[lastIndex] = {
-      ...messages[lastIndex],
-      content: messages[lastIndex].content + delta,
-    };
-
-    setCurrentConversation({
-      ...currentConversation,
-      messages,
-    });
-  };
-
-  const replaceLastAssistantMessage = (fullContent: string) => {
-    if (!currentConversation) return;
-
-    const messages = [...currentConversation.messages];
-    const lastIndex = messages.length - 1;
-
-    if (lastIndex < 0 || messages[lastIndex].role !== 'assistant') return;
-
-    messages[lastIndex] = {
-      ...messages[lastIndex],
-      content: fullContent,
-    };
-
-    setCurrentConversation({
-      ...currentConversation,
-      messages,
+      return { ...prev, messages };
     });
   };
 
@@ -139,15 +160,15 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       value={{
         conversations,
         currentConversation,
+        isStreaming,
+        waitingForAnswer,
         loadConversations,
         selectConversation,
         createConversation,
         updateConversation,
         deleteConversation,
-        appendUserMessage,
-        appendEmptyAssistantMessage,
-        appendToLastAssistantMessage,
-        replaceLastAssistantMessage,
+        sendMessage,
+        stopMessage,
       }}
     >
       {children}

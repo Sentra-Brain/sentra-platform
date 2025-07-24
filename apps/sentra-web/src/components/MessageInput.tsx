@@ -3,43 +3,30 @@ import React, { useState, useRef } from 'react';
 import { useChat } from '../hooks/useChat';
 import { ArrowUp } from 'lucide-react';
 import './MessageInput.css';
-import { chatService } from '../services/chatService';
+
 
 const MessageInput: React.FC = () => {
-  const { currentConversation, appendUserMessage, appendEmptyAssistantMessage, appendToLastAssistantMessage } = useChat();
+  const {
+    currentConversation,
+    isStreaming,
+    sendMessage,
+    stopMessage,
+  } = useChat();
+
   const [value, setValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSend = async () => {
-    if (!value.trim() || !currentConversation) return;
-
-    const userInput = value.trim();
+  const handleSend = () => {
+    if (!value.trim() || !currentConversation || isStreaming) return;
+    sendMessage(value.trim());
     setValue('');
-
-    // Paso 1: Añadir mensaje de usuario
-    appendUserMessage(userInput);
-
-    // Paso 2: Añadir mensaje de assistant vacío
-    appendEmptyAssistantMessage();
-
-    // Paso 3: Consumir el stream y actualizar la respuesta
-    chatService.sendMessageStream(
-      {
-        conversation_id: currentConversation.id,
-        content: userInput,
-      },
-      (delta) => {
-        if (!delta.final) {
-          appendToLastAssistantMessage(delta.content);
-        }
-      },
-      (err) => {
-        console.error('Streaming error:', err);
-        appendToLastAssistantMessage('\n[Error generando respuesta]');
-      }
-    );
   };
 
+  const handleStop = () => {
+    if (isStreaming) {
+      stopMessage();
+    }
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -49,7 +36,7 @@ const MessageInput: React.FC = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // File upload logic placeholder
+    // Placeholder for file upload logic
     e.target.value = '';
   };
 
@@ -72,21 +59,29 @@ const MessageInput: React.FC = () => {
           currentConversation ? 'Type a message...' : 'Select or create a conversation first...'
         }
         rows={1}
-        disabled={!currentConversation}
+        disabled={!currentConversation || isStreaming}
       />
 
       <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
 
-      <button
-        className="send-btn"
-        onClick={handleSend}
-        title="Send"
-        disabled={!value.trim() || !currentConversation}
-      >
-        <span role="img" aria-label="send">
-          ➤
-        </span>
-      </button>
+      {isStreaming ? (
+        <button className="stop-btn" onClick={handleStop} title="Stop">
+          <span role="img" aria-label="stop">
+            ⏹
+          </span>
+        </button>
+      ) : (
+        <button
+          className="send-btn"
+          onClick={handleSend}
+          title="Send"
+          disabled={!value.trim() || !currentConversation}
+        >
+          <span role="img" aria-label="send">
+            ➤
+          </span>
+        </button>
+      )}
     </div>
   );
 };

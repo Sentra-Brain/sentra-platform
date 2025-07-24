@@ -13,7 +13,7 @@ export type ConversationDetails = {
   initial_prompt?: string;
   messages: Array<{
     id: string;
-    role: 'user' | 'assistant';
+    role: string;
     content: string;
     timestamp: number;
   }>;

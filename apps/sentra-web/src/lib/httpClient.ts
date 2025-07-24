@@ -1,8 +1,9 @@
 // src/lib/httpClient.ts
-// This file defines the HTTP client for making API requests 
+// This file defines the HTTP client for making API requests
 // to the Sentra Brain API
 import axios from 'axios';
 import type { ApiErrorResponse } from './errorTypes';
+import { notifyError } from './notify';
 
 export type SentraError = {
   status: number;
@@ -35,10 +36,10 @@ export function setAuthToken(token: string | null) {
 
 client.interceptors.request.use((config) => {
   const token = runtimeToken ?? localStorage.getItem('jwt') ?? sessionStorage.getItem('jwt');
-    if (token && config.headers) {
-      config.headers.set?.('Authorization', `Bearer ${token}`);
-    }
-    return config;
+  if (token && config.headers) {
+    config.headers.set?.('Authorization', `Bearer ${token}`);
+  }
+  return config;
 });
 
 client.interceptors.response.use(
@@ -56,6 +57,22 @@ client.interceptors.response.use(
       path: detail?.path,
       requestId: detail?.requestId,
     };
+
+    if (
+      mapped.status === 401 &&
+      ['INVALID_TOKEN', 'EXPIRED_TOKEN', 'TOKEN_REVOKED'].includes(mapped.code)
+    ) {
+      // Handle unauthorized access, e.g., redirect to login
+      notifyError(`Unauthorized access: ${mapped.message}`);
+      // Log the error for debugging
+      console.error('[HTTP Client] Unauthorized access', mapped);
+      // Optionally, you can clear the token here
+      runtimeToken = null;
+      localStorage.removeItem('jwt');
+      sessionStorage.removeItem('jwt');
+    } else {
+      console.error('[HTTP Client] Error response', mapped);
+    }
 
     return Promise.reject(mapped);
   }
