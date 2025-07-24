@@ -7,4 +7,4 @@ class ConversationDelta(BaseModel):
     final: bool = False
 
 class ConversationResponse(BaseModel):
-    content: str = Field(..., description="Respuesta final del asistente")
+    content: str = Field(..., description="Final response content from the assistant.")

@@ -64,7 +64,8 @@ export const chatService = {
               const parsed: StreamedMessage = JSON.parse(json);
               onMessage(parsed);
               if (parsed.final) {
-                controller.abort(); // optional: stop reading further
+                // Allow the stream to complete naturally instead of aborting
+                // controller.abort(); // optional: stop reading further
               }
             } catch (err) {
               console.error('Failed to parse JSON chunk:', json, err);

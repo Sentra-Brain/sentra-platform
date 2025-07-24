@@ -1,5 +1,3 @@
-// ✅ Refactored ChatProvider with streaming orchestration logic (safe setState)
-
 import React, { useState, useEffect, useRef } from 'react';
 import { conversationService } from '../services/conversationService';
 import { chatService } from '../services/chatService';
@@ -104,6 +102,7 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
       (err) => {
         appendToLastAssistantMessage('\n[Error generating response]');
         setIsStreaming(false);
+        setWaitingForAnswer(false);
         console.error('[ChatProvider] sendMessage error', err);
         notifyError(err);
         controllerRef.current = null;

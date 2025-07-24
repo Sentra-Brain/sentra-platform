@@ -35,9 +35,6 @@ class ConversationEngine:
         user_msg = self._make_message("user", request.content, now)
         await self._persist_user_message(request, user_msg)
 
-        context.append(user_msg)
-        context = context[-CONTEXT_WINDOW_SIZE:]
-
         payload = self.prompt_factory.build_payload(
             context=context,
             new_message=user_msg
@@ -62,7 +59,6 @@ class ConversationEngine:
         yield ConversationDelta(content="", final=True)
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
 
-
     async def _llama_stream(self, payload: dict):
         async for line in self.llama_client.chat_completion(payload):
             if not line.strip():
@@ -80,9 +76,6 @@ class ConversationEngine:
                 logger.warning(f"Streaming JSON parse error: {e} | line: {line!r}")
             except Exception as e:
                 logger.error(f"Unexpected error in streaming loop: {e}")
-
-
-
 
     async def _load_context(self, user_id: str, conversation_id: str) -> list[dict]:
         try:
@@ -133,13 +126,6 @@ class ConversationEngine:
             "content": content,
             "timestamp": timestamp,
             **extra
-        }
-
-    def _create_payload(self, context: list[dict], temperature: float = 0.7) -> dict:
-        return {
-            "messages": context,
-            "stream": True,
-            "temperature": temperature
         }
 
     async def _persist_user_message(self, request: ConversationRequest, message: dict):

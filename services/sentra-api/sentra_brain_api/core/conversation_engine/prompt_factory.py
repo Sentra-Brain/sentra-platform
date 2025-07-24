@@ -18,7 +18,6 @@ class PromptFactory:
         presence_penalty: float = 0.0,
         frequency_penalty: float = 0.0,
         max_tokens: int = 1024,
-        stream: bool = True,
     ) -> dict:
         """
         Constructs the final payload for the LLM server, including:
@@ -55,9 +54,7 @@ class PromptFactory:
         # 5. Final payload
         return {
             "messages": messages,
-            # "stream": stream,
             "stream": True,  # Always stream for LlamaServerClient
-            # TODO: Add support for non-streaming if needed
             "temperature": temperature,
             "top_p": top_p,
             "presence_penalty": presence_penalty,

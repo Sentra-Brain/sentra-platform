@@ -3,6 +3,7 @@
   flex-direction: column;
   height: 100%;
   padding: 1rem;
+  align-self: center  ;
   overflow-y: auto;
   background-color: #1e1e2f; /* matches --sentra-primary */
   color: #f4f4f4; /* matches --sentra-text */
@@ -25,13 +26,12 @@
 
 .message-bubble.user {
   align-self: flex-end;
-  background-color: #4b9fff; /* --sentra-accent */
+  background-color: var(--sentra-primary-light);
   color: #fff;
 }
 
 .message-bubble.assistant {
   align-self: flex-start;
-  background-color: #2c2c44;
   color: #f4f4f4;
 }
 
@@ -40,13 +40,6 @@
   text-align: center;
   opacity: 0.6;
 }
-.assistant-placeholder {
-  color: #aaa;
-  font-style: italic;
-  padding-left: 12px;
-  margin-top: 6px;
-}
-
 
 .waiting-bubble {
   display: inline-block;

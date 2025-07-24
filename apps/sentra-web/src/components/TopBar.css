@@ -2,7 +2,7 @@
 .topbar {
   height: 48px;
   background: var(--sentra-primary);
-  border-bottom: 1px solid var(--sentra-accent-light);
+  border-bottom: 1px solid var(--sentra-primary-light);
   display: flex;
   justify-content: space-between;
   align-items: center;
