@@ -1,32 +1,71 @@
 import { useAuth } from '../context/useAuth';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { LogOut, Settings, LayoutDashboard, UserCircle } from 'lucide-react';
 import './UserMenu.css';
 
-export default function UserMenu() {
-  const { user } = useAuth();
+interface UserMenuProps {
+  collapsed?: boolean;
+}
+
+export default function UserMenu({ collapsed = false }: UserMenuProps) {
+  const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    }
+
+    if (open) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+      };
+    }
+  }, [open]);
 
   if (!user) return null;
 
+  const handleLogout = () => {
+    logout();
+    setOpen(false);
+  };
+
   return (
-    <div className="user-menu">
-      <button className="user-menu-trigger" onClick={() => setOpen(!open)}>
-        <span title={user.full_name}>
-          <UserCircle size={24} />
-        </span>{' '}
-        {/* <span>{user.full_name || user.email}</span> */}
+    <div className={`user-menu ${collapsed ? 'collapsed' : ''}`} ref={menuRef}>
+      <button 
+        className="user-menu-trigger" 
+        onClick={() => setOpen(!open)}
+        title={collapsed ? user.full_name || user.email : ''}
+      >
+        <UserCircle size={24} />
+        {!collapsed && <span className="user-name">{user.full_name || user.email}</span>}
       </button>
 
       {open && (
         <div className="user-menu-dropdown">
-          <button>
+          <div className="user-info">
+            <div className="user-avatar">
+              <UserCircle size={32} />
+            </div>
+            <div className="user-details">
+              <div className="user-full-name">{user.full_name || 'User'}</div>
+              <div className="user-email">{user.email}</div>
+            </div>
+          </div>
+          <div className="menu-separator"></div>
+          <button className="menu-item">
             <LayoutDashboard size={16} /> Manage Sentra
           </button>
-          <button>
+          <button className="menu-item">
             <Settings size={16} /> Settings
           </button>
-          <button>
+          <div className="menu-separator"></div>
+          <button className="menu-item" onClick={handleLogout}>
             <LogOut size={16} /> Log out
           </button>
         </div>

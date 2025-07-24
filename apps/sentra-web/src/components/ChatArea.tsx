@@ -29,8 +29,11 @@ const ChatArea: React.FC = () => {
           <div ref={endOfMessagesRef} />
         </div>
       ) : (
-        <div>
-          <p>No conversation selected.</p>
+        <div className="empty-state">
+          <div className="empty-state-content">
+            <h2>Welcome to Sentra Brain</h2>
+            <p>Start a new conversation to begin chatting with AI.</p>
+          </div>
         </div>
       )}
     </main>
