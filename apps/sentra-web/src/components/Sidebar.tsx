@@ -1,7 +1,7 @@
 // src/components/Sidebar.tsx
 import React, { useState } from 'react';
 import { useChat } from '../hooks/useChat';
-import { ChevronLeft, MessageSquare, BookOpen, Edit3, Wrench, Settings } from 'lucide-react';
+import { MessageSquare, BookOpen, Edit3, Wrench, Settings } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import UserMenu from './UserMenu';
 import './Sidebar.css';
@@ -27,19 +27,21 @@ const Sidebar: React.FC = () => {
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-top-row">
-        <div className="sidebar-logo">
+        <div 
+          className="sidebar-logo" 
+          onClick={() => collapsed && setCollapsed(false)}
+          onMouseEnter={() => collapsed && setCollapsed(false)}
+        >
           <img src="/sentra_brain_logo_64.png" alt="Sentra Brain Logo" />
-          {!collapsed && <span className="logo-tooltip">Open sidebar</span>}
+          {collapsed && <span className="logo-tooltip">Open sidebar</span>}
         </div>
-        {!collapsed && (
-          <button
-            className="sidebar-toggle"
-            onClick={() => setCollapsed((c) => !c)}
-            title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-          >
-            <ChevronLeft size={18} />
-          </button>
-        )}
+        <button
+          className="sidebar-toggle"
+          onClick={() => setCollapsed((c) => !c)}
+          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {collapsed ? '→' : '←'}
+        </button>
       </div>
 
       <div id="sidebar-content" className="sidebar-content">
