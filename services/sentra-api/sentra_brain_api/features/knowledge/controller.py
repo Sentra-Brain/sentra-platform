@@ -36,7 +36,7 @@ class KnowledgeController:
 
     def _require_admin(self, user: UserEntity = Depends(get_authenticated_user)) -> UserEntity:
         """Dependency to require admin role"""
-        if Role.ADMIN not in user.roles:
+        if Role.ADMIN.value not in set(user.roles.split(",")):
             raise HTTPException(status_code=403, detail="Admin role required")
         return user
 
