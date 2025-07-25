@@ -32,39 +32,6 @@ services:
     env_file:
       - .prod.env
 
-  sentra-doc:
-    image: sentrabrain.azurecr.io/sentra-doc:latest
-    container_name: sentra-doc
-    pull_policy: always
-    ports:
-      - "5100:5100"
-    networks:
-      - sentrabrain-net
-    env_file:
-      - .prod.env
-
-  sentra-crm:
-    image: sentrabrain.azurecr.io/sentra-crm:latest
-    container_name: sentra-crm
-    pull_policy: always
-    ports:
-      - "5200:5200"
-    networks:
-      - sentrabrain-net
-    env_file:
-      - .prod.env
-
-  sentra-action:
-    image: sentrabrain.azurecr.io/sentra-action:latest
-    container_name: sentra-action
-    pull_policy: always
-    ports:
-      - "5300:5300"
-    networks:
-      - sentrabrain-net
-    env_file:
-      - .prod.env
-
   sentra-rag-worker:
     image: sentrabrain.azurecr.io/sentra-rag-worker:latest
     container_name: sentra-rag-worker

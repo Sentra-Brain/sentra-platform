@@ -51,7 +51,7 @@ Sentra Brain is not a purely self-service platform. Its deployment and configura
 
 ### Scope Clarification (Phase 1)
 
-- **MCP Layer:** Phase 1 explicitly separates MCP into independent capability-focused services (`sentra-doc`, `sentra-crm`, and `sentra-action`) to enhance security, scalability, and maintenance.
+- **MCP Layer:** Phase 1 explicitly separates MCP into independent capability-focused services (TBD) to enhance security, scalability, and maintenance.
 - **Workflow Automation:** Embedded workflow automation (e.g., n8n) is considered optional and planned for future implementation beyond Phase 1.
 
 These goals shape all design and architecture decisions documented in the following sections.

@@ -43,7 +43,7 @@ This folder contains the source code and Docker configuration for the **Sentra B
   - **Authentication:** Token-based (JWT or similar).
   - **Chat Flow:** User → API → LLM (+ optional RAG).
   - **Document Retrieval:** User → API → RAG Engine.
-  - **CRM/ERP (MCP):** User → API → MCP Servers (sentra-crm, sentra-action).
+  - **CRM/ERP (MCP):** User → API → MCP Server(s).
 
 For detailed runtime diagrams, see `/docs/arc42/06_runtime_view.md`.
 

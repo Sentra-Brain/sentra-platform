@@ -155,39 +155,39 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
   const renderMetadataStep = () => (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Knowledge Source Name *
         </label>
         <input
           type="text"
           value={formData.name}
           onChange={(e) => handleInputChange('name', e.target.value)}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Enter a name for your knowledge source"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Description
         </label>
         <textarea
           value={formData.description}
           onChange={(e) => handleInputChange('description', e.target.value)}
           rows={3}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
           placeholder="Optional description"
         />
       </div>
 
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Visibility
         </label>
         <select
           value={formData.visibility}
           onChange={(e) => handleInputChange('visibility', e.target.value as KnowledgeSourceVisibility)}
-          className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-800"
         >
           <option value={KnowledgeSourceVisibility.PRIVATE}>Private</option>
           <option value={KnowledgeSourceVisibility.SHARED}>Shared</option>
@@ -203,7 +203,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
           onChange={(e) => handleInputChange('auto_index', e.target.checked)}
           className="mr-2"
         />
-        <label htmlFor="auto_index" className="text-sm text-gray-700">
+        <label htmlFor="auto_index" className="text-sm text-gray-300">
           Enable automatic indexing of new documents
         </label>
       </div>
@@ -213,14 +213,14 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
   const renderUploadStep = () => (
     <div className="space-y-6">
       <div>
-        <label className="block text-sm font-medium text-gray-700 mb-2">
+        <label className="block text-sm font-medium text-gray-300 mb-2">
           Select Folder or Files
         </label>
         <div className="space-y-3">
           <button
             type="button"
             onClick={handleFolderSelect}
-            className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-400 transition-colors"
+            className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg text-center hover:border-blue-400 transition-colors"
           >
             <FolderPlus className="mx-auto h-8 w-8 text-gray-400 mb-2" />
             <p className="text-gray-600 font-medium">Select Folder</p>
@@ -234,7 +234,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="w-full p-4 border-2 border-dashed border-gray-300 rounded-lg text-center hover:border-blue-400 transition-colors"
+            className="w-full p-4 border-2 border-dashed border-blue-300 rounded-lg text-center hover:border-blue-400 transition-colors"
           >
             <Upload className="mx-auto h-8 w-8 text-gray-400 mb-2" />
             <p className="text-gray-600 font-medium">Select Individual Files</p>
@@ -256,7 +256,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
 
       {selectedFiles.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-2">
+          <h3 className="text-sm font-medium text-gray-300 mb-2">
             Selected Files ({selectedFiles.length})
           </h3>
           <div className="space-y-2 max-h-48 overflow-y-auto border rounded-lg p-3">
@@ -329,7 +329,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">Create Knowledge Source</h2>
           <button
@@ -357,12 +357,12 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
 
         {/* Dialog Actions */}
         {step !== 'progress' && (
-          <div className="flex items-center justify-between p-6 border-t bg-gray-50">
+          <div className="flex items-center justify-between p-6 border-t">
             <div className="flex gap-2">
               {step === 'upload' && (
                 <button
                   onClick={handleBack}
-                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                  className="px-4 py-2 text-gray-300 border border-blue-300 rounded-md hover:bg-gray-800"
                 >
                   Back
                 </button>
@@ -371,7 +371,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
             <div className="flex gap-3">
               <button
                 onClick={handleClose}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                className="px-4 py-2 text-gray-300 border border-blue-300 rounded-md hover:bg-gray-800"
                 disabled={uploading}
               >
                 Cancel

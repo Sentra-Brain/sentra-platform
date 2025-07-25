@@ -59,7 +59,7 @@ const KnowledgeDemoPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-100 p-8">
       <div className="max-w-4xl mx-auto">
-        <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <div className="rounded-lg shadow-md p-6 mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Knowledge Management Demo
           </h1>
@@ -108,7 +108,7 @@ const KnowledgeDemoPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="rounded-lg shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Available Knowledge Sources</h2>
           <div className="space-y-3">
             {mockKnowledgeSources.map((source) => (

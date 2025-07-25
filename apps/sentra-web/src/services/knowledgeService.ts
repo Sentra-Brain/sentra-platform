@@ -13,13 +13,13 @@ import type {
 export const knowledgeService = {
   // Knowledge Sources
   listKnowledgeSources(limit = 100, offset = 0): Promise<KnowledgeSourceListResponse> {
-    return httpClient.get('/knowledge-sources', {
+    return httpClient.get('/knowledge/knowledge-sources', {
       params: { limit, offset },
     });
   },
 
   createKnowledgeSource(data: CreateKnowledgeSourceRequest): Promise<KnowledgeSource> {
-    return httpClient.post('/knowledge-sources', data);
+    return httpClient.post('/knowledge/knowledge-sources', data);
   },
 
   // Documents
@@ -32,8 +32,8 @@ export const knowledgeService = {
     if (knowledgeSourceId) {
       params.knowledge_source_id = knowledgeSourceId;
     }
-    
-    return httpClient.get('/documents', { params });
+
+    return httpClient.get('/knowledge/documents', { params });
   },
 
   uploadDocument(
@@ -51,7 +51,7 @@ export const knowledgeService = {
       formData.append('knowledge_source_id', knowledgeSourceId);
     }
 
-    return httpClient.post('/upload', formData, {
+    return httpClient.post('/knowledge/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

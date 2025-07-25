@@ -105,10 +105,8 @@ sequenceDiagram
 1. **User Frontend or (Future) n8n → Sentra API**  
    - Request for CRM/ERP data is initiated by a user through the frontend or, in future phases, via an automated workflow (n8n integration).
 
-2. **Sentra API → MCP Servers (sentra-crm / sentra-action)**  
-   - Sentra API forwards the request using gRPC or REST to the appropriate MCP Server, depending on the requested capability:
-      - sentra-crm for structured CRM/ERP data queries.
-      - sentra-action for triggerable actions or automations.
+2. **Sentra API → MCP Servers**  
+   - Sentra API forwards the request using gRPC or REST to the appropriate MCP Server, depending on the requested capability.
 
 3. **MCP Server → CRM/ERP APIs**  
    - MCP performs necessary queries or actions on behalf of Sentra Brain.

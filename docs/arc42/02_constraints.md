@@ -37,7 +37,7 @@ These constraints define the framework within which all architectural decisions 
   - Database:  
     - SQL (PostgreSQL or MariaDB): User authentication, configuration settings, licensing information, and administrative data.  
     - NoSQL (MongoDB or equivalent): Conversations and chat histories are stored as flexible JSON structures using a document-based NoSQL database, alongside relational storage for user credentials and configuration.  
-  - MCP Layer: Explicitly split into dedicated services (`sentra-doc`, `sentra-crm`, `sentra-action`) per capability.
+  - MCP Layer: Explicitly split into dedicated services (TBD) per capability.
 
 
 - **Repository Structure**  

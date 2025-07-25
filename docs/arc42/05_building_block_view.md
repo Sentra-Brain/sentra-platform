@@ -54,7 +54,7 @@ graph TD
 | **Sentra API (FastAPI)**       | Orchestrates all service communication: LLM, RAG, MCP Servers, Auth, and Conversations DB.                      |
 | **LLM Server**                 | Runs local or hybrid large language models (llama.cpp, vLLM). Responds to queries from Sentra API.              |
 | **RAG Engine**                 | Knowledge retrieval using ChromaDB. Provides document search functionality.                                     |
-| **MCP Servers (split)**        | `sentra-doc`, `sentra-crm`, `sentra-action`: Dedicated Model Context Protocol servers for isolated tool access. |
+| **MCP Servers (split)**        | TBD: Dedicated Model Context Protocol servers for isolated tool access. |
 | **Auth DB (SQL)**              | Stores user credentials, configuration settings, and administrative data.                                       |
 | **Conversations DB (NoSQL)**   | Stores chat histories and user conversation logs in JSON format.                                                |
 | **External Data Sources**      | Third-party systems providing knowledge or reference data to RAG.                                               |

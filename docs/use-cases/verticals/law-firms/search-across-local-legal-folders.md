@@ -9,7 +9,7 @@
 
 Law firm users can search for documents stored outside Sentra Brain’s Knowledge Base, specifically in shared folders or NAS storage configured by the organization.
 
-Sentra Brain connects to these folders via an MCP server (e.g., sentra-crm or sentra-doc) that indexes or queries file names, metadata, and optionally file contents.
+Sentra Brain connects to these folders via an MCP server that indexes or queries file names, metadata, and optionally file contents.
 
 This allows maintaining flexible file structures without requiring full import into Sentra Brain’s ChromaDB.
 
