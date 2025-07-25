@@ -50,15 +50,18 @@ services:
       - ../services/sentra-api/.env
 
   sentra-rag-worker:
-    image: sentrabrain.azurecr.io/sentra-rag-worker:latest
+    build:
+      context: ../services/sentra-rag-worker
+      dockerfile: Dockerfile
+    image: sentra-rag-worker:dev
     container_name: sentra-rag-worker
     pull_policy: always
     volumes:
       - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:
-      - sentrabrain-net
+      - sentrabrain-dev-net
     env_file:
-      - .prod.env
+      - .dev.env
     depends_on:
       - sentra-sql-db
       - sentra-vector-db
@@ -121,7 +124,7 @@ services:
     volumes:
       - sentra-vector-data:/chroma/.chroma/index
     networks:
-      - sentrabrain-net
+      - sentrabrain-dev-net
 
   rabbitmq:
     image: rabbitmq:3-management
