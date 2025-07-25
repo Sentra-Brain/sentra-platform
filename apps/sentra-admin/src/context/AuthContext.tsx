@@ -1,5 +1,5 @@
 // src/context/AuthContext.tsx
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { authService } from '../services/authService';
 import { userService } from '../services/userService';
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     sessionStorage.removeItem('refresh_token');
   };
 
-  const refreshAccessToken = async (): Promise<boolean> => {
+  const refreshAccessToken = useCallback(async (): Promise<boolean> => {
     // If there's already a refresh in progress, wait for it
     if (refreshPromiseRef.current) {
       return refreshPromiseRef.current;
@@ -46,7 +46,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const refreshToken = getRefreshToken();
     if (!refreshToken) {
       console.warn('[AuthContext] No refresh token available');
-      logout();
+      // Clear tokens directly to avoid circular dependency
+      clearTokens();
+      setAuthToken(null);
+      setRefreshTokenFunction(null);
+      setUser(null);
       return false;
     }
 
@@ -71,7 +75,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         return true;
       } catch (error) {
         console.error('[AuthContext] Token refresh failed:', error);
-        logout();
+        // Clear tokens directly to avoid circular dependency
+        clearTokens();
+        setAuthToken(null);
+        setRefreshTokenFunction(null);
+        setUser(null);
         return false;
       } finally {
         refreshPromiseRef.current = null;
@@ -79,7 +87,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     })();
 
     return refreshPromiseRef.current;
-  };
+  }, []);
 
   const getValidAccessToken = async (): Promise<string | null> => {
     const token = getToken();
@@ -120,7 +128,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       })
       .finally(() => setLoading(false));
-  }, []);
+  }, [refreshAccessToken]);
 
   const login = async (email: string, password: string, remember = true) => {
     try {
