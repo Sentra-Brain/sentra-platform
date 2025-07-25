@@ -102,7 +102,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div className="rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between p-6 border-b">
           <h2 className="text-xl font-semibold">Upload Documents</h2>
           <button
@@ -117,13 +117,13 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
         <div className="p-6 space-y-6">
           {/* Knowledge Source Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Upload to Knowledge Source
             </label>
             <select
               value={selectedKnowledgeSourceId}
               onChange={(e) => setSelectedKnowledgeSourceId(e.target.value)}
-              className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               disabled={uploading}
             >
               <option value="">Select a knowledge source...</option>
@@ -142,11 +142,11 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
 
           {/* File Selection */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-gray-300 mb-2">
               Select Files
             </label>
             <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
+              className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
             >
@@ -180,7 +180,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
           {/* Selected Files */}
           {selectedFiles.length > 0 && (
             <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-2">
+              <h3 className="text-sm font-medium text-gray-300 mb-2">
                 Selected Files ({selectedFiles.length})
               </h3>
               <div className="space-y-2 max-h-32 overflow-y-auto">
@@ -229,7 +229,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-4 py-2 text-gray-300 border border-blue-300 rounded-md hover:bg-gray-50"
               disabled={uploading}
             >
               Cancel

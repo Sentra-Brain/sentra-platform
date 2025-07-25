@@ -15,7 +15,7 @@ const KnowledgePage: React.FC = () => {
   return (
     <div className="h-full flex">
       {/* Master Panel - Tree View */}
-      <div className="w-1/3 min-w-80 border-r bg-white">
+      <div className="w-1/3 min-w-80 border-r">
         <KnowledgeTreeView
           onSelectNode={handleSelectNode}
           selectedNodeId={selectedNode?.id}
@@ -23,7 +23,7 @@ const KnowledgePage: React.FC = () => {
       </div>
 
       {/* Detail Panel */}
-      <div className="flex-1 bg-white">
+      <div className="flex-1">
         <KnowledgeDetailPanel selectedNode={selectedNode} />
       </div>
     </div>

@@ -16,9 +16,7 @@ interface KnowledgeDetailPanelProps {
   selectedNode?: KnowledgeTreeNode;
 }
 
-const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
-  selectedNode,
-}) => {
+const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({ selectedNode }) => {
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -79,7 +77,7 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
           <span className="text-2xl">{getTypeIcon(source.type)}</span>
           <div>
             <h2 className="text-xl font-semibold">{source.name}</h2>
-            <p className="text-gray-600 capitalize">{source.type.replace('_', ' ')} Source</p>
+            <p className=" capitalize">{source.type.replace('_', ' ')} Source</p>
           </div>
         </div>
         <StatusBadge status={source.status} />
@@ -87,8 +85,8 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
 
       {source.description && (
         <div>
-          <h3 className="font-medium text-gray-900 mb-2">Description</h3>
-          <p className="text-gray-700">{source.description}</p>
+          <h3 className="font-medium  mb-2">Description</h3>
+          <p className="text-gray-300">{source.description}</p>
         </div>
       )}
 
@@ -97,20 +95,16 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
           <div className="flex items-center gap-2">
             <Folder size={16} className="text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Visibility</p>
-              <p className="text-sm text-gray-600 capitalize">
-                {source.visibility.replace('-', ' ')}
-              </p>
+              <p className="text-sm font-medium ">Visibility</p>
+              <p className="text-sm  capitalize">{source.visibility.replace('-', ' ')}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <Settings size={16} className="text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Auto-index</p>
-              <p className="text-sm text-gray-600">
-                {source.auto_index ? 'Enabled' : 'Disabled'}
-              </p>
+              <p className="text-sm font-medium ">Auto-index</p>
+              <p className="text-sm ">{source.auto_index ? 'Enabled' : 'Disabled'}</p>
             </div>
           </div>
         </div>
@@ -119,18 +113,16 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
           <div className="flex items-center gap-2">
             <Calendar size={16} className="text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Created</p>
-              <p className="text-sm text-gray-600">
-                {formatDate(source.created_at)}
-              </p>
+              <p className="text-sm font-medium ">Created</p>
+              <p className="text-sm ">{formatDate(source.created_at)}</p>
             </div>
           </div>
 
           <div className="flex items-center gap-2">
             <User size={16} className="text-gray-400" />
             <div>
-              <p className="text-sm font-medium text-gray-900">Created by</p>
-              <p className="text-sm text-gray-600">{source.created_by}</p>
+              <p className="text-sm font-medium ">Created by</p>
+              <p className="text-sm ">{source.created_by}</p>
             </div>
           </div>
         </div>
@@ -138,18 +130,14 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
 
       {source.path && (
         <div>
-          <h3 className="font-medium text-gray-900 mb-2">Path</h3>
-          <code className="block p-2 bg-gray-100 rounded text-sm font-mono">
-            {source.path}
-          </code>
+          <h3 className="font-medium  mb-2">Path</h3>
+          <code className="block p-2 bg-gray-100 rounded text-sm font-mono">{source.path}</code>
         </div>
       )}
 
       <div>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-medium text-gray-900">
-            Documents ({documents.length})
-          </h3>
+          <h3 className="font-medium ">Documents ({documents.length})</h3>
           <button
             onClick={() => loadDocuments(source.id)}
             className="p-1 hover:bg-gray-100 rounded"
@@ -200,7 +188,7 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
           <File size={24} className="text-gray-400" />
           <div>
             <h2 className="text-xl font-semibold">{document.display_name}</h2>
-            <p className="text-gray-600">{document.filename}</p>
+            <p className="">{document.filename}</p>
           </div>
         </div>
         <StatusBadge status={document.status} />
@@ -208,35 +196,33 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
 
       {document.description && (
         <div>
-          <h3 className="font-medium text-gray-900 mb-2">Description</h3>
-          <p className="text-gray-700">{document.description}</p>
+          <h3 className="font-medium  mb-2">Description</h3>
+          <p className="text-gray-300">{document.description}</p>
         </div>
       )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-medium text-gray-900">File Type</p>
-            <p className="text-sm text-gray-600 uppercase">{document.filetype}</p>
+            <p className="text-sm font-medium ">File Type</p>
+            <p className="text-sm  uppercase">{document.filetype}</p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-900">Uploaded</p>
-            <p className="text-sm text-gray-600">
-              {formatDate(document.uploaded_at)}
-            </p>
+            <p className="text-sm font-medium ">Uploaded</p>
+            <p className="text-sm ">{formatDate(document.uploaded_at)}</p>
           </div>
         </div>
 
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-medium text-gray-900">Uploaded by</p>
-            <p className="text-sm text-gray-600">{document.uploaded_by}</p>
+            <p className="text-sm font-medium ">Uploaded by</p>
+            <p className="text-sm ">{document.uploaded_by}</p>
           </div>
 
           <div>
-            <p className="text-sm font-medium text-gray-900">Knowledge Source</p>
-            <p className="text-sm text-gray-600">{document.knowledge_source_id}</p>
+            <p className="text-sm font-medium ">Knowledge Source</p>
+            <p className="text-sm ">{document.knowledge_source_id}</p>
           </div>
         </div>
       </div>
@@ -244,15 +230,13 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
       {document.error && (
         <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
           <h3 className="font-medium text-red-900 mb-1">Error</h3>
-          <p className="text-sm text-red-700">{document.error}</p>
+          <p className="text-sm text-red-300">{document.error}</p>
         </div>
       )}
 
       <div>
-        <h3 className="font-medium text-gray-900 mb-2">File Path</h3>
-        <code className="block p-2 bg-gray-100 rounded text-sm font-mono">
-          {document.path}
-        </code>
+        <h3 className="font-medium  mb-2">File Path</h3>
+        <code className="block p-2 bg-gray-200 rounded text-sm font-mono">{document.path}</code>
       </div>
     </div>
   );
@@ -263,14 +247,12 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
         <Folder size={24} className="text-gray-400" />
         <div>
           <h2 className="text-xl font-semibold">{node.name}</h2>
-          <p className="text-gray-600">Knowledge visibility group</p>
+          <p className="text-gray-300">Knowledge visibility group</p>
         </div>
       </div>
 
       <div className="text-center py-8">
-        <p className="text-gray-500">
-          Select a knowledge source or document to view details
-        </p>
+        <p className="text-gray-200">Select a knowledge source or document to view details</p>
       </div>
     </div>
   );
@@ -280,12 +262,8 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
       <div className="h-full flex items-center justify-center">
         <div className="text-center">
           <Folder size={48} className="text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">
-            Knowledge Management
-          </h3>
-          <p className="text-gray-500">
-            Select an item from the explorer to view details
-          </p>
+          <h3 className="text-lg font-medium mb-2">Knowledge Management</h3>
+          <p className="text-gray-200">Select an item from the explorer to view details</p>
         </div>
       </div>
     );
@@ -297,11 +275,13 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
         <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
           <span>Knowledge</span>
           <span>›</span>
-          <span className="capitalize">{selectedNode.visibility?.replace('-', ' ') || 'Details'}</span>
+          <span className="capitalize">
+            {selectedNode.visibility?.replace('-', ' ') || 'Details'}
+          </span>
           {selectedNode.type !== 'visibility-group' && (
             <>
               <span>›</span>
-              <span className="text-gray-900">{selectedNode.name}</span>
+              <span className="">{selectedNode.name}</span>
             </>
           )}
         </div>
@@ -311,8 +291,8 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({
         {selectedNode.type === 'knowledge-source' && selectedNode.knowledgeSource
           ? renderKnowledgeSourceDetail(selectedNode.knowledgeSource)
           : selectedNode.type === 'document' && selectedNode.document
-          ? renderDocumentDetail(selectedNode.document)
-          : renderVisibilityGroupDetail(selectedNode)}
+            ? renderDocumentDetail(selectedNode.document)
+            : renderVisibilityGroupDetail(selectedNode)}
       </div>
     </div>
   );

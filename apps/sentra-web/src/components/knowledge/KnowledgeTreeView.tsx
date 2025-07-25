@@ -165,8 +165,8 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
     return (
       <div key={node.id}>
         <div
-          className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50 ${
-            isSelected ? 'bg-blue-50 border-l-4 border-blue-500' : ''
+          className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-800 ${
+            isSelected ? 'border-l-4 border-blue-400' : ''
           }`}
           style={{ paddingLeft: `${level * 20 + 8}px` }}
           onClick={() => handleNodeClick(node)}
