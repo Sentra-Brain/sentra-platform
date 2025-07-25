@@ -5,6 +5,7 @@ import { X, FolderPlus, Upload, AlertCircle, CheckCircle } from 'lucide-react';
 import type { CreateKnowledgeSourceRequest } from '../../models/knowledgeModels';
 import { KnowledgeSourceType, KnowledgeSourceVisibility } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
+import './CreateKnowledgeSourceDialog.css';
 
 interface CreateKnowledgeSourceDialogProps {
   isOpen: boolean;
@@ -328,29 +329,29 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
   );
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">Create Knowledge Source</h2>
+    <div className="create-dialog-overlay">
+      <div className="create-dialog">
+        <div className="create-dialog-header">
+          <h2 className="create-dialog-title">Create Knowledge Source</h2>
           <button
             onClick={handleClose}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="dialog-close-button"
             disabled={uploading}
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6">
+        <div className="create-dialog-content">
           {step === 'metadata' && renderMetadataStep()}
           {step === 'upload' && renderUploadStep()}
           {step === 'progress' && renderProgressStep()}
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mt-6">
-              <AlertCircle size={16} className="text-red-600" />
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="error-message">
+              <AlertCircle size={16} className="error-icon" />
+              <p className="error-text">{error}</p>
             </div>
           )}
         </div>

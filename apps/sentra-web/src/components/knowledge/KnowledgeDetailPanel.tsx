@@ -6,6 +6,7 @@ import type {
   KnowledgeSource,
   Document,
   KnowledgeSourceType,
+  KnowledgeTreeNode,
 } from '../../models/knowledgeModels';
 import { KnowledgeSourceType as KSType } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
