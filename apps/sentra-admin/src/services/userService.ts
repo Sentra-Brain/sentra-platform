@@ -1,14 +1,24 @@
 // src/services/userService.ts
-import axios from 'axios';
 import type { User } from '../models/user';
 
-axios.defaults.baseURL = import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100';
+const BASE_URL = import.meta.env.VITE_SENTRA_API_URL || 'http://127.0.0.1:8100';
 
 export const userService = {
   async getCurrentUser(token: string): Promise<User> {
-    const res = await axios.get<User>('/users/me', {
-      headers: { Authorization: `Bearer ${token}` },
+    // For initial token validation, we still need to use the direct approach
+    // because httpClient might trigger refresh loops during initialization
+    const response = await fetch(`${BASE_URL}/users/me`, {
+      headers: { 
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      method: 'GET'
     });
-    return res.data;
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch user');
+    }
+    
+    return response.json();
   },
 };

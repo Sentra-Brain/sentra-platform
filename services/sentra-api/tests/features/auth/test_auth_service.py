@@ -71,3 +71,69 @@ def test_verify_password(auth_service):
     password = "password123"
     hashed_password = auth_service.get_password_hash(password)
     assert auth_service._verify_password(password, hashed_password)  # Ensure the password verifies correctly
+
+def test_create_refresh_token(auth_service):
+    # Test refresh token creation
+    data = {"sub": "testuser", "roles": "user"}
+    token = auth_service.create_refresh_token(data, timedelta(days=7))
+    decoded = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
+    assert decoded["sub"] == "testuser"
+    assert decoded["roles"] == "user"
+    assert decoded["type"] == "refresh"
+
+def test_validate_refresh_token_success(auth_service):
+    # Test successful refresh token validation
+    data = {"sub": "testuser", "roles": "user"}
+    token = auth_service.create_refresh_token(data, timedelta(days=7))
+    
+    # Mock user retrieval
+    mock_user = MagicMock(spec=UserEntity)
+    mock_user.username = "testuser"
+    mock_user.disabled = False
+    auth_service.user_repo.get_by_username.return_value = mock_user
+    
+    result = auth_service.validate_refresh_token(token)
+    assert result == mock_user
+
+def test_validate_refresh_token_invalid_type(auth_service):
+    # Test refresh token validation with wrong token type
+    data = {"sub": "testuser", "roles": "user"}  # Missing "type": "refresh"
+    token = auth_service.create_access_token(data, timedelta(minutes=15))
+    
+    result = auth_service.validate_refresh_token(token)
+    assert result is None
+
+def test_validate_refresh_token_user_not_found(auth_service):
+    # Test refresh token validation when user not found
+    data = {"sub": "testuser", "roles": "user"}
+    token = auth_service.create_refresh_token(data, timedelta(days=7))
+    
+    auth_service.user_repo.get_by_username.return_value = None
+    auth_service.user_repo.get_by_email.return_value = None
+    
+    result = auth_service.validate_refresh_token(token)
+    assert result is None
+
+def test_validate_refresh_token_disabled_user(auth_service):
+    # Test refresh token validation with disabled user
+    data = {"sub": "testuser", "roles": "user"}
+    token = auth_service.create_refresh_token(data, timedelta(days=7))
+    
+    mock_user = MagicMock(spec=UserEntity)
+    mock_user.username = "testuser"
+    mock_user.disabled = True
+    auth_service.user_repo.get_by_username.return_value = mock_user
+    
+    result = auth_service.validate_refresh_token(token)
+    assert result is None
+
+def test_validate_refresh_token_expired(auth_service):
+    # Test refresh token validation with expired token
+    data = {"sub": "testuser", "roles": "user"}
+    token = auth_service.create_refresh_token(data, timedelta(microseconds=1))  # Very short expiry
+    
+    import time
+    time.sleep(0.001)  # Wait for token to expire
+    
+    result = auth_service.validate_refresh_token(token)
+    assert result is None
