@@ -20,6 +20,20 @@ vi.mock('../src/hooks/useChat', () => ({
   }),
 }));
 
+// Mock the knowledge service to avoid API calls in tests
+vi.mock('../src/services/knowledgeService', () => ({
+  knowledgeService: {
+    listKnowledgeSources: vi.fn().mockResolvedValue({
+      sources: [],
+      total: 0,
+    }),
+    listDocuments: vi.fn().mockResolvedValue({
+      documents: [],
+      total: 0,
+    }),
+  },
+}));
+
 // Mock the components that require complex context
 vi.mock('../src/components', () => ({
   ChatArea: () => <div data-testid="chat-area">Chat Area</div>,
@@ -35,11 +49,12 @@ describe('Navigation Pages', () => {
     expect(screen.getByText('This feature is under development and will be available in a future release.')).toBeInTheDocument();
   });
 
-  it('renders KnowledgePage', () => {
+  it('renders KnowledgePage', async () => {
     render(<KnowledgePage />);
     
-    expect(screen.getByText('Knowledge')).toBeInTheDocument();
-    expect(screen.getByText('Coming soon...')).toBeInTheDocument();
+    expect(screen.getByText('Knowledge Management')).toBeInTheDocument();
+    // Wait for the component to load and show the explorer
+    await screen.findByText('Knowledge Explorer');
   });
 
   it('renders PromptsPage', () => {
