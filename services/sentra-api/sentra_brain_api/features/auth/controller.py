@@ -6,7 +6,7 @@ from sentra_brain_api.core.config import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.logging import get_logger
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_brain_api.features.auth.models import Token
+from sentra_brain_api.features.auth.models import Token, RefreshTokenRequest, AccessToken
 from sentra_brain_api.features.user.repository import UserRepository
 from sentra_brain_api.infra.postgres_service import get_db
 
@@ -35,6 +35,35 @@ class AuthController:
                         path="/auth/token",
                         suggestion="Check your credentials",
                     )
+            access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
+            access_token = auth_service.create_access_token(
+                data={"sub": user.username, "roles": user.roles},
+                expires_delta=access_token_expires
+            )
+            refresh_token = auth_service.create_refresh_token(
+                data={"sub": user.username, "roles": user.roles}
+            )
+            return {"access_token": access_token, "refresh_token": refresh_token, "token_type": "bearer"}
+
+        @self.router.post("/refresh", response_model=AccessToken)
+        async def refresh_access_token(
+            request: RefreshTokenRequest,
+            db: Session = Depends(get_db)
+        ):
+            user_repo = UserRepository(db)
+            auth_service = AuthService(user_repo)
+            logger.info("Refreshing access token")
+            
+            user = auth_service.validate_refresh_token(request.refresh_token)
+            if not user:
+                raise SentraHTTPException(
+                    status_code=401,
+                    code="INVALID_REFRESH_TOKEN",
+                    message="Invalid or expired refresh token",
+                    path="/auth/refresh",
+                    suggestion="Please log in again",
+                )
+            
             access_token_expires = timedelta(minutes=settings.access_token_expire_minutes)
             access_token = auth_service.create_access_token(
                 data={"sub": user.username, "roles": user.roles},

@@ -34,6 +34,42 @@ class AuthService:
         encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
         return encoded_jwt
     
+    def create_refresh_token(self, data: dict, expires_delta: timedelta | None = None):
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.now(timezone.utc) + expires_delta
+        else:
+            expire = datetime.now(timezone.utc) + timedelta(days=7)  # 7 days default
+        to_encode.update({"exp": expire, "type": "refresh"})
+        encoded_jwt = jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+        return encoded_jwt
+    
+    def validate_refresh_token(self, refresh_token: str) -> UserEntity | None:
+        try:
+            payload = jwt.decode(refresh_token, settings.secret_key, algorithms=[settings.algorithm])
+            username: str = payload.get("sub")
+            token_type: str = payload.get("type")
+            
+            if not username or token_type != "refresh":
+                logger.warning("Invalid refresh token: missing subject or wrong type")
+                return None
+                
+            user = self.user_repo.get_by_username(username)
+            if not user:
+                user = self.user_repo.get_by_email(username.lower())
+            
+            if not user or user.disabled:
+                logger.warning(f"Refresh token refers to invalid or disabled user: '{username}'")
+                return None
+                
+            return user
+        except ExpiredSignatureError:
+            logger.warning("Refresh token has expired")
+            return None
+        except JWTError as e:
+            logger.warning(f"Invalid refresh token: {str(e)}")
+            return None
+    
     def create_verification_token(self, user_id: int, expires_delta: timedelta | None = None):
         expire = datetime.now(timezone.utc) + (expires_delta or timedelta(hours=24))
         to_encode = {"user_id": user_id, "exp": expire}
