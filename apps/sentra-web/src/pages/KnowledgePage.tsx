@@ -1,30 +1,20 @@
 // src/pages/KnowledgePage.tsx
 // Main Knowledge Management page with master-detail layout
-import React, { useState } from 'react';
+import React from 'react';
 import KnowledgeTreeView from '../components/knowledge/KnowledgeTreeView';
 import KnowledgeDetailPanel from '../components/knowledge/KnowledgeDetailPanel';
-import type { KnowledgeTreeNode } from '../models/knowledgeModels';
 
 const KnowledgePage: React.FC = () => {
-  const [selectedNode, setSelectedNode] = useState<KnowledgeTreeNode | undefined>();
-
-  const handleSelectNode = (node: KnowledgeTreeNode) => {
-    setSelectedNode(node);
-  };
-
   return (
     <div className="h-full flex">
       {/* Master Panel - Tree View */}
       <div className="w-1/3 min-w-80 border-r">
-        <KnowledgeTreeView
-          onSelectNode={handleSelectNode}
-          selectedNodeId={selectedNode?.id}
-        />
+        <KnowledgeTreeView />
       </div>
 
       {/* Detail Panel */}
       <div className="flex-1">
-        <KnowledgeDetailPanel selectedNode={selectedNode} />
+        <KnowledgeDetailPanel />
       </div>
     </div>
   );

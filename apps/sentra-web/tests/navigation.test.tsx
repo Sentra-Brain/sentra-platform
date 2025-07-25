@@ -20,6 +20,24 @@ vi.mock('../src/hooks/useChat', () => ({
   }),
 }));
 
+// Mock the useKnowledge hook since KnowledgePage depends on it
+vi.mock('../src/hooks/useKnowledge', () => ({
+  useKnowledge: () => ({
+    treeNodes: [],
+    selectedNode: undefined,
+    loading: false,
+    error: null,
+    showUploadDialog: false,
+    showCreateSourceDialog: false,
+    knowledgeSources: [],
+    refresh: vi.fn(),
+    selectNode: vi.fn(),
+    setShowUploadDialog: vi.fn(),
+    setShowCreateSourceDialog: vi.fn(),
+    getUserUploadSource: vi.fn(),
+  }),
+}));
+
 // Mock the knowledge service to avoid API calls in tests
 vi.mock('../src/services/knowledgeService', () => ({
   knowledgeService: {

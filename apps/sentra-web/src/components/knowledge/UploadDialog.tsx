@@ -5,6 +5,7 @@ import { X, Upload, Folder, AlertCircle } from 'lucide-react';
 import type { KnowledgeSource } from '../../models/knowledgeModels';
 import { KnowledgeSourceType } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
+import './UploadDialog.css';
 
 interface UploadDialogProps {
   isOpen: boolean;
@@ -101,29 +102,29 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
   const filteredSources = getFilteredSources();
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">Upload Documents</h2>
+    <div className="upload-dialog-overlay">
+      <div className="upload-dialog">
+        <div className="upload-dialog-header">
+          <h2 className="upload-dialog-title">Upload Documents</h2>
           <button
             onClick={onClose}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="dialog-close-button"
             disabled={uploading}
           >
             <X size={20} />
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="upload-dialog-content">
           {/* Knowledge Source Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="form-group">
+            <label className="form-label">
               Upload to Knowledge Source
             </label>
             <select
               value={selectedKnowledgeSourceId}
               onChange={(e) => setSelectedKnowledgeSourceId(e.target.value)}
-              className="w-full p-2 border border-blue-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="form-select"
               disabled={uploading}
             >
               <option value="">Select a knowledge source...</option>
@@ -134,35 +135,35 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
               ))}
             </select>
             {filteredSources.length === 0 && (
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="form-help-text">
                 No knowledge sources available for upload. Contact your administrator.
               </p>
             )}
           </div>
 
           {/* File Selection */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
+          <div className="form-group">
+            <label className="form-label">
               Select Files
             </label>
             <div
-              className="border-2 border-dashed border-blue-300 rounded-lg p-6 text-center hover:border-blue-400 transition-colors"
+              className="upload-drop-zone"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
             >
-              <Upload className="mx-auto h-12 w-12 text-gray-400 mb-2" />
-              <p className="text-gray-600 mb-2">
+              <Upload className="upload-icon" size={48} />
+              <p className="upload-text">
                 Drag and drop files here, or{' '}
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}
-                  className="text-blue-600 hover:text-blue-700 font-medium"
+                  className="upload-browse-button"
                   disabled={uploading}
                 >
                   browse
                 </button>
               </p>
-              <p className="text-xs text-gray-500">
+              <p className="upload-supported-formats">
                 Supported formats: PDF, DOCX, TXT, MD
               </p>
               <input
@@ -171,7 +172,7 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
                 multiple
                 accept=".pdf,.docx,.txt,.md"
                 onChange={handleFileSelect}
-                className="hidden"
+                className="upload-file-input"
                 disabled={uploading}
               />
             </div>
@@ -179,27 +180,24 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
 
           {/* Selected Files */}
           {selectedFiles.length > 0 && (
-            <div>
-              <h3 className="text-sm font-medium text-gray-300 mb-2">
+            <div className="selected-files">
+              <h3 className="selected-files-title">
                 Selected Files ({selectedFiles.length})
               </h3>
-              <div className="space-y-2 max-h-32 overflow-y-auto">
+              <div className="selected-files-list">
                 {selectedFiles.map((file, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Folder size={16} className="text-gray-400" />
-                      <span className="text-sm font-medium">{file.name}</span>
-                      <span className="text-xs text-gray-500">
+                  <div key={index} className="selected-file-item">
+                    <div className="selected-file-info">
+                      <Folder size={16} className="selected-file-icon" />
+                      <span className="selected-file-name">{file.name}</span>
+                      <span className="selected-file-size">
                         ({(file.size / 1024 / 1024).toFixed(2)} MB)
                       </span>
                     </div>
                     {!uploading && (
                       <button
                         onClick={() => removeFile(index)}
-                        className="text-red-600 hover:text-red-700 p-1"
+                        className="remove-file-button"
                       >
                         <X size={16} />
                       </button>
@@ -212,24 +210,24 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
 
           {/* Error Message */}
           {error && (
-            <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <AlertCircle size={16} className="text-red-600" />
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="error-message">
+              <AlertCircle size={16} className="error-icon" />
+              <p className="error-text">{error}</p>
             </div>
           )}
         </div>
 
         {/* Dialog Actions */}
-        <div className="flex items-center justify-between p-6 border-t bg-gray-50">
-          <div className="text-sm text-gray-500">
+        <div className="upload-dialog-footer">
+          <div className="upload-dialog-status">
             {selectedFiles.length > 0 && 
               `${selectedFiles.length} file${selectedFiles.length === 1 ? '' : 's'} selected`
             }
           </div>
-          <div className="flex gap-3">
+          <div className="upload-dialog-actions">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-gray-300 border border-blue-300 rounded-md hover:bg-gray-50"
+              className="btn-secondary"
               disabled={uploading}
             >
               Cancel
@@ -237,11 +235,11 @@ const UploadDialog: React.FC<UploadDialogProps> = ({
             <button
               onClick={handleUpload}
               disabled={selectedFiles.length === 0 || !selectedKnowledgeSourceId || uploading}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+              className="btn-upload"
             >
               {uploading ? (
                 <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                  <div className="upload-spinner"></div>
                   Uploading...
                 </>
               ) : (

@@ -1,134 +1,34 @@
 // src/components/knowledge/KnowledgeTreeView.tsx
 // Tree-based knowledge explorer component
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { ChevronRight, ChevronDown, RefreshCw, Folder, File, Upload, Plus } from 'lucide-react';
-import type {
-  KnowledgeSource,
-  Document,
-  KnowledgeSourceVisibility,
-  KnowledgeTreeNode,
-} from '../../models/knowledgeModels';
-import { KnowledgeSourceVisibility as KSVisibility } from '../../models/knowledgeModels';
-import { knowledgeService } from '../../services/knowledgeService';
+import type { KnowledgeTreeNode } from '../../models/knowledgeModels';
+import { useKnowledge } from '../../hooks/useKnowledge';
 import StatusBadge from './StatusBadge';
 import UploadDialog from './UploadDialog';
 import CreateKnowledgeSourceDialog from './CreateKnowledgeSourceDialog';
+import './KnowledgeTreeView.css';
 
-interface KnowledgeTreeViewProps {
-  onSelectNode: (node: KnowledgeTreeNode) => void;
-  selectedNodeId?: string;
-}
-
-const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
-  onSelectNode,
-  selectedNodeId,
-}) => {
-  const [knowledgeSources, setKnowledgeSources] = useState<KnowledgeSource[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
-  const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showUploadDialog, setShowUploadDialog] = useState(false);
-  const [showCreateSourceDialog, setShowCreateSourceDialog] = useState(false);
-
-  const loadData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [sourcesResponse, documentsResponse] = await Promise.all([
-        knowledgeService.listKnowledgeSources(),
-        knowledgeService.listDocuments(),
-      ]);
-      setKnowledgeSources(sourcesResponse.sources);
-      setDocuments(documentsResponse.documents);
-    } catch (err) {
-      setError('Failed to load knowledge data');
-      console.error('Error loading knowledge data:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const buildTreeNodes = (): KnowledgeTreeNode[] => {
-    const visibilityGroups: Record<KnowledgeSourceVisibility, KnowledgeTreeNode> = {
-      [KSVisibility.PRIVATE]: {
-        id: 'private',
-        name: 'Private',
-        type: 'visibility-group',
-        visibility: KSVisibility.PRIVATE,
-        children: [],
-        expanded: expandedNodes.has('private'),
-      },
-      [KSVisibility.SHARED]: {
-        id: 'shared',
-        name: 'Shared',
-        type: 'visibility-group',
-        visibility: KSVisibility.SHARED,
-        children: [],
-        expanded: expandedNodes.has('shared'),
-      },
-      [KSVisibility.ORG_WIDE]: {
-        id: 'org-wide',
-        name: 'Organization-Wide',
-        type: 'visibility-group',
-        visibility: KSVisibility.ORG_WIDE,
-        children: [],
-        expanded: expandedNodes.has('org-wide'),
-      },
-    };
-
-    // Group sources by visibility
-    knowledgeSources.forEach((source) => {
-      const sourceDocuments = documents.filter(
-        (doc) => doc.knowledge_source_id === source.id
-      );
-
-      const sourceNode: KnowledgeTreeNode = {
-        id: source.id,
-        name: source.name,
-        type: 'knowledge-source',
-        knowledgeSource: source,
-        documentCount: sourceDocuments.length,
-        expanded: expandedNodes.has(source.id),
-        children: sourceDocuments.map((doc) => ({
-          id: doc.id,
-          name: doc.display_name,
-          type: 'document',
-          document: doc,
-        })),
-      };
-
-      visibilityGroups[source.visibility].children!.push(sourceNode);
-    });
-
-    return Object.values(visibilityGroups);
-  };
-
-  const toggleExpanded = (nodeId: string) => {
-    const newExpanded = new Set(expandedNodes);
-    if (newExpanded.has(nodeId)) {
-      newExpanded.delete(nodeId);
-    } else {
-      newExpanded.add(nodeId);
-    }
-    setExpandedNodes(newExpanded);
-  };
-
-  const handleNodeClick = (node: KnowledgeTreeNode) => {
-    if (node.type === 'visibility-group' || node.type === 'knowledge-source') {
-      toggleExpanded(node.id);
-    }
-    onSelectNode(node);
-  };
+const KnowledgeTreeView: React.FC = () => {
+  const {
+    treeNodes,
+    selectedNode,
+    loading,
+    error,
+    showUploadDialog,
+    showCreateSourceDialog,
+    refresh,
+    selectNode,
+    setShowUploadDialog,
+    setShowCreateSourceDialog,
+    knowledgeSources,
+    getUserUploadSource,
+  } = useKnowledge();
 
   const renderTreeNode = (node: KnowledgeTreeNode, level = 0): React.ReactNode => {
     const hasChildren = node.children && node.children.length > 0;
     const isExpanded = node.expanded;
-    const isSelected = selectedNodeId === node.id;
+    const isSelected = selectedNode?.id === node.id;
 
     const getNodeIcon = () => {
       switch (node.type) {
@@ -146,10 +46,10 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
     const getNodeInfo = () => {
       if (node.type === 'knowledge-source' && node.knowledgeSource) {
         return (
-          <div className="flex items-center gap-2">
+          <div className="tree-node-info">
             <StatusBadge status={node.knowledgeSource.status} />
             {node.documentCount !== undefined && (
-              <span className="text-xs text-gray-500">
+              <span className="document-count">
                 {node.documentCount} docs
               </span>
             )}
@@ -165,15 +65,13 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
     return (
       <div key={node.id}>
         <div
-          className={`flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-800 ${
-            isSelected ? 'border-l-4 border-blue-400' : ''
-          }`}
+          className={`tree-node ${isSelected ? 'selected' : ''}`}
           style={{ paddingLeft: `${level * 20 + 8}px` }}
-          onClick={() => handleNodeClick(node)}
+          onClick={() => selectNode(node)}
         >
-          <div className="flex items-center gap-2 flex-1 min-w-0">
+          <div className="tree-node-content">
             {getNodeIcon()}
-            <span className="truncate font-medium">{node.name}</span>
+            <span className="tree-node-name">{node.name}</span>
           </div>
           {getNodeInfo()}
         </div>
@@ -187,54 +85,41 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
   };
 
   const handleUploadComplete = () => {
-    loadData(); // Refresh the tree to show new uploads
+    refresh(); // Refresh the tree to show new uploads
   };
 
   const handleCreateSourceComplete = () => {
-    loadData(); // Refresh the tree to show new knowledge source
-  };
-
-  const getUserUploadSource = (): KnowledgeSource | undefined => {
-    // Find the user's personal upload source (typically a private upload-type source)
-    return knowledgeSources.find(source => 
-      source.visibility === KSVisibility.PRIVATE && 
-      source.type === 'upload'
-    );
+    refresh(); // Refresh the tree to show new knowledge source
   };
 
   if (loading) {
     return (
-      <div className="p-4 text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
-        <p className="text-gray-500 mt-2">Loading knowledge sources...</p>
+      <div className="loading-state">
+        <div className="loading-spinner"></div>
+        <p className="loading-text">Loading knowledge sources...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="p-4 text-center">
-        <p className="text-red-600 mb-2">{error}</p>
-        <button
-          onClick={loadData}
-          className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-        >
+      <div className="error-state">
+        <p className="error-text">{error}</p>
+        <button onClick={refresh} className="retry-button">
           Retry
         </button>
       </div>
     );
   }
 
-  const treeNodes = buildTreeNodes();
-
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-3 border-b space-y-3">
-        <div className="flex items-center justify-between">
-          <h2 className="font-semibold">Knowledge Explorer</h2>
+    <div className="knowledge-tree">
+      <div className="knowledge-tree-header">
+        <div className="knowledge-tree-title">
+          <h2>Knowledge Explorer</h2>
           <button
-            onClick={loadData}
-            className="p-1 hover:bg-gray-100 rounded"
+            onClick={refresh}
+            className="refresh-button"
             title="Refresh"
           >
             <RefreshCw size={16} />
@@ -242,10 +127,10 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
         </div>
         
         {/* Upload Actions */}
-        <div className="flex gap-2">
+        <div className="upload-actions">
           <button
             onClick={() => setShowUploadDialog(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex-1"
+            className="btn btn-primary"
             title="Upload documents to an existing knowledge source"
           >
             <Upload size={16} />
@@ -253,7 +138,7 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
           </button>
           <button
             onClick={() => setShowCreateSourceDialog(true)}
-            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+            className="btn btn-success"
             title="Create a new knowledge source from folder upload"
           >
             <Plus size={16} />
@@ -261,7 +146,7 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
         </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto">
+      <div className="tree-content">
         {treeNodes.map((node) => renderTreeNode(node))}
       </div>
 
