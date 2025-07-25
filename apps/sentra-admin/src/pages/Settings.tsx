@@ -1,5 +1,5 @@
 import { useSettings } from '../hooks/useSettings';
-import { notifySuccess } from '../libs/notify';
+import { notifySuccess } from '../lib/notify';
 
 export default function Settings() {
   const token = localStorage.getItem('jwt') || sessionStorage.getItem('jwt');

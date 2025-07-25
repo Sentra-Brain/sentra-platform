@@ -24,20 +24,30 @@ const client = axios.create({
   timeout: 10000,
 });
 
+let runtimeToken: string | null = null;
+let refreshTokenFunction: (() => Promise<boolean>) | null = null;
+
+export function setAuthToken(token: string | null) {
+  runtimeToken = token;
+}
+
+export function setRefreshTokenFunction(refreshFn: (() => Promise<boolean>) | null) {
+  refreshTokenFunction = refreshFn;
+}
 
 client.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
+  const token = runtimeToken ?? localStorage.getItem('jwt') ?? sessionStorage.getItem('jwt');
   if (token && config.headers) {
     config.headers.set?.('Authorization', `Bearer ${token}`);
   }
-
   return config;
 });
 
 client.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const data = error?.response?.data as ApiErrorResponse | undefined;
+    const originalRequest = error.config;
 
     const detail = data?.detail?.error;
 
@@ -50,9 +60,51 @@ client.interceptors.response.use(
       requestId: detail?.requestId,
     };
 
+    // Handle 401 errors with automatic token refresh
+    if (
+      mapped.status === 401 &&
+      ['INVALID_TOKEN', 'EXPIRED_TOKEN', 'TOKEN_REVOKED'].includes(mapped.code) &&
+      refreshTokenFunction &&
+      !originalRequest._retried
+    ) {
+      console.log('[HTTP Client] Attempting token refresh due to 401 error');
+      originalRequest._retried = true;
+
+      try {
+        const refreshed = await refreshTokenFunction();
+        if (refreshed) {
+          console.log('[HTTP Client] Token refreshed successfully, retrying request');
+          // Update the authorization header with the new token
+          const newToken = runtimeToken ?? localStorage.getItem('jwt') ?? sessionStorage.getItem('jwt');
+          if (newToken && originalRequest.headers) {
+            originalRequest.headers.set('Authorization', `Bearer ${newToken}`);
+          }
+          // Retry the original request
+          return client(originalRequest);
+        }
+      } catch (refreshError) {
+        console.error('[HTTP Client] Token refresh failed', refreshError);
+      }
+    }
+
+    if (
+      mapped.status === 401 &&
+      ['INVALID_TOKEN', 'EXPIRED_TOKEN', 'TOKEN_REVOKED'].includes(mapped.code)
+    ) {
+      console.error('[HTTP Client] Unauthorized access', mapped);
+      runtimeToken = null;
+      localStorage.removeItem('jwt');
+      sessionStorage.removeItem('jwt');
+      localStorage.removeItem('refresh_token');
+      sessionStorage.removeItem('refresh_token');
+    } else {
+      console.error('[HTTP Client] Error response', mapped);
+    }
+
     return Promise.reject(mapped);
   }
 );
+
 export const httpClient = {
   get<TResponse>(url: string, config?: RequestConfig): Promise<TResponse> {
     return client.get(url, config).then((r) => r.data as TResponse);
