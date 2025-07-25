@@ -14,7 +14,7 @@ All items here are considered fixed for Phase 1. Future enhancements like workfl
 |--------|-----------------------------------------------|-----------|----------------|--------------------------------------------|
 | 001    | LLM Backend Engine: llama.cpp Host-Based      | Final     | ✅ Yes         | Direct host execution for GPU efficiency    |
 | 002    | Sentra API: Modular Orchestrator Design       | Final     | ✅ Yes         | FastAPI-based, layered (Chat, Auth, MCP Client) |
-| 003    | MCP Server Architecture: Split Per Capability | Final     | ✅ Yes         | sentra-doc, sentra-crm, sentra-action       |
+| 003    | MCP Server Architecture: Split Per Capability | Final     | ✅ Yes         | TBD       |
 | 004    | RAG Engine: ChromaDB Default                  | Final     | ✅ Yes         | Local vector store                          |
 | 005    | Auth Service: Internal Only (SQL + NoSQL)     | Final     | ✅ Yes         | Self-hosted Auth DB + Conversations DB      |
 | 006    | Service Orchestration: Docker Compose         | Final     | ✅ Yes         | Small install model                         |
@@ -59,17 +59,19 @@ Clear separation of concerns, maintainability, SME-friendly stack.
 
 ## ADR 003 – MCP Server Architecture: Split Per Capability
 
-**Decision:**  
-Split MCP functionality into three independent services:
+**NOTE: THIS NEEDS TO BE DEFINED:**
 
-- **sentra-doc:** Document Search Tools  
-- **sentra-crm:** CRM Lookup Tools  
-- **sentra-action:** Email and Action Triggers  
-
-**Rationale:**  
-- Security: Isolate sensitive tool access per MCP server.  
-- Deployment: Flexible hybrid setups (local + remote MCP servers).  
-- Maintenance: Simpler versioning and debugging per MCP capability.
+> **Decision:**  
+> Split MCP functionality into independent services:
+> 
+> - **sentra-doc:** Document Search Tools  
+> - **sentra-crm:** CRM Lookup Tools  
+> - **sentra-action:** Email and Action Triggers  
+> 
+> **Rationale:**  
+> - Security: Isolate sensitive tool access per MCP server.  
+> - Deployment: Flexible hybrid setups (local + remote MCP servers).  
+> - Maintenance: Simpler versioning and debugging per MCP capability.
 
 ---
 

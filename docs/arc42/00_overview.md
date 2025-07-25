@@ -44,7 +44,7 @@ graph TD
     Gateway["API Gateway"]
     LLM["LLM Server<br/>(llama.cpp)"]
     RAG["RAG Engine<br/>(ChromaDB/Qdrant)"]
-    MCP["MCP Servers (per capability)<br/>(sentra-doc, sentra-crm, sentra-action)"]
+    MCP["MCP Servers (per capability)"]
     ExternalTools["External Tools<br/>(CRM, ERP, Office Plugins)"]
 
     User --> Frontend

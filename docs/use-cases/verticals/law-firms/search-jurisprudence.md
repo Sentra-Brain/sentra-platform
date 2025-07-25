@@ -17,7 +17,7 @@ This capability relies on a dedicated MCP server configured with access to local
 3. User submits a query such as "Find recent Spanish Supreme Court rulings on data privacy."
 4. Sentra Brain API forwards the query to the LLM backend.
 5. LLM responds with a structured tool invocation targeting `search_jurisprudence`.
-6. Sentra Brain API invokes the configured MCP server (e.g., sentra-crm or sentra-legal-search).
+6. Sentra Brain API invokes the configured MCP server.
 7. MCP server queries connected legal databases and returns structured results:
     - Case name
     - Court

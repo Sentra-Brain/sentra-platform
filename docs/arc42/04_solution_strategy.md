@@ -10,7 +10,7 @@ Sentra Brain is positioned as a private, modular AI platform designed for SMEs a
 
 ## Key Architectural Decisions
 
-- **Modular Architecture:** Independent services for LLM Serving, RAG Engine, MCP Servers (split by capability: `sentra-doc`, `sentra-crm`, `sentra-action`), Admin Panel.
+- **Modular Architecture:** Independent services for LLM Serving, RAG Engine, MCP Servers (split by capability: TBD), Admin Panel.
 - **Self-Hosted by Default:** Primary deployment model is on-premise or private cloud, ensuring no external dependency for core functions.
 - **LLM Serving Engine:** Compatible with llama.cpp, vLLM, and multiple GGUF format models, including GPT, Qwen, Llama families.
 - **Secure MCP Integration:** Provides a controlled API layer for CRM, ERP, Office plugins, and other internal systems, split into dedicated MCP services per capability.
@@ -39,7 +39,7 @@ Sentra Brain is positioned as a private, modular AI platform designed for SMEs a
 ## Modular Architecture Overview
 
 - **LLM Serving Engine:** Run large language models locally or hybrid. Compatible with GPT, Qwen, Llama, and more.
-- **MCP Integration:** Secure API layer split into dedicated services (`sentra-doc`, `sentra-crm`, `sentra-action`) for CRM, ERP, and internal tool integration.
+- **MCP Integration:** Secure API layer split into dedicated services (TBD) for CRM, ERP, and internal tool integration.
 - **Document Search (RAG):** Private document search powered by ChromaDB.
 - **Internal Authentication & Chat History:** SQL + NoSQL database structure for user management and conversation storage.
 - **Enterprise-Grade Security:** On-premise or hybrid deployment. GDPR, HIPAA, ISO27001 ready.
@@ -53,7 +53,7 @@ Sentra Brain is positioned as a private, modular AI platform designed for SMEs a
 
 | Phase       | Scope                                                                                                                              | Estimated Duration |
 | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| **Phase 1** | Base Architecture, LLM + RAG + MCP Servers (sentra-doc, sentra-crm, sentra-action), Single UI, Internal Auth Service (SQL + NoSQL) | 4–6 weeks          |
+| **Phase 1** | Base Architecture, LLM + RAG + MCP Server(s), Single UI, Internal Auth Service (SQL + NoSQL) | 4–6 weeks          |
 | **Phase 2** | Admin Panel Development, Embedded n8n Integration (Workflow Automation), Logs and Monitoring                                       | 3–4 weeks          |
 | **Phase 3** | Certified Hardware Packages, Deployment Tooling (Docker/K8s), Installer Scripts                                                    | 2–3 weeks          |
 | **Phase 4** | Hybrid Deployment Enhancements, External Auth (optional), Advanced Security Audits                                                 | 3–4 weeks          |

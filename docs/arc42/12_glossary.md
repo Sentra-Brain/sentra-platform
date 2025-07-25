@@ -15,7 +15,7 @@ This glossary defines key terms, acronyms, and system components used throughout
 | llama.cpp            | Open-source LLM serving engine optimized for local GPU inference.                                 |
 | RAG                  | Retrieval-Augmented Generation. Combines document search with LLM query completion.              |
 | ChromaDB             | Default vector database engine used for implementing RAG functionality.                          |
-| MCP Servers          | Modular Model Context Protocol Servers: split into sentra-doc, sentra-crm, and sentra-action for better isolation. |
+| MCP Servers          | Modular Model Context Protocol Servers: split into few for better isolation. |
 | Auth Service         | Internal authentication service implementing OAuth2/OpenID standards.                             |
 | Self-Hosted          | Deployment model where all Sentra Brain services run within the client’s private infrastructure.  |
 | Hybrid               | Deployment model combining self-hosted core services with optional controlled cloud integrations.  |

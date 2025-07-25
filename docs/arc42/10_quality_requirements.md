@@ -52,8 +52,8 @@ graph TD
   - *Response:* Auth Service triggers alert, admin receives notification, access restrictions activate.
 
 - **MCP Server Isolation:**  
-  - *Scenario:* Only sentra-crm needs to be updated or redeployed.  
-  - *Response:* No impact on sentra-doc, sentra-action, LLM, RAG, or Frontend. Modular architecture allows isolated updates.
+  - *Scenario:* Only X-MCP SERVER needs to be updated or redeployed.  (TBD)
+  - *Response:* No impact on OTHER MCP SERVERS, LLM, RAG, or Frontend. Modular architecture allows isolated updates.
 
 - **System Monitoring:**  
   - *Scenario:* Vendor performs periodic health checks.  

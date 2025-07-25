@@ -83,6 +83,7 @@ sentrabrain.azurecr.io/sentra-api:latest
 - **Frontend:** [apps/sentra-web](../../apps/sentra-web)
 - **Admin Panel:** [apps/sentra-admin](../../apps/sentra-admin)
 - **RAG Engine:** [external - ChromaDB]
-- **MCP Servers:** [services/sentra-crm](../sentra-crm), [services/sentra-action](../sentra-action)
+- **MCP Servers:** TBD
+
 
 ---

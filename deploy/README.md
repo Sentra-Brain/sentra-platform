@@ -24,8 +24,6 @@ This directory contains deployment scripts, manifests, and configuration files f
 | sentra-vector-db | Vector Store (RAG)                     | 8001  | ghcr.io/chroma-core/chroma:latest      |
 | sentra-sql-db    | SQL Persistent Storage (Users/Configs) | 5432  | postgres:16-alpine                     |
 | sentra-nosql-db  | NoSQL Chat History Storage             | 27017 | mongo:7                                |
-| sentra-doc       | MCP: Document Search Tools             | 5100  | Custom MCP server                      |
-| sentra-crm       | MCP: CRM Lookup Tools                  | 5200  | Custom MCP server                      |
 | sentra-action    | MCP: Email/Actions                     | 5003  | Custom MCP server                      |
 
 ---

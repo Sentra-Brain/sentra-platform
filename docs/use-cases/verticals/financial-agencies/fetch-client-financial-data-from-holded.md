@@ -21,7 +21,7 @@ Typical queries include checking open invoices, payment status, revenue summarie
     - “What’s the outstanding balance for Cliente XYZ?”
     - “List unpaid invoices for March 2025 for Cliente XYZ.”
 5. Sentra Brain API detects the request requires Holded data via MCP skill.
-6. Sentra Brain API invokes the MCP Server (sentra-crm or sentra-action) with the request.
+6. Sentra Brain API invokes the MCP Server with the request.
 7. MCP Server calls Holded API using secure credentials.
 8. MCP Server receives, formats, and returns structured JSON with:
     - Invoice lists
