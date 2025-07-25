@@ -33,6 +33,17 @@ class KnowledgeRepository:
             query = query.filter(KnowledgeSourceEntity.created_by == created_by)
         return query.count()
 
+    def get_folder_knowledge_sources(self, auto_index_only: bool = True) -> List[KnowledgeSourceEntity]:
+        """Get folder-type knowledge sources for scanning"""
+        from sentra_brain_api.domain.knowledge_source_entity import KnowledgeSourceType, KnowledgeSourceStatus
+        query = self.db.query(KnowledgeSourceEntity).filter(
+            KnowledgeSourceEntity.type == KnowledgeSourceType.FOLDER,
+            KnowledgeSourceEntity.status == KnowledgeSourceStatus.ACTIVE
+        )
+        if auto_index_only:
+            query = query.filter(KnowledgeSourceEntity.auto_index == True)
+        return query.all()
+
     # Document methods
     def create_document(self, document: DocumentEntity) -> DocumentEntity:
         self.db.add(document)
@@ -60,12 +71,14 @@ class KnowledgeRepository:
             query = query.filter(DocumentEntity.knowledge_source_id == knowledge_source_id)
         return query.count()
 
-    def update_document_status(self, document_id: UUID, status: str, error: Optional[str] = None) -> Optional[DocumentEntity]:
+    def update_document_status(self, document_id: UUID, status: str, error: Optional[str] = None, chunks_count: Optional[int] = None) -> Optional[DocumentEntity]:
         document = self.get_document_by_id(document_id)
         if document:
             document.status = status
             if error:
                 document.error = error
+            if chunks_count is not None:
+                document.chunks_count = chunks_count
             self.db.commit()
             self.db.refresh(document)
         return document

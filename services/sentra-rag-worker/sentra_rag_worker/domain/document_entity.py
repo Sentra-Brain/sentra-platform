@@ -1,9 +1,7 @@
-# sentra_brain_api/domain/document_entity.py
-
 import enum
 from sqlalchemy import Column, String, ForeignKey, Enum, Text, Integer
 from sqlalchemy.dialects.postgresql import UUID
-from sentra_brain_api.domain.base_entity import BaseEntity
+from .base_entity import BaseEntity
 
 
 class DocumentFileType(enum.Enum):
