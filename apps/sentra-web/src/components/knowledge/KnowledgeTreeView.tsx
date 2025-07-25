@@ -1,7 +1,7 @@
 // src/components/knowledge/KnowledgeTreeView.tsx
 // Tree-based knowledge explorer component
 import React, { useState, useEffect } from 'react';
-import { ChevronRight, ChevronDown, RefreshCw, Folder, File } from 'lucide-react';
+import { ChevronRight, ChevronDown, RefreshCw, Folder, File, Upload, Plus } from 'lucide-react';
 import type {
   KnowledgeSource,
   Document,
@@ -11,6 +11,8 @@ import type {
 import { KnowledgeSourceVisibility as KSVisibility } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
 import StatusBadge from './StatusBadge';
+import UploadDialog from './UploadDialog';
+import CreateKnowledgeSourceDialog from './CreateKnowledgeSourceDialog';
 
 interface KnowledgeTreeViewProps {
   onSelectNode: (node: KnowledgeTreeNode) => void;
@@ -26,6 +28,8 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showUploadDialog, setShowUploadDialog] = useState(false);
+  const [showCreateSourceDialog, setShowCreateSourceDialog] = useState(false);
 
   const loadData = async () => {
     setLoading(true);
@@ -182,6 +186,22 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
     );
   };
 
+  const handleUploadComplete = () => {
+    loadData(); // Refresh the tree to show new uploads
+  };
+
+  const handleCreateSourceComplete = () => {
+    loadData(); // Refresh the tree to show new knowledge source
+  };
+
+  const getUserUploadSource = (): KnowledgeSource | undefined => {
+    // Find the user's personal upload source (typically a private upload-type source)
+    return knowledgeSources.find(source => 
+      source.visibility === KSVisibility.PRIVATE && 
+      source.type === 'upload'
+    );
+  };
+
   if (loading) {
     return (
       <div className="p-4 text-center">
@@ -209,19 +229,57 @@ const KnowledgeTreeView: React.FC<KnowledgeTreeViewProps> = ({
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between p-3 border-b">
-        <h2 className="font-semibold">Knowledge Explorer</h2>
-        <button
-          onClick={loadData}
-          className="p-1 hover:bg-gray-100 rounded"
-          title="Refresh"
-        >
-          <RefreshCw size={16} />
-        </button>
+      <div className="p-3 border-b space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-semibold">Knowledge Explorer</h2>
+          <button
+            onClick={loadData}
+            className="p-1 hover:bg-gray-100 rounded"
+            title="Refresh"
+          >
+            <RefreshCw size={16} />
+          </button>
+        </div>
+        
+        {/* Upload Actions */}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setShowUploadDialog(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm flex-1"
+            title="Upload documents to an existing knowledge source"
+          >
+            <Upload size={16} />
+            Upload Documents
+          </button>
+          <button
+            onClick={() => setShowCreateSourceDialog(true)}
+            className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm"
+            title="Create a new knowledge source from folder upload"
+          >
+            <Plus size={16} />
+          </button>
+        </div>
       </div>
+      
       <div className="flex-1 overflow-y-auto">
         {treeNodes.map((node) => renderTreeNode(node))}
       </div>
+
+      {/* Upload Dialog */}
+      <UploadDialog
+        isOpen={showUploadDialog}
+        onClose={() => setShowUploadDialog(false)}
+        onUploadComplete={handleUploadComplete}
+        knowledgeSources={knowledgeSources}
+        defaultKnowledgeSourceId={getUserUploadSource()?.id}
+      />
+
+      {/* Create Knowledge Source Dialog */}
+      <CreateKnowledgeSourceDialog
+        isOpen={showCreateSourceDialog}
+        onClose={() => setShowCreateSourceDialog(false)}
+        onCreateComplete={handleCreateSourceComplete}
+      />
     </div>
   );
 };
