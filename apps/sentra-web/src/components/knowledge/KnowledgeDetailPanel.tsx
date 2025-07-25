@@ -3,20 +3,19 @@
 import React, { useState, useEffect } from 'react';
 import { RefreshCw, Folder, File, Calendar, User, Settings } from 'lucide-react';
 import type {
-  KnowledgeTreeNode,
   KnowledgeSource,
   Document,
   KnowledgeSourceType,
+  KnowledgeTreeNode,
 } from '../../models/knowledgeModels';
 import { KnowledgeSourceType as KSType } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
+import { useKnowledge } from '../../hooks/useKnowledge';
 import StatusBadge from './StatusBadge';
+import './KnowledgeDetailPanel.css';
 
-interface KnowledgeDetailPanelProps {
-  selectedNode?: KnowledgeTreeNode;
-}
-
-const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({ selectedNode }) => {
+const KnowledgeDetailPanel: React.FC = () => {
+  const { selectedNode } = useKnowledge();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -71,76 +70,72 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({ selectedNod
   };
 
   const renderKnowledgeSourceDetail = (source: KnowledgeSource) => (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{getTypeIcon(source.type)}</span>
+    <div className="detail-content">
+      <div className="detail-header">
+        <div className="detail-title-section">
+          <span className="detail-title-icon">{getTypeIcon(source.type)}</span>
           <div>
-            <h2 className="text-xl font-semibold">{source.name}</h2>
-            <p className=" capitalize">{source.type.replace('_', ' ')} Source</p>
+            <h2 className="detail-title">{source.name}</h2>
+            <p className="detail-subtitle">{source.type.replace('_', ' ')} Source</p>
           </div>
         </div>
         <StatusBadge status={source.status} />
       </div>
 
       {source.description && (
-        <div>
-          <h3 className="font-medium  mb-2">Description</h3>
-          <p className="text-gray-300">{source.description}</p>
+        <div className="detail-section">
+          <h3 className="section-title">Description</h3>
+          <p className="section-content">{source.description}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Folder size={16} className="text-gray-400" />
-            <div>
-              <p className="text-sm font-medium ">Visibility</p>
-              <p className="text-sm  capitalize">{source.visibility.replace('-', ' ')}</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <Settings size={16} className="text-gray-400" />
-            <div>
-              <p className="text-sm font-medium ">Auto-index</p>
-              <p className="text-sm ">{source.auto_index ? 'Enabled' : 'Disabled'}</p>
-            </div>
+      <div className="detail-grid">
+        <div className="detail-field">
+          <Folder size={16} className="field-icon" />
+          <div className="field-content">
+            <p className="field-label">Visibility</p>
+            <p className="field-value">{source.visibility.replace('-', ' ')}</p>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div className="flex items-center gap-2">
-            <Calendar size={16} className="text-gray-400" />
-            <div>
-              <p className="text-sm font-medium ">Created</p>
-              <p className="text-sm ">{formatDate(source.created_at)}</p>
-            </div>
+        <div className="detail-field">
+          <Settings size={16} className="field-icon" />
+          <div className="field-content">
+            <p className="field-label">Auto-index</p>
+            <p className="field-value">{source.auto_index ? 'Enabled' : 'Disabled'}</p>
           </div>
+        </div>
 
-          <div className="flex items-center gap-2">
-            <User size={16} className="text-gray-400" />
-            <div>
-              <p className="text-sm font-medium ">Created by</p>
-              <p className="text-sm ">{source.created_by}</p>
-            </div>
+        <div className="detail-field">
+          <Calendar size={16} className="field-icon" />
+          <div className="field-content">
+            <p className="field-label">Created</p>
+            <p className="field-value">{formatDate(source.created_at)}</p>
+          </div>
+        </div>
+
+        <div className="detail-field">
+          <User size={16} className="field-icon" />
+          <div className="field-content">
+            <p className="field-label">Created by</p>
+            <p className="field-value">{source.created_by}</p>
           </div>
         </div>
       </div>
 
       {source.path && (
-        <div>
-          <h3 className="font-medium  mb-2">Path</h3>
-          <code className="block p-2 bg-gray-100 rounded text-sm font-mono">{source.path}</code>
+        <div className="detail-section">
+          <h3 className="section-title">Path</h3>
+          <code className="code-block">{source.path}</code>
         </div>
       )}
 
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <h3 className="font-medium ">Documents ({documents.length})</h3>
+      <div className="documents-section">
+        <div className="documents-header">
+          <h3 className="documents-title">Documents ({documents.length})</h3>
           <button
             onClick={() => loadDocuments(source.id)}
-            className="p-1 hover:bg-gray-100 rounded"
+            className="documents-refresh"
             title="Refresh documents"
             disabled={loading}
           >
@@ -149,30 +144,27 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({ selectedNod
         </div>
 
         {loading ? (
-          <div className="text-center py-4">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500 mx-auto"></div>
+          <div className="loading-documents">
+            <div className="loading-spinner"></div>
           </div>
         ) : error ? (
-          <div className="text-center py-4">
-            <p className="text-red-600 text-sm">{error}</p>
+          <div className="error-documents">
+            <p className="error-documents-text">{error}</p>
           </div>
         ) : documents.length === 0 ? (
-          <p className="text-gray-500 text-center py-4">No documents found</p>
+          <p className="empty-documents">No documents found</p>
         ) : (
-          <div className="space-y-2 max-h-64 overflow-y-auto">
+          <div className="documents-list">
             {documents.map((doc) => (
-              <div
-                key={doc.id}
-                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
-              >
-                <div className="flex items-center gap-3 min-w-0 flex-1">
-                  <File size={16} className="text-gray-400 flex-shrink-0" />
-                  <div className="min-w-0 flex-1">
-                    <p className="font-medium text-sm truncate">{doc.display_name}</p>
-                    <p className="text-xs text-gray-500">{doc.filename}</p>
+              <div key={doc.id} className="document-item">
+                <div className="document-info">
+                  <File size={16} className="document-icon" />
+                  <div className="document-details">
+                    <p className="document-name">{doc.display_name}</p>
+                    <p className="document-filename">{doc.filename}</p>
                   </div>
                 </div>
-                <StatusBadge status={doc.status} className="ml-2" />
+                <StatusBadge status={doc.status} className="document-status" />
               </div>
             ))}
           </div>
@@ -182,118 +174,126 @@ const KnowledgeDetailPanel: React.FC<KnowledgeDetailPanelProps> = ({ selectedNod
   );
 
   const renderDocumentDetail = (document: Document) => (
-    <div className="space-y-6">
-      <div className="flex items-start justify-between">
-        <div className="flex items-center gap-3">
-          <File size={24} className="text-gray-400" />
+    <div className="detail-content">
+      <div className="detail-header">
+        <div className="detail-title-section">
+          <File size={24} className="detail-title-icon" />
           <div>
-            <h2 className="text-xl font-semibold">{document.display_name}</h2>
-            <p className="">{document.filename}</p>
+            <h2 className="detail-title">{document.display_name}</h2>
+            <p className="detail-subtitle">{document.filename}</p>
           </div>
         </div>
         <StatusBadge status={document.status} />
       </div>
 
       {document.description && (
-        <div>
-          <h3 className="font-medium  mb-2">Description</h3>
-          <p className="text-gray-300">{document.description}</p>
+        <div className="detail-section">
+          <h3 className="section-title">Description</h3>
+          <p className="section-content">{document.description}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-3">
-          <div>
-            <p className="text-sm font-medium ">File Type</p>
-            <p className="text-sm  uppercase">{document.filetype}</p>
-          </div>
-
-          <div>
-            <p className="text-sm font-medium ">Uploaded</p>
-            <p className="text-sm ">{formatDate(document.uploaded_at)}</p>
+      <div className="detail-grid">
+        <div className="detail-field">
+          <div className="field-content">
+            <p className="field-label">File Type</p>
+            <p className="field-value">{document.filetype.toUpperCase()}</p>
           </div>
         </div>
 
-        <div className="space-y-3">
-          <div>
-            <p className="text-sm font-medium ">Uploaded by</p>
-            <p className="text-sm ">{document.uploaded_by}</p>
+        <div className="detail-field">
+          <div className="field-content">
+            <p className="field-label">Uploaded</p>
+            <p className="field-value">{formatDate(document.uploaded_at)}</p>
           </div>
+        </div>
 
-          <div>
-            <p className="text-sm font-medium ">Knowledge Source</p>
-            <p className="text-sm ">{document.knowledge_source_id}</p>
+        <div className="detail-field">
+          <div className="field-content">
+            <p className="field-label">Uploaded by</p>
+            <p className="field-value">{document.uploaded_by}</p>
+          </div>
+        </div>
+
+        <div className="detail-field">
+          <div className="field-content">
+            <p className="field-label">Knowledge Source</p>
+            <p className="field-value">{document.knowledge_source_id}</p>
           </div>
         </div>
       </div>
 
       {document.error && (
-        <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-          <h3 className="font-medium text-red-900 mb-1">Error</h3>
-          <p className="text-sm text-red-300">{document.error}</p>
+        <div className="error-section">
+          <h3 className="error-section-title">Error</h3>
+          <p className="error-section-text">{document.error}</p>
         </div>
       )}
 
-      <div>
-        <h3 className="font-medium  mb-2">File Path</h3>
-        <code className="block p-2 bg-gray-200 rounded text-sm font-mono">{document.path}</code>
+      <div className="detail-section">
+        <h3 className="section-title">File Path</h3>
+        <code className="code-block">{document.path}</code>
       </div>
     </div>
   );
 
   const renderVisibilityGroupDetail = (node: KnowledgeTreeNode) => (
-    <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <Folder size={24} className="text-gray-400" />
-        <div>
-          <h2 className="text-xl font-semibold">{node.name}</h2>
-          <p className="text-gray-300">Knowledge visibility group</p>
+    <div className="detail-content">
+      <div className="detail-header">
+        <div className="detail-title-section">
+          <Folder size={24} className="detail-title-icon" />
+          <div>
+            <h2 className="detail-title">{node.name}</h2>
+            <p className="detail-subtitle">Knowledge visibility group</p>
+          </div>
         </div>
       </div>
 
-      <div className="text-center py-8">
-        <p className="text-gray-200">Select a knowledge source or document to view details</p>
+      <div className="empty-state">
+        <div className="empty-state-content">
+          <p className="empty-state-text">Select a knowledge source or document to view details</p>
+        </div>
       </div>
     </div>
   );
 
   if (!selectedNode) {
     return (
-      <div className="h-full flex items-center justify-center">
-        <div className="text-center">
-          <Folder size={48} className="text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium mb-2">Knowledge Management</h3>
-          <p className="text-gray-200">Select an item from the explorer to view details</p>
+      <div className="knowledge-detail-panel">
+        <div className="empty-state">
+          <div className="empty-state-content">
+            <Folder size={48} className="empty-state-icon" />
+            <h3 className="empty-state-title">Knowledge Management</h3>
+            <p className="empty-state-text">Select an item from the explorer to view details</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-6 border-b">
-        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
+    <div className="knowledge-detail-panel">
+      <div className="detail-breadcrumb">
+        <div className="breadcrumb-nav">
           <span>Knowledge</span>
-          <span>›</span>
-          <span className="capitalize">
+          <span className="breadcrumb-separator">›</span>
+          <span className="breadcrumb-current">
             {selectedNode.visibility?.replace('-', ' ') || 'Details'}
           </span>
           {selectedNode.type !== 'visibility-group' && (
             <>
-              <span>›</span>
-              <span className="">{selectedNode.name}</span>
+              <span className="breadcrumb-separator">›</span>
+              <span className="breadcrumb-current">{selectedNode.name}</span>
             </>
           )}
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6">
-        {selectedNode.type === 'knowledge-source' && selectedNode.knowledgeSource
-          ? renderKnowledgeSourceDetail(selectedNode.knowledgeSource)
-          : selectedNode.type === 'document' && selectedNode.document
-            ? renderDocumentDetail(selectedNode.document)
-            : renderVisibilityGroupDetail(selectedNode)}
-      </div>
+      {selectedNode.type === 'knowledge-source' && selectedNode.knowledgeSource
+        ? renderKnowledgeSourceDetail(selectedNode.knowledgeSource)
+        : selectedNode.type === 'document' && selectedNode.document
+          ? renderDocumentDetail(selectedNode.document)
+          : renderVisibilityGroupDetail(selectedNode)}
     </div>
   );
 };
