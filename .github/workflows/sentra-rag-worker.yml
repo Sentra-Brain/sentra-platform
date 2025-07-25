@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/sentra-api
+        working-directory: services/sentra-rag-worker
     steps:
       - uses: actions/checkout@v4
 
