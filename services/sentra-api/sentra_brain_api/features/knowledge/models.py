@@ -4,8 +4,8 @@ from datetime import datetime
 from typing import Optional, List
 from uuid import UUID
 from pydantic import BaseModel, Field
-from sentra_brain_api.domain.knowledge_source_entity import KnowledgeSourceType, KnowledgeSourceVisibility, KnowledgeSourceStatus
-from sentra_brain_api.domain.document_entity import DocumentFileType, DocumentStatus
+from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceType, KnowledgeSourceVisibility, KnowledgeSourceStatus
+from sentra_shared.domain.entities.document_entity import DocumentFileType, DocumentStatus
 
 
 # Knowledge Source Schemas

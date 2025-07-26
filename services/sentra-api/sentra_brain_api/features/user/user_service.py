@@ -1,14 +1,14 @@
 # sentra_brain_api/features/user/user_service.py
 from fastapi import HTTPException, status
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.crosscutting import logging
+from sentra_shared.core import logging
 from sentra_brain_api.crosscutting.notification_service import NotificationService
-from sentra_brain_api.domain.role import Role
-from sentra_brain_api.domain.system_settings import SystemSettings
-from sentra_brain_api.domain.user_entity import UserEntity
+from sentra_shared.domain.entities.role import Role
+from sentra_shared.domain.entities.system_settings import SystemSettings
+from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.user.models import SignupResponse, UserModel
-from sentra_brain_api.features.user.repository import UserRepository
+from sentra_shared.domain.repositories.user_repository import UserRepository
 from sqlalchemy.orm import Session
 import asyncio
 import os

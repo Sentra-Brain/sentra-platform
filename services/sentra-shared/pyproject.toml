@@ -1,0 +1,16 @@
+[project]
+name = "sentra-shared"
+version = "0.1.0"
+description = "Shared logic for Sentra Brain services"
+authors = [
+  { name = "Juan G Carmona", email = "juan@jgcarmona.com" }
+]
+readme = "README.md"
+requires-python = ">=3.8"
+
+[tool.setuptools.packages.find]
+where = ["sentra_shared"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

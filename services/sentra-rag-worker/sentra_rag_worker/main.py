@@ -5,7 +5,7 @@ import signal
 import os
 import sys
 from typing import Dict, Any
-from sentra_rag_worker.core.logging import get_logger
+from sentra_shared.core.logging import get_logger
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.infra.database import create_db_session
 from sentra_rag_worker.infra.knowledge_repository import KnowledgeRepository

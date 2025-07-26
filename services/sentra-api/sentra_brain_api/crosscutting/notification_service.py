@@ -2,7 +2,7 @@ import os
 import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-from sentra_brain_api.crosscutting.logging import get_logger
+from sentra_shared.core.logging import get_logger
 
 logger = get_logger(__name__)
 

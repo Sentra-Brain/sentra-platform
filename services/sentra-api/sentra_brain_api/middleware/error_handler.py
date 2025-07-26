@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 from sentra_brain_api.core.exceptions import SentraHTTPException
-import traceback
+from starlette.middleware.base import BaseHTTPMiddleware
 
 
 class ErrorHandlerMiddleware(BaseHTTPMiddleware):

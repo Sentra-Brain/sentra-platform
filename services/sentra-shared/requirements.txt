@@ -1,0 +1,17 @@
+pika
+psycopg2-binary
+pydantic
+pydantic-settings
+pymongo
+sqlalchemy
+passlib 
+passlib[bcrypt]
+
+
+pytest==8.4.1
+pytest-cov==6.2.1
+pytest-mock==3.14.1
+pytest-asyncio==1.1.0
+
+# Development tools
+debugpy==1.8.15

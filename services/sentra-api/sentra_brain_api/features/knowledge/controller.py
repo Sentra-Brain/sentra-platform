@@ -5,11 +5,11 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, HTTPException, Q
 from sqlalchemy.orm import Session
 
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_brain_api.domain.user_entity import UserEntity
-from sentra_brain_api.domain.role import Role
-from sentra_brain_api.infra.postgres_service import get_db
-from sentra_brain_api.infra.rabbitmq.publisher import get_rabbitmq_publisher
-from sentra_brain_api.features.knowledge.repository import KnowledgeRepository
+from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_shared.domain.entities.role import Role
+from sentra_shared.infra.sql.postgres_service import get_db
+from sentra_shared.infra.amqp.publisher import get_rabbitmq_publisher
+from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.service import KnowledgeService
 from sentra_brain_api.features.knowledge.models import (
     CreateKnowledgeSourceRequest,
@@ -19,7 +19,7 @@ from sentra_brain_api.features.knowledge.models import (
     DocumentResponse,
     DocumentListResponse
 )
-from sentra_brain_api.crosscutting.logging import get_logger
+from sentra_shared.core.logging import get_logger
 
 logger = get_logger(__name__)
 

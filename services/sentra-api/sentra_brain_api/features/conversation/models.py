@@ -3,8 +3,7 @@
 from datetime import datetime
 from typing import List, Literal, Optional
 from pydantic import BaseModel, Field
-
-from sentra_brain_api.core.base_mongo_model import BaseMongoModel
+from sentra_shared.model.base_mongo_model import BaseMongoModel
 
 
 class CreateConversationRequest(BaseModel):

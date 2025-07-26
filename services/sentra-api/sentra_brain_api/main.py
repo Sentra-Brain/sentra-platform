@@ -9,7 +9,6 @@ from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
 from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
-from sentra_brain_api.crosscutting import logging
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
@@ -19,7 +18,8 @@ from sentra_brain_api.features.knowledge.controller import KnowledgeController
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
-from sentra_brain_api.infra import postgres_service
+from sentra_shared.core import logging
+from sentra_shared.infra.sql import postgres_service
 import os
 
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware

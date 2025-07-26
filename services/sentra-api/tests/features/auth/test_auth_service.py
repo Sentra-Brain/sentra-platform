@@ -3,8 +3,8 @@ from unittest.mock import MagicMock, patch
 from datetime import timedelta
 from jose import jwt
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_brain_api.domain.user_entity import UserEntity
-from sentra_brain_api.core.config import settings
+from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_shared.infra.sql.postgres_settings import settings
 
 class FakeUserRepository():
     _instance = None

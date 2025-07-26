@@ -5,8 +5,8 @@ import time
 import uuid
 from typing import AsyncGenerator, Dict, Any, Optional
 import httpx
-from sentra_brain_api.crosscutting import logging
-from sentra_brain_api.core.config import settings
+from sentra_shared.core import logging
+from sentra_shared.core.settings import settings
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,

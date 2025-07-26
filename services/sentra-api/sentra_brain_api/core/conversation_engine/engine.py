@@ -11,7 +11,7 @@ from sentra_brain_api.core.conversation_engine.llama_server_client import LlamaS
 from sentra_brain_api.core.conversation_engine.conversations_cache import ConversationsCache
 from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE, USER_CONVERSATION_CACHE_SIZE
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.infra.mongo_conversation_repository import get_conversation_mongo_repository
+from sentra_shared.infra.nosql.mongo_conversation_repository import get_conversation_mongo_repository
 
 logger = logging.getLogger("sentra_brain_engine")
 
