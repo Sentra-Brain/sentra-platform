@@ -44,6 +44,7 @@ services:
       - "5678:5678"   # Python debugpy
     volumes:
       - ../services/sentra-api:/app
+      - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
     env_file:
@@ -56,6 +57,8 @@ services:
     image: sentra-rag-worker:dev
     container_name: sentra-rag-worker
     pull_policy: always
+    ports:
+      - "5679:5679"   # Python debugpy
     volumes:
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
       # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw

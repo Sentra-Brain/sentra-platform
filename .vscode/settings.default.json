@@ -1,41 +1,49 @@
 {
-    "editor.defaultFormatter": "esbenp.prettier-vscode",
-    "editor.formatOnSave": true,
-    "[javascript]": {
-        "editor.defaultFormatter": "biomejs.biome"
-    },
-    "[typescript]": {
-        "editor.defaultFormatter": "biomejs.biome"
-    },
-    "[json]": {
-        "editor.defaultFormatter": "biomejs.biome"
-    },
-    "[jsonc]": {
-        "editor.defaultFormatter": "biomejs.biome"
-    },
-    "[markdown]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "[yaml]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "editor.codeActionsOnSave": {
-        "quickfix.biome": "explicit",
-        "source.organizeImports.biome": "never"
-    },
-    "search.exclude": {
-        "node_modules": true,
-        "dist": true,
-        "pnpm-lock.yaml": true,
-        "**/*.snapshot.json": true
-    },
-    "typescript.format.enable": false,
-    "typescript.tsdk": "node_modules/typescript/lib",
-    "workspace-default-settings.runOnActivation": true,
-    "prettier.prettierPath": "node_modules/prettier/index.cjs",
-    "eslint.workingDirectories": [
-        {
-            "mode": "auto"
-        }
-    ]
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "biomejs.biome"
+  },
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[yaml]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "quickfix.biome": "explicit",
+    "source.organizeImports.biome": "never"
+  },
+  "search.exclude": {
+    "node_modules": true,
+    "dist": true,
+    "pnpm-lock.yaml": true,
+    "**/*.snapshot.json": true
+  },
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/dist": true,
+    "**/.venv": true,
+    "**/build": true,
+    "**/__pycache__": true
+  },
+
+  "typescript.format.enable": false,
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "workspace-default-settings.runOnActivation": true,
+  "prettier.prettierPath": "node_modules/prettier/index.cjs",
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ]
 }

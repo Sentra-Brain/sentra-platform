@@ -171,9 +171,9 @@ async def main():
     debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
 
     if debug_mode:
-        logger.info("✅ Debug mode enabled: waiting for debugger on port 5678")
+        logger.info("✅ Debug mode enabled: waiting for debugger on port 5679")
         import debugpy
-        debugpy.listen(("0.0.0.0", 5678))
+        debugpy.listen(("0.0.0.0", 5679))
         debugpy.wait_for_client()
         logger.info("✅ Debugger attached")
 
