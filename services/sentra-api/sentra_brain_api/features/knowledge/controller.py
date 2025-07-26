@@ -11,7 +11,7 @@ from sentra_brain_api.infra.postgres_service import get_db
 from sentra_brain_api.infra.rabbitmq.publisher import get_rabbitmq_publisher
 from sentra_brain_api.features.knowledge.repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.service import KnowledgeService
-from sentra_brain_api.features.knowledge.schemas import (
+from sentra_brain_api.features.knowledge.models import (
     CreateKnowledgeSourceRequest,
     DocumentUploadRequest,
     KnowledgeSourceResponse,

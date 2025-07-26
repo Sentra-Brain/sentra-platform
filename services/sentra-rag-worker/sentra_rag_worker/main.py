@@ -13,7 +13,7 @@ from sentra_rag_worker.infra.rabbitmq_publisher import RabbitMQPublisher
 from sentra_rag_worker.features.document_processor import DocumentProcessor
 from sentra_rag_worker.features.folder_scanner import FolderScanner
 
-logger = get_logger(__name__)
+logger = get_logger("sentra_rag_worker.main")
 
 
 class RAGWorker:
@@ -157,10 +157,10 @@ class RAGWorker:
 async def main():
     """Main entry point."""
     logger.info("sentra-rag-worker starting...")
-    logger.info(f"Configuration: RabbitMQ={settings.rabbitmq_host}:{settings.rabbitmq_port}, "
-                f"ChromaDB={settings.chroma_url}, "
-                f"Scan interval={settings.folder_scan_interval}s")
-    
+    logger.info(f"Configuration: RabbitMQ={settings.rabbitmq_host}:{settings.rabbitmq_port}, ")
+    logger.info(f"ChromaDB={settings.chroma_url}, ")
+    logger.info(f"Scan interval={settings.folder_scan_interval}s")
+
     worker = RAGWorker()
     
     try:

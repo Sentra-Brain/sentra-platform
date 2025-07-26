@@ -30,8 +30,10 @@ class KnowledgeSourceResponse(BaseModel):
     auto_index: bool
     status: KnowledgeSourceStatus
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }
 
 
 # Document Schemas
@@ -48,13 +50,15 @@ class DocumentResponse(BaseModel):
     filetype: DocumentFileType
     path: str
     uploaded_by: UUID
-    uploaded_at: datetime
+    created_at: datetime
     status: DocumentStatus
     error: Optional[str] = None
     knowledge_source_id: UUID
 
-    class Config:
-        from_attributes = True
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }
 
 
 # List responses
@@ -62,7 +66,17 @@ class KnowledgeSourceListResponse(BaseModel):
     sources: List[KnowledgeSourceResponse]
     total: int
 
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }
+
 
 class DocumentListResponse(BaseModel):
     documents: List[DocumentResponse]
     total: int
+
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }

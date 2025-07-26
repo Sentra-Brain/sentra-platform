@@ -13,7 +13,7 @@ from sentra_brain_api.domain.knowledge_source_entity import KnowledgeSourceEntit
 from sentra_brain_api.domain.document_entity import DocumentEntity, DocumentFileType
 from sentra_brain_api.features.knowledge.repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.service import KnowledgeService
-from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
+from sentra_brain_api.features.knowledge.models import CreateKnowledgeSourceRequest, DocumentUploadRequest
 from sentra_brain_api.infra.rabbitmq.publisher import RabbitMQPublisher
 
 

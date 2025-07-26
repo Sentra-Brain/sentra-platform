@@ -3,11 +3,16 @@ from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+from sentra_rag_worker.core import logging
+
+logger = logging.get_logger(__name__)
+
 load_dotenv()
 
 
 class Settings(BaseSettings):
     # PostgreSQL (same as sentra-api)
+    logger.info("Loading Settings...")
     database_url: str = Field(..., json_schema_extra={"env": "DATABASE_URL"})
 
     # RabbitMQ
@@ -35,6 +40,8 @@ class Settings(BaseSettings):
         env_file=".env",
         extra="allow"
     )
+
+    logger.info("Settings loaded successfully.")
 
 
 settings = Settings()

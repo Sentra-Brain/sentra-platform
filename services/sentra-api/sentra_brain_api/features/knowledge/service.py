@@ -16,7 +16,7 @@ from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.logging import get_logger
 from sentra_brain_api.domain.document_entity import DocumentEntity, DocumentFileType
 from sentra_brain_api.features.knowledge.repository import KnowledgeRepository
-from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
+from sentra_brain_api.features.knowledge.models import CreateKnowledgeSourceRequest, DocumentUploadRequest
 from sentra_brain_api.infra.rabbitmq.publisher import RabbitMQPublisher
 
 logger = get_logger(__name__)

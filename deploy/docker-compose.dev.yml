@@ -61,7 +61,7 @@ services:
     networks:
       - sentrabrain-dev-net
     env_file:
-      - .dev.env
+      - ../services/sentra-rag-worker/.env
     depends_on:
       - sentra-sql-db
       - sentra-vector-db
