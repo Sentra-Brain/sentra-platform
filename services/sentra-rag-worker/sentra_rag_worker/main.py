@@ -2,6 +2,7 @@
 
 import asyncio
 import signal
+import os
 import sys
 from typing import Dict, Any
 from sentra_rag_worker.core.logging import get_logger
@@ -77,26 +78,37 @@ class RAGWorker:
         # Note: The consumer will handle the actual shutdown in its main loop
 
     def _process_message(self, message: Dict[str, Any]) -> bool:
-        """Process a single indexation message.
-        
-        Args:
-            message: RabbitMQ message containing document details
-            
-        Returns:
-            True if processing was successful, False otherwise
-        """
         try:
-            # Validate required fields
-            required_fields = ['document_id', 'knowledge_source_id', 'filepath', 'filename', 'filetype']
-            missing_fields = [field for field in required_fields if field not in message]
-            
+            required_fields = ['document_id', 'document_path', 'knowledge_source_id']
+            missing_fields = [f for f in required_fields if f not in message]
+
             if missing_fields:
                 logger.error(f"Message missing required fields: {missing_fields}")
                 return False
-            
-            # Process the document
-            return self.document_processor.process_document(message)
-            
+
+            # Adapt message format to expected fields
+            document_path = message['document_path']
+            filename = os.path.basename(document_path)
+            extension = os.path.splitext(filename)[1].lower().lstrip('.')
+            filetype = extension if extension in ['pdf', 'docx', 'txt', 'md'] else None
+
+            if not filetype:
+                logger.error(f"Unsupported or missing filetype for file: {filename}")
+                return False
+
+            enriched_message = {
+                "document_id": message['document_id'],
+                "knowledge_source_id": message['knowledge_source_id'],
+                "filepath": document_path,
+                "filename": filename,
+                "filetype": filetype,
+                # Optional:
+                "display_name": filename,
+                "uploaded_by": message.get("uploaded_by")  # if present
+            }
+
+            return self.document_processor.process_document(enriched_message)
+
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             return False
@@ -156,6 +168,15 @@ class RAGWorker:
 
 async def main():
     """Main entry point."""
+    debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
+
+    if debug_mode:
+        logger.info("✅ Debug mode enabled: waiting for debugger on port 5678")
+        import debugpy
+        debugpy.listen(("0.0.0.0", 5678))
+        debugpy.wait_for_client()
+        logger.info("✅ Debugger attached")
+
     logger.info("sentra-rag-worker starting...")
     logger.info(f"Configuration: RabbitMQ={settings.rabbitmq_host}:{settings.rabbitmq_port}, ")
     logger.info(f"ChromaDB={settings.chroma_url}, ")
