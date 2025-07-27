@@ -10,6 +10,10 @@ class DocumentFileType(enum.Enum):
     DOCX = "docx"
     TXT = "txt"
     MD = "md"
+    HTML = "html"
+    EML = "eml"
+    MSG = "msg"
+    EPUB = "epub"
 
 
 class DocumentStatus(enum.Enum):

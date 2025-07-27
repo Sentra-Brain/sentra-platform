@@ -7,3 +7,25 @@ python-dotenv==1.1.1
 
 # Development tools
 debugpy==1.8.15
+
+# Text encoding detection
+chardet>=5.1.0
+
+# PDF extraction
+PyMuPDF>=1.23.7
+
+# DOCX full extraction (incl. headers/footers)
+docx2txt>=0.9
+
+# HTML parsing
+beautifulsoup4>=4.12.2
+lxml>=4.9.3  # Required backend for BeautifulSoup
+
+# Email parsing
+mail-parser>=4.1.4
+
+# EPUB extraction
+EbookLib>=0.18
+
+# Outlook .msg email files
+extract-msg>=0.45.0
