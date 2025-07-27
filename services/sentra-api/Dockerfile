@@ -1,21 +1,23 @@
 FROM python:3.13
 
-# Keeps Python from generating .pyc files in the container
 ENV PYTHONDONTWRITEBYTECODE=1
-
-# Turns off buffering for easier container logging
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH="/app:/shared"
 
-# Install pip requirements
-COPY requirements.txt .
+COPY services/shared/sentra-shared /shared
+RUN pip install -e /shared
+
+COPY services/sentra-api/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /app
-COPY . /app
+COPY services/sentra-api /app
+
+ENV PYTHONPATH="/app:/shared"
 
 EXPOSE 8100
- # Expose the debugpy port
-EXPOSE 5678 
+EXPOSE 5678
 
+RUN echo $PYTHONPATH && ls -la /shared && ls -la /app
 
 CMD ["python", "-m", "sentra_brain_api.main"]

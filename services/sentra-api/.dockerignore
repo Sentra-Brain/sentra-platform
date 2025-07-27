@@ -1,0 +1,30 @@
+# --- Ignorar todo lo que no sea apps/ y services/ ---
+*
+!apps/
+!services/
+
+# --- Ignorar basura común dentro de todo el contexto ---
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+**/*.log
+**/*.pyc
+**/.DS_Store
+**/*.egg-info/
+**/dist/
+**/build/
+**/node_modules/
+**/.coverage
+
+# --- Ignorar lo que está en apps pero no es código útil ---
+apps/**/.next/
+apps/**/.vite/
+apps/**/dist/
+apps/**/build/
+apps/**/node_modules/
+
+# --- Ignorar lo que está en services y no hace falta en build ---
+services/**/.devcontainer/
+services/**/.vscode/
+services/**/tests/
+services/**/.pytest_cache/

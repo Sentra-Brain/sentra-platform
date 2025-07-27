@@ -8,8 +8,8 @@ authors = [
 readme = "README.md"
 requires-python = ">=3.8"
 
-[tool.setuptools.packages.find]
-where = ["sentra_shared"]
+[tool.setuptools]
+packages = { find = { where = ["sentra_shared"] } }
 
 [build-system]
 requires = ["setuptools", "wheel"]

@@ -10,6 +10,7 @@
     "**/dist": true,
     "**/.venv": true,
     "**/build": true,
-    "**/__pycache__": true
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
   }
 }
