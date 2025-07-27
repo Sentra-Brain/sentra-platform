@@ -11,7 +11,6 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # PostgreSQL (same as sentra-api)
-    logger.info("Loading Settings...")
     database_url: str = Field(..., json_schema_extra={"env": "DATABASE_URL"})
 
     # RabbitMQ
