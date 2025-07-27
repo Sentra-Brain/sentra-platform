@@ -30,7 +30,7 @@ def init_db():
     from sentra_shared.domain.entities.conversation_entity import ConversationEntity
     from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
     from sentra_shared.domain.entities.document_entity import DocumentEntity
-    from sentra_shared.features.user.repository import UserRepository
+    from sentra_shared.domain.repositories.user_repository import UserRepository
     from sqlalchemy.exc import OperationalError
 
     MAX_RETRIES = 30
