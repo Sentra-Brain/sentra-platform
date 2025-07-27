@@ -14,7 +14,7 @@ from sentra_shared.domain.entities.document_entity import DocumentEntity, Docume
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.service import KnowledgeService
 from sentra_brain_api.features.knowledge.models import CreateKnowledgeSourceRequest, DocumentUploadRequest
-from sentra_shared.infra.amqp.publisher import RabbitMQPublisher
+from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 
 
 class TestKnowledgeService:
@@ -23,12 +23,12 @@ class TestKnowledgeService:
         return Mock(spec=KnowledgeRepository)
 
     @pytest.fixture
-    def mock_rabbitmq_publisher(self):
-        return Mock(spec=RabbitMQPublisher)
+    def mock_indexing_publisher(self):
+        return Mock(spec=IndexingJobPublisher)
 
     @pytest.fixture
-    def service(self, mock_repository, mock_rabbitmq_publisher):
-        return KnowledgeService(mock_repository, mock_rabbitmq_publisher)
+    def service(self, mock_repository, mock_indexing_publisher):
+        return KnowledgeService(mock_repository, mock_indexing_publisher)
 
     @pytest.fixture
     def mock_user(self):
@@ -130,30 +130,27 @@ class TestKnowledgeService:
             )
             
             # Mock existing upload source
-            upload_source = KnowledgeSourceEntity(
-                name=f"{mock_user.username}'s Uploads",
-                type=KnowledgeSourceType.UPLOAD,
-                created_by=mock_user.id
-            )
+            upload_source = Mock(spec=KnowledgeSourceEntity)
             upload_source.id = "upload-source-id"
+            upload_source.type = KnowledgeSourceType.UPLOAD
             
             service.repository.list_knowledge_sources.return_value = [upload_source]
             
             # Mock document creation
-            expected_document = DocumentEntity(
-                filename=file.filename,
-                display_name=request.display_name,
-                description=request.description,
-                filetype=DocumentFileType.PDF,
-                uploaded_by=mock_user.id,
-                knowledge_source_id=upload_source.id
-            )
+            expected_document = Mock(spec=DocumentEntity)
             expected_document.id = "document-id"
+            expected_document.filename = file.filename
+            expected_document.display_name = request.display_name
+            expected_document.description = request.description
+            expected_document.filetype = DocumentFileType.PDF
+            expected_document.uploaded_by = mock_user.id
+            expected_document.knowledge_source_id = upload_source.id
             service.repository.create_document.return_value = expected_document
             
-            # Mock RabbitMQ publisher context manager
-            service.rabbitmq_publisher.__enter__ = Mock(return_value=service.rabbitmq_publisher)
-            service.rabbitmq_publisher.__exit__ = Mock(return_value=None)
+            # Mock indexing publisher context manager
+            service.indexing_publisher.__enter__ = Mock(return_value=service.indexing_publisher)
+            service.indexing_publisher.__exit__ = Mock(return_value=None)
+            service.indexing_publisher.publish_indexing_job = Mock(return_value=True)
             
             # Execute
             result = service.upload_document(file, request, mock_user)
@@ -161,8 +158,8 @@ class TestKnowledgeService:
             # Assert
             assert result == expected_document
             service.repository.create_document.assert_called_once()
-            service.rabbitmq_publisher.__enter__.assert_called_once()
-            service.rabbitmq_publisher.publish_indexation_job.assert_called_once()
+            service.indexing_publisher.__enter__.assert_called_once()
+            service.indexing_publisher.publish_indexing_job.assert_called_once()
 
     def test_upload_document_invalid_file_type(self, service, mock_user):
         """Test uploading a document with unsupported file type"""
@@ -203,27 +200,24 @@ class TestKnowledgeService:
             service.repository.list_knowledge_sources.return_value = []
             
             # Mock upload source creation
-            new_upload_source = KnowledgeSourceEntity(
-                name=f"{mock_user.username}'s Uploads",
-                type=KnowledgeSourceType.UPLOAD,
-                created_by=mock_user.id
-            )
+            new_upload_source = Mock(spec=KnowledgeSourceEntity)
             new_upload_source.id = "new-upload-source-id"
+            new_upload_source.type = KnowledgeSourceType.UPLOAD
             service.repository.create_knowledge_source.return_value = new_upload_source
             
             # Mock document creation
-            expected_document = DocumentEntity(
-                filename=file.filename,
-                display_name=request.display_name,
-                filetype=DocumentFileType.TXT,
-                uploaded_by=mock_user.id,
-                knowledge_source_id=new_upload_source.id
-            )
+            expected_document = Mock(spec=DocumentEntity)
+            expected_document.filename = file.filename
+            expected_document.display_name = request.display_name
+            expected_document.filetype = DocumentFileType.TXT
+            expected_document.uploaded_by = mock_user.id
+            expected_document.knowledge_source_id = new_upload_source.id
             service.repository.create_document.return_value = expected_document
             
-            # Mock RabbitMQ publisher context manager
-            service.rabbitmq_publisher.__enter__ = Mock(return_value=service.rabbitmq_publisher)
-            service.rabbitmq_publisher.__exit__ = Mock(return_value=None)
+            # Mock indexing publisher context manager
+            service.indexing_publisher.__enter__ = Mock(return_value=service.indexing_publisher)
+            service.indexing_publisher.__exit__ = Mock(return_value=None)
+            service.indexing_publisher.publish_indexing_job = Mock(return_value=True)
             
             # Execute
             result = service.upload_document(file, request, mock_user)

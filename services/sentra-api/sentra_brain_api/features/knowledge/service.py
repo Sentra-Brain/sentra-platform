@@ -1,7 +1,6 @@
 # sentra_brain_api/features/knowledge/service.py
 
 import os
-import uuid
 from pathlib import Path
 from typing import List, Optional
 from fastapi import UploadFile, HTTPException
@@ -9,7 +8,8 @@ from fastapi import UploadFile, HTTPException
 from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity, KnowledgeSourceType, KnowledgeSourceVisibility, KnowledgeSourceStatus
 from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType
 from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_shared.infra.amqp.publisher import RabbitMQPublisher
+from sentra_shared.domain.services.file_storage import FileStorageService
+from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
@@ -23,9 +23,10 @@ logger = get_logger(__name__)
 
 
 class KnowledgeService:
-    def __init__(self, repository: KnowledgeRepository, rabbitmq_publisher: RabbitMQPublisher):
+    def __init__(self, repository: KnowledgeRepository, indexing_publisher: IndexingJobPublisher = None):
         self.repository = repository
-        self.rabbitmq_publisher = rabbitmq_publisher
+        self.indexing_publisher = indexing_publisher or IndexingJobPublisher()
+        self._file_storage = None
 
     ALLOWED_FILE_TYPES = {
         ".pdf": DocumentFileType.PDF,
@@ -38,6 +39,13 @@ class KnowledgeService:
         """Lazy import of settings to avoid circular imports"""
         from sentra_shared.core.settings import settings
         return settings
+    
+    def _get_file_storage(self) -> FileStorageService:
+        """Lazy initialization of file storage service"""
+        if self._file_storage is None:
+            settings = self._get_settings()
+            self._file_storage = FileStorageService(settings.knowledge_mount_path)
+        return self._file_storage
 
     def create_knowledge_source(self, request: CreateKnowledgeSourceRequest, user: UserEntity) -> KnowledgeSourceEntity:
         """Create a new knowledge source"""
@@ -90,7 +98,6 @@ class KnowledgeService:
     def upload_document(self, file: UploadFile, request: DocumentUploadRequest, user: UserEntity) -> DocumentEntity:
         """Upload a document and queue it for indexing"""
         try:
-            settings = self._get_settings()
             file_extension = Path(file.filename).suffix.lower()
             
             if file_extension not in self.ALLOWED_FILE_TYPES:
@@ -116,46 +123,42 @@ class KnowledgeService:
                 )
                 upload_source = self.repository.create_knowledge_source(upload_source)
 
-            # Create upload directory
-            upload_dir = Path(settings.knowledge_mount_path) / "uploads" / str(user.id)
-            upload_dir.mkdir(parents=True, exist_ok=True)
-
-            # Generate unique filename
-            file_id = str(uuid.uuid4())
-            filename = f"{file_id}_{file.filename}"
-            file_path = upload_dir / filename
-
-            # Save file
+            # Use FileStorageService to save with original filename
+            file_storage = self._get_file_storage()
             try:
-                with open(file_path, "wb") as buffer:
-                    buffer.write(file.file.read())
-                logger.info(f"File saved: {file_path}")
+                absolute_path, relative_path = file_storage.save_file(file.file, file.filename, user.id)
+                logger.info(f"File saved: {absolute_path} (relative: {relative_path})")
             except Exception as e:
-                logger.error(f"Failed to save file {filename}: {e}")
+                logger.error(f"Failed to save file {file.filename}: {e}")
                 raise HTTPException(status_code=500, detail="Failed to save file")
 
-            # Create document record
+            # Create document record using original filename
             document = DocumentEntity(
-                filename=file.filename,
+                filename=file.filename,  # Store original filename
                 display_name=request.display_name,
                 description=request.description,
                 filetype=self.ALLOWED_FILE_TYPES[file_extension],
-                path=str(file_path.relative_to(Path(settings.knowledge_mount_path))),
+                path=relative_path,  # Store relative path for consistency
                 uploaded_by=user.id,
                 knowledge_source_id=upload_source.id
             )
 
             document = self.repository.create_document(document)
 
-            # Queue for indexing
+            # Queue for indexing using new publisher
             try:
-                with self.rabbitmq_publisher:
-                    self.rabbitmq_publisher.publish_indexation_job(
+                with self.indexing_publisher:
+                    success = self.indexing_publisher.publish_indexing_job(
                         document_id=str(document.id),
-                        document_path=str(file_path),
-                        knowledge_source_id=str(upload_source.id)
+                        document_path=relative_path,  # Use relative path
+                        knowledge_source_id=str(upload_source.id),
+                        filename=file.filename,
+                        uploaded_by=str(user.id)
                     )
-                logger.info(f"Document {document.id} queued for indexing")
+                    if success:
+                        logger.info(f"Document {document.id} queued for indexing")
+                    else:
+                        logger.warning(f"Failed to queue document {document.id} for indexing")
             except Exception as e:
                 logger.error(f"Failed to queue document {document.id} for indexing: {e}")
                 # Continue - document is saved but indexing will need to be retried
@@ -196,7 +199,8 @@ class KnowledgeService:
                       limit: int = 100, offset: int = 0) -> tuple[List[DocumentEntity], int]:
         """List documents for a user"""
         try:            
-            source_uuid = uuid.UUID(knowledge_source_id) if knowledge_source_id else None
+            from uuid import UUID
+            source_uuid = UUID(knowledge_source_id) if knowledge_source_id else None
             documents = self.repository.list_documents(
                 uploaded_by=user.id, 
                 knowledge_source_id=source_uuid, 

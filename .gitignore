@@ -447,3 +447,7 @@ node_modules/
 
 # Folder for dev certificates
 [Cc]erts/
+# Build artifacts for Python packages
+*.egg-info/
+.eggs/
+

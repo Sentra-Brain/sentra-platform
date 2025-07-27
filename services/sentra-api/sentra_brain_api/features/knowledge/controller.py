@@ -8,7 +8,7 @@ from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_shared.domain.entities.role import Role
 from sentra_shared.infra.sql.postgres_service import get_db
-from sentra_shared.infra.amqp.publisher import get_rabbitmq_publisher
+from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.service import KnowledgeService
 from sentra_brain_api.features.knowledge.models import (
@@ -31,7 +31,7 @@ class KnowledgeController:
 
     def _get_service(self, db: Session = Depends(get_db)) -> KnowledgeService:
         repository = KnowledgeRepository(db)
-        publisher = get_rabbitmq_publisher()
+        publisher = IndexingJobPublisher()
         return KnowledgeService(repository, publisher)
 
     def _require_admin(self, user: UserEntity = Depends(get_authenticated_user)) -> UserEntity:

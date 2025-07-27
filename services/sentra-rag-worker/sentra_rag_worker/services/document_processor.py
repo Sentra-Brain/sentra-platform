@@ -1,5 +1,6 @@
 from pathlib import Path
 from sentra_shared.domain.entities.document_entity import DocumentFileType, DocumentStatus
+from sentra_shared.domain.services.file_storage import FileStorageService
 from sentra_rag_worker.services.document_extractor import DocumentExtractor
 from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker
@@ -22,6 +23,19 @@ class DocumentProcessor:
         self.chunker = TextChunker()
         self.embedding_service = EmbeddingService()
         self.vector_store = VectorStoreService()
+        self._file_storage = None
+    
+    def _get_settings(self):
+        """Lazy import of settings to avoid circular imports"""
+        from sentra_shared.core.settings import settings
+        return settings
+    
+    def _get_file_storage(self) -> FileStorageService:
+        """Lazy initialization of file storage service"""
+        if self._file_storage is None:
+            settings = self._get_settings()
+            self._file_storage = FileStorageService(settings.knowledge_mount_path)
+        return self._file_storage
 
     def process_document(self, message: Dict[str, Any]) -> bool:
         """Process a document indexation job.
@@ -36,7 +50,7 @@ class DocumentProcessor:
             # Extract message fields
             document_id = UUID(message['document_id'])
             knowledge_source_id = UUID(message['knowledge_source_id'])
-            filepath = message['filepath']
+            filepath = message['filepath']  # This should be relative path
             filename = message['filename']
             display_name = message.get('display_name', filename)
             filetype_str = message['filetype']
@@ -59,16 +73,26 @@ class DocumentProcessor:
                 # Update status to processing
                 self._update_document_status_with_repo(repo, document_id, DocumentStatus.PROCESSING)
 
-                # Step 1: Validation
-                if not self._validate_file(filepath):
-                    error_msg = f"File validation failed: {filepath}"
+                # Resolve relative path to absolute path using FileStorageService
+                file_storage = self._get_file_storage()
+                try:
+                    absolute_filepath = file_storage.resolve_document_path(filepath)
+                except ValueError as e:
+                    error_msg = f"Path resolution failed: {e}"
+                    logger.error(error_msg)
+                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
+                    return False
+
+                # Step 1: Validation using absolute path
+                if not self._validate_file(str(absolute_filepath)):
+                    error_msg = f"File validation failed: {absolute_filepath}"
                     logger.error(error_msg)
                     self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
                     return False
 
                 # Step 2: Content extraction
                 try:
-                    content = self.extractor.extract_content(filepath, filetype)
+                    content = self.extractor.extract_content(str(absolute_filepath), filetype)
                     if not content.strip():
                         error_msg = "No content extracted from document"
                         logger.warning(error_msg)
