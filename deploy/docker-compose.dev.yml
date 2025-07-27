@@ -44,7 +44,7 @@ services:
       - "5678:5678"
     volumes:
       - ../services/sentra-api:/app
-      - ../services/shared/sentra-shared:/shared/sentra-shared
+      - ../libs/sentra-shared:/libs/sentra-shared
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net

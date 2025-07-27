@@ -4,6 +4,7 @@
 # Solo incluye apps y services
 !apps/
 !services/
+!libs/
 
 # Dentro de apps/ y services/, ignora basura
 **/__pycache__/

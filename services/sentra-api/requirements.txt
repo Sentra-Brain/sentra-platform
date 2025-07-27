@@ -17,3 +17,5 @@ python-jose
 python-multipart
 
 uvicorn
+
+-e ../../libs/sentra-shared

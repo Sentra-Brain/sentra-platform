@@ -26,3 +26,5 @@ pytest-asyncio==1.1.0
 
 # Development tools
 debugpy==1.8.15
+
+-e ../../libs/sentra-shared
