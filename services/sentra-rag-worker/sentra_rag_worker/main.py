@@ -1,18 +1,18 @@
 #!/usr/bin/env python3
 
-import asyncio
-import signal
-import os
-import sys
-from typing import Dict, Any
-from sentra_shared.core.logging import get_logger
 from sentra_rag_worker.core.config import settings
-from sentra_rag_worker.infra.database import create_db_session
-from sentra_rag_worker.infra.knowledge_repository import KnowledgeRepository
-from sentra_rag_worker.infra.rabbitmq_consumer import RabbitMQConsumer
-from sentra_rag_worker.infra.rabbitmq_publisher import RabbitMQPublisher
 from sentra_rag_worker.features.document_processor import DocumentProcessor
 from sentra_rag_worker.features.folder_scanner import FolderScanner
+from sentra_shared.core.logging import get_logger
+from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
+from sentra_shared.infra.amqp.rabbitmq_publisher import RabbitMQPublisher
+from sentra_shared.infra.sql.postgres_service import create_db_session
+from typing import Dict, Any
+import asyncio
+import os
+import signal
+import sys
 
 logger = get_logger("sentra_rag_worker.main")
 

@@ -1,13 +1,12 @@
 import os
-import hashlib
 from pathlib import Path
-from typing import List, Set, Dict, Any
+from typing import List, Dict, Any
 from uuid import UUID, uuid4
-from sentra_rag_worker.core.logging import get_logger
+from sentra_shared.core.logging import get_logger
 from sentra_rag_worker.core.config import settings
-from sentra_rag_worker.domain.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
-from sentra_rag_worker.domain.knowledge_source_entity import KnowledgeSourceEntity
-from sentra_rag_worker.infra.knowledge_repository import KnowledgeRepository
+from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
+from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
+from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 
 logger = get_logger(__name__)
 

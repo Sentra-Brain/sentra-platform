@@ -1,9 +1,8 @@
-import os
 from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-from sentra_rag_worker.core import logging
+from sentra_shared.core import logging
 
 logger = logging.get_logger(__name__)
 

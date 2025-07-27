@@ -2,7 +2,7 @@
 
 import time
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, Session
 from sentra_shared.infra.sql.postgres_settings import settings
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.entities.base_entity import BaseEntity
@@ -12,19 +12,20 @@ from sentra_shared.infra.sql.security import pwd_context
 
 logger = get_logger(__name__)
 
-# 1. Module-level SQLAlchemy objects (engine/session)
+# Create database engine
 engine = create_engine(settings.database_url)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-# 2. Dependency for FastAPI routes
-def get_db():
+def get_db() -> Session:
+    """Get database session."""
     db = SessionLocal()
     try:
-        yield db
-    finally:
+        return db
+    except Exception as e:
+        logger.error(f"Error creating database session: {e}")
         db.close()
+        raise
 
-# 3. DB initialization for app startup
 def init_db():
     from sentra_shared.domain.entities.user_entity import UserEntity
     from sentra_shared.domain.entities.conversation_entity import ConversationEntity
@@ -77,3 +78,7 @@ def init_db():
         logger.info("[init_db] Default system settings created.")
 
     db.close()
+
+def create_db_session() -> Session:
+    """Create a new database session."""
+    return SessionLocal()

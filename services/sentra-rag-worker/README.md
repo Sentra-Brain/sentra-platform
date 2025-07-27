@@ -92,6 +92,78 @@ FROM python:3.11-slim
 CMD ["python", "-m", "sentra_rag_worker.main"]
 ```
 
+## Docker Image Optimization
+
+To speed up build times and reduce image size, we use a **custom base image** called `sentra-rag-base` that pre-installs all core dependencies used by RAG workers.
+
+This base image includes:
+
+- Python 3.13
+- `sentence-transformers`, `chromadb`, `sqlalchemy`, `pydantic`, etc.
+- System libraries: `tesseract-ocr`, `poppler-utils`, `libpq-dev`, etc.
+
+### Build the base image (once)
+
+```bash
+docker build -f Dockerfile.base -t sentra-rag-base:py3.13 .
+```
+
+The `Dockerfile.base` and `requirements.rag.txt` files define this environment and should be version-controlled at the root of the repository.
+
+### Dockerfile.base (example)
+
+```Dockerfile
+FROM python:3.13-slim
+
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    libmagic1 \
+    poppler-utils \
+    tesseract-ocr \
+    libpq-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /base
+COPY requirements.rag.txt .
+RUN pip install --no-cache-dir -r requirements.rag.txt
+
+ENV PYTHONUNBUFFERED=1
+```
+
+### requirements.rag.txt (example)
+
+```txt
+pika==1.3.2
+psycopg2-binary==2.9.10
+sqlalchemy==2.0.41
+pydantic==2.11.7
+pydantic-settings==2.10.1
+python-dotenv==1.1.1
+sentence-transformers==5.0.0
+chromadb==1.0.15
+asyncio-mqtt>=0.13.0
+```
+
+### Final worker Dockerfile
+
+Once the base is built, your `sentra-rag-worker` Dockerfile should use it as the base:
+
+```Dockerfile
+FROM sentra-rag-base:py3.13
+
+WORKDIR /app
+
+COPY libs/sentra-shared /libs/sentra-shared
+RUN pip install -e /libs/sentra-shared
+
+COPY services/sentra-rag-worker /app
+
+CMD ["python", "-m", "sentra_rag_worker.main"]
+```
+
+This approach drastically reduces build time and image size during development and CI/CD.
+
+
 ## Development
 
 ### Running Tests

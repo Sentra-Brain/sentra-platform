@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Copy full context (we're assuming context = root of repo)
+# Copy and install shared library
 COPY services/sentra-api/requirements.txt /app/requirements.txt
 COPY libs/sentra-shared /libs/sentra-shared
 RUN pip install -e /libs/sentra-shared

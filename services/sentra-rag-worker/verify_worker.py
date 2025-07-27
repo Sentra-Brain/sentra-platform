@@ -11,6 +11,8 @@ import tempfile
 from uuid import uuid4
 from pathlib import Path
 
+from sentra_shared.core.logging import get_logger
+
 # Set up test environment
 os.environ.update({
     'DATABASE_URL': 'sqlite:///./test.db',
@@ -38,7 +40,6 @@ def main():
     print("\n📦 Step 1: Loading components...")
     try:
         from sentra_rag_worker.core.config import settings
-        from sentra_rag_worker.core.logging import get_logger
         from sentra_rag_worker.features.text_chunker import TextChunker
         from sentra_rag_worker.features.document_extractor import DocumentExtractor
         from sentra_rag_worker.features.folder_scanner import FolderScanner

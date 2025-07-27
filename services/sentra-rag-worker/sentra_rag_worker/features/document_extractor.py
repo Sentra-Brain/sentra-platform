@@ -1,8 +1,6 @@
 import os
-from typing import List, Union
-from pathlib import Path
-from sentra_rag_worker.core.logging import get_logger
-from sentra_rag_worker.domain.document_entity import DocumentFileType
+from sentra_shared.core.logging import get_logger
+from sentra_shared.domain.entities.document_entity import DocumentFileType
 
 logger = get_logger(__name__)
 

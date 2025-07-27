@@ -35,7 +35,7 @@ def test_imports():
         from sentra_rag_worker.core.config import settings
         print("✓ Config import successful")
         
-        from sentra_rag_worker.core.logging import get_logger
+        from sentra_shared.core.logging import get_logger
         print("✓ Logging import successful")
         
         from sentra_rag_worker.domain.document_entity import DocumentEntity, DocumentFileType
