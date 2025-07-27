@@ -39,7 +39,4 @@ class Settings(BaseSettings):
         extra="allow"
     )
 
-    logger.info("Settings loaded successfully.")
-
-
 settings = Settings()
