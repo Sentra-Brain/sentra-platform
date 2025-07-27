@@ -41,7 +41,7 @@ def test_imports():
         from sentra_rag_worker.domain.document_entity import DocumentEntity, DocumentFileType
         print("✓ Document entity import successful")
         
-        from sentra_rag_worker.features.text_chunker import TextChunker
+        from sentra_rag_worker.services.text_chunker import TextChunker
         print("✓ Text chunker import successful")
         
         # Skip document extractor for now due to dependency issues
@@ -57,7 +57,7 @@ def test_text_chunker():
     print("\nTesting text chunker...")
     
     try:
-        from sentra_rag_worker.features.text_chunker import TextChunker
+        from sentra_rag_worker.services.text_chunker import TextChunker
         
         chunker = TextChunker(chunk_size=100, chunk_overlap=20)
         

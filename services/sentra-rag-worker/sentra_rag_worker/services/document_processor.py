@@ -1,9 +1,9 @@
 from pathlib import Path
 from sentra_rag_worker.domain.document_entity import DocumentFileType, DocumentStatus
-from sentra_rag_worker.features.document_extractor import DocumentExtractor
-from sentra_rag_worker.features.embedding_service import EmbeddingService
-from sentra_rag_worker.features.text_chunker import TextChunker
-from sentra_rag_worker.features.vector_store_service import VectorStoreService
+from sentra_rag_worker.services.document_extractor import DocumentExtractor
+from sentra_rag_worker.services.embedding_service import EmbeddingService
+from sentra_rag_worker.services.text_chunker import TextChunker
+from sentra_rag_worker.services.vector_store_service import VectorStoreService
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.infra.sql.postgres_service import create_db_session

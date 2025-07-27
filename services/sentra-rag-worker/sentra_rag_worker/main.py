@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
 from sentra_rag_worker.core.config import settings
-from sentra_rag_worker.features.document_processor import DocumentProcessor
-from sentra_rag_worker.features.folder_scanner import FolderScanner
+from sentra_rag_worker.services.document_processor import DocumentProcessor
+from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer

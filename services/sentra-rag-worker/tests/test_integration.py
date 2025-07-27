@@ -66,7 +66,7 @@ def test_document_processor_validation():
     print("\nTesting document processor validation...")
     
     try:
-        from sentra_rag_worker.features.document_processor import DocumentProcessor
+        from sentra_rag_worker.services.document_processor import DocumentProcessor
         
         processor = DocumentProcessor()
         print("✓ Document processor can be instantiated")
@@ -83,7 +83,7 @@ def test_folder_scanner_structure():
     
     try:
         # We can't test the full functionality without database, but we can test imports
-        from sentra_rag_worker.features.folder_scanner import FolderScanner
+        from sentra_rag_worker.services.folder_scanner import FolderScanner
         print("✓ Folder scanner import works")
         
         # Test constants
