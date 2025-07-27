@@ -3,5 +3,7 @@ pytest-cov==6.2.1
 pytest-mock==3.14.1
 pytest-asyncio==1.1.0
 
+python-dotenv==1.1.1
+
 # Development tools
 debugpy==1.8.15
