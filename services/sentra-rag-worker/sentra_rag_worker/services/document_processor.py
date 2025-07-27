@@ -1,5 +1,5 @@
 from pathlib import Path
-from sentra_rag_worker.domain.document_entity import DocumentFileType, DocumentStatus
+from sentra_shared.domain.entities.document_entity import DocumentFileType, DocumentStatus
 from sentra_rag_worker.services.document_extractor import DocumentExtractor
 from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker

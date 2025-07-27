@@ -43,7 +43,7 @@ def main():
         from sentra_rag_worker.services.text_chunker import TextChunker
         from sentra_rag_worker.services.document_extractor import DocumentExtractor
         from sentra_rag_worker.services.folder_scanner import FolderScanner
-        from sentra_rag_worker.domain.document_entity import DocumentFileType
+        from sentra_shared.domain.entities.document_entity import DocumentFileType
         
         logger = get_logger(__name__)
         print("✅ All components loaded successfully")

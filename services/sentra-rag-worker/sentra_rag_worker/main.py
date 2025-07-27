@@ -7,6 +7,7 @@ from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
 from sentra_shared.infra.amqp.rabbitmq_publisher import RabbitMQPublisher
+from sentra_shared.infra.sql import postgres_service
 from sentra_shared.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
 import asyncio
@@ -183,6 +184,9 @@ async def main():
     logger.info(f"Scan interval={settings.folder_scan_interval}s")
 
     worker = RAGWorker()
+
+    
+    postgres_service.init_db()
     
     try:
         await worker.start()

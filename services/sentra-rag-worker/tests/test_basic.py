@@ -38,7 +38,7 @@ def test_imports():
         from sentra_shared.core.logging import get_logger
         print("✓ Logging import successful")
         
-        from sentra_rag_worker.domain.document_entity import DocumentEntity, DocumentFileType
+        from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType
         print("✓ Document entity import successful")
         
         from sentra_rag_worker.services.text_chunker import TextChunker
