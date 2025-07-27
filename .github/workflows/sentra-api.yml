@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'services/sentra-api/**'
+      - 'libs/sentra-shared/**'
       - '.github/workflows/cicd-sentra-api.yml'
   pull_request:
     paths:
       - 'services/sentra-api/**'
+      - 'libs/sentra-shared/**'
       - '.github/workflows/cicd-sentra-api.yml'
   workflow_dispatch:
 
