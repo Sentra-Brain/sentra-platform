@@ -5,8 +5,8 @@ from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
-from sentra_shared.infra.amqp.rabbitmq_publisher import RabbitMQPublisher
 from sentra_shared.infra.sql import postgres_service
 from sentra_shared.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
@@ -23,7 +23,7 @@ class RAGWorker:
 
     def __init__(self):
         self.consumer = RabbitMQConsumer()
-        self.publisher = RabbitMQPublisher()
+        self.publisher = IndexingJobPublisher()
         self.document_processor = DocumentProcessor()
         self.running = False
         self._folder_scan_task = None
@@ -41,10 +41,10 @@ class RAGWorker:
         # Start folder scanning task
         self._folder_scan_task = asyncio.create_task(self._folder_scan_loop())
         
-        # Start consuming messages
+        # Start consuming messages with linear processing
         try:
-            logger.info("Starting message consumption...")
-            self.consumer.start_consuming(self._process_message)
+            logger.info("Starting linear message processing...")
+            self.consumer.start_consuming(self._process_message_linear)
         except KeyboardInterrupt:
             logger.info("Received keyboard interrupt")
         except Exception as e:
@@ -76,43 +76,58 @@ class RAGWorker:
         """Handle shutdown signals."""
         logger.info(f"Received signal {signum}, initiating shutdown...")
         self.running = False
-        # Note: The consumer will handle the actual shutdown in its main loop
 
-    def _process_message(self, message: Dict[str, Any]) -> bool:
+    def _process_message_linear(self, message: Dict[str, Any]) -> bool:
+        """
+        Process message with linear flow: validate → process → acknowledge.
+        No retries, no requeueing. Process once and mark done.
+        """
         try:
+            # Validate required fields
             required_fields = ['document_id', 'document_path', 'knowledge_source_id']
             missing_fields = [f for f in required_fields if f not in message]
 
             if missing_fields:
                 logger.error(f"Message missing required fields: {missing_fields}")
-                return False
+                return True  # Acknowledge to prevent reprocessing
 
-            # Adapt message format to expected fields
+            # Extract and enrich message data
             document_path = message['document_path']
-            filename = os.path.basename(document_path)
+            filename = message.get('filename') or os.path.basename(document_path)
+            
+            # Determine file type from path
             extension = os.path.splitext(filename)[1].lower().lstrip('.')
             filetype = extension if extension in ['pdf', 'docx', 'txt', 'md'] else None
 
             if not filetype:
                 logger.error(f"Unsupported or missing filetype for file: {filename}")
-                return False
+                return True  # Acknowledge to prevent reprocessing
 
-            enriched_message = {
+            # Create standardized processing message
+            processing_message = {
                 "document_id": message['document_id'],
                 "knowledge_source_id": message['knowledge_source_id'],
-                "filepath": document_path,
+                "filepath": document_path,  # Will be resolved to absolute path in processor
                 "filename": filename,
                 "filetype": filetype,
-                # Optional:
                 "display_name": filename,
-                "uploaded_by": message.get("uploaded_by")  # if present
+                "uploaded_by": message.get("uploaded_by")
             }
 
-            return self.document_processor.process_document(enriched_message)
+            # Process document (handles all errors internally)
+            success = self.document_processor.process_document(processing_message)
+            
+            # Always acknowledge - no retries
+            if success:
+                logger.info(f"Successfully processed document {message['document_id']}")
+            else:
+                logger.error(f"Failed to process document {message['document_id']} - marked as failed")
+            
+            return True  # Always acknowledge
 
         except Exception as e:
-            logger.error(f"Error processing message: {e}")
-            return False
+            logger.error(f"Unexpected error processing message: {e}")
+            return True  # Acknowledge even on unexpected errors to prevent infinite reprocessing
 
     async def _folder_scan_loop(self):
         """Periodic folder scanning loop."""
