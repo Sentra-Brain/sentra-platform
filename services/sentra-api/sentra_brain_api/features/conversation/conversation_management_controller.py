@@ -1,11 +1,12 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_brain_api.crosscutting import logging
-from sentra_brain_api.domain.user_entity import UserEntity
-from sentra_brain_api.infra.mongo_conversation_repository import MongoConversationRepository, get_conversation_mongo_repository
-from sentra_brain_api.infra.postgres_service import get_db
-from sentra_brain_api.features.conversation.repository import ConversationRepository
+from sentra_shared.core import logging
+from sentra_shared.domain.entities.user_entity import UserEntity
+
+from sentra_shared.infra.nosql.mongo_conversation_repository import MongoConversationRepository, get_conversation_mongo_repository
+from sentra_shared.infra.sql.postgres_service import get_db
+from sentra_shared.domain.repositories.conversation_repository import ConversationRepository
 from sentra_brain_api.features.conversation.models import (
     ConversationListItemModel,
     ConversationModel,

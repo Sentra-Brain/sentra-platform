@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sqlalchemy.orm import Session
-from sentra_brain_api.domain.user_entity import UserEntity
+from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.user.models import SignupResponse, UserModel, SignupModel, UserUpdate
-from sentra_brain_api.infra.postgres_service import get_db
+from sentra_shared.infra.sql.postgres_service import get_db
 from sentra_brain_api.features.user.constants import (
     SIGNUP_DESCRIPTION,
     ME_DESCRIPTION,
     UPDATE_USER_DESCRIPTION,
     VALIDATE_USER_DESCRIPTION
 )
-from sentra_brain_api.features.user.repository import UserRepository
+from sentra_shared.domain.repositories.user_repository  import UserRepository
 from sentra_brain_api.features.user.user_service import UserService
-from sentra_brain_api.crosscutting import logging
+from sentra_shared.core import logging
 
 logger = logging.get_logger("sentra_brain_api")
 

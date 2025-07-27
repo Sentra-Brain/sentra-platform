@@ -2,16 +2,16 @@ from datetime import datetime, timezone, timedelta
 from typing import List
 
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.crosscutting.logging import get_logger
-from sentra_brain_api.domain.conversation_entity import ConversationEntity
-from sentra_brain_api.domain.user_entity import UserEntity
-from sentra_brain_api.features.conversation.repository import ConversationRepository
+from sentra_shared.core.logging import get_logger
+from sentra_shared.domain.entities.conversation_entity import ConversationEntity
+from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_shared.domain.repositories.conversation_repository import ConversationRepository
 from sentra_brain_api.features.conversation.conversation_service import ConversationService
 from sentra_brain_api.features.conversation.models import (
     CreateConversationRequest,
     UpdateConversationRequest,
 )
-from sentra_brain_api.infra.mongo_conversation_repository import MongoConversationRepository
+from sentra_shared.infra.nosql.mongo_conversation_repository import MongoConversationRepository
 
 logger = get_logger("sentra_brain_api")
 

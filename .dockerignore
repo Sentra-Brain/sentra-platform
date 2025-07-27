@@ -1,0 +1,27 @@
+# Ignora todo por defecto
+**
+
+# Solo incluye apps y services
+!apps/
+!services/
+!libs/
+
+# Dentro de apps/ y services/, ignora basura
+**/__pycache__/
+**/.pytest_cache/
+**/.venv/
+**/.DS_Store
+**/*.py[cod]
+**/*.egg-info/
+**/*.log
+**/dist/
+**/build/
+**/node_modules/
+**/.coverage
+
+# Ignorar tests
+**/tests/
+
+# Ignorar tooling local
+**/.vscode/
+**/.devcontainer/

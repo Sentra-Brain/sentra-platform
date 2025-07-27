@@ -35,15 +35,17 @@ services:
 
   sentra-api:
     build:
-      context: ../services/sentra-api
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: services/sentra-api/Dockerfile
     image: sentra-api:dev
     container_name: sentra-api
     ports:
-      - "8100:8100"   # API
-      - "5678:5678"   # Python debugpy
+      - "8100:8100"
+      - "5678:5678"
     volumes:
       - ../services/sentra-api:/app
+      - ../libs/sentra-shared:/libs/sentra-shared
+      - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
     env_file:
@@ -51,17 +53,22 @@ services:
 
   sentra-rag-worker:
     build:
-      context: ../services/sentra-rag-worker
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: services/sentra-rag-worker/Dockerfile
     image: sentra-rag-worker:dev
     container_name: sentra-rag-worker
     pull_policy: always
+    ports:
+      - "5679:5679"   # Python debugpy
     volumes:
-      - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
+      - ../services/sentra-rag-worker:/app
+      - ../libs/sentra-shared:/libs/sentra-shared
+      - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
+      # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
     env_file:
-      - .dev.env
+      - ../services/sentra-rag-worker/.env
     depends_on:
       - sentra-sql-db
       - sentra-vector-db

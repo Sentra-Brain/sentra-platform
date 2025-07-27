@@ -1,7 +1,23 @@
+from pathlib import Path
 from unittest.mock import MagicMock
-import pytest
-from fastapi.testclient import TestClient
+from dotenv import load_dotenv
+import sys
 import os
+
+from fastapi.testclient import TestClient
+import pytest
+
+# Load .env.test
+env_path = Path(__file__).resolve().parent / ".env.test"
+load_dotenv(dotenv_path=env_path, override=True)
+
+# Support relative PYTHONPATH from .env
+pythonpath = os.environ.get("PYTHONPATH")
+if pythonpath:
+    resolved_path = (Path(__file__).resolve().parent / pythonpath).resolve()
+    if resolved_path.exists():
+        sys.path.insert(0, str(resolved_path))
+        
 os.environ.update({
     "DATABASE_URL": "sqlite:///./test_qna.db",
     "INITIAL_ADMIN_USERNAME": "admin",
@@ -12,20 +28,29 @@ os.environ.update({
     "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
     "MONGO_URL": "mongodb://localhost:27017"
 })
-from sentra_brain_api.core.config import settings
-from sentra_brain_api.infra.postgres_service import get_db, init_db
+from sentra_shared.infra.sql.postgres_settings import settings as pg_settings
+from sentra_shared.infra.nosql.mongo_settings import settings as mongo_settings
+from sentra_shared.infra.amqp.rabbitmq_settings import settings as rabbitmq_settings
+from sentra_shared.infra.sql.postgres_service import get_db, init_db
 
 @pytest.fixture(scope="session", autouse=True)
 def load_settings():
     # Set up the settings for the tests
-    settings.secret_key = "your_secret_key"
-    settings.algorithm = "HS256"
-    settings.access_token_expire_minutes = 30
-    settings.database_url = "sqlite:///./test_qna.db"
-    settings.initial_admin_username = "admin"
-    settings.initial_admin_email = "admin@example.com"
-    settings.initial_admin_password = "P@ssw0rd!"
-    settings.mongo_url = "mongodb://localhost:27017"
+    pg_settings.secret_key = "your_secret_key"
+    pg_settings.algorithm = "HS256"
+    pg_settings.access_token_expire_minutes = 30
+    pg_settings.database_url = "sqlite:///./test_qna.db"
+    pg_settings.initial_admin_username = "admin"
+    pg_settings.initial_admin_email = "admin@example.com"
+    pg_settings.initial_admin_password = "P@ssw0rd!"
+
+    mongo_settings.mongo_url = "mongodb://localhost:27017"
+
+    rabbitmq_settings.rabbitmq_host = "localhost"
+    rabbitmq_settings.rabbitmq_port = 5672
+    rabbitmq_settings.rabbitmq_user = "guest"
+    rabbitmq_settings.rabbitmq_password = "guest"
+    rabbitmq_settings.rabbitmq_queue = "test_queue"
 
     # Mock init_db to avoid its execution
     # monkeypatch.setattr('sentra_brain_api.infra.postgres_service.init_db', lambda: None)

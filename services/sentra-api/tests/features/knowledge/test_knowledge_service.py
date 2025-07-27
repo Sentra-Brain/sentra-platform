@@ -8,13 +8,13 @@ from unittest.mock import Mock, MagicMock, patch
 from fastapi import UploadFile, HTTPException
 from io import BytesIO
 
-from sentra_brain_api.domain.user_entity import UserEntity
-from sentra_brain_api.domain.knowledge_source_entity import KnowledgeSourceEntity, KnowledgeSourceType, KnowledgeSourceVisibility
-from sentra_brain_api.domain.document_entity import DocumentEntity, DocumentFileType
-from sentra_brain_api.features.knowledge.repository import KnowledgeRepository
+from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity, KnowledgeSourceType, KnowledgeSourceVisibility
+from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType
+from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.service import KnowledgeService
-from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
-from sentra_brain_api.infra.rabbitmq.publisher import RabbitMQPublisher
+from sentra_brain_api.features.knowledge.models import CreateKnowledgeSourceRequest, DocumentUploadRequest
+from sentra_shared.infra.amqp.publisher import RabbitMQPublisher
 
 
 class TestKnowledgeService:

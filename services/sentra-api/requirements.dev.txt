@@ -1,0 +1,22 @@
+
+bcrypt==4.0.1
+debugpy
+email-validator
+fastapi
+httpx
+passlib 
+passlib[bcrypt]
+pika
+psycopg2-binary
+pydantic
+pydantic-settings
+pymongo
+pytest
+pytest-cov
+pytest-dotenv
+pytest-mock
+python-jose
+python-multipart
+sqlalchemy
+uvicorn
+-e ../shared/sentra-shared

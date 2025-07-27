@@ -1,9 +1,9 @@
 # sentra_brain_api/features/admin/settings/settings_controller.py
 from fastapi import APIRouter, Depends
 from sentra_brain_api.crosscutting.authorization import get_superadmin_user
-from sentra_brain_api.domain.system_settings import SystemSettings
+from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_brain_api.features.admin.settings.models import SystemSettingsModel
-from sentra_brain_api.infra.postgres_service import get_db
+from sentra_shared.infra.sql.postgres_service import get_db
 from sqlalchemy.orm import Session
 
 

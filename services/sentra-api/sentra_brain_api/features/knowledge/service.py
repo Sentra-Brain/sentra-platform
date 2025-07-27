@@ -6,18 +6,18 @@ from pathlib import Path
 from typing import List, Optional
 from fastapi import UploadFile, HTTPException
 
-from sentra_brain_api.domain.user_entity import UserEntity
-from sentra_brain_api.domain.knowledge_source_entity import (
-    KnowledgeSourceEntity, 
-    KnowledgeSourceType, 
-    KnowledgeSourceVisibility
-)
+from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity, KnowledgeSourceType, KnowledgeSourceVisibility, KnowledgeSourceStatus
+from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType
+from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_shared.infra.amqp.publisher import RabbitMQPublisher
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.crosscutting.logging import get_logger
-from sentra_brain_api.domain.document_entity import DocumentEntity, DocumentFileType
-from sentra_brain_api.features.knowledge.repository import KnowledgeRepository
-from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
-from sentra_brain_api.infra.rabbitmq.publisher import RabbitMQPublisher
+from sentra_shared.core.logging import get_logger
+from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_brain_api.features.knowledge.models import (
+    CreateKnowledgeSourceRequest,
+    DocumentUploadRequest
+)
+
 
 logger = get_logger(__name__)
 
@@ -36,7 +36,7 @@ class KnowledgeService:
 
     def _get_settings(self):
         """Lazy import of settings to avoid circular imports"""
-        from sentra_brain_api.core.config import settings
+        from sentra_shared.core.settings import settings
         return settings
 
     def create_knowledge_source(self, request: CreateKnowledgeSourceRequest, user: UserEntity) -> KnowledgeSourceEntity:

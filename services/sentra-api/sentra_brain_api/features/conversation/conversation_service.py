@@ -1,6 +1,6 @@
 # sentra_brain_api/features/conversation/conversation_service.py
-from sentra_brain_api.domain.conversation_entity import ConversationEntity
-from sentra_brain_api.features.conversation.repository import ConversationRepository
+from sentra_shared.domain.entities.conversation_entity import ConversationEntity
+from sentra_shared.domain.repositories.conversation_repository import ConversationRepository
 
 
 class ConversationService:

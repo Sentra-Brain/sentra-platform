@@ -1,6 +1,6 @@
 import httpx
 from typing import AsyncGenerator
-from sentra_brain_api.core.config import settings
+from sentra_shared.core.settings import settings
 
 class LlamaServerClient:
     def __init__(self, base_url: str = None):

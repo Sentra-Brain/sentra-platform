@@ -23,7 +23,7 @@
       },
       "module": "pytest",
       "cwd": "${workspaceRoot}/tests",
-      "envFile": "${workspaceFolder}/tests/.env",
+      "envFile": "${workspaceFolder}/services/sentra-api/tests/.env.test",
       "console": "integratedTerminal"
     },
     {

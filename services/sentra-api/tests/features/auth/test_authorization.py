@@ -4,7 +4,7 @@
 # from fastapi import HTTPException
 # from dataclasses import dataclass
 # from sentra_brain_api.crosscutting.authorization import get_authenticated_user, get_admin_user
-# from sentra_brain_api.core.config import settings
+# from sentra_shared.core.settings import settings
 
 # @dataclass
 # class FakeUser:

@@ -31,6 +31,33 @@
       "console": "integratedTerminal",
       "env": { "DEBUG_MODE": "true" },
       "justMyCode": false
-    }
+    },
+    {
+      "name": "Test: sentra-shared",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "env": {
+        "PYTEST_ADDOPTS": "--no-cov"
+      },
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/services/sentra-shared/tests",
+      "envFile": "${workspaceFolder}/services/sentra-shared/tests/.env.test",
+      "console": "integratedTerminal",
+    },
+    
+    {
+      "name": "Test: sentra-api",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "env": {
+        "PYTEST_ADDOPTS": "--no-cov"
+      },
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/services/sentra-api/tests",
+      "envFile": "${workspaceFolder}/services/sentra-api/tests/.env.test",
+      "console": "integratedTerminal",
+    },
   ]
 }

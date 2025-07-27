@@ -1,8 +1,8 @@
 # import pytest
 # from unittest.mock import MagicMock, patch
 # from sqlalchemy.orm import Session
-# from sentra_brain_api.domain.user import UserEntity
-# from sentra_brain_api.features.user.repository import UserRepository
+# from sentra_shared.domain.user import UserEntity
+# from sentra_shared.domain.repositories.user_repository import UserRepository
 
 # # Mock data
 # mock_user = UserEntity(id=1, username="testuser", full_name="Test User", email="test@example.com", disabled=False, roles=["user"])

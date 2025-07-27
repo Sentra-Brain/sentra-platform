@@ -1,3 +1,4 @@
+
 bcrypt==4.0.1
 debugpy
 email-validator
@@ -10,11 +11,11 @@ psycopg2-binary
 pydantic
 pydantic-settings
 pymongo
-pytest
-pytest-cov
-pytest-dotenv
-pytest-mock
+sqlalchemy
+
 python-jose
 python-multipart
-sqlalchemy
+
 uvicorn
+
+-e ../../libs/sentra-shared

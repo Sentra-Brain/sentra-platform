@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from unittest.mock import patch, MagicMock
 from datetime import datetime, timezone
-from sentra_brain_api.domain.user_entity import UserEntity
+from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.conversation.conversation_management_controller import ConversationManagementController
 
 @pytest.fixture

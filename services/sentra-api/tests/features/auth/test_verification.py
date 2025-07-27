@@ -3,11 +3,11 @@ import pytest
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 from fastapi import HTTPException, status
-from sentra_brain_api.core.config import settings
+from sentra_shared.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.domain.user_entity import UserEntity
+from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_brain_api.features.user.repository import UserRepository
+from sentra_shared.domain.repositories.user_repository  import UserRepository
 
 # Create Fake UserRepository so that this test doesn't depend on the actual database
 class FakeUserRepository():

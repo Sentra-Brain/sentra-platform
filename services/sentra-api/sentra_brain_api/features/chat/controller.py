@@ -5,8 +5,8 @@ from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
 from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_brain_api.crosscutting.logging import get_logger
-from sentra_brain_api.domain.user_entity import UserEntity
+from sentra_shared.core.logging import get_logger
+from sentra_shared.domain.entities.user_entity import UserEntity
 import json
 
 logger = get_logger("sentra_brain_api")

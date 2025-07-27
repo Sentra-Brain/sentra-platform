@@ -1,6 +1,6 @@
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.features.user.repository import UserRepository
-from sentra_brain_api.crosscutting.logging import get_logger
+from sentra_shared.domain.repositories.user_repository import UserRepository
+from sentra_shared.core.logging import get_logger
 from sqlalchemy.orm import Session
 
 logger = get_logger(__name__)

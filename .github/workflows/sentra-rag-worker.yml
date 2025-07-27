@@ -5,10 +5,12 @@ on:
     branches: [main]
     paths:
       - 'services/sentra-rag-worker/**'
+      - 'libs/sentra-shared/**'
       - '.github/workflows/cicd-sentra-rag-worker.yml'
   pull_request:
     paths:
       - 'services/sentra-rag-worker/**'
+      - 'libs/sentra-shared/**'
       - '.github/workflows/cicd-sentra-rag-worker.yml'
   workflow_dispatch:
 
@@ -33,6 +35,7 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
+          pip install -r requirements.rag.txt
           pip install -r requirements.txt
 
       - name: Lint with flake8
