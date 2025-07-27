@@ -9,8 +9,7 @@ between the API producer and RAG worker consumer.
 import os
 import re
 from pathlib import Path
-from typing import Optional, Tuple
-from fastapi import UploadFile
+from typing import Optional, Tuple, BinaryIO
 
 from sentra_shared.core.logging import get_logger
 
@@ -111,12 +110,13 @@ class FileStorageService:
                 new_name = f"{stem}_{timestamp}{suffix}"
                 return parent / new_name
     
-    def save_uploaded_file(self, file: UploadFile, user_id: str) -> Tuple[Path, str]:
+    def save_file(self, file_content: BinaryIO, filename: str, user_id: str) -> Tuple[Path, str]:
         """
-        Save an uploaded file using original filename.
+        Save file content using original filename.
         
         Args:
-            file: FastAPI UploadFile object
+            file_content: File-like object with file content
+            filename: Original filename
             user_id: ID of the uploading user
             
         Returns:
@@ -126,7 +126,7 @@ class FileStorageService:
             Exception: If file saving fails
         """
         # Sanitize the original filename
-        safe_filename = self.sanitize_filename(file.filename)
+        safe_filename = self.sanitize_filename(filename)
         
         # Create user directory
         upload_dir = self.create_user_upload_directory(user_id)
@@ -139,8 +139,8 @@ class FileStorageService:
         try:
             with open(final_path, "wb") as buffer:
                 # Reset file pointer in case it was read before
-                file.file.seek(0)
-                buffer.write(file.file.read())
+                file_content.seek(0)
+                buffer.write(file_content.read())
             
             logger.info(f"File saved: {final_path}")
             

@@ -10,7 +10,6 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 from io import BytesIO
-from fastapi import UploadFile
 
 from sentra_shared.domain.services.file_storage import FileStorageService
 
@@ -74,18 +73,17 @@ class TestFileStorageService:
         result_path2 = file_storage.handle_filename_collision(original_file)
         assert result_path2 == test_dir / "document_2.pdf"
     
-    def test_save_uploaded_file(self, file_storage, temp_mount_path):
-        """Test saving an uploaded file."""
-        # Create mock uploaded file
+    def test_save_file(self, file_storage, temp_mount_path):
+        """Test saving a file."""
+        # Create file content
         file_content = b"Test PDF content"
-        mock_file = Mock(spec=UploadFile)
-        mock_file.filename = "test_document.pdf"
-        mock_file.file = BytesIO(file_content)
+        file_obj = BytesIO(file_content)
         
         user_id = "test-user-456"
+        filename = "test_document.pdf"
         
         # Save the file
-        absolute_path, relative_path = file_storage.save_uploaded_file(mock_file, user_id)
+        absolute_path, relative_path = file_storage.save_file(file_obj, filename, user_id)
         
         # Verify results
         expected_relative = f"uploads/{user_id}/test_document.pdf"
@@ -97,8 +95,8 @@ class TestFileStorageService:
         expected_absolute = Path(temp_mount_path) / expected_relative
         assert absolute_path == expected_absolute
     
-    def test_save_uploaded_file_with_collision(self, file_storage, temp_mount_path):
-        """Test saving uploaded file with filename collision."""
+    def test_save_file_with_collision(self, file_storage, temp_mount_path):
+        """Test saving file with filename collision."""
         # Create existing file
         user_id = "test-user-789"
         upload_dir = file_storage.create_user_upload_directory(user_id)
@@ -107,12 +105,11 @@ class TestFileStorageService:
         
         # Create new file with same name
         file_content = b"New content"
-        mock_file = Mock(spec=UploadFile)
-        mock_file.filename = "document.pdf"
-        mock_file.file = BytesIO(file_content)
+        file_obj = BytesIO(file_content)
+        filename = "document.pdf"
         
         # Save the file
-        absolute_path, relative_path = file_storage.save_uploaded_file(mock_file, user_id)
+        absolute_path, relative_path = file_storage.save_file(file_obj, filename, user_id)
         
         # Should have collision handling
         assert "document_1.pdf" in relative_path

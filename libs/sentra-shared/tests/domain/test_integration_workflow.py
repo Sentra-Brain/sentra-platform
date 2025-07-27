@@ -11,7 +11,6 @@ import pytest
 from pathlib import Path
 from unittest.mock import Mock, patch
 from io import BytesIO
-from fastapi import UploadFile
 
 from sentra_shared.domain.services.file_storage import FileStorageService
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher, create_indexing_job
@@ -31,16 +30,15 @@ class TestEndToEndWorkflow:
         # 1. Setup file storage service
         file_storage = FileStorageService(temp_mount_path)
         
-        # 2. Create a mock uploaded file
+        # 2. Create file content
         file_content = b"This is a test PDF document with some content for indexing."
-        mock_file = Mock(spec=UploadFile)
-        mock_file.filename = "test_document.pdf"
-        mock_file.file = BytesIO(file_content)
+        file_obj = BytesIO(file_content)
         
         user_id = "test-user-123"
+        filename = "test_document.pdf"
         
         # 3. Save the file using FileStorageService
-        absolute_path, relative_path = file_storage.save_uploaded_file(mock_file, user_id)
+        absolute_path, relative_path = file_storage.save_file(file_obj, filename, user_id)
         
         # 4. Verify file was saved correctly
         assert absolute_path.exists()
@@ -86,19 +84,17 @@ class TestEndToEndWorkflow:
         
         # Create first file
         file_content_1 = b"First file content"
-        mock_file_1 = Mock(spec=UploadFile)
-        mock_file_1.filename = "document.pdf"
-        mock_file_1.file = BytesIO(file_content_1)
+        file_obj_1 = BytesIO(file_content_1)
+        filename_1 = "document.pdf"
         
-        path_1, rel_path_1 = file_storage.save_uploaded_file(mock_file_1, user_id)
+        path_1, rel_path_1 = file_storage.save_file(file_obj_1, filename_1, user_id)
         
         # Create second file with same name
         file_content_2 = b"Second file content"
-        mock_file_2 = Mock(spec=UploadFile)
-        mock_file_2.filename = "document.pdf"
-        mock_file_2.file = BytesIO(file_content_2)
+        file_obj_2 = BytesIO(file_content_2)
+        filename_2 = "document.pdf"
         
-        path_2, rel_path_2 = file_storage.save_uploaded_file(mock_file_2, user_id)
+        path_2, rel_path_2 = file_storage.save_file(file_obj_2, filename_2, user_id)
         
         # Verify collision was handled
         assert path_1.name == "document.pdf"

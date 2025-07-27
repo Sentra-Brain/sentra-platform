@@ -126,7 +126,7 @@ class KnowledgeService:
             # Use FileStorageService to save with original filename
             file_storage = self._get_file_storage()
             try:
-                absolute_path, relative_path = file_storage.save_uploaded_file(file, user.id)
+                absolute_path, relative_path = file_storage.save_file(file.file, file.filename, user.id)
                 logger.info(f"File saved: {absolute_path} (relative: {relative_path})")
             except Exception as e:
                 logger.error(f"Failed to save file {file.filename}: {e}")
