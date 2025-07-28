@@ -1,6 +1,22 @@
 {
   "annotations": {
-    "list": []
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
   },
   "description": "Overview dashboard for Sentra Brain services",
   "editable": true,
@@ -13,7 +29,7 @@
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -87,21 +103,21 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
-          "expr": "up",
+          "expr": "rate(http_requests_total[5m])",
           "interval": "",
-          "legendFormat": "{{job}} - {{instance}}",
+          "legendFormat": "{{job}} - {{method}} {{status}}",
           "refId": "A"
         }
       ],
-      "title": "Service Status (Up/Down)",
+      "title": "HTTP Request Rate",
       "type": "timeseries"
     },
     {
       "datasource": {
         "type": "prometheus",
-        "uid": "prometheus"
+        "uid": "${DS_PROMETHEUS}"
       },
       "fieldConfig": {
         "defaults": {
@@ -113,16 +129,15 @@
             "mode": "absolute",
             "steps": [
               {
-                "color": "red",
+                "color": "green",
                 "value": null
               },
               {
-                "color": "green",
-                "value": 1
+                "color": "red",
+                "value": 80
               }
             ]
-          },
-          "unit": "short"
+          }
         },
         "overrides": []
       },
@@ -145,11 +160,12 @@
         "showThresholdLabels": false,
         "showThresholdMarkers": true
       },
+      "pluginVersion": "8.0.0",
       "targets": [
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "${DS_PROMETHEUS}"
           },
           "expr": "up",
           "interval": "",
@@ -157,13 +173,13 @@
           "refId": "A"
         }
       ],
-      "title": "Services Health",
+      "title": "Service Status",
       "type": "gauge"
     },
     {
       "datasource": {
         "type": "loki",
-        "uid": "loki"
+        "uid": "${DS_LOKI}"
       },
       "gridPos": {
         "h": 8,
@@ -186,13 +202,13 @@
         {
           "datasource": {
             "type": "loki",
-            "uid": "loki"
+            "uid": "${DS_LOKI}"
           },
-          "expr": "{container_name=~\".*\"}",
+          "expr": "{container_name=~\"sentra.*\"}",
           "refId": "A"
         }
       ],
-      "title": "Container Logs",
+      "title": "Sentra Services Logs",
       "type": "logs"
     }
   ],
