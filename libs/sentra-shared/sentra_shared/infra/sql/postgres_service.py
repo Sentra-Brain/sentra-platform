@@ -3,10 +3,10 @@
 import time
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
+from sentra_shared.domain.enums.role import Role
 from sentra_shared.infra.sql.postgres_settings import settings
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.entities.base_entity import BaseEntity
-from sentra_shared.domain.entities.role import Role
 from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.infra.sql.security import pwd_context
 
@@ -68,9 +68,9 @@ def init_db():
             hashed_password=pwd_context.hash(settings.initial_admin_password),
             disabled=False
         )
-        admin_user.set_roles([Role.ADMIN, Role.USER])
+        admin_user.set_roles([Role.SUPERADMIN, Role.ADMIN, Role.USER])
         user_repo.create(admin_user)
-        logger.info("[init_db] Initial admin user created.")
+        logger.info("[init_db] Initial Super Admin user created.")
 
     if not db.query(SystemSettings).first():
         db.add(SystemSettings(max_users=3))

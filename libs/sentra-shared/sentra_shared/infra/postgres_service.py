@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 from sentra_shared.infra.sql.postgres_settings import settings
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.entities.base_entity import BaseEntity
-from sentra_shared.domain.entities.role import Role
+from sentra_shared.domain.enums.role import Role
 from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.infra.sql.security import pwd_context
 

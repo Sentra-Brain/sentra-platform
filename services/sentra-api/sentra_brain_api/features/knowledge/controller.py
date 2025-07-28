@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_shared.domain.entities.role import Role
+from sentra_shared.domain.enums.role import Role
 from sentra_shared.infra.sql.postgres_service import get_db
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
