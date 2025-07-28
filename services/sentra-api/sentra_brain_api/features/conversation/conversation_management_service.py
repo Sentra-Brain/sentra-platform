@@ -7,6 +7,7 @@ from sentra_shared.domain.entities.conversation_entity import ConversationEntity
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_shared.domain.repositories.conversation_repository import ConversationRepository
 from sentra_brain_api.features.conversation.conversation_service import ConversationService
+from sentra_brain_api.features.conversation.title_generation_service import TitleGenerationService
 from sentra_brain_api.features.conversation.models import (
     CreateConversationRequest,
     UpdateConversationRequest,
@@ -19,6 +20,7 @@ class ConversationManagementService:
     def __init__(self, sql_repo: ConversationRepository, mongo_repo: MongoConversationRepository):
         self.sql_service = ConversationService(sql_repo)
         self.mongo_repo = mongo_repo
+        self.title_service = TitleGenerationService()
 
     def create_conversation(self, user: UserEntity, request: CreateConversationRequest) -> str:
         try:
@@ -77,6 +79,14 @@ class ConversationManagementService:
                 path="/conversations/",
                 suggestion="Check MongoDB availability and message structure."
             )
+
+        # Generate title if none provided and we have the first user message
+        if not request.title and request.content:
+            try:
+                self._generate_title_sync(str(conversation.id), str(user.id), request.content)
+            except Exception as e:
+                logger.warning(f"Title generation failed for conversation {conversation.id}: {e}")
+                # Don't fail the conversation creation if title generation fails
 
         return str(conversation.id)
 
@@ -172,3 +182,24 @@ class ConversationManagementService:
                 path=f"/conversations/{conversation_id}",
                 suggestion="Check the conversation ID and try again."
             )
+
+    def _generate_title_sync(self, conversation_id: str, user_id: str, user_message: str):
+        """
+        Generate and update conversation title using heuristic approach.
+        This is a simplified synchronous approach to avoid async complications.
+        """
+        try:
+            # Use heuristic approach for now - it's fast and reliable
+            title = self.title_service._generate_title_heuristic(user_message)
+            if title:
+                # Update SQL record
+                self.sql_service.update_conversation(conversation_id, title=title)
+                
+                # Update MongoDB record
+                self.mongo_repo.update_conversation(conversation_id, {"title": title})
+                
+                logger.info(f"Generated heuristic title '{title}' for conversation {conversation_id}")
+            else:
+                logger.warning(f"No title generated for conversation {conversation_id}")
+        except Exception as e:
+            logger.error(f"Failed to generate and update title for conversation {conversation_id}: {e}")
