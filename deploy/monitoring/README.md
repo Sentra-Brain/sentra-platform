@@ -10,13 +10,13 @@ This directory contains the configuration for the observability stack integrated
 - **Configuration**: `prometheus.yml`
 
 ### Grafana (Visualization & Dashboards)
-- **URL**: http://localhost:3000
+- **URL**: http://localhost:3001
 - **Credentials**: admin/admin
 - **Purpose**: Visualizes metrics, logs, and traces
 - **Configuration**: `grafana/provisioning/`
 
 ### Loki (Log Aggregation)
-- **URL**: http://localhost:3100
+- **URL**: http://localhost:3101
 - **Purpose**: Centralized log storage and querying
 - **Configuration**: `loki-config.yaml`
 
@@ -89,7 +89,7 @@ All requests include correlation IDs that flow through:
    ```
 
 2. Access the dashboards:
-   - **Grafana**: http://localhost:3000 (admin/admin)
+   - **Grafana**: http://localhost:3001 (admin/admin)
    - **Prometheus**: http://localhost:9090
    - **Jaeger**: http://localhost:16686
 
