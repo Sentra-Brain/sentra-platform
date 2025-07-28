@@ -66,12 +66,15 @@ def test_document_status_enum():
         return False
 
 
-def test_enhanced_logging():
-    """Test enhanced logging functionality."""
-    print("\nTesting enhanced logging...")
+def test_simple_logging():
+    """Test simple logging functionality."""
+    print("\nTesting simple logging...")
     
     try:
-        from sentra_shared.core.logging import get_logger, set_request_id, get_request_id, StepTimer
+        from sentra_shared.core.logging import get_logger, set_request_id, get_request_id, configure_logging
+        
+        # Configure logging for testing
+        configure_logging(debug=True)
         
         # Test request_id context
         original_request_id = get_request_id()
@@ -81,22 +84,18 @@ def test_enhanced_logging():
         assert current_request_id == "test-request-123", f"Request ID not set correctly: {current_request_id}"
         print("✓ Request ID context works")
         
-        # Test structured logger
+        # Test basic logger
         logger = get_logger("test_logger")
-        logger.info_step("test_operation", document_id="doc-456", duration=2.3, custom_field="test_value")
-        print("✓ Structured logging works")
-        
-        # Test step timer
-        with StepTimer(logger, "test_timing", "doc-789") as timer:
-            import time
-            time.sleep(0.1)  # Simulate work
-        
-        print("✓ Step timer works")
+        logger.info("extracting")
+        logger.info("chunking") 
+        logger.info("embedding")
+        logger.info("indexing")
+        print("✓ Basic logging works")
         
         return True
         
     except Exception as e:
-        print(f"✗ Enhanced logging test failed: {e}")
+        print(f"✗ Simple logging test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -195,7 +194,7 @@ def main():
     
     tests = [
         test_document_status_enum,
-        test_enhanced_logging,
+        test_simple_logging,
         test_knowledge_repository,
         test_document_entity
     ]
