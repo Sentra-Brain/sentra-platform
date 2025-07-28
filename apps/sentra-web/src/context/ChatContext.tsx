@@ -20,7 +20,7 @@ export type ChatContextType = {
   createConversation: (data: CreateConversationRequest) => Promise<void>;
   updateConversation: (id: string, data: UpdateConversationRequest) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
-  sendMessage: (text: string) => void;
+  sendMessage: (text: string) => Promise<void>;
   stopMessage: () => void;
 };
 
@@ -63,8 +63,14 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const sendMessage = (text: string) => {
-    if (!text.trim() || !currentConversation || isStreaming) return;
+  const sendMessage = async (text: string) => {
+    if (!text.trim() || isStreaming) return;
+
+    // If no conversation is selected, create one first
+    if (!currentConversation) {
+      await createConversation({ content: text.trim() });
+      return; // The message will be sent as part of conversation creation
+    }
 
     const userMessage = {
       id: crypto.randomUUID(),

@@ -77,7 +77,7 @@ const Sidebar: React.FC = () => {
             <div className="sidebar-header">
               <button
                 className="new-conv-btn"
-                onClick={() => createConversation({ content: 'Hello, I need help with something.' })}
+                onClick={() => createConversation({ content: '' })}
               >
                 + New Chat
               </button>
