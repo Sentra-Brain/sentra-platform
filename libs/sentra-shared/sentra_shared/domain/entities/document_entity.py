@@ -17,8 +17,12 @@ class DocumentFileType(enum.Enum):
 
 
 class DocumentStatus(enum.Enum):
-    QUEUED = "queued"
+    PENDING = "pending"
     PROCESSING = "processing"
+    EXTRACTING = "extracting"
+    CHUNKING = "chunking"
+    EMBEDDING = "embedding"
+    INDEXING = "indexing"
     INDEXED = "indexed"
     FAILED = "failed"
 
@@ -32,7 +36,8 @@ class DocumentEntity(BaseEntity):
     filetype = Column(Enum(DocumentFileType), nullable=False)
     path = Column(Text, nullable=False)
     uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    status = Column(Enum(DocumentStatus), nullable=False, default=DocumentStatus.QUEUED)
+    status = Column(Enum(DocumentStatus), nullable=False, default=DocumentStatus.PENDING)
+    status_message = Column(Text, nullable=True)
     error = Column(Text, nullable=True)
     chunks_count = Column(Integer, nullable=True)
     knowledge_source_id = Column(UUID(as_uuid=True), ForeignKey("knowledge_sources.id"), nullable=False)

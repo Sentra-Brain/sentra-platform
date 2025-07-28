@@ -52,7 +52,9 @@ class DocumentResponse(BaseModel):
     uploaded_by: UUID
     created_at: datetime
     status: DocumentStatus
+    status_message: Optional[str] = None
     error: Optional[str] = None
+    chunks_count: Optional[int] = None
     knowledge_source_id: UUID
 
     model_config = {

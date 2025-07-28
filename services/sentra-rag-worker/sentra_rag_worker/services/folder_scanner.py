@@ -165,7 +165,7 @@ class FolderScanner:
                 filetype=filetype,
                 path=file_path_str,
                 uploaded_by=source.created_by,  # Use the source creator as uploader
-                status=DocumentStatus.QUEUED,
+                status=DocumentStatus.PENDING,
                 knowledge_source_id=source.id
             )
             

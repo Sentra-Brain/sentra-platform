@@ -71,12 +71,15 @@ class KnowledgeRepository:
             query = query.filter(DocumentEntity.knowledge_source_id == knowledge_source_id)
         return query.count()
 
-    def update_document_status(self, document_id: UUID, status: str, error: Optional[str] = None, chunks_count: Optional[int] = None) -> Optional[DocumentEntity]:
+    def update_document_status(self, document_id: UUID, status: str, error: Optional[str] = None, 
+                             status_message: Optional[str] = None, chunks_count: Optional[int] = None) -> Optional[DocumentEntity]:
         document = self.get_document_by_id(document_id)
         if document:
             document.status = status
             if error:
                 document.error = error
+            if status_message:
+                document.status_message = status_message
             if chunks_count is not None:
                 document.chunks_count = chunks_count
             self.db.commit()

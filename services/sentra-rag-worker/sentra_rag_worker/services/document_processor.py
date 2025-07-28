@@ -5,7 +5,7 @@ from sentra_rag_worker.services.document_extractor import DocumentExtractor
 from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag_worker.services.vector_store_service import VectorStoreService
-from sentra_shared.core.logging import get_logger
+from sentra_shared.core.logging import get_logger, set_request_id
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
@@ -47,6 +47,9 @@ class DocumentProcessor:
             True if processing was successful, False otherwise
         """
         try:
+            # Set up request context for tracing
+            request_id = set_request_id(message.get('request_id'))
+            
             # Extract message fields
             document_id = UUID(message['document_id'])
             knowledge_source_id = UUID(message['knowledge_source_id'])
@@ -91,6 +94,8 @@ class DocumentProcessor:
                     return False
 
                 # Step 2: Content extraction
+                self._update_document_status_with_repo(repo, document_id, DocumentStatus.EXTRACTING)
+                logger.info("extracting")
                 try:
                     content = self.extractor.extract_content(str(absolute_filepath), filetype)
                     if not content.strip():
@@ -105,6 +110,8 @@ class DocumentProcessor:
                     return False
 
                 # Step 3: Text chunking
+                self._update_document_status_with_repo(repo, document_id, DocumentStatus.CHUNKING)
+                logger.info("chunking")
                 try:
                     chunks = self.chunker.chunk_text(content)
                     if not chunks:
@@ -121,6 +128,8 @@ class DocumentProcessor:
                     return False
 
                 # Step 4: Generate embeddings
+                self._update_document_status_with_repo(repo, document_id, DocumentStatus.EMBEDDING)
+                logger.info("embedding")
                 try:
                     embeddings = self.embedding_service.generate_embeddings(chunks)
                     if len(embeddings) != len(chunks):
@@ -135,6 +144,8 @@ class DocumentProcessor:
                     return False
 
                 # Step 5: Index into ChromaDB
+                self._update_document_status_with_repo(repo, document_id, DocumentStatus.INDEXING)
+                logger.info("indexing")
                 try:
                     chunks_indexed = self.vector_store.index_document_chunks(
                         document_id=document_id,
