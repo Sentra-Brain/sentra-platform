@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from sentra_rag_worker.core.config import settings
+from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra_shared.core.logging import get_logger
@@ -31,6 +32,9 @@ class RAGWorker:
     async def start(self):
         """Start the RAG worker."""
         logger.info("Starting sentra-rag-worker...")
+        
+        # Setup observability
+        instrument_worker()
         
         self.running = True
         

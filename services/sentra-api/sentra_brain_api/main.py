@@ -9,6 +9,7 @@ from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
 from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
+from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
@@ -80,6 +81,10 @@ def create_app(
     app.include_router(knowledge_controller.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
+
+    # Setup observability
+    instrument_app(app)
+    add_correlation_id_middleware(app)
 
     return app
 

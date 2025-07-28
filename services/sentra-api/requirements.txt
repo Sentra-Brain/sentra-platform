@@ -18,4 +18,14 @@ python-multipart
 
 uvicorn
 
+# OpenTelemetry instrumentation
+opentelemetry-api
+opentelemetry-sdk
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-fastapi
+opentelemetry-instrumentation-requests
+opentelemetry-instrumentation-sqlalchemy
+opentelemetry-instrumentation-psycopg2
+prometheus-client
+
 -e ../../libs/sentra-shared
