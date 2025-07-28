@@ -1,10 +1,11 @@
 import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch, MagicMock, AsyncMock
 from datetime import datetime, timezone
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.conversation.conversation_management_controller import ConversationManagementController
+from sentra_brain_api.features.conversation.title_generation_service import TitleGenerationService
 
 @pytest.fixture
 def app(mock_user):
@@ -80,3 +81,53 @@ def test_get_conversation_by_id(client, mock_user):
         data = res.json()
         assert data["id"] == "abc"
         assert data["title"] == "Test"
+
+
+def test_create_conversation_with_auto_title_generation(client, mock_user):
+    """Test that conversation creation triggers title generation when no title provided."""
+    mock_service = MagicMock()
+    mock_service.create_conversation.return_value = "mock-id"
+    
+    # Mock the title generation service
+    mock_title_service = AsyncMock()
+    mock_title_service.generate_title.return_value = "Generated Title"
+
+    with patch("sentra_brain_api.features.conversation.conversation_management_controller.ConversationManagementController._get_service", return_value=mock_service), \
+         patch("sentra_brain_api.crosscutting.authorization.get_authenticated_user", return_value=mock_user):
+
+        res = client.post("/conversations/", json={
+            "description": "Test description",  # No title provided
+            "content": "How do I learn machine learning?"
+        })
+
+        assert res.status_code == 200
+        assert res.json() == {"id": "mock-id"}
+        
+        # Verify service was called with the request
+        mock_service.create_conversation.assert_called_once()
+        call_args = mock_service.create_conversation.call_args[0][1]  # Second argument is the request
+        assert call_args.title is None  # No title provided
+        assert call_args.content == "How do I learn machine learning?"
+
+
+def test_create_conversation_with_existing_title_skips_generation(client, mock_user):
+    """Test that title generation is skipped when title is already provided."""
+    mock_service = MagicMock()
+    mock_service.create_conversation.return_value = "mock-id"
+
+    with patch("sentra_brain_api.features.conversation.conversation_management_controller.ConversationManagementController._get_service", return_value=mock_service), \
+         patch("sentra_brain_api.crosscutting.authorization.get_authenticated_user", return_value=mock_user):
+
+        res = client.post("/conversations/", json={
+            "title": "My Custom Title",  # Title provided
+            "description": "Test description",
+            "content": "How do I learn machine learning?"
+        })
+
+        assert res.status_code == 200
+        assert res.json() == {"id": "mock-id"}
+        
+        # Verify service was called with the request including title
+        mock_service.create_conversation.assert_called_once()
+        call_args = mock_service.create_conversation.call_args[0][1]
+        assert call_args.title == "My Custom Title"

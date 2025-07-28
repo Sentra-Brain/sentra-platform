@@ -28,4 +28,11 @@ opentelemetry-instrumentation-sqlalchemy
 opentelemetry-instrumentation-psycopg2
 prometheus-client
 
+pytest
+pytest-asyncio
+pytest-cov
+pytest-dotenv
+pytest-mock
+python-jose
+
 -e ../../libs/sentra-shared
