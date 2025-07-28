@@ -3,7 +3,7 @@
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
-from sentra_shared.core.logging import get_logger
+from sentra_shared.core.logging import get_logger, set_request_id
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
@@ -14,6 +14,7 @@ import asyncio
 import os
 import signal
 import sys
+import uuid
 
 logger = get_logger("sentra_rag_worker.main")
 
@@ -111,7 +112,8 @@ class RAGWorker:
                 "filename": filename,
                 "filetype": filetype,
                 "display_name": filename,
-                "uploaded_by": message.get("uploaded_by")
+                "uploaded_by": message.get("uploaded_by"),
+                "request_id": message.get("request_id", str(uuid.uuid4()))  # Ensure request_id is set
             }
 
             # Process document (handles all errors internally)
