@@ -14,9 +14,9 @@ const MessageInput: React.FC = () => {
   const [value, setValue] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleSend = () => {
-    if (!value.trim() || !currentConversation || isStreaming) return;
-    sendMessage(value.trim());
+  const handleSend = async () => {
+    if (!value.trim() || isStreaming) return;
+    await sendMessage(value.trim());
     setValue('');
   };
 
@@ -24,10 +24,10 @@ const MessageInput: React.FC = () => {
     if (isStreaming) stopMessage();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
-      handleSend();
+      await handleSend();
     }
   };
 
@@ -55,10 +55,10 @@ const MessageInput: React.FC = () => {
           placeholder={
             currentConversation
               ? 'Type a message...'
-              : 'Select or create a conversation first...'
+              : 'Ask anything to start a new conversation...'
           }
           rows={1}
-          disabled={!currentConversation || isStreaming}
+          disabled={isStreaming}
         />
       </div>
 
@@ -77,7 +77,7 @@ const MessageInput: React.FC = () => {
           className="icon-btn send"
           onClick={handleSend}
           title="Send"
-          disabled={!value.trim() || !currentConversation}
+          disabled={!value.trim() || isStreaming}
         >
           <Send size={18} />
         </button>
