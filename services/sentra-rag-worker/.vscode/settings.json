@@ -1,22 +1,31 @@
 {
-    "workbench.colorCustomizations": {
-        "activityBar.activeBackground": "#ffa033",
-        "activityBar.background": "#ffa033",
-        "activityBar.foreground": "#15202b",
-        "activityBar.inactiveForeground": "#15202b99",
-        "activityBarBadge.background": "#008044",
-        "activityBarBadge.foreground": "#e7e7e7",
-        "commandCenter.border": "#15202b99",
-        "sash.hoverBorder": "#ffa033",
-        "statusBar.background": "#ff8800",
-        "statusBar.foreground": "#15202b",
-        "statusBarItem.hoverBackground": "#cc6d00",
-        "statusBarItem.remoteBackground": "#ff8800",
-        "statusBarItem.remoteForeground": "#15202b",
-        "titleBar.activeBackground": "#ff8800",
-        "titleBar.activeForeground": "#15202b",
-        "titleBar.inactiveBackground": "#ff880099",
-        "titleBar.inactiveForeground": "#15202b99"
-    },
-    "peacock.color": "#FF8800"
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [], // now controlled by pytest.ini
+
+  // Optional: if you use coverage gutters
+  "coverage-gutters.coverageFileNames": ["coverage.xml"],
+  "coverage-gutters.showGutterCoverage": true,
+  "coverage-gutters.showLineCoverage": true,
+
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#ffa033",
+    "activityBar.background": "#ffa033",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#008044",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#ffa033",
+    "statusBar.background": "#ff8800",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#cc6d00",
+    "statusBarItem.remoteBackground": "#ff8800",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#ff8800",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#ff880099",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#FF8800"
 }

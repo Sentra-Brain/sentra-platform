@@ -82,9 +82,10 @@ def create_app(
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
 
-    # Setup observability
-    instrument_app(app)
-    add_correlation_id_middleware(app)
+    # Setup observability (only if not in test mode)
+    if os.getenv("TESTING") != "true":
+        instrument_app(app)
+        add_correlation_id_middleware(app)
 
     return app
 

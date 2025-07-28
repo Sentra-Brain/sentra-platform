@@ -17,7 +17,13 @@ if pythonpath:
     resolved_path = (Path(__file__).resolve().parent / pythonpath).resolve()
     if resolved_path.exists():
         sys.path.insert(0, str(resolved_path))
-        
+
+# Set TESTING environment variable
+if "TESTING" not in os.environ:
+    # This is to ensure that the application knows it's in test mode
+    # and can skip certain initializations like database connections.
+    os.environ["TESTING"] = "true"
+
 os.environ.update({
     "DATABASE_URL": "sqlite:///./test_qna.db",
     "INITIAL_ADMIN_USERNAME": "admin",
