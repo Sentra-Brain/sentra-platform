@@ -49,7 +49,7 @@ def init_db():
         try:
             # ✅ Verify that the database is migrated before continuing
             check_schema_consistency(engine)
-            logger.info("✅ Database schema is up to date.")
+            logger.info("Database schema is up to date.")
             break
         except OperationalError as e:
             attempt += 1
