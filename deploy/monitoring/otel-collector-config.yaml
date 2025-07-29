@@ -40,3 +40,8 @@ service:
       receivers: [otlp]
       processors: [batch]
       exporters: [loki, debug]
+
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug]
