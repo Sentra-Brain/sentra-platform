@@ -7,15 +7,15 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse
 )
-from sentra_brain_api.features.llm_proxy.adapter import LlamaServerClient
+from sentra_brain_api.features.llm_proxy.adapter import VLLMServerClient
 import json
 
 logger = logging.get_logger("llm_proxy")
 
 
-def get_llama_client() -> LlamaServerClient:
-    """Dependency function to get LlamaServerClient instance"""
-    return LlamaServerClient()
+def get_vllm_client() -> VLLMServerClient:
+    """Dependency function to get VLLMServerClient instance"""
+    return VLLMServerClient()
 
 
 class LLMProxyController:
@@ -31,7 +31,7 @@ class LLMProxyController:
         )
         async def create_chat_completion(
             request: ChatCompletionRequest,
-            llama_client: LlamaServerClient = Depends(get_llama_client)
+            vllm_client: VLLMServerClient = Depends(get_vllm_client)
         ):
             try:
                 logger.info(f"Received chat completion request: model={request.model}, stream={request.stream}, messages={len(request.messages)}")
@@ -40,7 +40,7 @@ class LLMProxyController:
                     # Return streaming response
                     async def generate_stream():
                         try:
-                            async for chunk in llama_client.stream_chat(request):
+                            async for chunk in vllm_client.stream_chat(request):
                                 chunk_json = chunk.model_dump_json()
                                 yield f"data: {chunk_json}\n\n"
                             yield "data: [DONE]\n\n"
@@ -54,7 +54,7 @@ class LLMProxyController:
                             }
                             yield f"data: {json.dumps(error_data)}\n\n"
                         finally:
-                            await llama_client.close()
+                            await vllm_client.close()
                     
                     return StreamingResponse(
                         generate_stream(),
@@ -68,11 +68,11 @@ class LLMProxyController:
                 else:
                     # Return regular response
                     try:
-                        response = await llama_client.complete_chat(request)
+                        response = await vllm_client.complete_chat(request)
                         logger.info(f"Chat completion successful: {response.id}")
                         return response
                     finally:
-                        await llama_client.close()
+                        await vllm_client.close()
                         
             except Exception as e:
                 logger.error(f"Error in chat completion: {e}")

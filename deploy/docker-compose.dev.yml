@@ -76,22 +76,17 @@ services:
       - sentra-vector-db
       - rabbitmq
 
-  llama-server:
-    image: ghcr.io/ggml-org/llama.cpp:server-cuda
-    container_name: llama-server
+  vllm:
+    image: vllm/vllm-openai
+    container_name: vllm
     ports:
-      - "11434:11434"
+      - "8002:8000"  # External port 8002, internal remains 8000
     volumes:
       - D:\models:/models:ro
-    # Uncomment the following line to use a specific model (small example model)
-    # command: >
-    #   -m /models/tiny-llama/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
-    #   --port 11434
-    # --host 0.0.0.0
     command: >
-      -m /models/capybara-mistral-7b/capybarahermes-2.5-mistral-7b.Q4_K_S.gguf
-      --port 11434
-      --host 0.0.0.0
+      --model /models/meta-llama--Llama-3.1-8B-Instruct
+      --dtype float16
+      --gpu-memory-utilization 0.9
     networks:
       - sentrabrain-dev-net
     deploy:

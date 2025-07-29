@@ -74,7 +74,7 @@ sentrabrain.azurecr.io/sentra-api:latest
 ```
 
 - Managed by `docker-compose.yml` (production) and `docker-compose.dev.yml` (development).
-- External services like llama-server, ChromaDB, and MCP must be available at runtime.
+- External services like vllm, ChromaDB, and MCP must be available at runtime.
 
 ---
 

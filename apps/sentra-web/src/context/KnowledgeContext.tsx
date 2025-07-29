@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { knowledgeService } from '../services/knowledgeService';
+import { useKnowledgeNavigation } from '../hooks/useKnowledgeNavigation';
 import type {
   KnowledgeSource,
   Document,
@@ -32,6 +33,8 @@ export type KnowledgeContextType = {
   // Actions
   loadData: () => Promise<void>;
   selectNode: (node: KnowledgeTreeNode) => void;
+  navigateToKnowledgeSource: (sourceId: string) => void;
+  navigateToDocument: (documentId: string, sourceId?: string) => void;
   toggleExpanded: (nodeId: string) => void;
   setShowUploadDialog: (show: boolean) => void;
   setShowCreateSourceDialog: (show: boolean) => void;
@@ -50,6 +53,12 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
   const [error, setError] = useState<string | null>(null);
   const [showUploadDialog, setShowUploadDialog] = useState(false);
   const [showCreateSourceDialog, setShowCreateSourceDialog] = useState(false);
+
+  const { 
+    navigateToKnowledgeSource, 
+    navigateToDocument, 
+    getSelectedNodeFromUrl 
+  } = useKnowledgeNavigation();
 
   const loadData = async () => {
     setLoading(true);
@@ -78,6 +87,14 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
     if (node.type === 'visibility-group' || node.type === 'knowledge-source') {
       toggleExpanded(node.id);
     }
+    
+    // Navigate based on node type
+    if (node.type === 'knowledge-source') {
+      navigateToKnowledgeSource(node.id);
+    } else if (node.type === 'document' && node.document) {
+      navigateToDocument(node.document.id, node.document.knowledge_source_id);
+    }
+    
     setSelectedNode(node);
   };
 
@@ -160,6 +177,14 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
     loadData();
   }, []);
 
+  // Sync selectedNode with URL
+  useEffect(() => {
+    if (knowledgeSources.length > 0 || documents.length > 0) {
+      const nodeFromUrl = getSelectedNodeFromUrl(knowledgeSources, documents);
+      setSelectedNode(nodeFromUrl);
+    }
+  }, [knowledgeSources, documents, getSelectedNodeFromUrl]);
+
   return (
     <KnowledgeContext.Provider
       value={{
@@ -174,6 +199,8 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
         showCreateSourceDialog,
         loadData,
         selectNode,
+        navigateToKnowledgeSource,
+        navigateToDocument,
         toggleExpanded,
         setShowUploadDialog,
         setShowCreateSourceDialog,

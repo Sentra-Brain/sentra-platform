@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This module powers the conversational capabilities of Sentra Brain, enabling a structured and extensible message-to-response pipeline. It manages user messages, conversational context, tool invocation (via MCP), prompt generation, and streaming responses from the underlying LLM (e.g., llama-server).
+This module powers the conversational capabilities of Sentra Brain, enabling a structured and extensible message-to-response pipeline. It manages user messages, conversational context, tool invocation (via MCP), prompt generation, and streaming responses from the underlying LLM (e.g., vLLM).
 
 This engine is the "brainstem" of Sentra Brain's chat functionality.
 
@@ -80,7 +80,7 @@ POST /v1/chat/completions
 1. Retrieve conversation context from memory or MongoDB.
 2. Trim previous messages to fit LLM context window.
 3. Generate prompt using `prompt_factory.py`.
-4. Send to llama-server (via HTTP/streaming).
+4. Send to vLLM (via HTTP/streaming).
 5. Persist message and LLM reply.
 6. Return response (optionally streamed) to frontend.
 
@@ -121,7 +121,7 @@ Fallback: fetch from MongoDB or persistent store when not cached.
 
 - [x] `ConversationEngine.receive_message()`
 - [x] Prompt factory for basic chat
-- [x] llama-server HTTP integration
+- [x] vLLM HTTP integration
 - [x] Streamed & non-streamed responses
 - [x] In-memory conversation cache (per user/session)
 
@@ -167,14 +167,6 @@ print(response.content)
 - Only send new message content (not full history).
 - Expect streamed or non-streamed response.
 - Always provide `parent_message_id` if available (for conversation threading).
-
----
-
-## 🛠 Dev Tips
-
-- To simulate llama-server locally: use `curl` or Postman to POST to `http://localhost:11434/api/generate`
-- Keep `prompt_factory.py` modular for future expansion (e.g., legal, real estate copilots).
-- Use `.env` for LLM base URL config (per environment).
 
 ---
 

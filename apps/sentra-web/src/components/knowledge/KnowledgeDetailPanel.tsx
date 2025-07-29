@@ -1,7 +1,7 @@
 // src/components/knowledge/KnowledgeDetailPanel.tsx
 // Detail panel for selected knowledge source or document
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Folder, File, Calendar, User, Settings } from 'lucide-react';
+import { RefreshCw, Folder, File, Calendar, User, Settings, Power, PowerOff } from 'lucide-react';
 import type {
   KnowledgeSource,
   Document,
@@ -11,14 +11,23 @@ import type {
 import { KnowledgeSourceType as KSType } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
 import { useKnowledge } from '../../hooks/useKnowledge';
+import { useUserDisplayName } from '../../hooks/useUserDisplayName';
 import StatusBadge from './StatusBadge';
+import DocumentRow from './DocumentRow';
+import { notifySuccess, notifyError } from '../../lib/notify';
 import './KnowledgeDetailPanel.css';
 
 const KnowledgeDetailPanel: React.FC = () => {
-  const { selectedNode } = useKnowledge();
+  const { selectedNode, refresh, navigateToDocument } = useKnowledge();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isTogglingStatus, setIsTogglingStatus] = useState(false);
+
+  // Get display name for the knowledge source creator
+  const { displayName: creatorDisplayName } = useUserDisplayName(
+    selectedNode?.knowledgeSource?.created_by
+  );
 
   const loadDocuments = async (knowledgeSourceId: string) => {
     setLoading(true);
@@ -32,6 +41,32 @@ const KnowledgeDetailPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleKnowledgeSourceStatus = async (knowledgeSource: KnowledgeSource) => {
+    const newStatus = knowledgeSource.status === 'active';
+    setIsTogglingStatus(true);
+    try {
+      await knowledgeService.updateKnowledgeSourceStatus(knowledgeSource.id, !newStatus);
+      notifySuccess(`Knowledge source ${newStatus ? 'disabled' : 'enabled'} successfully`);
+      refresh(); // Refresh the tree and detail panel
+    } catch (error) {
+      notifyError(error);
+    } finally {
+      setIsTogglingStatus(false);
+    }
+  };
+
+  const handleDocumentUpdated = (updatedDocument: Document) => {
+    setDocuments(prev => 
+      prev.map(doc => doc.id === updatedDocument.id ? updatedDocument : doc)
+    );
+    refresh(); // Also refresh the tree to update counts
+  };
+
+  const handleDocumentClick = (document: Document) => {
+    // Navigate to document detail using URL-based routing
+    navigateToDocument(document.id, document.knowledge_source_id);
   };
 
   useEffect(() => {
@@ -79,7 +114,27 @@ const KnowledgeDetailPanel: React.FC = () => {
             <p className="detail-subtitle">{source.type.replace('_', ' ')} Source</p>
           </div>
         </div>
-        <StatusBadge status={source.status} />
+        <div className="detail-header-actions">
+          <StatusBadge status={source.status} />
+          <button
+            onClick={() => toggleKnowledgeSourceStatus(source)}
+            disabled={isTogglingStatus}
+            className={`status-toggle-button ${source.status === 'active' ? 'active' : 'inactive'}`}
+            title={source.status === 'active' ? 'Disable knowledge source' : 'Enable knowledge source'}
+          >
+            {source.status === 'active' ? (
+              <>
+                <PowerOff size={16} />
+                Disable
+              </>
+            ) : (
+              <>
+                <Power size={16} />
+                Enable
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {source.description && (
@@ -118,7 +173,7 @@ const KnowledgeDetailPanel: React.FC = () => {
           <User size={16} className="field-icon" />
           <div className="field-content">
             <p className="field-label">Created by</p>
-            <p className="field-value">{source.created_by}</p>
+            <p className="field-value">{creatorDisplayName || source.created_by}</p>
           </div>
         </div>
       </div>
@@ -156,16 +211,12 @@ const KnowledgeDetailPanel: React.FC = () => {
         ) : (
           <div className="documents-list">
             {documents.map((doc) => (
-              <div key={doc.id} className="document-item">
-                <div className="document-info">
-                  <File size={16} className="document-icon" />
-                  <div className="document-details">
-                    <p className="document-name">{doc.display_name}</p>
-                    <p className="document-filename">{doc.filename}</p>
-                  </div>
-                </div>
-                <StatusBadge status={doc.status} className="document-status" />
-              </div>
+              <DocumentRow
+                key={doc.id}
+                document={doc}
+                onDocumentUpdated={handleDocumentUpdated}
+                onDocumentClick={handleDocumentClick}
+              />
             ))}
           </div>
         )}
@@ -173,69 +224,75 @@ const KnowledgeDetailPanel: React.FC = () => {
     </div>
   );
 
-  const renderDocumentDetail = (document: Document) => (
-    <div className="detail-content">
-      <div className="detail-header">
-        <div className="detail-title-section">
-          <File size={24} className="detail-title-icon" />
-          <div>
-            <h2 className="detail-title">{document.display_name}</h2>
-            <p className="detail-subtitle">{document.filename}</p>
+  const renderDocumentDetail = (document: Document) => {
+    const { displayName: uploaderDisplayName } = useUserDisplayName(document.uploaded_by);
+    
+    return (
+      <div className="detail-content">
+        <div className="detail-header">
+          <div className="detail-title-section">
+            <File size={24} className="detail-title-icon" />
+            <div>
+              <h2 className="detail-title">{document.display_name}</h2>
+              <p className="detail-subtitle">{document.filename}</p>
+            </div>
           </div>
+          <StatusBadge status={document.status} />
         </div>
-        <StatusBadge status={document.status} />
-      </div>
 
-      {document.description && (
+        {document.description && (
+          <div className="detail-section">
+            <h3 className="section-title">Description</h3>
+            <p className="section-content">{document.description}</p>
+          </div>
+        )}
+
+        <div className="detail-grid">
+          <div className="detail-field">
+            <div className="field-content">
+              <p className="field-label">File Type</p>
+              <p className="field-value">{document.filetype.toUpperCase()}</p>
+            </div>
+          </div>
+
+          <div className="detail-field">
+            <div className="field-content">
+              <p className="field-label">Uploaded</p>
+              <p className="field-value">{formatDate(document.uploaded_at)}</p>
+            </div>
+          </div>
+
+          <div className="detail-field">
+            <div className="field-content">
+              <p className="field-label">Uploaded by</p>
+              <p className="field-value">{uploaderDisplayName || document.uploaded_by}</p>
+            </div>
+          </div>
+
+          {document.chunks_count && (
+            <div className="detail-field">
+              <div className="field-content">
+                <p className="field-label">Chunks</p>
+                <p className="field-value">{document.chunks_count}</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {document.error && (
+          <div className="error-section">
+            <h3 className="error-section-title">Error</h3>
+            <p className="error-section-text">{document.error}</p>
+          </div>
+        )}
+
         <div className="detail-section">
-          <h3 className="section-title">Description</h3>
-          <p className="section-content">{document.description}</p>
-        </div>
-      )}
-
-      <div className="detail-grid">
-        <div className="detail-field">
-          <div className="field-content">
-            <p className="field-label">File Type</p>
-            <p className="field-value">{document.filetype.toUpperCase()}</p>
-          </div>
-        </div>
-
-        <div className="detail-field">
-          <div className="field-content">
-            <p className="field-label">Uploaded</p>
-            <p className="field-value">{formatDate(document.uploaded_at)}</p>
-          </div>
-        </div>
-
-        <div className="detail-field">
-          <div className="field-content">
-            <p className="field-label">Uploaded by</p>
-            <p className="field-value">{document.uploaded_by}</p>
-          </div>
-        </div>
-
-        <div className="detail-field">
-          <div className="field-content">
-            <p className="field-label">Knowledge Source</p>
-            <p className="field-value">{document.knowledge_source_id}</p>
-          </div>
+          <h3 className="section-title">File Path</h3>
+          <code className="code-block">{document.path}</code>
         </div>
       </div>
-
-      {document.error && (
-        <div className="error-section">
-          <h3 className="error-section-title">Error</h3>
-          <p className="error-section-text">{document.error}</p>
-        </div>
-      )}
-
-      <div className="detail-section">
-        <h3 className="section-title">File Path</h3>
-        <code className="code-block">{document.path}</code>
-      </div>
-    </div>
-  );
+    );
+  };
 
   const renderVisibilityGroupDetail = (node: KnowledgeTreeNode) => (
     <div className="detail-content">

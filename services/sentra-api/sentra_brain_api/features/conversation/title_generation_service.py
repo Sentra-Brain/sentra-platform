@@ -3,7 +3,7 @@
 import re
 from typing import Optional
 from sentra_shared.core.logging import get_logger
-from sentra_brain_api.features.llm_proxy.adapter import LlamaServerClient
+from sentra_brain_api.features.llm_proxy.adapter import VLLMServerClient
 from sentra_brain_api.features.llm_proxy.models import ChatCompletionRequest, ChatMessage
 
 logger = get_logger("title_generation_service")
@@ -11,10 +11,10 @@ logger = get_logger("title_generation_service")
 
 class TitleGenerationService:
     """Service for generating conversation titles from user messages using LLM."""
-    
-    def __init__(self, llama_client: Optional[LlamaServerClient] = None):
-        self.llama_client = llama_client or LlamaServerClient()
-    
+
+    def __init__(self, vllm_client: Optional[VLLMServerClient] = None):
+        self.vllm_client = vllm_client or VLLMServerClient()
+
     async def generate_title(self, user_message: str) -> Optional[str]:
         """
         Generate a conversation title from the first user message.
@@ -73,7 +73,7 @@ Just return the title, nothing else."""
         )
         
         try:
-            response = await self.llama_client.complete_chat(request)
+            response = await self.vllm_client.complete_chat(request)
             if response.choices and len(response.choices) > 0:
                 content = response.choices[0].message.content
                 if content:
