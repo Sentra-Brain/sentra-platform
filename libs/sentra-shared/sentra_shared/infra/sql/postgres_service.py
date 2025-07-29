@@ -47,7 +47,7 @@ def init_db():
     attempt = 0
     while attempt < MAX_RETRIES:
         try:
-            # ✅ Verifica que la base está migrada antes de continuar
+            # ✅ Verify that the database is migrated before continuing
             check_schema_consistency(engine)
             logger.info("✅ Database schema is up to date.")
             break
