@@ -110,4 +110,21 @@ export const knowledgeService = {
       };
     });
   },
+
+  // Enable/Disable knowledge source
+  updateKnowledgeSourceStatus(knowledgeSourceId: string, enabled: boolean): Promise<KnowledgeSource> {
+    return httpClient.put(`/knowledge/knowledge-sources/${knowledgeSourceId}/status`, null, {
+      params: { enabled },
+    });
+  },
+
+  // Re-index document  
+  reindexDocument(documentId: string): Promise<Document> {
+    return httpClient.post(`/knowledge/documents/${documentId}/reindex`);
+  },
+
+  // Remove document (mark for removal)
+  removeDocument(documentId: string): Promise<Document> {
+    return httpClient.del(`/knowledge/documents/${documentId}`);
+  },
 };

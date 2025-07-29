@@ -1,0 +1,158 @@
+/* DocumentRow.css - Compact design */
+
+.document-row {
+  display: flex;
+  flex-direction: column;
+  padding: 0.5rem 0.75rem;
+  background-color: var(--sentra-primary-light);
+  border-radius: 0.25rem;
+  border: 1px solid var(--sentra-accent-light);
+  transition: all 0.2s ease;
+  gap: 0.5rem;
+}
+
+.document-row:hover {
+  background-color: var(--sentra-accent-light);
+  border-color: var(--sentra-primary);
+}
+
+.document-row-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-width: 0;
+}
+
+.document-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.document-name-link {
+  background: none;
+  border: none;
+  color: var(--sentra-text);
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 300px;
+  transition: color 0.2s ease;
+}
+
+.document-name-link:hover {
+  color: var(--sentra-primary);
+  text-decoration: underline;
+}
+
+.document-status {
+  flex-shrink: 0;
+}
+
+.document-actions {
+  display: flex;
+  gap: 0.25rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 0.25rem;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: transparent;
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.reindex-button {
+  color: #f97316; /* Orange */
+  border-color: #f97316;
+}
+
+.reindex-button:hover:not(:disabled) {
+  background-color: #f97316;
+  color: white;
+}
+
+.rename-button {
+  color: #6b7280; /* Gray */
+  border-color: #6b7280;
+}
+
+.rename-button:hover:not(:disabled) {
+  background-color: #6b7280;
+  color: white;
+}
+
+.remove-button {
+  color: #ef4444; /* Red */
+  border-color: #ef4444;
+}
+
+.remove-button:hover:not(:disabled) {
+  background-color: #ef4444;
+  color: white;
+}
+
+.document-error {
+  padding: 0.5rem;
+  background-color: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.error-text {
+  font-size: 0.75rem;
+  color: #ef4444;
+  margin: 0;
+}
+
+/* Animation utilities */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .document-row-content {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .document-info {
+    width: 100%;
+  }
+  
+  .document-actions {
+    justify-content: flex-end;
+    width: 100%;
+  }
+}

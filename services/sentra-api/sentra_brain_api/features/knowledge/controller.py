@@ -95,3 +95,34 @@ class KnowledgeController:
                 documents=[DocumentResponse.model_validate(doc) for doc in documents],
                 total=total
             )
+
+        @self.router.put("/knowledge-sources/{knowledge_source_id}/status")
+        async def update_knowledge_source_status(
+            knowledge_source_id: str,
+            enabled: bool,
+            user: UserEntity = Depends(self._require_admin),
+            service: KnowledgeService = Depends(self._get_service)
+        ):
+            """Enable or disable a knowledge source (admin only)"""
+            knowledge_source = service.update_knowledge_source_status(knowledge_source_id, enabled, user)
+            return KnowledgeSourceResponse.model_validate(knowledge_source)
+
+        @self.router.post("/documents/{document_id}/reindex")
+        async def reindex_document(
+            document_id: str,
+            user: UserEntity = Depends(get_authenticated_user),
+            service: KnowledgeService = Depends(self._get_service)
+        ):
+            """Re-index a document"""
+            document = service.reindex_document(document_id, user)
+            return DocumentResponse.model_validate(document)
+
+        @self.router.delete("/documents/{document_id}")
+        async def remove_document(
+            document_id: str,
+            user: UserEntity = Depends(get_authenticated_user),
+            service: KnowledgeService = Depends(self._get_service)
+        ):
+            """Mark a document for removal"""
+            document = service.remove_document(document_id, user)
+            return DocumentResponse.model_validate(document)

@@ -38,6 +38,12 @@ const StatusBadge: React.FC<StatusBadgeProps> = ({ status, className = '' }) => 
           text: 'Failed',
           style: 'status-badge-error',
         };
+      case DocStatus.TO_BE_REMOVED:
+        return {
+          icon: '🗑️',
+          text: 'To be removed',
+          style: 'status-badge-warning',
+        };
       case KSStatus.DISABLED:
         return {
           icon: '🛑',
