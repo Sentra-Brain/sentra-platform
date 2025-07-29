@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
 from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
 from sentra_brain_api.core.conversation_engine.prompt_factory import PromptFactory
-from sentra_brain_api.core.conversation_engine.llama_server_client import LlamaServerClient
+from sentra_brain_api.core.conversation_engine.vllm_client import VLLMClient
 from sentra_brain_api.core.conversation_engine.conversations_cache import ConversationsCache
 from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE, USER_CONVERSATION_CACHE_SIZE
 from sentra_brain_api.core.exceptions import SentraHTTPException
@@ -17,9 +17,10 @@ logger = logging.getLogger("sentra_brain_engine")
 
 
 class ConversationEngine:
-    def __init__(self, mongo_repo=None, llama_client=None):
+    def __init__(self, mongo_repo=None, vllm_client=None):
+        from sentra_shared.core.settings import settings
         self.mongo_repo = mongo_repo or get_conversation_mongo_repository()
-        self.llama_client = llama_client or LlamaServerClient()
+        self.vllm_client = vllm_client or VLLMClient(base_url=settings.vllm_server_url)
         self.prompt_factory = PromptFactory()
         self.cache = ConversationsCache(
             capacity=USER_CONVERSATION_CACHE_SIZE,
@@ -41,7 +42,7 @@ class ConversationEngine:
         )
 
         buffer = ""
-        async for delta in self._llama_stream(payload):
+        async for delta in self._vllm_stream(payload):
             buffer += delta
             yield ConversationDelta(content=delta)
 
@@ -59,8 +60,8 @@ class ConversationEngine:
         yield ConversationDelta(content="", final=True)
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
 
-    async def _llama_stream(self, payload: dict):
-        async for line in self.llama_client.chat_completion(payload):
+    async def _vllm_stream(self, payload: dict):
+        async for line in self.vllm_client.chat_completion(payload):
             if not line.strip():
                 continue
 
