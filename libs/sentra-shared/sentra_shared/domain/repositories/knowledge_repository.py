@@ -33,6 +33,12 @@ class KnowledgeRepository:
             query = query.filter(KnowledgeSourceEntity.created_by == created_by)
         return query.count()
 
+    def update_knowledge_source(self, knowledge_source: KnowledgeSourceEntity) -> KnowledgeSourceEntity:
+        """Update a knowledge source entity"""
+        self.db.commit()
+        self.db.refresh(knowledge_source)
+        return knowledge_source
+
     def get_folder_knowledge_sources(self, auto_index_only: bool = True) -> List[KnowledgeSourceEntity]:
         """Get folder-type knowledge sources for scanning"""
         from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceType, KnowledgeSourceStatus
@@ -84,4 +90,10 @@ class KnowledgeRepository:
                 document.chunks_count = chunks_count
             self.db.commit()
             self.db.refresh(document)
+        return document
+
+    def update_document(self, document: DocumentEntity) -> DocumentEntity:
+        """Update a document entity"""
+        self.db.commit()
+        self.db.refresh(document)
         return document

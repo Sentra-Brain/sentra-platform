@@ -20,3 +20,4 @@ class DocumentStatus(enum.Enum):
     INDEXING = "indexing"
     INDEXED = "indexed"
     FAILED = "failed"
+    TO_BE_REMOVED = "to_be_removed"

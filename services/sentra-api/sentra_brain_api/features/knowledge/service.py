@@ -222,3 +222,137 @@ class KnowledgeService:
                 path="/knowledge/documents",
                 suggestion="Revisa los permisos de acceso a la base de datos."
             )
+
+    def update_knowledge_source_status(self, knowledge_source_id: str, enabled: bool, user: UserEntity) -> KnowledgeSourceEntity:
+        """Enable or disable a knowledge source"""
+        try:
+            from uuid import UUID
+            source_uuid = UUID(knowledge_source_id)
+            
+            # Get the knowledge source
+            knowledge_source = self.repository.get_knowledge_source_by_id(source_uuid)
+            if not knowledge_source:
+                raise HTTPException(status_code=404, detail="Knowledge source not found")
+            
+            # Update status
+            from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceStatus
+            new_status = KnowledgeSourceStatus.ACTIVE if enabled else KnowledgeSourceStatus.DISABLED
+            knowledge_source.status = new_status
+            
+            # Save to database
+            updated_source = self.repository.update_knowledge_source(knowledge_source)
+            logger.info(f"Knowledge source {knowledge_source_id} status changed to {new_status.value} by {user.id}")
+            
+            return updated_source
+        except HTTPException as he:
+            logger.error(f"HTTP error updating knowledge source status: {he.detail}")
+            raise he
+        except Exception as e:
+            logger.error(f"Failed to update knowledge source status: {e}")
+            raise SentraHTTPException(
+                status_code=500,
+                code="UPDATE_KNOWLEDGE_SOURCE_STATUS_FAILED", 
+                message="No se pudo actualizar el estado de la fuente de conocimiento.",
+                details=str(e),
+                path="/knowledge/knowledge-sources/status",
+                suggestion="Revisa los permisos de acceso a la base de datos."
+            )
+
+    def reindex_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
+        """Re-index a document by queuing it for indexing"""
+        try:
+            from uuid import UUID
+            doc_uuid = UUID(document_id)
+            
+            # Get the document
+            document = self.repository.get_document_by_id(doc_uuid)
+            if not document:
+                raise HTTPException(status_code=404, detail="Document not found")
+            
+            # Check if user has access to this document
+            if document.uploaded_by != user.id:
+                raise HTTPException(status_code=403, detail="Access denied to this document")
+            
+            # Reset document status to PENDING for re-indexing
+            from sentra_shared.domain.entities.document_entity import DocumentStatus
+            document.status = DocumentStatus.PENDING
+            document.error = None  # Clear any previous errors
+            document.status_message = "Queued for re-indexing"
+            
+            # Save to database
+            updated_document = self.repository.update_document(document)
+            
+            # Queue for indexing
+            try:
+                with self.indexing_publisher:
+                    success = self.indexing_publisher.publish_indexing_job(
+                        document_id=str(document.id),
+                        document_path=document.path,
+                        knowledge_source_id=str(document.knowledge_source_id),
+                        filename=document.filename,
+                        uploaded_by=str(user.id)
+                    )
+                    if success:
+                        logger.info(f"Document {document_id} queued for re-indexing by user {user.id}")
+                    else:
+                        logger.warning(f"Failed to queue document {document_id} for re-indexing")
+            except Exception as e:
+                logger.error(f"Failed to queue document {document_id} for re-indexing: {e}")
+                # Continue - document status is updated but indexing will need to be retried
+            
+            return updated_document
+        except HTTPException as he:
+            logger.error(f"HTTP error re-indexing document: {he.detail}")
+            raise he
+        except Exception as e:
+            logger.error(f"Failed to re-index document: {e}")
+            raise SentraHTTPException(
+                status_code=500,
+                code="REINDEX_DOCUMENT_FAILED",
+                message="No se pudo reindexar el documento.",
+                details=str(e),
+                path="/knowledge/documents/reindex",
+                suggestion="Revisa los permisos de acceso a la base de datos."
+            )
+
+    def remove_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
+        """Mark a document for removal"""
+        try:
+            from uuid import UUID
+            doc_uuid = UUID(document_id)
+            
+            # Get the document
+            document = self.repository.get_document_by_id(doc_uuid)
+            if not document:
+                raise HTTPException(status_code=404, detail="Document not found")
+            
+            # Check if user has access to this document
+            if document.uploaded_by != user.id:
+                raise HTTPException(status_code=403, detail="Access denied to this document")
+            
+            # Set status to TO_BE_REMOVED
+            from sentra_shared.domain.entities.document_entity import DocumentStatus
+            document.status = DocumentStatus.TO_BE_REMOVED
+            document.status_message = "Marked for removal"
+            
+            # Save to database
+            updated_document = self.repository.update_document(document)
+            logger.info(f"Document {document_id} marked for removal by user {user.id}")
+            
+            # TODO: Send message to sentra_rag_worker for actual deletion
+            # This would be implemented when the worker supports removal operations
+            
+            return updated_document
+        except HTTPException as he:
+            logger.error(f"HTTP error removing document: {he.detail}")
+            raise he
+        except Exception as e:
+            logger.error(f"Failed to remove document: {e}")
+            raise SentraHTTPException(
+                status_code=500,
+                code="REMOVE_DOCUMENT_FAILED",
+                message="No se pudo marcar el documento para eliminación.",
+                details=str(e),
+                path="/knowledge/documents/remove",
+                suggestion="Revisa los permisos de acceso a la base de datos."
+            )
