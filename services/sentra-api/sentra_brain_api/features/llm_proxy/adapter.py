@@ -28,11 +28,11 @@ class VLLMServerClient:
     async def complete_chat(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
         """Complete a chat request without streaming - forwards directly to vllm-server"""
 
-        # Forward the request directly as JSON to the llama-server /v1/chat/completions endpoint
+        # Forward the request directly as JSON to the vllm server /v1/chat/completions endpoint
         request_data = request.model_dump(exclude_none=True)
         
         try:
-            logger.info(f"Forwarding request to llama-server at {self.base_url}/v1/chat/completions")
+            logger.info(f"Forwarding request to vllm server at {self.base_url}/v1/chat/completions")
             response = await self.client.post(
                 f"{self.base_url}/v1/chat/completions",
                 json=request_data,
@@ -40,28 +40,28 @@ class VLLMServerClient:
             )
             response.raise_for_status()
             
-            # Return the response directly from llama-server as it should be OpenAI-compatible
+            # Return the response directly from vllm server as it should be OpenAI-compatible
             response_data = response.json()
             return ChatCompletionResponse(**response_data)
             
         except httpx.RequestError as e:
-            logger.error(f"Request error calling llama-server: {e}")
-            raise Exception(f"Failed to connect to llama-server: {e}")
+            logger.error(f"Request error calling vllm server: {e}")
+            raise Exception(f"Failed to connect to vllm server: {e}")
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error from llama-server: {e.response.status_code} - {e.response.text}")
-            raise Exception(f"llama-server returned error: {e.response.status_code}")
+            logger.error(f"HTTP error from vllm server: {e.response.status_code} - {e.response.text}")
+            raise Exception(f"vllm server returned error: {e.response.status_code}")
         except Exception as e:
-            logger.error(f"Unexpected error calling llama-server: {e}")
+            logger.error(f"Unexpected error calling vllm server: {e}")
             raise Exception(f"Unexpected error: {e}")
     
     async def stream_chat(self, request: ChatCompletionRequest) -> AsyncGenerator[ChatCompletionChunk, None]:
-        """Stream a chat completion response - forwards directly to llama-server"""
+        """Stream a chat completion response - forwards directly to vllm server"""
         
-        # Forward the request directly as JSON to the llama-server /v1/chat/completions endpoint
+        # Forward the request directly as JSON to the vllm server /v1/chat/completions endpoint
         request_data = request.model_dump(exclude_none=True)
         
         try:
-            logger.info(f"Streaming request to llama-server at {self.base_url}/v1/chat/completions")
+            logger.info(f"Streaming request to vllm server at {self.base_url}/v1/chat/completions")
             
             async with self.client.stream(
                 "POST",
@@ -88,15 +88,15 @@ class VLLMServerClient:
                             yield chunk
                                 
                         except json.JSONDecodeError:
-                            logger.warning(f"Failed to parse JSON from llama-server: {line}")
+                            logger.warning(f"Failed to parse JSON from vllm server: {line}")
                             continue
             
         except httpx.RequestError as e:
-            logger.error(f"Request error during streaming from llama-server: {e}")
-            raise Exception(f"Failed to connect to llama-server: {e}")
+            logger.error(f"Request error during streaming from vllm server: {e}")
+            raise Exception(f"Failed to connect to vllm server: {e}")
         except httpx.HTTPStatusError as e:
-            logger.error(f"HTTP error during streaming from llama-server: {e.response.status_code}")
-            raise Exception(f"llama-server returned error: {e.response.status_code}")
+            logger.error(f"HTTP error during streaming from vllm server: {e.response.status_code}")
+            raise Exception(f"vllm server returned error: {e.response.status_code}")
         except Exception as e:
-            logger.error(f"Unexpected error during streaming from llama-server: {e}")
+            logger.error(f"Unexpected error during streaming from vllm server: {e}")
             raise Exception(f"Unexpected error: {e}")
