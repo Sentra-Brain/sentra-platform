@@ -5,7 +5,7 @@ from sqlalchemy import create_engine, make_url
 from sqlalchemy.orm import sessionmaker
 from sentra_shared.infra.sql.postgres_settings import settings
 from sentra_shared.core.logging import get_logger
-from sentra_shared.domain.entities.base_entity import BaseEntity
+import sentra_shared.domain.entities 
 from sentra_shared.domain.enums.role import Role
 from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.infra.sql.security import pwd_context
@@ -30,6 +30,7 @@ def get_db():
 
 # 3. DB initialization for app startup
 def init_db():
+    import sentra_shared.domain.entities 
     from sentra_shared.domain.entities.user_entity import UserEntity
     from sentra_shared.domain.entities.conversation_entity import ConversationEntity
     from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity

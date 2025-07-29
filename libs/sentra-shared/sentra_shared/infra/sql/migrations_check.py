@@ -1,13 +1,19 @@
 # sentra_shared/infra/sql/migrations_check.py
 
-from alembic.config import Config
-from alembic.script import ScriptDirectory
-from alembic.runtime.migration import MigrationContext
-from sqlalchemy.engine import Engine
 from alembic import command
+from alembic.config import Config
+from alembic.runtime.migration import MigrationContext
+from alembic.script import ScriptDirectory
+from pathlib import Path
+from sqlalchemy.engine import Engine
 
+def get_alembic_config() -> Config:
+    # Calcula la ruta absoluta al alembic.ini, partiendo del archivo actual
+    this_file = Path(__file__).resolve()
+    ini_path = this_file.parent / "alembic.ini"
+    return Config(str(ini_path))
 
-def check_schema_consistency(engine: Engine, alembic_ini_path: str = "alembic.ini"):
+def check_schema_consistency(engine: Engine):
     """
     Checks if the database schema is consistent with the Alembic migrations.
     This function compares the current database schema revision with the expected revision.
@@ -20,7 +26,7 @@ def check_schema_consistency(engine: Engine, alembic_ini_path: str = "alembic.in
     Raises:
         RuntimeError: If there is a desync between the schema and the migrations.
     """
-    config = Config(alembic_ini_path)
+    config = get_alembic_config()
     script = ScriptDirectory.from_config(config)
 
     with engine.connect() as conn:

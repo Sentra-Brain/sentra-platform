@@ -205,9 +205,6 @@ async def main():
     logger.info(f"Scan interval={settings.folder_scan_interval}s")
 
     worker = RAGWorker()
-
-    
-    postgres_service.init_db()
     
     try:
         await worker.start()
