@@ -50,17 +50,13 @@ describe('DocumentRow Component', () => {
         document={mockDocument}
         onDocumentUpdated={onDocumentUpdated}
         onDocumentClick={onDocumentClick}
-        userDisplayName="John Doe"
       />
     );
 
     expect(screen.getByText('Test Document')).toBeInTheDocument();
-    expect(screen.getByText('test-document.pdf')).toBeInTheDocument();
-    expect(screen.getByText('PDF')).toBeInTheDocument();
-    expect(screen.getByText('by John Doe')).toBeInTheDocument();
-    expect(screen.getByText('42 chunks')).toBeInTheDocument();
-    expect(screen.getByText('Re-Index')).toBeInTheDocument();
-    expect(screen.getByText('Remove')).toBeInTheDocument();
+    expect(screen.getByTitle('Re-index this document')).toBeInTheDocument();
+    expect(screen.getByTitle('Rename this document')).toBeInTheDocument();
+    expect(screen.getByTitle('Remove this document')).toBeInTheDocument();
   });
 
   it('should handle re-index action', async () => {
@@ -78,7 +74,7 @@ describe('DocumentRow Component', () => {
       />
     );
 
-    const reindexButton = screen.getByText('Re-Index');
+    const reindexButton = screen.getByTitle('Re-index this document');
     fireEvent.click(reindexButton);
 
     await waitFor(() => {
@@ -105,7 +101,7 @@ describe('DocumentRow Component', () => {
       />
     );
 
-    const removeButton = screen.getByText('Remove');
+    const removeButton = screen.getByTitle('Remove this document');
     fireEvent.click(removeButton);
 
     await waitFor(() => {
@@ -129,8 +125,8 @@ describe('DocumentRow Component', () => {
       />
     );
 
-    const documentRow = screen.getByText('Test Document').closest('.document-row');
-    fireEvent.click(documentRow!);
+    const documentNameButton = screen.getByTitle('View document details');
+    fireEvent.click(documentNameButton);
 
     expect(onDocumentClick).toHaveBeenCalledWith(mockDocument);
   });
@@ -146,7 +142,28 @@ describe('DocumentRow Component', () => {
       />
     );
 
-    const removeButton = screen.getByText('Remove');
+    const removeButton = screen.getByTitle('Remove this document');
     expect(removeButton).toBeDisabled();
+  });
+
+  it('should handle rename action', () => {
+    // Mock window.prompt
+    global.prompt = vi.fn(() => 'New Document Name');
+
+    const onDocumentUpdated = vi.fn();
+    const onDocumentClick = vi.fn();
+
+    render(
+      <DocumentRow
+        document={mockDocument}
+        onDocumentUpdated={onDocumentUpdated}
+        onDocumentClick={onDocumentClick}
+      />
+    );
+
+    const renameButton = screen.getByTitle('Rename this document');
+    fireEvent.click(renameButton);
+
+    expect(global.prompt).toHaveBeenCalledWith('Enter new document name:', 'Test Document');
   });
 });

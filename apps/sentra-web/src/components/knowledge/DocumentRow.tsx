@@ -1,7 +1,7 @@
 // src/components/knowledge/DocumentRow.tsx
 // Individual document row component with actions
 import React, { useState } from 'react';
-import { File, RotateCcw, Trash2, ExternalLink } from 'lucide-react';
+import { RotateCcw, Trash2, Edit3 } from 'lucide-react';
 import type { Document } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
 import { notifySuccess, notifyError } from '../../lib/notify';
@@ -12,17 +12,16 @@ interface DocumentRowProps {
   document: Document;
   onDocumentUpdated: (document: Document) => void;
   onDocumentClick?: (document: Document) => void;
-  userDisplayName?: string;
 }
 
 const DocumentRow: React.FC<DocumentRowProps> = ({ 
   document, 
   onDocumentUpdated, 
-  onDocumentClick,
-  userDisplayName 
+  onDocumentClick
 }) => {
   const [isReindexing, setIsReindexing] = useState(false);
   const [isRemoving, setIsRemoving] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   const handleReindex = async (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent row click
@@ -56,86 +55,75 @@ const DocumentRow: React.FC<DocumentRowProps> = ({
     }
   };
 
-  const handleRowClick = () => {
+  const handleRename = async (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click
+    const newName = window.prompt('Enter new document name:', document.display_name);
+    if (!newName || newName === document.display_name) {
+      return;
+    }
+    
+    setIsRenaming(true);
+    try {
+      // TODO: Implement rename API endpoint when available
+      // const updatedDocument = await knowledgeService.renameDocument(document.id, newName);
+      // onDocumentUpdated(updatedDocument);
+      notifySuccess('Rename functionality will be available soon');
+    } catch (error) {
+      notifyError(error);
+    } finally {
+      setIsRenaming(false);
+    }
+  };
+
+  const handleDocumentNameClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent row click
     if (onDocumentClick) {
       onDocumentClick(document);
     }
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
-  };
-
   return (
-    <div 
-      className={`document-row ${onDocumentClick ? 'clickable' : ''}`}
-      onClick={handleRowClick}
-    >
-      <div className="document-row-main">
+    <div className="document-row">
+      <div className="document-row-content">
         <div className="document-info">
-          <File size={16} className="document-icon" />
-          <div className="document-details">
-            <div className="document-name-section">
-              <p className="document-name">{document.display_name}</p>
-              {onDocumentClick && (
-                <ExternalLink size={14} className="document-link-icon" />
-              )}
-            </div>
-            <p className="document-filename">{document.filename}</p>
-            <div className="document-metadata">
-              <span className="metadata-item">
-                Uploaded: {formatDate(document.uploaded_at)}
-              </span>
-              {userDisplayName && (
-                <span className="metadata-item">
-                  by {userDisplayName}
-                </span>
-              )}
-              {document.filetype && (
-                <span className="metadata-item">
-                  {document.filetype.toUpperCase()}
-                </span>
-              )}
-            </div>
-          </div>
-        </div>
-        
-        <div className="document-status-section">
+          <button
+            className="document-name-link"
+            onClick={handleDocumentNameClick}
+            title="View document details"
+          >
+            {document.display_name}
+          </button>
           <StatusBadge status={document.status} className="document-status" />
-          {document.chunks_count && (
-            <span className="chunks-count">
-              {document.chunks_count} chunks
-            </span>
-          )}
         </div>
-      </div>
-
-      <div className="document-actions">
-        <button
-          onClick={handleReindex}
-          disabled={isReindexing}
-          className="action-button reindex-button"
-          title="Re-index this document"
-        >
-          <RotateCcw size={16} className={isReindexing ? 'animate-spin' : ''} />
-          Re-Index
-        </button>
         
-        <button
-          onClick={handleRemove}
-          disabled={isRemoving || document.status === 'to_be_removed'}
-          className="action-button remove-button"
-          title="Remove this document"
-        >
-          <Trash2 size={16} />
-          Remove
-        </button>
+        <div className="document-actions">
+          <button
+            onClick={handleReindex}
+            disabled={isReindexing}
+            className="action-button reindex-button"
+            title="Re-index this document"
+          >
+            <RotateCcw size={14} className={isReindexing ? 'animate-spin' : ''} />
+          </button>
+          
+          <button
+            onClick={handleRename}
+            disabled={isRenaming}
+            className="action-button rename-button"
+            title="Rename this document"
+          >
+            <Edit3 size={14} />
+          </button>
+          
+          <button
+            onClick={handleRemove}
+            disabled={isRemoving || document.status === 'to_be_removed'}
+            className="action-button remove-button"
+            title="Remove this document"
+          >
+            <Trash2 size={14} />
+          </button>
+        </div>
       </div>
 
       {document.error && (

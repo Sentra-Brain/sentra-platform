@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { userService } from '../services/userService';
 import type { User } from '../models/user';
+import { getSafeUserDisplayName } from '../utils/userUtils';
 
 const userCache = new Map<string, User>();
 
@@ -36,7 +37,7 @@ export const useUserDisplayName = (userId?: string) => {
       })
       .catch(error => {
         console.error('Failed to load user:', error);
-        setDisplayName(userId); // Fallback to UUID
+        setDisplayName(getSafeUserDisplayName(userId)); // Safe fallback
       })
       .finally(() => setLoading(false));
   }, [userId, getUserDisplayName]);

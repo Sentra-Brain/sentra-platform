@@ -217,7 +217,6 @@ const KnowledgeDetailPanel: React.FC = () => {
                 document={doc}
                 onDocumentUpdated={handleDocumentUpdated}
                 onDocumentClick={handleDocumentClick}
-                userDisplayName={creatorDisplayName}
               />
             ))}
           </div>
