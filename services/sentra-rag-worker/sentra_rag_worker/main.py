@@ -4,11 +4,13 @@
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
 from sentra_rag_worker.services.document_processor import DocumentProcessor
+from sentra_rag_worker.services.document_removal_processor import DocumentRemovalProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra_shared.core.logging import get_logger, configure_logging
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
+from sentra_shared.infra.amqp.removal_job_consumer import RemovalJobConsumer
 from sentra_shared.infra.sql import postgres_service
 from sentra_shared.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
@@ -28,11 +30,14 @@ class RAGWorker:
     """Main RAG worker application."""
 
     def __init__(self):
-        self.consumer = RabbitMQConsumer()
+        self.indexing_consumer = RabbitMQConsumer()
+        self.removal_consumer = RemovalJobConsumer()
         self.publisher = IndexingJobPublisher()
         self.document_processor = DocumentProcessor()
+        self.removal_processor = DocumentRemovalProcessor()
         self.running = False
         self._folder_scan_task = None
+        self._removal_consumer_task = None
 
     async def start(self):
         """Start the RAG worker."""
@@ -50,14 +55,17 @@ class RAGWorker:
         # Start folder scanning task
         self._folder_scan_task = asyncio.create_task(self._folder_scan_loop())
         
-        # Start consuming messages with linear processing
+        # Start removal consumer task
+        self._removal_consumer_task = asyncio.create_task(self._removal_consumer_loop())
+        
+        # Start consuming indexing messages with linear processing (main thread)
         try:
-            logger.info("Starting linear message processing...")
-            self.consumer.start_consuming(self._process_message_linear)
+            logger.info("Starting linear message processing for indexing jobs...")
+            self.indexing_consumer.start_consuming(self._process_indexing_message_linear)
         except KeyboardInterrupt:
             logger.info("Received keyboard interrupt")
         except Exception as e:
-            logger.error(f"Error in message consumption: {e}")
+            logger.error(f"Error in indexing message consumption: {e}")
         finally:
             await self.stop()
 
@@ -75,8 +83,17 @@ class RAGWorker:
             except asyncio.CancelledError:
                 pass
         
+        # Cancel removal consumer task
+        if self._removal_consumer_task:
+            self._removal_consumer_task.cancel()
+            try:
+                await self._removal_consumer_task
+            except asyncio.CancelledError:
+                pass
+        
         # Disconnect from services
-        self.consumer.disconnect()
+        self.indexing_consumer.disconnect()
+        self.removal_consumer.disconnect()
         self.publisher.disconnect()
         
         logger.info("sentra-rag-worker stopped")
@@ -86,9 +103,9 @@ class RAGWorker:
         logger.info(f"Received signal {signum}, initiating shutdown...")
         self.running = False
 
-    def _process_message_linear(self, message: Dict[str, Any]) -> bool:
+    def _process_indexing_message_linear(self, message: Dict[str, Any]) -> bool:
         """
-        Process message with linear flow: validate → process → acknowledge.
+        Process indexing message with linear flow: validate → process → acknowledge.
         No retries, no requeueing. Process once and mark done.
         """
         try:
@@ -97,7 +114,7 @@ class RAGWorker:
             missing_fields = [f for f in required_fields if f not in message]
 
             if missing_fields:
-                logger.error(f"Message missing required fields: {missing_fields}")
+                logger.error(f"Indexing message missing required fields: {missing_fields}")
                 return True  # Acknowledge to prevent reprocessing
 
             # Extract and enrich message data
@@ -129,15 +146,62 @@ class RAGWorker:
             
             # Always acknowledge - no retries
             if success:
-                logger.info(f"Successfully processed document {message['document_id']}")
+                logger.info(f"Successfully processed indexing document {message['document_id']}")
             else:
-                logger.error(f"Failed to process document {message['document_id']} - marked as failed")
+                logger.error(f"Failed to process indexing document {message['document_id']} - marked as failed")
             
             return True  # Always acknowledge
 
         except Exception as e:
-            logger.error(f"Unexpected error processing message: {e}")
+            logger.error(f"Unexpected error processing indexing message: {e}")
             return True  # Acknowledge even on unexpected errors to prevent infinite reprocessing
+
+    def _process_removal_message(self, message: Dict[str, Any]) -> bool:
+        """
+        Process removal message.
+        """
+        try:
+            # Validate required fields
+            required_fields = ['document_id', 'knowledge_source_id', 'user_id']
+            missing_fields = [f for f in required_fields if f not in message]
+
+            if missing_fields:
+                logger.error(f"Removal message missing required fields: {missing_fields}")
+                return True  # Acknowledge to prevent reprocessing
+
+            # Process document removal (handles all errors internally)
+            success = self.removal_processor.process_removal_job(message)
+            
+            if success:
+                logger.info(f"Successfully processed removal for document {message['document_id']}")
+            else:
+                logger.error(f"Failed to process removal for document {message['document_id']}")
+            
+            return True  # Always acknowledge removal jobs
+
+        except Exception as e:
+            logger.error(f"Unexpected error processing removal message: {e}")
+            return True  # Acknowledge even on unexpected errors
+
+    async def _removal_consumer_loop(self):
+        """Run the removal consumer in a separate task."""
+        logger.info("Starting removal consumer loop...")
+        
+        while self.running:
+            try:
+                # Start consuming removal messages
+                logger.info("Starting removal message consumer...")
+                self.removal_consumer.start_consuming(self._process_removal_message)
+                
+            except Exception as e:
+                logger.error(f"Error in removal consumer: {e}")
+                if self.running:
+                    logger.info("Restarting removal consumer in 5 seconds...")
+                    await asyncio.sleep(5)
+                else:
+                    break
+        
+        logger.info("Removal consumer loop stopped")
 
     async def _folder_scan_loop(self):
         """Periodic folder scanning loop."""
