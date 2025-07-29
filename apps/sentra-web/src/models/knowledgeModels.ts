@@ -88,6 +88,7 @@ export interface Document {
   status: DocumentStatus;
   error?: string;
   knowledge_source_id: string;
+  chunks_count?: number;
 }
 
 export interface DocumentUploadRequest {

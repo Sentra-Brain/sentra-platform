@@ -15,6 +15,10 @@ export const userService = {
     });
   },
 
+  getUserById(userId: string): Promise<User> {
+    return httpClient.get<User>(`/users/${userId}`);
+  },
+
   signup(data: SignupRequest): Promise<SignupResponse> {
     return httpClient.post<SignupResponse, SignupRequest>('/users/signup', data);
   },
