@@ -129,7 +129,7 @@ services:
     image: ghcr.io/chroma-core/chroma:latest
     container_name: sentra-vector-db
     ports:
-      - "8500:8001"
+      - "8000:8000"
     volumes:
       - sentra-vector-data:/chroma/.chroma/index
     networks:
