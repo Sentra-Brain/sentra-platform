@@ -18,7 +18,7 @@ import { notifySuccess, notifyError } from '../../lib/notify';
 import './KnowledgeDetailPanel.css';
 
 const KnowledgeDetailPanel: React.FC = () => {
-  const { selectedNode, refresh } = useKnowledge();
+  const { selectedNode, refresh, navigateToDocument } = useKnowledge();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -65,9 +65,8 @@ const KnowledgeDetailPanel: React.FC = () => {
   };
 
   const handleDocumentClick = (document: Document) => {
-    // TODO: Navigate to document detail page
-    // This would be implemented when the document detail page is available
-    console.log('Navigate to document:', document);
+    // Navigate to document detail using URL-based routing
+    navigateToDocument(document.id, document.knowledge_source_id);
   };
 
   useEffect(() => {
