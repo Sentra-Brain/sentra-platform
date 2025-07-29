@@ -2,24 +2,32 @@
 
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, DateTime
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy.orm import declared_attr, DeclarativeBase
+from sqlalchemy import DateTime
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+
 
 class Base(DeclarativeBase):
     pass
 
+
 class BaseEntity(Base):
     __abstract__ = True
 
-    @declared_attr
-    def id(cls):
-        return Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id: Mapped[uuid.UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        primary_key=True,
+        default=uuid.uuid4
+    )
 
-    @declared_attr
-    def created_at(cls):
-        return Column(DateTime, default=datetime.now(timezone.utc), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime,
+        nullable=False,
+        default=lambda: datetime.now(timezone.utc)
+    )
 
-    @declared_attr
-    def updated_at(cls):
-        return Column(DateTime, onupdate=datetime.now(timezone.utc), nullable=True)
+    updated_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        onupdate=lambda: datetime.now(timezone.utc)
+    )

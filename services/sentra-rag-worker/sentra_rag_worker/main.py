@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
+
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
-from sentra_shared.core.logging import get_logger, set_request_id
+from sentra_shared.core.logging import get_logger, configure_logging
 from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
@@ -17,6 +18,9 @@ import signal
 import sys
 import uuid
 
+
+debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
+configure_logging(debug=debug_mode)
 logger = get_logger("sentra_rag_worker.main")
 
 
@@ -205,9 +209,6 @@ async def main():
     logger.info(f"Scan interval={settings.folder_scan_interval}s")
 
     worker = RAGWorker()
-
-    
-    postgres_service.init_db()
     
     try:
         await worker.start()

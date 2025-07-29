@@ -1,19 +1,23 @@
 # sentra_brain_api/infra/postgres_service.py
 
 import time
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, make_url
 from sqlalchemy.orm import sessionmaker
 from sentra_shared.infra.sql.postgres_settings import settings
 from sentra_shared.core.logging import get_logger
-from sentra_shared.domain.base_entity import BaseEntity
-from sentra_shared.domain.entities.role import Role
+import sentra_shared.domain.entities 
+from sentra_shared.domain.enums.role import Role
 from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.infra.sql.security import pwd_context
 
 logger = get_logger(__name__)
 
 # 1. Module-level SQLAlchemy objects (engine/session)
-engine = create_engine(settings.database_url)
+engine = create_engine(
+    make_url(settings.database_url).set(drivername="postgresql+psycopg2"),
+    future=True,
+    pool_pre_ping=True
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # 2. Dependency for FastAPI routes
@@ -26,6 +30,7 @@ def get_db():
 
 # 3. DB initialization for app startup
 def init_db():
+    import sentra_shared.domain.entities 
     from sentra_shared.domain.entities.user_entity import UserEntity
     from sentra_shared.domain.entities.conversation_entity import ConversationEntity
     from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity

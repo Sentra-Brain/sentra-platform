@@ -3,7 +3,7 @@ from typing import List
 from sqlalchemy import String, Boolean
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sentra_shared.domain.entities.base_entity import BaseEntity
-from sentra_shared.domain.entities.role import Role
+from sentra_shared.domain.enums.role import Role
 
 class UserEntity(BaseEntity):
     __tablename__ = "users"

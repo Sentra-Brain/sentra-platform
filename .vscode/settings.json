@@ -11,5 +11,16 @@
     "**/build": true,
     "**/__pycache__": true,
     "**/.pytest_cache": true
-  }
+  },
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "127.0.0.1",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "sentra_db",
+      "database": "sentra_brain",
+      "username": "sentra_admin"
+    }
+  ]
 }

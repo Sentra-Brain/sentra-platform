@@ -21,7 +21,7 @@ This directory contains deployment scripts, manifests, and configuration files f
 | sentra-admin     | Admin UI                               | 3001  | Custom build (React/Next.js)           |
 | sentra-api       | Orchestrator + API + Auth + MCP Client | 8100  | Custom (Python/Node.js)                |
 | llama-server     | LLM Backend                            | 11434 | ghcr.io/ggml-org/llama.cpp:server-cuda |
-| sentra-vector-db | Vector Store (RAG)                     | 8001  | ghcr.io/chroma-core/chroma:latest      |
+| sentra-vector-db | Vector Store (RAG)                     | 8000  | ghcr.io/chroma-core/chroma:latest      |
 | sentra-sql-db    | SQL Persistent Storage (Users/Configs) | 5432  | postgres:16-alpine                     |
 | sentra-nosql-db  | NoSQL Chat History Storage             | 27017 | mongo:7                                |
 | sentra-action    | MCP: Email/Actions                     | 5003  | Custom MCP server                      |

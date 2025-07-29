@@ -3,7 +3,7 @@ from fastapi import HTTPException, status
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_shared.core import logging
 from sentra_brain_api.crosscutting.notification_service import NotificationService
-from sentra_shared.domain.entities.role import Role
+from sentra_shared.domain.enums.role import Role
 from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService

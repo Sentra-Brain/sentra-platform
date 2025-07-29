@@ -47,7 +47,7 @@ RABBITMQ_PASSWORD=sentra
 RABBITMQ_QUEUE=indexation_queue
 
 # ChromaDB
-CHROMA_URL=http://sentra-vector-db:8001
+CHROMA_URL=http://sentra-vector-db:8000
 
 # Processing
 KNOWLEDGE_ROOT=/mnt/sentra_knowledge

@@ -82,7 +82,7 @@ flowchart TD
 | sentra-admin       | Admin UI                               | 3200  | —                   |
 | sentra-api         | Orchestrator + API + Auth + MCP Client | 8100  | —                   |
 | llama-server       | LLM Backend                            | 11434 | —                   |
-| sentra-vector-db   | Vector Store (RAG)                     | 8001  | sentra-vector-data  |
+| sentra-vector-db   | Vector Store (RAG)                     | 8000  | sentra-vector-data  |
 | sentra-sql-db      | SQL Persistent Storage (Users/Configs) | 5432  | sentra-sql-data     |
 | sentra-nosql-db    | NoSQL Chat History Storage             | 27017 | sentra-nosql-data   |
 

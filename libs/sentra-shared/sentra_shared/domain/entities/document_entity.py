@@ -1,43 +1,44 @@
-# services/sentra-shared/sentra_shared/domain/document_entity.py
-import enum
-from sqlalchemy import Column, ForeignKey, Enum, Text, Integer
-from sqlalchemy.dialects.postgresql import UUID
+# sentra_shared/domain/document_entity.py
+
+from sqlalchemy import Text, Integer, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.dialects.postgresql import ENUM as PgEnum, UUID
 from sentra_shared.domain.entities.base_entity import BaseEntity
-
-
-class DocumentFileType(enum.Enum):
-    PDF = "pdf"
-    DOCX = "docx"
-    TXT = "txt"
-    MD = "md"
-    HTML = "html"
-    EML = "eml"
-    MSG = "msg"
-    EPUB = "epub"
-
-
-class DocumentStatus(enum.Enum):
-    PENDING = "pending"
-    PROCESSING = "processing"
-    EXTRACTING = "extracting"
-    CHUNKING = "chunking"
-    EMBEDDING = "embedding"
-    INDEXING = "indexing"
-    INDEXED = "indexed"
-    FAILED = "failed"
+from sentra_shared.domain.enums.document import DocumentFileType, DocumentStatus
 
 
 class DocumentEntity(BaseEntity):
     __tablename__ = "documents"
 
-    filename = Column(Text, nullable=False)
-    display_name = Column(Text, nullable=False)
-    description = Column(Text, nullable=True)
-    filetype = Column(Enum(DocumentFileType), nullable=False)
-    path = Column(Text, nullable=False)
-    uploaded_by = Column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    status = Column(Enum(DocumentStatus), nullable=False, default=DocumentStatus.PENDING)
-    status_message = Column(Text, nullable=True)
-    error = Column(Text, nullable=True)
-    chunks_count = Column(Integer, nullable=True)
-    knowledge_source_id = Column(UUID(as_uuid=True), ForeignKey("knowledge_sources.id"), nullable=False)
+    filename: Mapped[str] = mapped_column(Text, nullable=False)
+    display_name: Mapped[str] = mapped_column(Text, nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+    filetype: Mapped[DocumentFileType] = mapped_column(
+        PgEnum(DocumentFileType, name="document_file_type", metadata=BaseEntity.metadata),
+        nullable=False
+    )
+
+    path: Mapped[str] = mapped_column(Text, nullable=False)
+
+    uploaded_by: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("users.id"),
+        nullable=False
+    )
+
+    status: Mapped[DocumentStatus] = mapped_column(
+        PgEnum(DocumentStatus, name="document_status", metadata=BaseEntity.metadata),
+        nullable=False,
+        default=DocumentStatus.PENDING
+    )
+
+    status_message: Mapped[str | None] = mapped_column(Text, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    chunks_count: Mapped[int | None] = mapped_column(Integer, nullable=True)
+
+    knowledge_source_id: Mapped[UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("knowledge_sources.id"),
+        nullable=False
+    )
