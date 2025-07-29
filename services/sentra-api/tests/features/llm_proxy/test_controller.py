@@ -11,7 +11,7 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionChoice,
     ChatCompletionUsage
 )
-from sentra_brain_api.features.llm_proxy.controller import get_llama_client
+from sentra_brain_api.features.llm_proxy.controller import get_vllm_client
 
 
 @pytest.fixture
@@ -21,7 +21,7 @@ def client():
 
 
 @pytest.fixture
-def mock_llama_client():
+def mock_vllm_client():
     mock_client = AsyncMock()
     mock_client.close = AsyncMock()
     return mock_client
@@ -61,13 +61,13 @@ def sample_response():
 
 class TestOpenAIProxyController:
     
-    def test_chat_completions_non_streaming(self, client, sample_request, sample_response, mock_llama_client):
+    def test_chat_completions_non_streaming(self, client, sample_request, sample_response, mock_vllm_client):
         # Setup mock
-        mock_llama_client.complete_chat.return_value = sample_response
+        mock_vllm_client.complete_chat.return_value = sample_response
         
         # Override the dependency 
         app = client.app
-        app.dependency_overrides[get_llama_client] = lambda: mock_llama_client
+        app.dependency_overrides[get_vllm_client] = lambda: mock_vllm_client
         
         try:
             # Make request
@@ -83,15 +83,15 @@ class TestOpenAIProxyController:
             # Clean up override
             app.dependency_overrides.clear()
     
-    def test_chat_completions_with_streaming(self, client, sample_request, mock_llama_client):
+    def test_chat_completions_with_streaming(self, client, sample_request, mock_vllm_client):
         # Setup mock for streaming
         async def mock_stream():
             yield sample_response  # This would be chunks in real implementation
-        mock_llama_client.stream_chat.return_value = mock_stream()
+        mock_vllm_client.stream_chat.return_value = mock_stream()
         
         # Override the dependency 
         app = client.app
-        app.dependency_overrides[get_llama_client] = lambda: mock_llama_client
+        app.dependency_overrides[get_vllm_client] = lambda: mock_vllm_client
         
         try:
             # Set streaming to true

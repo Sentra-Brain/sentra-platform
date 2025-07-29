@@ -16,9 +16,9 @@ from sentra_brain_api.features.llm_proxy.models import (
 logger = logging.get_logger("llm_proxy")
 
 
-class LlamaServerClient:
+class VLLMServerClient:
     def __init__(self, base_url: str = None):
-        self.base_url = (base_url or settings.llama_server_url).rstrip("/")
+        self.base_url = (base_url or settings.vllm_server_url).rstrip("/")
         self.client = httpx.AsyncClient(timeout=300.0)  # 5 minute timeout
     
     async def close(self):
@@ -26,8 +26,8 @@ class LlamaServerClient:
         await self.client.aclose()
     
     async def complete_chat(self, request: ChatCompletionRequest) -> ChatCompletionResponse:
-        """Complete a chat request without streaming - forwards directly to llama-server"""
-        
+        """Complete a chat request without streaming - forwards directly to vllm-server"""
+
         # Forward the request directly as JSON to the llama-server /v1/chat/completions endpoint
         request_data = request.model_dump(exclude_none=True)
         

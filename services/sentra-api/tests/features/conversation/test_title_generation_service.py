@@ -14,18 +14,18 @@ class TestTitleGenerationService:
     """Test cases for TitleGenerationService."""
 
     @pytest.fixture
-    def mock_llama_client(self):
-        """Mock LlamaServerClient for testing."""
+    def mock_vllm_client(self):
+        """Mock VLLMServerClient for testing."""
         client = AsyncMock()
         return client
 
     @pytest.fixture
-    def title_service(self, mock_llama_client):
+    def title_service(self, mock_vllm_client):
         """TitleGenerationService instance with mocked LLM client."""
-        return TitleGenerationService(llama_client=mock_llama_client)
+        return TitleGenerationService(vllm_client=mock_vllm_client)
 
     @pytest.mark.asyncio
-    async def test_generate_title_with_llm_success(self, title_service, mock_llama_client):
+    async def test_generate_title_with_llm_success(self, title_service, mock_vllm_client):
         """Test successful title generation using LLM."""
         # Mock LLM response
         mock_response = ChatCompletionResponse(
@@ -46,25 +46,25 @@ class TestTitleGenerationService:
                 total_tokens=15
             )
         )
-        mock_llama_client.complete_chat.return_value = mock_response
+        mock_vllm_client.complete_chat.return_value = mock_response
 
         result = await title_service.generate_title("How do I register a patent in Europe?")
         
         assert result == "Patent Registration Europe"
-        mock_llama_client.complete_chat.assert_called_once()
+        mock_vllm_client.complete_chat.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_generate_title_llm_failure_uses_heuristic(self, title_service, mock_llama_client):
+    async def test_generate_title_llm_failure_uses_heuristic(self, title_service, mock_vllm_client):
         """Test that heuristic is used when LLM fails."""
         # Mock LLM to raise an exception
-        mock_llama_client.complete_chat.side_effect = Exception("LLM unavailable")
+        mock_vllm_client.complete_chat.side_effect = Exception("LLM unavailable")
 
         result = await title_service.generate_title("How do I register a patent in Europe?")
         
         # Should fall back to heuristic
         assert result is not None
         assert len(result) > 0
-        mock_llama_client.complete_chat.assert_called_once()
+        mock_vllm_client.complete_chat.assert_called_once()
 
     @pytest.mark.asyncio
     async def test_generate_title_empty_message_returns_none(self, title_service):
@@ -74,7 +74,7 @@ class TestTitleGenerationService:
         assert await title_service.generate_title(None) is None
 
     @pytest.mark.asyncio
-    async def test_generate_title_llm_empty_response_uses_heuristic(self, title_service, mock_llama_client):
+    async def test_generate_title_llm_empty_response_uses_heuristic(self, title_service, mock_vllm_client):
         """Test that heuristic is used when LLM returns empty response."""
         mock_response = ChatCompletionResponse(
             id="test-id",
@@ -94,7 +94,7 @@ class TestTitleGenerationService:
                 total_tokens=10
             )
         )
-        mock_llama_client.complete_chat.return_value = mock_response
+        mock_vllm_client.complete_chat.return_value = mock_response
 
         result = await title_service.generate_title("How do I fix my computer?")
         
@@ -150,7 +150,7 @@ class TestTitleGenerationService:
         assert title_service._clean_title('""') == "New Conversation"
 
     @pytest.mark.asyncio
-    async def test_generate_title_with_llm_request_format(self, title_service, mock_llama_client):
+    async def test_generate_title_with_llm_request_format(self, title_service, mock_vllm_client):
         """Test that LLM request is properly formatted."""
         mock_response = ChatCompletionResponse(
             id="test-id",
@@ -170,12 +170,12 @@ class TestTitleGenerationService:
                 total_tokens=17
             )
         )
-        mock_llama_client.complete_chat.return_value = mock_response
+        mock_vllm_client.complete_chat.return_value = mock_response
 
         await title_service.generate_title("Test message")
         
         # Verify the request was made with correct parameters
-        call_args = mock_llama_client.complete_chat.call_args[0][0]
+        call_args = mock_vllm_client.complete_chat.call_args[0][0]
         assert call_args.model == "sentra-brain"
         assert call_args.max_tokens == 20
         assert call_args.temperature == 0.3

@@ -4,7 +4,7 @@ from sentra_shared.core.logging import get_logger
 logger = get_logger(__name__)
 
 class SentraSettings(BaseSettings):
-    llama_server_url: str = Field(default="http://localhost:11434", json_schema_extra={"env": "LLAMA_SERVER_URL"})
+    vllm_server_url: str = Field(default="http://vllm:8000", json_schema_extra={"env": "VLLM_SERVER_URL"})
     knowledge_mount_path: str = Field(default="/mnt/sentra_knowledge", json_schema_extra={"env": "KNOWLEDGE_MOUNT_PATH"})
 
     model_config = SettingsConfigDict(

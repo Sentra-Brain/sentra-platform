@@ -54,7 +54,7 @@ class PromptFactory:
         # 5. Final payload
         return {
             "messages": messages,
-            "stream": True,  # Always stream for LlamaServerClient
+            "stream": True,  # Always stream for OpenAI-compatible LLMs
             "temperature": temperature,
             "top_p": top_p,
             "presence_penalty": presence_penalty,
