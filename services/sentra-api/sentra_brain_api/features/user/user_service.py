@@ -147,3 +147,19 @@ class UserService:
                 path="/users/validate",
                 suggestion="Check request payload"
             )
+
+    def get_user_display_name(self, user_id: str, db: Session) -> str:
+        """
+        Returns the display name for a user by ID (full_name, username, or email).
+        """
+        user_repository = self.user_repository(db)
+        user = user_repository.get(user_id)
+        if not user:
+            raise SentraHTTPException(
+                status_code=404,
+                code="USER_NOT_FOUND",
+                message=f"User with id {user_id} not found",
+                path=f"/users/{user_id}/display-name",
+                suggestion="Check user ID or contact support"
+            )
+        return user.full_name or user.username or user.email

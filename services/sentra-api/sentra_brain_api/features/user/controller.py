@@ -41,3 +41,8 @@ class UserController:
         def validate_user(token: str, db: Session = Depends(get_db)):
             logger.info(f"Validating user with token: {token}")
             return self.user_service.validate_user(token, db)
+
+        @self.router.get("/{user_id}/display-name", response_model=str, description="Get a user's display name by ID.")
+        def get_user_display_name(user_id: str, current_user: UserEntity = Depends(get_authenticated_user), db: Session = Depends(get_db)):
+            logger.info(f"Fetching display name for user: {user_id}")
+            return self.user_service.get_user_display_name(user_id, db)
