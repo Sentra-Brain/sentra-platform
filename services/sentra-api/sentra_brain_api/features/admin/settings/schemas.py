@@ -1,7 +1,7 @@
 # features/admin/models.py
 from pydantic import BaseModel
 
-class SystemSettingsModel(BaseModel):
+class SystemSettingsResponse(BaseModel):
     id: int
     workspace_name: str
     license_type: str

@@ -107,14 +107,15 @@ class KnowledgeController:
                 total=total
             )
 
-        @self.router.post("/documents/{document_id}/reindex", response_model=DocumentResponse)
-        async def reindex_document(
-            document_id: str,
-            user: UserEntity = Depends(get_authenticated_user),
+        @self.router.post("/knowledge-sources", response_model=KnowledgeSourceResponse)
+        async def create_knowledge_source(
+            request: CreateKnowledgeSourceRequest,
+            user: UserEntity = Depends(self._require_admin),
             service: KnowledgeApiService = Depends(self._get_service)
         ):
-            doc = service.reindex_document(document_id, user)
-            return to_document_response(doc)
+            """Create a new knowledge source (admin only)"""
+            knowledge_source = service.create_knowledge_source(request, user)
+            return KnowledgeSourceResponse.model_validate(knowledge_source)
 
         @self.router.delete("/documents/{document_id}", response_model=DocumentResponse)
         async def remove_document(

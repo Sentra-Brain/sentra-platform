@@ -12,7 +12,7 @@ from sentra_shared.infra.sql.migrations_check import check_schema_consistency
 
 from sentra_shared.domain.enums.role import Role
 from sentra_shared.domain.repository.user_repository import UserRepository
-from sentra_shared.domain.entities.system_settings import SystemSettings
+from sentra_shared.domain.entities.system_settings import SystemSettingsEntity
 from sentra_shared.domain.entities.user_entity import UserEntity
 
 logger = get_logger(__name__)
@@ -83,8 +83,8 @@ def init_db():
             user_repo.create(admin_user)
             logger.info("[init_db] Initial Super Admin user created.")
 
-        if not db.query(SystemSettings).first():
-            db.add(SystemSettings(max_users=3))
+        if not db.query(SystemSettingsEntity).first():
+            db.add(SystemSettingsEntity(max_users=3))
             db.commit()
             logger.info("[init_db] Default system settings created.")
 

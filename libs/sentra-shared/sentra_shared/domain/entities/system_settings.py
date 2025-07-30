@@ -5,7 +5,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 from sentra_shared.domain.entities.base_entity import BaseEntity
 
 
-class SystemSettings(BaseEntity):
+class SystemSettingsEntity(BaseEntity):
     __tablename__ = "system_settings"
 
     workspace_name: Mapped[str] = mapped_column(String(255), default="Sentra Brain")

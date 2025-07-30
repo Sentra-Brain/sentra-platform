@@ -5,7 +5,7 @@ from typing import Optional
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_shared.domain.enums.role import Role
 from sentra_shared.domain.repository.user_repository import UserRepository
-from sentra_shared.domain.entities.system_settings import SystemSettings
+from sentra_shared.domain.entities.system_settings import SystemSettingsEntity
 from sqlalchemy.orm import Session
 
 
@@ -59,7 +59,7 @@ class UserService:
         return user
 
     def get_max_user_limit(self) -> int:
-        settings = self.db.query(SystemSettings).first()
+        settings = self.db.query(SystemSettingsEntity).first()
         return settings.max_users if settings else -1
 
     def count_non_superadmin_users(self) -> int:

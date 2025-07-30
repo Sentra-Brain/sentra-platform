@@ -308,7 +308,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
         <div className="space-y-4">
           <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-500 mx-auto"></div>
           <div>
-            <h3 className="text-lg font-medium text-gray-900">
+            <h3 className="text-lg font-medium">
               Creating Knowledge Source...
             </h3>
             <p className="text-gray-600 mt-1">

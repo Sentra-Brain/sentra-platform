@@ -45,7 +45,7 @@ class KnowledgeApiService:
             type=request.type,
             path=request.path,
             description=request.description,
-            created_by=user.id,
+            created_by_id=user.id,
             visibility=request.visibility,
             auto_index=request.auto_index
         )
@@ -54,12 +54,24 @@ class KnowledgeApiService:
         except ValueError as ve:
             raise SentraHTTPException(400, "INVALID_KNOWLEDGE_SOURCE", str(ve), suggestion="Revisa el path indicado")
         except Exception as e:
-            raise SentraHTTPException(500, "CREATE_KNOWLEDGE_SOURCE_FAILED", str(e))
+            raise SentraHTTPException(
+                status_code=500,
+                code="CREATE_KNOWLEDGE_SOURCE_FAILED",
+                message="Could not create knowledge source",
+                details=str(e),
+                path="/knowledge-sources",
+                suggestion="Check file system or database access permissions."
+            )
 
     def upload_document(self, file: UploadFile, request: DocumentUploadRequest, user: UserEntity) -> DocumentEntity:
         ext = Path(file.filename).suffix.lower()
         if ext not in ALLOWED_FILE_TYPES:
-            raise SentraHTTPException(400, "UNSUPPORTED_FILE_TYPE", f"Extension {ext} not supported.")
+            raise SentraHTTPException(
+                status_code=400,
+                code="INVALID_FILE_TYPE",
+                message=f"File type '{ext}' is not allowed. Allowed types: {', '.join(ALLOWED_FILE_TYPES)}",
+                path="/upload"
+            )
 
         upload_source = next(
             (src for src in self.knowledge_repo.list_by_user(user.id) if src.type == KnowledgeSourceType.UPLOAD),
@@ -70,7 +82,7 @@ class KnowledgeApiService:
             upload_source = KnowledgeSourceEntity(
                 name=f"{user.username}'s Uploads",
                 type=KnowledgeSourceType.UPLOAD,
-                created_by=user.id,
+                created_by_id=user.id,
                 auto_index=True,
                 visibility=KnowledgeSourceVisibility.PRIVATE
             )
@@ -79,7 +91,14 @@ class KnowledgeApiService:
         try:
             abs_path, rel_path = self._file_storage.save_file(file.file, file.filename, user.id)
         except Exception as e:
-            raise SentraHTTPException(500, "SAVE_FILE_FAILED", str(e))
+            raise SentraHTTPException(
+                status_code=500,
+                code="FILE_STORAGE_ERROR",
+                message="Could not save file to storage.",
+                details=str(e),
+                path="/upload",
+                suggestion="Check file system permissions."
+            )
 
         document = DocumentEntity(
             filename=file.filename,
@@ -87,7 +106,7 @@ class KnowledgeApiService:
             description=request.description,
             filetype=self.ALLOWED_FILE_TYPES[ext],
             path=rel_path,
-            created_by=user.id,
+            created_by_id=user.id,
             knowledge_source_id=upload_source.id
         )
         document = self.document_repo.create(document)

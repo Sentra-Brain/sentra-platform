@@ -1,8 +1,9 @@
 # sentra_brain_api/features/admin/settings/settings_controller.py
 from fastapi import APIRouter, Depends
 from sentra_brain_api.crosscutting.authorization import get_superadmin_user
-from sentra_shared.domain.entities.system_settings import SystemSettings
-from sentra_brain_api.features.admin.settings.models import SystemSettingsModel
+from sentra_brain_api.features.admin.settings.mappers import to_system_settings_response
+from sentra_shared.domain.entities.system_settings import SystemSettingsEntity
+from sentra_brain_api.features.admin.settings.schemas import SystemSettingsResponse
 from sentra_shared.infra.sql.postgres_service import get_db
 from sqlalchemy.orm import Session
 
@@ -13,15 +14,15 @@ class SettingsController:
         self._add_routes()
 
     def _add_routes(self):
-        @self.router.get("/settings", response_model=SystemSettingsModel)
+        @self.router.get("/settings", response_model=SystemSettingsResponse)
         def get_settings(db: Session = Depends(get_db)):
-            settings = db.query(SystemSettings).first()
-            return SystemSettingsModel.model_validate(settings, from_attributes=True)
+            settings = db.query(SystemSettingsEntity).first()
+            return to_system_settings_response(settings)
 
-        @self.router.put("/settings", response_model=SystemSettingsModel)
-        def update_settings(data: SystemSettingsModel, db: Session = Depends(get_db)):
-            settings = db.query(SystemSettings).first()
+        @self.router.put("/settings", response_model=SystemSettingsResponse)
+        def update_settings(data: SystemSettingsResponse, db: Session = Depends(get_db)):
+            settings = db.query(SystemSettingsEntity).first()
             settings.max_users = data.max_users
             db.commit()
             db.refresh(settings)
-            return SystemSettingsModel.model_validate(settings, from_attributes=True)
+            return to_system_settings_response(settings)
