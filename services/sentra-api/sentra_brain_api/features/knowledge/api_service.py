@@ -104,7 +104,7 @@ class KnowledgeApiService:
             filename=file.filename,
             display_name=request.display_name,
             description=request.description,
-            filetype=self.ALLOWED_FILE_TYPES[ext],
+            filetype=ALLOWED_FILE_TYPES[ext],
             path=rel_path,
             created_by_id=user.id,
             knowledge_source_id=upload_source.id

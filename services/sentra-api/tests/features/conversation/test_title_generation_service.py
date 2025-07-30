@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock
-from sentra_brain_api.features.conversation.title_generation_service import TitleGenerationService
+from sentra_brain_api.features.conversation.title.title_generation_service import TitleGenerationService
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionResponse, 
     ChatCompletionChoice, 
