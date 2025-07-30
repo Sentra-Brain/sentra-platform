@@ -1,8 +1,8 @@
 """Initial schema
 
-Revision ID: b72de5204db5
+Revision ID: fceef663e3e0
 Revises: 
-Create Date: 2025-07-29 04:18:16.919259
+Create Date: 2025-07-30 10:36:42.475396
 
 """
 from typing import Sequence, Union
@@ -13,7 +13,7 @@ from sqlalchemy import MetaData
 from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
-revision: str = 'b72de5204db5'
+revision: str = 'fceef663e3e0'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -32,6 +32,7 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('users',
@@ -44,19 +45,21 @@ def upgrade() -> None:
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_users_email'), 'users', ['email'], unique=True)
     op.create_index(op.f('ix_users_username'), 'users', ['username'], unique=True)
     op.create_table('conversations',
-    sa.Column('user_id', sa.UUID(), nullable=False),
     sa.Column('title', sa.String(), nullable=True),
     sa.Column('description', sa.String(), nullable=True),
     sa.Column('initial_prompt', sa.Text(), nullable=True),
+    sa.Column('created_by_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('knowledge_sources',
@@ -64,14 +67,15 @@ def upgrade() -> None:
     sa.Column('type', postgresql.ENUM('UPLOAD', 'FOLDER', 'EXTERNAL_API', 'MANUAL', 'MCP_TOOL', name='knowledge_source_type', metadata=MetaData()), nullable=False),
     sa.Column('path', sa.Text(), nullable=True),
     sa.Column('description', sa.Text(), nullable=True),
-    sa.Column('created_by', sa.UUID(), nullable=False),
     sa.Column('visibility', postgresql.ENUM('PRIVATE', 'SHARED', 'ORG_WIDE', name='knowledge_source_visibility', metadata=MetaData()), nullable=False),
     sa.Column('auto_index', sa.Boolean(), nullable=False),
     sa.Column('status', postgresql.ENUM('ACTIVE', 'DISABLED', 'ERROR', name='knowledge_source_status', metadata=MetaData()), nullable=False),
+    sa.Column('created_by_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
-    sa.ForeignKeyConstraint(['created_by'], ['users.id'], ),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('documents',
@@ -80,17 +84,18 @@ def upgrade() -> None:
     sa.Column('description', sa.Text(), nullable=True),
     sa.Column('filetype', postgresql.ENUM('PDF', 'DOCX', 'TXT', 'MD', 'HTML', 'EML', 'MSG', 'EPUB', name='document_file_type', metadata=MetaData()), nullable=False),
     sa.Column('path', sa.Text(), nullable=False),
-    sa.Column('uploaded_by', sa.UUID(), nullable=False),
-    sa.Column('status', postgresql.ENUM('PENDING', 'PROCESSING', 'EXTRACTING', 'CHUNKING', 'EMBEDDING', 'INDEXING', 'INDEXED', 'FAILED', name='document_status', metadata=MetaData()), nullable=False),
+    sa.Column('status', postgresql.ENUM('PENDING', 'PROCESSING', 'EXTRACTING', 'CHUNKING', 'EMBEDDING', 'INDEXING', 'INDEXED', 'FAILED', 'TO_BE_REMOVED', 'REMOVED', name='document_status', metadata=MetaData()), nullable=False),
     sa.Column('status_message', sa.Text(), nullable=True),
     sa.Column('error', sa.Text(), nullable=True),
     sa.Column('chunks_count', sa.Integer(), nullable=True),
     sa.Column('knowledge_source_id', sa.UUID(), nullable=False),
+    sa.Column('created_by_id', sa.UUID(), nullable=False),
     sa.Column('id', sa.UUID(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=False),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('deleted_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by_id'], ['users.id'], ),
     sa.ForeignKeyConstraint(['knowledge_source_id'], ['knowledge_sources.id'], ),
-    sa.ForeignKeyConstraint(['uploaded_by'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     # ### end Alembic commands ###
