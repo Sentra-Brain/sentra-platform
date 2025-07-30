@@ -38,6 +38,7 @@ class TitleGenerationService:
             logger.warning(f"LLM title generation failed: {e}")
         
         # Fallback to heuristic approach
+        logger.debug(f"Falling back to heuristic title generation for: {user_message[:100]}")
         return self._generate_title_heuristic(user_message)
     
     async def _generate_title_with_llm(self, user_message: str) -> Optional[str]:

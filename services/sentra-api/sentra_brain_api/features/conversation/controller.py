@@ -1,41 +1,33 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_shared.core import logging
 from sentra_shared.domain.entities.user_entity import UserEntity
-
+from sentra_brain_api.features.conversation.api_service import ConversationApiService
 from sentra_shared.infra.nosql.mongo_conversation_repository import MongoConversationRepository, get_conversation_mongo_repository
 from sentra_shared.infra.sql.postgres_service import get_db
-from sentra_shared.domain.repository.conversation_repository import ConversationRepository
-from sentra_brain_api.features.conversation.models import (
-    ConversationListItemModel,
-    ConversationModel,
+
+from sentra_brain_api.features.conversation.schemas import (
+    ConversationListItemResponse,
+    ConversationResponse,
     CreateConversationRequest,
     CreateConversationResponse,
     DeleteConversationResponse,
     UpdateConversationRequest,
     UpdateConversationResponse,
 )
-from sentra_brain_api.features.conversation.conversation_management_service import ConversationManagementService
-
-logger = logging.get_logger("sentra_brain_api")
 
 
 class ConversationController:
     def __init__(self):
         self.router = APIRouter()
-        self._add_routes()   
-    
+        self._add_routes()
 
     def _get_service(
-            self,
-            db: Session = None,
-            mongo_repo: MongoConversationRepository = None
-    ) -> ConversationManagementService:
-            return ConversationManagementService(
-                sql_repo=ConversationRepository(db) if db else None,
-                mongo_repo=mongo_repo
-            )
+        self,
+        db: Session = Depends(get_db),
+        mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository)
+    ) -> ConversationApiService:
+        return ConversationApiService(db=db, mongo_repo=mongo_repo)
 
     def _add_routes(self):
         @self.router.post(
@@ -43,50 +35,35 @@ class ConversationController:
             response_model=CreateConversationResponse,
             description="Creates a new conversation for the current user"
         )
-        def create_conversation(
+        async def create_conversation(
             body: CreateConversationRequest,
             current_user: UserEntity = Depends(get_authenticated_user),
-            db: Session = Depends(get_db),
-            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository)
+            service: ConversationApiService = Depends(self._get_service)
         ):
-            service = self._get_service(db=db, mongo_repo=nosql_repo)
-            conversation_id = service.create_conversation(current_user, body)
-            return CreateConversationResponse(id=conversation_id)
+            return await service.create_conversation(current_user, body)
 
         @self.router.get(
             "/",
-            response_model=list[ConversationListItemModel],
+            response_model=list[ConversationListItemResponse],
             description="Retrieves all conversations for the current user"
         )
         def get_conversations(
             current_user: UserEntity = Depends(get_authenticated_user),
-            db: Session = Depends(get_db),
+            service: ConversationApiService = Depends(self._get_service)
         ):
-            service = self._get_service(db=db)
-            conversations = service.get_user_conversations(current_user)
-            return [
-                ConversationListItemModel(
-                    id=str(conv.id),
-                    title=conv.title or "Untitled",
-                    created_at=conv.created_at
-                )
-                for conv in conversations
-            ]
+            return service.list_user_conversations(current_user)
 
         @self.router.get(
             "/{conversation_id}",
-            response_model=ConversationModel,
+            response_model=ConversationResponse,
             description="Retrieve a specific conversation by its ID"
         )
         def get_conversation_by_id(
             conversation_id: str,
             current_user: UserEntity = Depends(get_authenticated_user),
-            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
+            service: ConversationApiService = Depends(self._get_service)
         ):
-            service = self._get_service(mongo_repo=nosql_repo)
-            conversation_data = service.get_conversation(current_user, conversation_id)
-            model = ConversationModel.from_mongo(conversation_data)
-            return model.model_dump()
+            return service.get_conversation(current_user, conversation_id)
 
         @self.router.put(
             "/{conversation_id}",
@@ -97,16 +74,9 @@ class ConversationController:
             conversation_id: str,
             request: UpdateConversationRequest,
             current_user: UserEntity = Depends(get_authenticated_user),
-            db: Session = Depends(get_db),
-            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository)
+            service: ConversationApiService = Depends(self._get_service)
         ):
-            service = self._get_service(db=db, mongo_repo=nosql_repo)
-            updated = service.update_conversation(current_user, conversation_id, request)
-            return UpdateConversationResponse(
-                conversation_id=str(updated.id),
-                title=updated.title,
-                description=updated.description
-            )
+            return service.update_conversation(current_user, conversation_id, request)
 
         @self.router.delete(
             "/{conversation_id}",
@@ -116,12 +86,6 @@ class ConversationController:
         def delete_conversation(
             conversation_id: str,
             current_user: UserEntity = Depends(get_authenticated_user),
-            db: Session = Depends(get_db),
-            nosql_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository)
+            service: ConversationApiService = Depends(self._get_service)
         ):
-            service = self._get_service(db=db, mongo_repo=nosql_repo)
-            service.delete_conversation(current_user, conversation_id)
-            return DeleteConversationResponse(
-                success=True,
-                message="Conversation deleted successfully"
-            )
+            return service.delete_conversation(current_user, conversation_id)

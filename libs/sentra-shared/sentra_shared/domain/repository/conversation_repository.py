@@ -19,4 +19,10 @@ class ConversationRepository(BaseRepository[ConversationEntity]):
     
     def get_by_user_id(self, user_id: str):
         return self.db.query(ConversationEntity).filter(ConversationEntity.user_id == user_id).all()
+    
+    def update_title(self, conversation_id: str, title: str):
+        conversation = self.get(conversation_id)
+        if conversation:
+            conversation.title = title
+            self.db.commit()
         
