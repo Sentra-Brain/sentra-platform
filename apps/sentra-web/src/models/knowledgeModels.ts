@@ -1,6 +1,8 @@
 // src/models/knowledgeModels.ts
 // TypeScript models for Knowledge Management API
 
+import type { UserRef } from "./user";
+
 // Const enums matching the backend (using const assertions for better TypeScript support)
 export const KnowledgeSourceType = {
   UPLOAD: 'upload',
@@ -54,7 +56,7 @@ export interface KnowledgeSource {
   type: KnowledgeSourceType;
   path?: string;
   description?: string;
-  created_by: string;
+  created_by: UserRef;
   created_at: string;
   visibility: KnowledgeSourceVisibility;
   auto_index: boolean;
@@ -83,13 +85,16 @@ export interface Document {
   description?: string;
   filetype: DocumentFileType;
   path: string;
-  uploaded_by: string;
-  uploaded_at: string;
+  created_by: UserRef;
+  created_at: string;
   status: DocumentStatus;
+  status_message?: string;
   error?: string;
   knowledge_source_id: string;
   chunks_count?: number;
 }
+
+
 
 export interface DocumentUploadRequest {
   display_name: string;

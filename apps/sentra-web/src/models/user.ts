@@ -7,3 +7,9 @@ export interface User {
   full_name: string;
   disabled: boolean;
 }
+
+// UserRef interface to match API response
+export interface UserRef {
+  id: string;
+  full_name: string;
+}

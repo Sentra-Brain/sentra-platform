@@ -135,13 +135,6 @@ class KnowledgeApiService:
             self.document_repo.count_by_user_or_source(user.id, source_uuid)
         )
 
-    def get_documents_by_knowledge_source(self, source_id: str, user: UserEntity, limit: int, offset: int) -> tuple[List[DocumentEntity], int]:
-        source_uuid = UUID(source_id)
-        return (
-            self.document_repo.list_by_user_or_source(knowledge_source_id=source_uuid, limit=limit, offset=offset),
-            self.document_repo.count_by_user_or_source(knowledge_source_id=source_uuid)
-        )
-
     def update_knowledge_source_status(self, source_id: str, enabled: bool) -> KnowledgeSourceEntity:
         return self.knowledge_svc.update_status(UUID(source_id), enabled)
 

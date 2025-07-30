@@ -9,28 +9,22 @@ class DocumentRepository(BaseRepository[DocumentEntity]):
     def __init__(self, db: Session):
         super().__init__(DocumentEntity, db)
 
-    def list_by_user_or_source(
+    def list_by_source(
         self,
-        uploaded_by: Optional[UUID] = None,
         knowledge_source_id: Optional[UUID] = None,
         limit: int = 100,
         offset: int = 0
     ) -> List[DocumentEntity]:
         query = self.db.query(self.model).filter(self.model.deleted_at.is_(None))
-        if uploaded_by:
-            query = query.filter(self.model.created_by_id == uploaded_by)
         if knowledge_source_id:
             query = query.filter(self.model.knowledge_source_id == knowledge_source_id)
         return query.offset(offset).limit(limit).all()
 
-    def count_by_user_or_source(
+    def count_by_source(
         self,
-        uploaded_by: Optional[UUID] = None,
         knowledge_source_id: Optional[UUID] = None
     ) -> int:
         query = self.db.query(self.model).filter(self.model.deleted_at.is_(None))
-        if uploaded_by:
-            query = query.filter(self.model.created_by_id == uploaded_by)
         if knowledge_source_id:
             query = query.filter(self.model.knowledge_source_id == knowledge_source_id)
         return query.count()

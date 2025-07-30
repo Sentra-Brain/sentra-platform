@@ -38,7 +38,19 @@ class KnowledgeController:
             raise HTTPException(status_code=403, detail="Admin role required")
         return user
 
+
     def _add_routes(self):
+    
+        @self.router.post("/knowledge-sources", response_model=KnowledgeSourceResponse)
+        async def create_knowledge_source(
+            request: CreateKnowledgeSourceRequest,
+            user: UserEntity = Depends(self._require_admin),
+            service: KnowledgeApiService = Depends(self._get_service)
+        ):
+            """Create a new knowledge source (admin only)"""
+            knowledge_source = service.create_knowledge_source(request, user)
+            return KnowledgeSourceResponse.model_validate(knowledge_source)
+    
         @self.router.post("/upload", response_model=DocumentResponse)
         async def upload_document(
             file: UploadFile = File(...),
@@ -62,16 +74,15 @@ class KnowledgeController:
                 total=total
             )
 
-        @self.router.get("/knowledge-sources/{knowledge_source_id}/documents", response_model=DocumentListResponse)
-        async def get_documents_by_source(
+        @self.router.get("/knowledge-sources/{knowledge_source_id}/documents")
+        async def list_documents(
             knowledge_source_id: str,
-            limit: int = Query(100), offset: int = Query(0),
             user: UserEntity = Depends(get_authenticated_user),
             service: KnowledgeApiService = Depends(self._get_service)
         ):
-            docs, total = service.get_documents_by_knowledge_source(knowledge_source_id, user, limit, offset)
+            docs, total = service.list_documents(user, knowledge_source_id, limit=1000, offset=0)
             return DocumentListResponse(
-                documents=[to_document_response(d) for d in docs],
+                documents=[DocumentResponse.model_validate(doc) for doc in docs],
                 total=total
             )
 
@@ -107,15 +118,7 @@ class KnowledgeController:
                 total=total
             )
 
-        @self.router.post("/knowledge-sources", response_model=KnowledgeSourceResponse)
-        async def create_knowledge_source(
-            request: CreateKnowledgeSourceRequest,
-            user: UserEntity = Depends(self._require_admin),
-            service: KnowledgeApiService = Depends(self._get_service)
-        ):
-            """Create a new knowledge source (admin only)"""
-            knowledge_source = service.create_knowledge_source(request, user)
-            return KnowledgeSourceResponse.model_validate(knowledge_source)
+
 
         @self.router.delete("/documents/{document_id}", response_model=DocumentResponse)
         async def remove_document(

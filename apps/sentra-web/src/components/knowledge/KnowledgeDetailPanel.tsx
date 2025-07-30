@@ -11,7 +11,6 @@ import type {
 import { KnowledgeSourceType as KSType } from '../../models/knowledgeModels';
 import { knowledgeService } from '../../services/knowledgeService';
 import { useKnowledge } from '../../hooks/useKnowledge';
-import { useUserDisplayName } from '../../hooks/useUserDisplayName';
 import StatusBadge from './StatusBadge';
 import DocumentRow from './DocumentRow';
 import { notifySuccess, notifyError } from '../../lib/notify';
@@ -23,11 +22,6 @@ const KnowledgeDetailPanel: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
-
-  // Get display name for the knowledge source creator
-  const { displayName: creatorDisplayName } = useUserDisplayName(
-    selectedNode?.knowledgeSource?.created_by
-  );
 
   const loadDocuments = async (knowledgeSourceId: string) => {
     setLoading(true);
@@ -173,7 +167,7 @@ const KnowledgeDetailPanel: React.FC = () => {
           <User size={16} className="field-icon" />
           <div className="field-content">
             <p className="field-label">Created by</p>
-            <p className="field-value">{creatorDisplayName || source.created_by}</p>
+            <p className="field-value">{source.created_by?.full_name}</p>
           </div>
         </div>
       </div>
@@ -224,9 +218,7 @@ const KnowledgeDetailPanel: React.FC = () => {
     </div>
   );
 
-  const renderDocumentDetail = (document: Document) => {
-    const { displayName: uploaderDisplayName } = useUserDisplayName(document.uploaded_by);
-    
+  const renderDocumentDetail = (document: Document) => {    
     return (
       <div className="detail-content">
         <div className="detail-header">
@@ -257,15 +249,15 @@ const KnowledgeDetailPanel: React.FC = () => {
 
           <div className="detail-field">
             <div className="field-content">
-              <p className="field-label">Uploaded</p>
-              <p className="field-value">{formatDate(document.uploaded_at)}</p>
+              <p className="field-label">Created</p>
+              <p className="field-value">{formatDate(document.created_at)}</p>
             </div>
           </div>
 
           <div className="detail-field">
             <div className="field-content">
-              <p className="field-label">Uploaded by</p>
-              <p className="field-value">{uploaderDisplayName || document.uploaded_by}</p>
+              <p className="field-label">Created by</p>
+              <p className="field-value">{document.created_by?.full_name}</p>
             </div>
           </div>
 
