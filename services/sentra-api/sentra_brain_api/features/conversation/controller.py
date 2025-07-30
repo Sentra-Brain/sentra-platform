@@ -21,7 +21,7 @@ from sentra_brain_api.features.conversation.conversation_management_service impo
 logger = logging.get_logger("sentra_brain_api")
 
 
-class ConversationManagementController:
+class ConversationController:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()   
