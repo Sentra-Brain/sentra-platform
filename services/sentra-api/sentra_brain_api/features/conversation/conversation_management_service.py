@@ -5,7 +5,7 @@ from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.entities.conversation_entity import ConversationEntity
 from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_shared.domain.repositories.conversation_repository import ConversationRepository
+from sentra_shared.domain.repository.conversation_repository import ConversationRepository
 from sentra_brain_api.features.conversation.conversation_service import ConversationService
 from sentra_brain_api.features.conversation.title_generation_service import TitleGenerationService
 from sentra_brain_api.features.conversation.models import (

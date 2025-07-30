@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 from uuid import uuid4
-from sentra_shared.domain.repositories.base_repository import BaseRepository
+from sentra_shared.domain.repository.base_repository import BaseRepository
 from sentra_shared.domain.entities.conversation_entity import ConversationEntity
 
 

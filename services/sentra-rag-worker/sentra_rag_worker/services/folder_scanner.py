@@ -6,7 +6,7 @@ from sentra_shared.core.logging import get_logger
 from sentra_rag_worker.core.config import settings
 from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
 from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
 
 logger = get_logger(__name__)
 
@@ -164,7 +164,7 @@ class FolderScanner:
                 display_name=filename,
                 filetype=filetype,
                 path=file_path_str,
-                uploaded_by=source.created_by,  # Use the source creator as uploader
+                uploaded_by=source.user_id,  # Use the source creator as uploader
                 status=DocumentStatus.PENDING,
                 knowledge_source_id=source.id
             )
@@ -179,7 +179,7 @@ class FolderScanner:
                 "filepath": file_path_str,
                 "filename": filename,
                 "display_name": filename,
-                "uploaded_by": str(source.created_by),
+                "uploaded_by": str(source.user_id),
                 "filetype": filetype.value
             }
             

@@ -11,7 +11,7 @@ from sentra_shared.infra.sql.security import pwd_context
 from sentra_shared.infra.sql.migrations_check import check_schema_consistency
 
 from sentra_shared.domain.enums.role import Role
-from sentra_shared.domain.repositories.user_repository import UserRepository
+from sentra_shared.domain.repository.user_repository import UserRepository
 from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.domain.entities.user_entity import UserEntity
 

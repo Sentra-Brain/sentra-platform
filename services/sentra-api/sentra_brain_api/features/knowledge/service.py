@@ -1,6 +1,5 @@
 # sentra_brain_api/features/knowledge/service.py
 
-import os
 from pathlib import Path
 from typing import List, Optional
 from fastapi import UploadFile, HTTPException
@@ -12,17 +11,56 @@ from sentra_shared.domain.services.file_storage import FileStorageService
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_shared.core.logging import get_logger
-from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
 from sentra_brain_api.features.knowledge.models import (
     CreateKnowledgeSourceRequest,
     DocumentUploadRequest
 )
+
+from sentra_brain_api.features.knowledge.models import KnowledgeSourceResponse, DocumentResponse
+
+from sentra_brain_api.shared_models.user_refs import UserRef
 
 
 logger = get_logger(__name__)
 
 
 class KnowledgeService:
+    def get_documents_by_knowledge_source(self, knowledge_source_id: str, user: UserEntity, limit: int = 100, offset: int = 0) -> tuple[List[dict], int]:
+        """Get documents for a specific knowledge source, using navigation property for uploader's name"""
+        from uuid import UUID
+        source_uuid = UUID(knowledge_source_id)
+        documents = self.repository.list_documents(
+            knowledge_source_id=source_uuid,
+            limit=limit,
+            offset=offset
+        )
+        total = self.repository.get_documents_count(
+            knowledge_source_id=source_uuid
+        )
+        result = []
+        for doc in documents:
+            user = doc.created_by
+            user_ref = UserRef(id=user.id, full_name=user.full_name) if user else None
+
+            result.append(
+                DocumentResponse(
+                    id=doc.id,
+                    filename=doc.filename,
+                    display_name=doc.display_name,
+                    description=doc.description,
+                    filetype=doc.filetype,
+                    path=doc.path,
+                    created_by=user_ref,
+                    created_at=doc.created_at,
+                    status=doc.status,
+                    status_message=doc.status_message,
+                    error=doc.error,
+                    chunks_count=doc.chunks_count,
+                    knowledge_source_id=doc.knowledge_source_id
+                )
+            )
+        return result, total
     def __init__(self, repository: KnowledgeRepository, indexing_publisher: IndexingJobPublisher = None):
         self.repository = repository
         self.indexing_publisher = indexing_publisher or IndexingJobPublisher()
@@ -270,7 +308,7 @@ class KnowledgeService:
                 raise HTTPException(status_code=404, detail="Document not found")
             
             # Check if user has access to this document
-            if document.uploaded_by != user.id:
+            if document.user_id != user.id:
                 raise HTTPException(status_code=403, detail="Access denied to this document")
             
             # Reset document status to PENDING for re-indexing
@@ -327,7 +365,7 @@ class KnowledgeService:
                 raise HTTPException(status_code=404, detail="Document not found")
             
             # Check if user has access to this document
-            if document.uploaded_by != user.id:
+            if document.user_id != user.id:
                 raise HTTPException(status_code=403, detail="Access denied to this document")
             
             # Set status to TO_BE_REMOVED

@@ -6,7 +6,7 @@ from sentra_shared.domain.entities.user_entity import UserEntity
 
 from sentra_shared.infra.nosql.mongo_conversation_repository import MongoConversationRepository, get_conversation_mongo_repository
 from sentra_shared.infra.sql.postgres_service import get_db
-from sentra_shared.domain.repositories.conversation_repository import ConversationRepository
+from sentra_shared.domain.repository.conversation_repository import ConversationRepository
 from sentra_brain_api.features.conversation.models import (
     ConversationListItemModel,
     ConversationModel,

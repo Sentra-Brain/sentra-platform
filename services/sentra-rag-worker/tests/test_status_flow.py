@@ -106,7 +106,7 @@ def test_knowledge_repository():
     print("\nTesting knowledge repository...")
     
     try:
-        from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+        from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
         from sentra_shared.domain.entities.document_entity import DocumentStatus
         from uuid import UUID
         

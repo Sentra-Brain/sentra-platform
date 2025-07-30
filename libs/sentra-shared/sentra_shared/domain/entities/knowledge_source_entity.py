@@ -1,7 +1,7 @@
 # sentra_shared/domain/knowledge_source_entity.py
 
 from sqlalchemy import Text, Boolean, ForeignKey
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.dialects.postgresql import ENUM as PgEnum, UUID
 from sentra_shared.domain.entities.base_entity import BaseEntity
 from sentra_shared.domain.enums.knowledge import (
@@ -24,12 +24,6 @@ class KnowledgeSourceEntity(BaseEntity):
     path: Mapped[str | None] = mapped_column(Text, nullable=True)
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
-    created_by: Mapped[UUID] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("users.id"),
-        nullable=False
-    )
-
     visibility: Mapped[KnowledgeSourceVisibility] = mapped_column(
         PgEnum(KnowledgeSourceVisibility, name="knowledge_source_visibility", metadata=BaseEntity.metadata),
         nullable=False,
@@ -43,3 +37,7 @@ class KnowledgeSourceEntity(BaseEntity):
         nullable=False,
         default=KnowledgeSourceStatus.ACTIVE
     )
+
+    # Relationships
+    created_by_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
+    created_by = relationship("UserEntity", back_populates="knowledge_sources", lazy="joined")

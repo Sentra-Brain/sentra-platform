@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
 from sentra_shared.infra.sql.postgres_service import get_db
-from sentra_shared.domain.repositories.base_repository import BaseRepository
+from sentra_shared.domain.repository.base_repository import BaseRepository
 from typing import Type, TypeVar
 
 T = TypeVar('T')

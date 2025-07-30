@@ -10,7 +10,7 @@ from sentra_brain_api.features.user.constants import (
     UPDATE_USER_DESCRIPTION,
     VALIDATE_USER_DESCRIPTION
 )
-from sentra_shared.domain.repositories.user_repository  import UserRepository
+from sentra_shared.domain.repository.user_repository  import UserRepository
 from sentra_brain_api.features.user.user_service import UserService
 from sentra_shared.core import logging
 

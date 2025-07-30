@@ -31,3 +31,13 @@ class BaseEntity(Base):
         nullable=True,
         onupdate=lambda: datetime.now(timezone.utc)
     )
+
+    
+    deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime,
+        nullable=True,
+        default=None
+    )
+
+    def soft_delete(self):
+        self.deleted_at = datetime.now(timezone.utc)

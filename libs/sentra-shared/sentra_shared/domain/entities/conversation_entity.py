@@ -7,9 +7,10 @@ from sentra_shared.domain.entities.base_entity import BaseEntity
 class ConversationEntity(BaseEntity):
     __tablename__ = "conversations"
 
-    user_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     title: Mapped[str | None] = mapped_column(String, nullable=True)
     description: Mapped[str | None] = mapped_column(String, nullable=True)
     initial_prompt: Mapped[str | None] = mapped_column(Text, nullable=True)
 
+    # Relationships
+    created_by_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
     user = relationship("UserEntity", back_populates="conversations")

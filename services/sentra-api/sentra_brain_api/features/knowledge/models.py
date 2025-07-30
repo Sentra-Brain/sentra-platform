@@ -6,6 +6,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceType, KnowledgeSourceVisibility, KnowledgeSourceStatus
 from sentra_shared.domain.entities.document_entity import DocumentFileType, DocumentStatus
+from sentra_brain_api.shared_models.user_refs import UserRef
 
 
 # Knowledge Source Schemas
@@ -24,7 +25,7 @@ class KnowledgeSourceResponse(BaseModel):
     type: KnowledgeSourceType
     path: Optional[str] = None
     description: Optional[str] = None
-    created_by: UUID
+    created_by: UserRef
     created_at: datetime
     visibility: KnowledgeSourceVisibility
     auto_index: bool
@@ -49,7 +50,7 @@ class DocumentResponse(BaseModel):
     description: Optional[str] = None
     filetype: DocumentFileType
     path: str
-    uploaded_by: UUID
+    created_by: UserRef
     created_at: datetime
     status: DocumentStatus
     status_message: Optional[str] = None

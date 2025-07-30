@@ -8,7 +8,7 @@ from sentra_shared.domain.entities.system_settings import SystemSettings
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.user.models import SignupResponse, UserModel
-from sentra_shared.domain.repositories.user_repository import UserRepository
+from sentra_shared.domain.repository.user_repository import UserRepository
 from sqlalchemy.orm import Session
 import asyncio
 import os

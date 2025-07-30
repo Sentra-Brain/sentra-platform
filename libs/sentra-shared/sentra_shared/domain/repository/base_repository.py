@@ -1,22 +1,33 @@
+# sentra_shared/repository/base_repository.py
+
 from typing import Type, TypeVar, Generic, List, Optional
+from uuid import UUID
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy import select
 
-T = TypeVar('T')
+from sentra_shared.domain.entities.base_entity import BaseEntity
+
+T = TypeVar('T', bound=BaseEntity)
 
 class BaseRepository(Generic[T]):
     def __init__(self, model: Type[T], db: Session):
         self.model = model
         self.db = db
 
-    def get(self, id: int) -> Optional[T]:
-        # For SQLAlchemy >= 1.4:
-        return self.db.get(self.model, id)
-        # For older SQLAlchemy:
-        # return self.db.query(self.model).filter_by(id=id).first()
+    def get(self, id: UUID) -> Optional[T]:
+        stmt = select(self.model).where(self.model.id == id, self.model.deleted_at.is_(None))
+        return self.db.scalars(stmt).first()
 
-    def get_all(self) -> List[T]:
-        return self.db.query(self.model).all()
+    def get_all(self, limit: int = 100, offset: int = 0) -> List[T]:
+        stmt = select(self.model).where(self.model.deleted_at.is_(None)).limit(limit).offset(offset)
+        return self.db.scalars(stmt).all()
+
+    def filter_by(self, limit: int = 100, offset: int = 0, **kwargs) -> List[T]:
+        stmt = select(self.model).filter_by(**kwargs).where(self.model.deleted_at.is_(None)).limit(limit).offset(offset)
+        return self.db.scalars(stmt).all()
 
     def create(self, obj: T) -> T:
         try:
@@ -37,13 +48,17 @@ class BaseRepository(Generic[T]):
             self.db.rollback()
             raise ValueError(self._parse_integrity_error(e))
 
-    def delete(self, id: int) -> None:
+    def delete(self, id: UUID, soft: bool = True) -> None:
         obj = self.get(id)
-        if obj:
-            self.db.delete(obj)
-            self.db.commit()
-        else:
+        if not obj:
             raise ValueError("Object not found")
+
+        if soft and hasattr(obj, "soft_delete"):
+            obj.soft_delete()
+        else:
+            self.db.delete(obj)
+
+        self.db.commit()
 
     def _parse_integrity_error(self, error: IntegrityError) -> str:
         orig_msg = str(error.orig)

@@ -3,7 +3,7 @@ from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.authorization import get_admin_user
 from sentra_brain_api.features.user.models import UserModel
 from sentra_shared.infra.sql.postgres_service import get_db
-from sentra_shared.domain.repositories.user_repository  import UserRepository
+from sentra_shared.domain.repository.user_repository  import UserRepository
 from sentra_brain_api.features.admin.admin_service import AdminService
 from sqlalchemy.orm import Session
 import logging

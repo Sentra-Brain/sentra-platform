@@ -6,7 +6,7 @@ from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag_worker.services.vector_store_service import VectorStoreService
 from sentra_shared.core.logging import get_logger, set_request_id
-from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
 from sentra_shared.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
 from uuid import UUID

@@ -8,7 +8,7 @@ from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_shared.core.logging import get_logger
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.models import TokenData
-from sentra_shared.domain.repositories.user_repository import UserRepository
+from sentra_shared.domain.repository.user_repository import UserRepository
 from sentra_shared.infra.sql.postgres_service import get_db
 
 logger = get_logger("sentra.auth")

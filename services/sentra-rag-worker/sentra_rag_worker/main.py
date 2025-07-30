@@ -7,7 +7,7 @@ from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.document_removal_processor import DocumentRemovalProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra_shared.core.logging import get_logger, configure_logging
-from sentra_shared.domain.repositories.knowledge_repository import KnowledgeRepository
+from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
 from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_shared.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
 from sentra_shared.infra.amqp.removal_job_consumer import RemovalJobConsumer

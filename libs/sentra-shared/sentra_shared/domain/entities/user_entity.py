@@ -13,12 +13,15 @@ class UserEntity(BaseEntity):
     full_name: Mapped[str] = mapped_column(String)
     hashed_password: Mapped[str] = mapped_column(String)
     disabled: Mapped[bool] = mapped_column(Boolean, default=False)
-    roles: Mapped[str] = mapped_column(String)  # CSV format
-
-    conversations = relationship("ConversationEntity", back_populates="user", cascade="all, delete-orphan")
+    roles: Mapped[str] = mapped_column(String)
 
     def get_roles(self) -> List[Role]:
         return [Role(role.strip()) for role in self.roles.split(",") if role]
 
     def set_roles(self, roles: List[Role]) -> None:
         self.roles = ",".join(role.value for role in roles)
+
+    # Relationships
+    conversations = relationship("ConversationEntity", back_populates="created_by", cascade="all, delete-orphan")
+    documents = relationship("DocumentEntity", back_populates="created_by", cascade="all, delete-orphan")
+    knowledge_sources = relationship("KnowledgeSourceEntity", back_populates="created_by", cascade="all, delete-orphan")
