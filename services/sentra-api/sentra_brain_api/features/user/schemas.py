@@ -21,17 +21,6 @@ class UserModel(BaseModel):
         "from_attributes": True
     }
 
-    @classmethod
-    def from_entity(cls, user: UserEntity) -> "UserModel":
-        return cls(
-            id=str(user.id) if user.id else None,
-            username=user.username,
-            email=user.email,
-            full_name=user.full_name,
-            disabled=user.disabled,
-            roles=user.get_roles() if hasattr(user, "get_roles") else []
-        )
-
 
 class SignupModel(BaseModel):
     username: str
@@ -51,5 +40,5 @@ class SignupResponse(BaseModel):
         "from_attributes": True
     }
 
-class UserUpdate(UserModel):
+class UserUpdate(BaseModel):
     password: str | None = None

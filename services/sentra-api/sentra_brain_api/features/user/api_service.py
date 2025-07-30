@@ -4,10 +4,11 @@ from uuid import UUID
 from fastapi import HTTPException, status
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_brain_api.features.user.models import SignupResponse, UserModel
+from sentra_brain_api.features.user.mappers import to_user_model
+from sentra_brain_api.features.user.schemas import SignupResponse, UserModel
 from sentra_shared.core import logging
-from sentra_shared.infra.notifications.notification_service import NotificationService
 from sentra_shared.domain.services.user_service import UserService
+from sentra_shared.infra.notifications.notification_service import NotificationService
 from sqlalchemy.orm import Session
 import asyncio
 import os
@@ -58,7 +59,7 @@ class UserApiService:
             )
 
             return SignupResponse(
-                user=UserModel.model_validate(user, from_attributes=True),
+                user=to_user_model(user),
                 message=message
             )
 
@@ -96,7 +97,7 @@ class UserApiService:
                     suggestion="Check your signup link"
                 )
 
-            return UserModel.model_validate(user, from_attributes=True)
+            return to_user_model(user)
 
         except HTTPException:
             raise

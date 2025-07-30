@@ -4,9 +4,10 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from uuid import UUID
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_brain_api.features.user.models import SignupResponse, UserModel, SignupModel, UserUpdate
+from sentra_brain_api.features.user.schemas import SignupResponse, UserModel, SignupModel, UserUpdate
 from sentra_shared.domain.entities.user_entity import UserEntity
 from sentra_shared.infra.sql.postgres_service import get_db
+from sentra_brain_api.features.user.mappers import to_user_model
 from sentra_brain_api.features.user.constants import (
     SIGNUP_DESCRIPTION,
     ME_DESCRIPTION,
@@ -23,7 +24,7 @@ class UserController:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()
-
+    
     def _add_routes(self):
         @self.router.post("/signup", response_model=SignupResponse, description=SIGNUP_DESCRIPTION)
         def signup(user: SignupModel, db: Session = Depends(get_db)):
@@ -32,7 +33,7 @@ class UserController:
 
         @self.router.get("/me", response_model=UserModel, description=ME_DESCRIPTION)
         def me(current_user: UserEntity = Depends(get_authenticated_user)):
-            return UserModel.from_entity(current_user)
+            return to_user_model(current_user)
 
         @self.router.put("/{user_to_update_id}", response_model=UserModel, description=UPDATE_USER_DESCRIPTION)
         def update_user(
