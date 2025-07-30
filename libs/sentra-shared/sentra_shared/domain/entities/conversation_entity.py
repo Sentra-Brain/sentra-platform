@@ -13,4 +13,4 @@ class ConversationEntity(BaseEntity):
 
     # Relationships
     created_by_id: Mapped[UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("users.id"), nullable=False)
-    user = relationship("UserEntity", back_populates="conversations")
+    created_by = relationship("UserEntity", back_populates="conversations")

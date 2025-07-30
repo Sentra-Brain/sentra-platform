@@ -4,7 +4,7 @@
 # from sentra_brain_api.main import create_app
 # from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 # from sentra_shared.infra.sql.postgres_service import get_db
-# from sentra_brain_api.features.user.models import User
+# from sentra_brain_api.features.user.schemas import User
 
 # # Sample mock user objects (replace as needed)
 # class MockUser:
