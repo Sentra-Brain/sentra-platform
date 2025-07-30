@@ -64,12 +64,14 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
     setLoading(true);
     setError(null);
     try {
-      const [sourcesResponse, documentsResponse] = await Promise.all([
+      const [sourcesResponse] = await Promise.all([
         knowledgeService.listKnowledgeSources(),
-        knowledgeService.listDocuments(),
+        // TODO: review this because we don't need to get documents, in general,
+        // we need to get documents per knowledge source
+        // knowledgeService.listDocuments(undefined, undefined, 1000),
       ]);
       setKnowledgeSources(sourcesResponse.sources);
-      setDocuments(documentsResponse.documents);
+      // setDocuments(documentsResponse.documents);
     } catch (err) {
       setError('Failed to load knowledge data');
       console.error('Error loading knowledge data:', err);

@@ -86,15 +86,6 @@ class KnowledgeController:
                 total=total
             )
 
-        @self.router.post("/knowledge-sources", response_model=KnowledgeSourceResponse)
-        async def create_knowledge_source(
-            request: CreateKnowledgeSourceRequest,
-            user: UserEntity = Depends(self._require_admin),
-            service: KnowledgeApiService = Depends(self._get_service)
-        ):
-            source = service.create_knowledge_source(request, user)
-            return to_knowledge_source_response(source)
-
         @self.router.put("/knowledge-sources/{knowledge_source_id}/status", response_model=KnowledgeSourceResponse)
         async def update_status(
             knowledge_source_id: str,
