@@ -34,7 +34,7 @@ class ConversationApiService:
 
     async def create_conversation(self, user: UserEntity, request: CreateConversationRequest) -> CreateConversationResponse:
         conversation = ConversationEntity(
-            user_id=user.id,
+            created_by_id=user.id,
             title=request.title,
             description=request.description,
             initial_prompt=request.initial_prompt
