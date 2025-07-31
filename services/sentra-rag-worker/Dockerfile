@@ -1,4 +1,5 @@
-FROM sentra-rag-base:py3.13
+ARG BASE_IMAGE=sentra-rag-base:py3.13
+FROM ${BASE_IMAGE}
 
 WORKDIR /app
 
