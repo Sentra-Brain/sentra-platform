@@ -20,7 +20,7 @@ const DocumentCard: React.FC<DocumentCardProps> = ({ document }) => {
   const [isProcessing, setIsProcessing] = useState(false);
 
   const handleCardClick = () => {
-    navigateToDocument(document.id, document.knowledge_source_id);
+    navigateToDocument(document.id);
   };
 
   const handleReindex = async (e: React.MouseEvent) => {

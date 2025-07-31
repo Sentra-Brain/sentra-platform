@@ -12,7 +12,7 @@ export const useKnowledgeNavigation = () => {
     navigate(`/knowledge/sources/${sourceId}`);
   }, [navigate]);
 
-  const navigateToDocument = useCallback((documentId: string, _sourceId?: string) => {
+  const navigateToDocument = useCallback((documentId: string) => {
     navigate(`/knowledge/documents/${documentId}`);
   }, [navigate]);
 

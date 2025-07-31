@@ -20,21 +20,31 @@ vi.mock('../src/hooks/useChat', () => ({
   }),
 }));
 
-// Mock the useKnowledge hook since KnowledgePage depends on it
-vi.mock('../src/hooks/useKnowledge', () => ({
-  useKnowledge: () => ({
-    treeNodes: [],
-    selectedNode: undefined,
+// Mock the useKnowledgeSources hook since KnowledgePage depends on it
+vi.mock('../src/hooks/useKnowledgeSources', () => ({
+  useKnowledgeSources: () => ({
+    sources: [],
     loading: false,
     error: null,
-    showUploadDialog: false,
-    showCreateSourceDialog: false,
-    knowledgeSources: [],
     refresh: vi.fn(),
-    selectNode: vi.fn(),
-    setShowUploadDialog: vi.fn(),
-    setShowCreateSourceDialog: vi.fn(),
+    createSource: vi.fn(),
+    updateSourceStatus: vi.fn(),
+    getSourceById: vi.fn(),
     getUserUploadSource: vi.fn(),
+  }),
+}));
+
+vi.mock('../src/hooks/useDocuments', () => ({
+  useDocuments: () => ({
+    documentsBySource: {},
+    loadDocumentsForSource: vi.fn(),
+    uploadDocument: vi.fn(),
+    removeDocument: vi.fn(),
+    reindexDocument: vi.fn(),
+    getDocumentsForSource: vi.fn().mockReturnValue([]),
+    getDocumentById: vi.fn(),
+    isLoadingSource: vi.fn().mockReturnValue(false),
+    refreshDocumentsForSource: vi.fn(),
   }),
 }));
 
@@ -68,11 +78,14 @@ describe('Navigation Pages', () => {
   });
 
   it('renders KnowledgePage', async () => {
-    render(<KnowledgePage />);
+    render(
+      <BrowserRouter>
+        <KnowledgePage />
+      </BrowserRouter>
+    );
     
-    expect(screen.getByText('Knowledge Management')).toBeInTheDocument();
-    // Wait for the component to load and show the explorer
-    await screen.findByText('Knowledge Explorer');
+    // Check for the knowledge sources list title
+    expect(screen.getByText('Knowledge Sources')).toBeInTheDocument();
   });
 
   it('renders PromptsPage', () => {
