@@ -79,6 +79,7 @@ jobs:
           docker build -f services/sentra-api/Dockerfile \
             -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-api:${{ steps.get_version.outputs.version }} \
             .
+        working-directory: .
 
       - name: Push Docker image
         run: |
