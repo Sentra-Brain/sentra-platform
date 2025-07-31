@@ -7,7 +7,7 @@ from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.document_removal_processor import DocumentRemovalProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra_core.core.logging import get_logger, configure_logging
-from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
 from sentra_core.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
 from sentra_core.infra.amqp.removal_job_consumer import RemovalJobConsumer
@@ -231,7 +231,7 @@ class RAGWorker:
         try:
             # Create database session
             db = create_db_session()
-            repo = KnowledgeRepository(db)
+            repo = KnowledgeSourceRepository(db)
             scanner = FolderScanner(repo)
             
             # Scan for new files

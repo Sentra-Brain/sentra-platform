@@ -6,7 +6,7 @@ from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag_worker.services.vector_store_service import VectorStoreService
 from sentra_core.core.logging import get_logger, set_request_id
-from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 from sentra_core.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
 from uuid import UUID
@@ -71,7 +71,7 @@ class DocumentProcessor:
             # Create database session
             db = create_db_session()
             try:
-                repo = KnowledgeRepository(db)
+                repo = KnowledgeSourceRepository(db)
                 
                 # Update status to processing
                 self._update_document_status_with_repo(repo, document_id, DocumentStatus.PROCESSING)
@@ -229,14 +229,14 @@ class DocumentProcessor:
         """Update document status using a new database session."""
         db = create_db_session()
         try:
-            repo = KnowledgeRepository(db)
+            repo = KnowledgeSourceRepository(db)
             self._update_document_status_with_repo(repo, document_id, status, error, chunks_count)
         finally:
             db.close()
 
     def _update_document_status_with_repo(
         self, 
-        repo: KnowledgeRepository, 
+        repo: KnowledgeSourceRepository, 
         document_id: UUID, 
         status: DocumentStatus, 
         error: str = None, 
