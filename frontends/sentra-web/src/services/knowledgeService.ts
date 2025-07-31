@@ -49,6 +49,7 @@ export const knowledgeService = {
   },
 
   uploadDocument(
+    knowledgeSourceId: string,
     file: File,
     data: DocumentUploadRequest
   ): Promise<Document> {
@@ -59,7 +60,7 @@ export const knowledgeService = {
       formData.append('description', data.description);
     }
 
-    return httpClient.post('/upload', formData, {
+    return httpClient.post(`/knowledge/sources/${knowledgeSourceId}/documents`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

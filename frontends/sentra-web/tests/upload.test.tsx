@@ -77,6 +77,7 @@ describe('Upload Functionality', () => {
           isOpen={true}
           onClose={vi.fn()}
           onUploadComplete={vi.fn()}
+          knowledgeSourceId="test-source-id"
         />
       );
 
@@ -90,6 +91,7 @@ describe('Upload Functionality', () => {
           isOpen={true}
           onClose={vi.fn()}
           onUploadComplete={vi.fn()}
+          knowledgeSourceId="test-source-id"
         />
       );
 

@@ -27,21 +27,19 @@ export const useDocuments = () => {
     }
   }, []); // No dependencies to prevent re-creation and infinite loops
 
-  const uploadDocument = useCallback(async (file: File, data: DocumentUploadRequest): Promise<Document> => {
-    const newDocument = await knowledgeService.uploadDocument(file, data);
+  const uploadDocument = useCallback(async (knowledgeSourceId: string, file: File, data: DocumentUploadRequest): Promise<Document> => {
+    const newDocument = await knowledgeService.uploadDocument(knowledgeSourceId, file, data);
     
-    // Add to the upload source's documents (the API automatically determines the upload source)
-    if (newDocument.knowledge_source_id) {
-      setDocumentsBySource(prev => ({
-        ...prev,
-        [newDocument.knowledge_source_id]: [
-          ...(prev[newDocument.knowledge_source_id] || []),
-          newDocument
-        ]
-      }));
-      // Invalidate cache for this source
-      requestCache.invalidate(`knowledge/sources/${newDocument.knowledge_source_id}/documents`);
-    }
+    // Add to the specified source's documents
+    setDocumentsBySource(prev => ({
+      ...prev,
+      [knowledgeSourceId]: [
+        ...(prev[knowledgeSourceId] || []),
+        newDocument
+      ]
+    }));
+    // Invalidate cache for this source
+    requestCache.invalidate(`knowledge/sources/${knowledgeSourceId}/documents`);
     
     return newDocument;
   }, []);
