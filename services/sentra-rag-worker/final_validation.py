@@ -13,7 +13,7 @@ from uuid import uuid4
 from unittest.mock import Mock
 
 # Set up paths
-sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/libs/sentra-shared')
+sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/core/sentra-core')
 
 def test_complete_removal_workflow():
     """Test the complete removal workflow from job creation to message format."""
@@ -22,10 +22,10 @@ def test_complete_removal_workflow():
     
     try:
         # Step 1: Import all required components
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
-        from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
-        from sentra_shared.infra.amqp.removal_job_consumer import RemovalJobConsumer
-        from sentra_shared.domain.enums.document import DocumentStatus
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
+        from sentra_core.infra.amqp.removal_job_consumer import RemovalJobConsumer
+        from sentra_core.domain.enums.document import DocumentStatus
         
         print("✓ All components imported successfully")
         
@@ -146,8 +146,8 @@ def test_error_handling():
     print("-" * 40)
     
     try:
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
-        from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
         
         # Test invalid UUIDs
         try:

@@ -7,8 +7,8 @@ WORKDIR /app
 
 # Copy and install shared library
 COPY services/sentra-api/requirements.txt /app/requirements.txt
-COPY libs/sentra-shared /libs/sentra-shared
-RUN pip install -e /libs/sentra-shared
+COPY core/sentra-core /core/sentra-core
+RUN pip install -e /core/sentra-core
 
 # Install requirements (editable install)
 RUN pip install --no-cache-dir -r /app/requirements.txt

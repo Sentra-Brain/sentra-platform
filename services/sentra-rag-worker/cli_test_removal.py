@@ -11,13 +11,13 @@ import os
 from uuid import UUID, uuid4
 
 # Set up environment
-sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/libs/sentra-shared')
+sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/core/sentra-core')
 
 def test_publish_removal_job(document_id: str, knowledge_source_id: str, user_id: str):
     """Test publishing a removal job."""
     try:
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
-        from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
         
         # Create the removal job
         job = RemoveDocumentJob(

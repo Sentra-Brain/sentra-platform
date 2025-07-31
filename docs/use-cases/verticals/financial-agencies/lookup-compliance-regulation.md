@@ -10,7 +10,7 @@
 Financial agency users often need quick access to up-to-date compliance rules and regulations, including tax deadlines, fiscal regimes, and accounting standards.  
 Sentra Brain allows users to query compliance information either via internal Knowledge Base (RAG) or through external MCP-connected regulation databases.
 
-This reduces dependency on manual website checks or outdated reference materials.
+This reduces dependency on manual frontends/website checks or outdated reference materials.
 
 ## Basic Flow
 

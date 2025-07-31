@@ -3,7 +3,7 @@ from uuid import UUID
 import chromadb
 from chromadb.config import Settings as ChromaSettings
 from sentra_rag_worker.core.config import settings
-from sentra_shared.core.logging import get_logger
+from sentra_core.core.logging import get_logger
 
 logger = get_logger(__name__)
 

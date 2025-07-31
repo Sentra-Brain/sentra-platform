@@ -1,10 +1,10 @@
-# sentra_brain_api/features/public/public_controller.py
+# sentra_brain_api/features/public/controller.py
 from fastapi import APIRouter, Depends
-from sentra_shared.domain.entities.system_settings import SystemSettings
-from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_brain_api.features.public.models import PublicSettingsModel
-from sentra_shared.infra.sql.postgres_service import get_db
+from sentra_brain_api.features.public.api_service import PublicApiService
+from sentra_core.infra.sql.postgres_service import get_db
 from sqlalchemy.orm import Session
+from sentra_brain_api.features.public.schemas import PublicSettingsResponse
+from sentra_brain_api.features.public.constants import PUBLIC_SETTINGS_DESCRIPTION
 
 class PublicSettingsController:
     def __init__(self):
@@ -12,19 +12,6 @@ class PublicSettingsController:
         self._add_routes()
 
     def _add_routes(self):
-        @self.router.get("/settings", response_model=PublicSettingsModel, tags=["public"])
+        @self.router.get("/settings", response_model=PublicSettingsResponse, description=PUBLIC_SETTINGS_DESCRIPTION, tags=["public"])
         def get_public_settings(db: Session = Depends(get_db)):
-            settings = db.query(SystemSettings).first()
-            total_users = db.query(UserEntity).filter(~UserEntity.roles.contains("superadmin")).count()
-
-            if settings.max_users == -1:
-                available = -1  # indicates "unlimited"
-            else:
-                available = max(0, settings.max_users - total_users)
-
-            return PublicSettingsModel(
-                workspace_name=settings.workspace_name,
-                max_users=settings.max_users,
-                available_slots=available
-            )
-
+            return PublicApiService(db).get_public_settings()

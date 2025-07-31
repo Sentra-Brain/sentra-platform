@@ -42,7 +42,7 @@ These constraints define the framework within which all architectural decisions 
 
 - **Repository Structure**  
   The project must maintain a single-repository structure, organized as:  
-  `/apps/`, `/services/`, `/deploy/`, `/docs/arc42/`, `/website/`.
+  `/apps/`, `/services/`, `/deploy/`, `/docs/arc42/`, `/frontends/website/`.
 
 - **Hardware Requirements**  
   Minimum baseline hardware for full deployment:  

@@ -1,7 +1,7 @@
 services:
   sentra-web:
     build:
-      context: ../apps/sentra-web    
+      context: ../frontends/sentra-web    
     command: ["npm", "run", "dev:inspect"]
     image: sentra-web:dev
     container_name: sentra-web
@@ -9,16 +9,16 @@ services:
       - "3100:3100"   # App
       - "3129:9229"   # Node.js Inspect
     volumes:
-      - ../apps/sentra-web:/app
+      - ../frontends/sentra-web:/app
       - /app/node_modules
     networks:
       - sentrabrain-dev-net
     env_file:
-      - ../apps/sentra-web/.env
+      - ../frontends/sentra-web/.env
 
   sentra-admin:
     build:
-      context: ../apps/sentra-admin 
+      context: ../frontends/sentra-admin 
     command: ["npm", "run", "dev:inspect"]
     image: sentra-admin:dev
     container_name: sentra-admin
@@ -26,12 +26,12 @@ services:
       - "3200:3200"   # App
       - "3229:9329"   # Node.js Inspect
     volumes:
-      - ../apps/sentra-admin:/app
+      - ../frontends/sentra-admin:/app
       - /app/node_modules
     networks:
       - sentrabrain-dev-net
     env_file:
-      - ../apps/sentra-admin/.env
+      - ../frontends/sentra-admin/.env
 
   sentra-api:
     build:
@@ -45,7 +45,7 @@ services:
       - "8080:8080"   # Metrics port
     volumes:
       - ../services/sentra-api:/app
-      - ../libs/sentra-shared:/libs/sentra-shared
+      - ../core/sentra-core:/core/sentra-core
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -64,7 +64,7 @@ services:
       - "8081:8080"   # Metrics port
     volumes:
       - ../services/sentra-rag-worker:/app
-      - ../libs/sentra-shared:/libs/sentra-shared
+      - ../core/sentra-core:/core/sentra-core
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
       # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:

@@ -1,12 +1,12 @@
-# Ignora todo por defecto
+# Ignore all files and directories by default
 **
 
-# Solo incluye apps y services
-!apps/
+# Include folders that should not be ignored
+!frontends/
 !services/
-!libs/
+!core/
 
-# Dentro de apps/ y services/, ignora basura
+# Ignore specific files and directories
 **/__pycache__/
 **/.pytest_cache/
 **/.venv/
@@ -19,9 +19,9 @@
 **/node_modules/
 **/.coverage
 
-# Ignorar tests
+# Ignore test directories
 **/tests/
 
-# Ignorar tooling local
+# Ignore local tooling
 **/.vscode/
 **/.devcontainer/

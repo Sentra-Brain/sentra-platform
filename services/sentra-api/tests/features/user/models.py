@@ -1,4 +1,4 @@
-from sentra_brain_api.features.user.models import SignupResponse, UserModel
+from sentra_brain_api.features.user.schemas import SignupResponse, UserModel
 
 mock_user = UserModel(
     id=1,

@@ -5,7 +5,7 @@
       "name": "Astro Dev (Terminal)",
       "command": "./node_modules/.bin/astro dev",
       "request": "launch",
-      "cwd": "${workspaceFolder}/website",
+      "cwd": "${workspaceFolder}/frontends/website",
       "type": "node-terminal"
     },
     {
@@ -13,14 +13,14 @@
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm run dev",
-      "cwd": "${workspaceFolder}/apps/sentra-web"
+      "cwd": "${workspaceFolder}/frontends/sentra-web"
     },
     {
       "name": "Sentra Admin Dev",
       "type": "node-terminal",
       "request": "launch",
       "command": "pnpm run dev",
-      "cwd": "${workspaceFolder}/apps/sentra-admin"
+      "cwd": "${workspaceFolder}/frontends/sentra-admin"
     },
     {
       "name": "Sentra API (Debug)",
@@ -33,7 +33,7 @@
       "justMyCode": false
     },
     {
-      "name": "Test: sentra-shared",
+      "name": "Test: sentra-core",
       "type": "debugpy",
       "request": "launch",
       "purpose": ["debug-test"],
@@ -41,8 +41,8 @@
         "PYTEST_ADDOPTS": "--no-cov"
       },
       "module": "pytest",
-      "cwd": "${workspaceFolder}/services/sentra-shared/tests",
-      "envFile": "${workspaceFolder}/services/sentra-shared/tests/.env.test",
+      "cwd": "${workspaceFolder}/services/sentra-core/tests",
+      "envFile": "${workspaceFolder}/services/sentra-core/tests/.env.test",
       "console": "integratedTerminal",
     },
     

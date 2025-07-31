@@ -5,12 +5,12 @@ on:
     branches: [main]
     paths:
       - 'services/sentra-rag-worker/**'
-      - 'libs/sentra-shared/**'
+      - 'core/sentra-core/**'
       - '.github/workflows/cicd-sentra-rag-worker.yml'
   pull_request:
     paths:
       - 'services/sentra-rag-worker/**'
-      - 'libs/sentra-shared/**'
+      - 'core/sentra-core/**'
       - '.github/workflows/cicd-sentra-rag-worker.yml'
   workflow_dispatch:
 

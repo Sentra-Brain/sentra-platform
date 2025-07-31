@@ -2,11 +2,11 @@ from datetime import datetime, timedelta, timezone
 from fastapi import HTTPException, status
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
-from sentra_shared.infra.sql.postgres_settings import settings
+from sentra_core.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_shared.domain.repositories.user_repository  import UserRepository
-from sentra_shared.core import logging
+from sentra_core.domain.entities.user_entity import UserEntity
+from sentra_core.domain.repository.user_repository  import UserRepository
+from sentra_core.core import logging
 
 logger = logging.get_logger("sentra_brain_api")
 

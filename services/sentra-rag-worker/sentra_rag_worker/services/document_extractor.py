@@ -1,6 +1,6 @@
 import os
-from sentra_shared.core.logging import get_logger
-from sentra_shared.domain.entities.document_entity import DocumentFileType
+from sentra_core.core.logging import get_logger
+from sentra_core.domain.entities.document_entity import DocumentFileType
 
 import chardet
 import fitz  # PyMuPDF

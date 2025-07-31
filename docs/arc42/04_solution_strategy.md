@@ -16,7 +16,7 @@ Sentra Brain is positioned as a private, modular AI platform designed for SMEs a
 - **Secure MCP Integration:** Provides a controlled API layer for CRM, ERP, Office plugins, and other internal systems, split into dedicated MCP services per capability.
 - **Document Search (RAG):** Integration with ChromaDB for private knowledge base retrieval.
 - **Internal Authentication and Session Handling:** Using SQL database for user credentials/configuration and NoSQL database (MongoDB) for chat histories.
-- **Single-Repository Monorepo:** Unified structure `/apps/`, `/services/`, `/deploy/`, `/docs/arc42/`, `/website/`.
+- **Single-Repository Monorepo:** Unified structure `/apps/`, `/services/`, `/deploy/`, `/docs/arc42/`, `/frontends/website/`.
 - **Enterprise-Grade Security:** Designed for GDPR, HIPAA, and ISO27001 compliance.
 - **Certified Hardware:** Official deployment packages include Sentra Brain-certified hardware.
 - **Workflow Automation (Future Phase):** Embedded n8n instance for internal process automation planned for future development (not part of Phase 1 baseline).

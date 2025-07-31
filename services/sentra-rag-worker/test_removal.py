@@ -27,14 +27,14 @@ os.environ.update({
 
 # Add the project root to the path
 sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/services/sentra-rag-worker')
-sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/libs/sentra-shared')
+sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/core/sentra-core')
 
 def test_removal_job_schema():
     """Test the RemoveDocumentJob schema."""
     print("Testing RemoveDocumentJob schema...")
     
     try:
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
         
         # Create a test job
         job = RemoveDocumentJob(
@@ -61,7 +61,7 @@ def test_document_status_enum():
     print("\nTesting DocumentStatus enum...")
     
     try:
-        from sentra_shared.domain.enums.document import DocumentStatus
+        from sentra_core.domain.enums.document import DocumentStatus
         
         # Check that new statuses exist
         assert hasattr(DocumentStatus, 'TO_BE_REMOVED')
@@ -93,7 +93,7 @@ def test_removal_publisher_import():
     print("\nTesting RemovalJobPublisher import...")
     
     try:
-        from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
+        from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
         
         # Test instantiation (without connecting)
         publisher = RemovalJobPublisher()
@@ -111,7 +111,7 @@ def test_removal_consumer_import():
     print("\nTesting RemovalJobConsumer import...")
     
     try:
-        from sentra_shared.infra.amqp.removal_job_consumer import RemovalJobConsumer
+        from sentra_core.infra.amqp.removal_job_consumer import RemovalJobConsumer
         
         # Test instantiation (without connecting)
         consumer = RemovalJobConsumer()
@@ -147,7 +147,7 @@ def test_removal_job_serialization():
     print("\nTesting RemoveDocumentJob JSON serialization...")
     
     try:
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
         import json
         
         # Create a test job

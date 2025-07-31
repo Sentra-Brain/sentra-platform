@@ -1,7 +1,7 @@
 from typing import List
 import re
 from sentra_rag_worker.core.config import settings
-from sentra_shared.core.logging import get_logger
+from sentra_core.core.logging import get_logger
 
 logger = get_logger(__name__)
 

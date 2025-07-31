@@ -153,8 +153,8 @@ FROM sentra-rag-base:py3.13
 
 WORKDIR /app
 
-COPY libs/sentra-shared /libs/sentra-shared
-RUN pip install -e /libs/sentra-shared
+COPY core/sentra-core /core/sentra-core
+RUN pip install -e /core/sentra-core
 
 COPY services/sentra-rag-worker /app
 
