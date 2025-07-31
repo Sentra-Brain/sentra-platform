@@ -45,3 +45,33 @@ class DocumentRepository(BaseRepository[DocumentEntity]):
         document.status_message = status_message
         document.chunks_count = chunks_count
         return self.update(document)
+
+    def list_by_user_or_source(
+        self,
+        user_id: UUID,
+        knowledge_source_id: Optional[UUID] = None,
+        limit: int = 100,
+        offset: int = 0
+    ) -> List[DocumentEntity]:
+        """List documents by user or optionally filtered by knowledge source"""
+        query = self.db.query(self.model).filter(
+            self.model.created_by_id == user_id,
+            self.model.deleted_at.is_(None)
+        )
+        if knowledge_source_id:
+            query = query.filter(self.model.knowledge_source_id == knowledge_source_id)
+        return query.offset(offset).limit(limit).all()
+
+    def count_by_user_or_source(
+        self,
+        user_id: UUID,
+        knowledge_source_id: Optional[UUID] = None
+    ) -> int:
+        """Count documents by user or optionally filtered by knowledge source"""
+        query = self.db.query(self.model).filter(
+            self.model.created_by_id == user_id,
+            self.model.deleted_at.is_(None)
+        )
+        if knowledge_source_id:
+            query = query.filter(self.model.knowledge_source_id == knowledge_source_id)
+        return query.count()
