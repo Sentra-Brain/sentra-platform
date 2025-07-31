@@ -35,4 +35,4 @@ pytest-dotenv
 pytest-mock
 python-jose
 
--e ../../libs/sentra-shared
+-e ../../core/sentra-core

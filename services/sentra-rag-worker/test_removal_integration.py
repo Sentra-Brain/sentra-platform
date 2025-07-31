@@ -31,7 +31,7 @@ os.environ.update({
 
 # Add project paths
 sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/services/sentra-rag-worker')
-sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/libs/sentra-shared')
+sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/core/sentra-core')
 
 def test_removal_message_processing():
     """Test processing of removal messages with mocked dependencies."""
@@ -39,7 +39,7 @@ def test_removal_message_processing():
     
     try:
         from sentra_rag_worker.services.document_removal_processor import DocumentRemovalProcessor
-        from sentra_shared.domain.enums.document import DocumentStatus
+        from sentra_core.domain.enums.document import DocumentStatus
         
         # Create test data
         document_id = uuid4()
@@ -137,8 +137,8 @@ def test_publisher_message_format():
     print("\nTesting publisher message format...")
     
     try:
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
-        from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
         import json
         
         # Create test job

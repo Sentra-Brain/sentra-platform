@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from unittest.mock import AsyncMock, Mock
-from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.conversation.schemas import (

@@ -5,22 +5,22 @@ from uuid import UUID
 from typing import List, Optional
 from fastapi import UploadFile
 
-from sentra_shared.domain.constants.file_types import ALLOWED_FILE_TYPES
-from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-from sentra_shared.domain.entities.document_entity import DocumentEntity
-from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
-from sentra_shared.domain.services.file_storage import FileStorageService
-from sentra_shared.domain.services.knowledge_source_service import KnowledgeSourceService
-from sentra_shared.domain.services.document_service import DocumentService
-from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra_shared.domain.repository.document_repository import DocumentRepository
-from sentra_shared.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
-from sentra_shared.domain.enums.document import DocumentFileType
+from sentra_core.domain.constants.file_types import ALLOWED_FILE_TYPES
+from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
+from sentra_core.domain.entities.document_entity import DocumentEntity
+from sentra_core.domain.entities.user_entity import UserEntity
+from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra_core.domain.services.file_storage import FileStorageService
+from sentra_core.domain.services.knowledge_source_service import KnowledgeSourceService
+from sentra_core.domain.services.document_service import DocumentService
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra_core.domain.repository.document_repository import DocumentRepository
+from sentra_core.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
+from sentra_core.domain.enums.document import DocumentFileType
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
-from sentra_shared.core.settings import settings
-from sentra_shared.core.logging import get_logger
+from sentra_core.core.settings import settings
+from sentra_core.core.logging import get_logger
 
 logger = get_logger(__name__)
 

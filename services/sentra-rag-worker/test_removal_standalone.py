@@ -29,7 +29,7 @@ os.environ.update({
 
 # Add project paths
 sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/services/sentra-rag-worker')
-sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/libs/sentra-shared')
+sys.path.insert(0, '/home/runner/work/sentra-brain/sentra-brain/core/sentra-core')
 
 def test_removal_schemas_and_publishers():
     """Test the removal schemas and publishers that don't require external dependencies."""
@@ -37,7 +37,7 @@ def test_removal_schemas_and_publishers():
     
     try:
         # Test RemoveDocumentJob schema
-        from sentra_shared.model.remove_document_job import RemoveDocumentJob
+        from sentra_core.model.remove_document_job import RemoveDocumentJob
         
         job = RemoveDocumentJob(
             document_id=uuid4(),
@@ -51,7 +51,7 @@ def test_removal_schemas_and_publishers():
         print("✓ RemoveDocumentJob schema works")
         
         # Test RemovalJobPublisher
-        from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
+        from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
         
         publisher = RemovalJobPublisher()
         assert publisher.queue == "removal_jobs"
@@ -74,7 +74,7 @@ def test_removal_schemas_and_publishers():
         print("✓ RemovalJobPublisher works")
         
         # Test RemovalJobConsumer
-        from sentra_shared.infra.amqp.removal_job_consumer import RemovalJobConsumer
+        from sentra_core.infra.amqp.removal_job_consumer import RemovalJobConsumer
         
         consumer = RemovalJobConsumer()
         assert consumer.queue == "removal_jobs"
@@ -99,7 +99,7 @@ def test_removal_processor_with_mocks():
             'chromadb.config': MagicMock()
         }):
             from sentra_rag_worker.services.document_removal_processor import DocumentRemovalProcessor
-            from sentra_shared.domain.enums.document import DocumentStatus
+            from sentra_core.domain.enums.document import DocumentStatus
             
             # Create test data
             document_id = uuid4()

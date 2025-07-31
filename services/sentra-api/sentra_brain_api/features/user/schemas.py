@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 
-from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_core.domain.entities.user_entity import UserEntity
 
 class Token(BaseModel):
     access_token: str

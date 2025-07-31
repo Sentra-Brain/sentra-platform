@@ -2,7 +2,7 @@
 
 import re
 from typing import Optional
-from sentra_shared.core.logging import get_logger
+from sentra_core.core.logging import get_logger
 from sentra_brain_api.features.llm_proxy.adapter import VLLMServerClient
 from sentra_brain_api.features.llm_proxy.models import ChatCompletionRequest, ChatMessage
 

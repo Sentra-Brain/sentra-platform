@@ -2,11 +2,11 @@ import os
 from pathlib import Path
 from typing import List, Dict, Any
 from uuid import UUID, uuid4
-from sentra_shared.core.logging import get_logger
+from sentra_core.core.logging import get_logger
 from sentra_rag_worker.core.config import settings
-from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
-from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
+from sentra_core.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
+from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
 
 logger = get_logger(__name__)
 

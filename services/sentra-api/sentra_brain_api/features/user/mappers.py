@@ -1,6 +1,6 @@
 # sentra_brain_api/features/user/mappers.py
 
-from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.user.schemas import UserModel
 
 def to_user_model(user: UserEntity) -> UserModel:

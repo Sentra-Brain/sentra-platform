@@ -1,6 +1,6 @@
 # sentra_brain_api/features/conversation/mappers.py
 
-from sentra_shared.domain.entities.conversation_entity import ConversationEntity
+from sentra_core.domain.entities.conversation_entity import ConversationEntity
 from sentra_brain_api.features.conversation.schemas import (
     ConversationListItemResponse,
     ConversationResponse,

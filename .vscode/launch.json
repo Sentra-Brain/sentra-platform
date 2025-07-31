@@ -33,7 +33,7 @@
       "justMyCode": false
     },
     {
-      "name": "Test: sentra-shared",
+      "name": "Test: sentra-core",
       "type": "debugpy",
       "request": "launch",
       "purpose": ["debug-test"],
@@ -41,8 +41,8 @@
         "PYTEST_ADDOPTS": "--no-cov"
       },
       "module": "pytest",
-      "cwd": "${workspaceFolder}/services/sentra-shared/tests",
-      "envFile": "${workspaceFolder}/services/sentra-shared/tests/.env.test",
+      "cwd": "${workspaceFolder}/services/sentra-core/tests",
+      "envFile": "${workspaceFolder}/services/sentra-core/tests/.env.test",
       "console": "integratedTerminal",
     },
     

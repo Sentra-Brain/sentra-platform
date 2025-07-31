@@ -1,13 +1,13 @@
 from pathlib import Path
-from sentra_shared.domain.entities.document_entity import DocumentFileType, DocumentStatus
-from sentra_shared.domain.services.file_storage import FileStorageService
+from sentra_core.domain.entities.document_entity import DocumentFileType, DocumentStatus
+from sentra_core.domain.services.file_storage import FileStorageService
 from sentra_rag_worker.services.document_extractor import DocumentExtractor
 from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag_worker.services.vector_store_service import VectorStoreService
-from sentra_shared.core.logging import get_logger, set_request_id
-from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
-from sentra_shared.infra.sql.postgres_service import create_db_session
+from sentra_core.core.logging import get_logger, set_request_id
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
+from sentra_core.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any
 from uuid import UUID
 import os
@@ -27,7 +27,7 @@ class DocumentProcessor:
     
     def _get_settings(self):
         """Lazy import of settings to avoid circular imports"""
-        from sentra_shared.core.settings import settings
+        from sentra_core.core.settings import settings
         return settings
     
     def _get_file_storage(self) -> FileStorageService:

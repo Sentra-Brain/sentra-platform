@@ -19,8 +19,8 @@ from sentra_brain_api.features.knowledge.controller import KnowledgeController
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
-from sentra_shared.core import logging
-from sentra_shared.infra.sql import postgres_service
+from sentra_core.core import logging
+from sentra_core.infra.sql import postgres_service
 import os
 
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware

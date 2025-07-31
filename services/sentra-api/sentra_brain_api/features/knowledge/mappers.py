@@ -1,7 +1,7 @@
 # sentra_brain_api/features/knowledge/mappers.py
 
-from sentra_shared.domain.entities.document_entity import DocumentEntity
-from sentra_shared.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
+from sentra_core.domain.entities.document_entity import DocumentEntity
+from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
 from sentra_brain_api.features.knowledge.schemas import DocumentResponse, KnowledgeSourceResponse
 from sentra_brain_api.shared_models.user_refs import UserRef
 

@@ -2,7 +2,7 @@
 
 from sqlalchemy.orm import Session
 from sentra_brain_api.features.public.schemas import PublicSettingsResponse
-from sentra_shared.domain.services.system_settings_service import SystemSettingsService
+from sentra_core.domain.services.system_settings_service import SystemSettingsService
 
 class PublicApiService:
     def __init__(self, db: Session):

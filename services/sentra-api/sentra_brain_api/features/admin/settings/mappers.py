@@ -1,5 +1,5 @@
 from sentra_brain_api.features.admin.settings.schemas import SystemSettingsResponse
-from sentra_shared.domain.entities.system_settings import SystemSettingsEntity
+from sentra_core.domain.entities.system_settings import SystemSettingsEntity
 
 def to_system_settings_response(settings: SystemSettingsEntity) -> SystemSettingsResponse:
     return SystemSettingsResponse(

@@ -11,7 +11,7 @@ import tempfile
 from uuid import uuid4
 from pathlib import Path
 
-from sentra_shared.core.logging import get_logger
+from sentra_core.core.logging import get_logger
 
 # Set up test environment
 os.environ.update({
@@ -43,7 +43,7 @@ def main():
         from sentra_rag_worker.services.text_chunker import TextChunker
         from sentra_rag_worker.services.document_extractor import DocumentExtractor
         from sentra_rag_worker.services.folder_scanner import FolderScanner
-        from sentra_shared.domain.entities.document_entity import DocumentFileType
+        from sentra_core.domain.entities.document_entity import DocumentFileType
         
         logger = get_logger(__name__)
         print("✅ All components loaded successfully")

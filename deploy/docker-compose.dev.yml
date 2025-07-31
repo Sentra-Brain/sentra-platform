@@ -45,7 +45,7 @@ services:
       - "8080:8080"   # Metrics port
     volumes:
       - ../services/sentra-api:/app
-      - ../libs/sentra-shared:/libs/sentra-shared
+      - ../core/sentra-core:/core/sentra-core
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -64,7 +64,7 @@ services:
       - "8081:8080"   # Metrics port
     volumes:
       - ../services/sentra-rag-worker:/app
-      - ../libs/sentra-shared:/libs/sentra-shared
+      - ../core/sentra-core:/core/sentra-core
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
       # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:

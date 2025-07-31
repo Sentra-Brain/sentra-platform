@@ -2,12 +2,12 @@ from fastapi import APIRouter, Depends, UploadFile, File, Form, Query, HTTPExcep
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from sentra_shared.infra.sql.postgres_service import get_db
-from sentra_shared.domain.entities.user_entity import UserEntity
-from sentra_shared.domain.enums.role import Role
-from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra_shared.domain.repository.document_repository import DocumentRepository
-from sentra_shared.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra_core.infra.sql.postgres_service import get_db
+from sentra_core.domain.entities.user_entity import UserEntity
+from sentra_core.domain.enums.role import Role
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra_core.domain.repository.document_repository import DocumentRepository
+from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
 
 from sentra_brain_api.features.knowledge.api_service import KnowledgeApiService
 from sentra_brain_api.features.knowledge.schemas import (

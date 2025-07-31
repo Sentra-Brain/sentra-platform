@@ -1,0 +1,35 @@
+[project]
+name = "sentra-core"
+version = "0.1.0"
+description = "Shared logic for Sentra Brain"
+authors = [{ name = "Juan G Carmona" }]
+readme = "README.md"
+requires-python = ">=3.9"
+
+# main dependencies
+dependencies = [
+  "pika",
+  "psycopg2-binary",
+  "pydantic",
+  "pydantic-settings",
+  "pymongo",
+  "sqlalchemy",
+  "passlib[bcrypt]",
+]
+
+# Optional dependencies
+[project.optional-dependencies]
+dev = [
+  "pytest==8.4.1",
+  "pytest-cov==6.2.1",
+  "pytest-mock==3.14.1",
+  "pytest-asyncio==1.1.0",
+  "debugpy==1.8.15",
+]
+
+[tool.setuptools]
+packages = ["sentra_core"]
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

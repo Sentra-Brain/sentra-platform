@@ -20,10 +20,10 @@ The removal system consists of several components:
 
 ### 1. RemoveDocumentJob Schema
 
-Located at: `libs/sentra-shared/sentra_shared/model/remove_document_job.py`
+Located at: `core/sentra-core/sentra_core/model/remove_document_job.py`
 
 ```python
-from sentra_shared.model.remove_document_job import RemoveDocumentJob
+from sentra_core.model.remove_document_job import RemoveDocumentJob
 from uuid import uuid4
 
 job = RemoveDocumentJob(
@@ -35,11 +35,11 @@ job = RemoveDocumentJob(
 
 ### 2. RemovalJobPublisher
 
-Located at: `libs/sentra-shared/sentra_shared/domain/services/removal_job_publisher.py`
+Located at: `core/sentra-core/sentra_core/domain/services/removal_job_publisher.py`
 
 ```python
-from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
-from sentra_shared.model.remove_document_job import RemoveDocumentJob
+from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
+from sentra_core.model.remove_document_job import RemoveDocumentJob
 
 # Create a removal job
 job = RemoveDocumentJob(
@@ -58,7 +58,7 @@ with RemovalJobPublisher() as publisher:
 The system now supports additional document statuses:
 
 ```python
-from sentra_shared.domain.enums.document import DocumentStatus
+from sentra_core.domain.enums.document import DocumentStatus
 
 # New statuses for removal workflow
 DocumentStatus.TO_BE_REMOVED  # "to_be_removed"
@@ -130,8 +130,8 @@ python test_removal_standalone.py
 ### Publishing a Removal Job
 
 ```python
-from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
-from sentra_shared.model.remove_document_job import RemoveDocumentJob
+from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
+from sentra_core.model.remove_document_job import RemoveDocumentJob
 from uuid import UUID
 
 # Create the job
@@ -153,8 +153,8 @@ with RemovalJobPublisher() as publisher:
 ### Batch Publishing
 
 ```python
-from sentra_shared.domain.services.removal_job_publisher import RemovalJobPublisher
-from sentra_shared.model.remove_document_job import RemoveDocumentJob
+from sentra_core.domain.services.removal_job_publisher import RemovalJobPublisher
+from sentra_core.model.remove_document_job import RemoveDocumentJob
 
 jobs = [
     RemoveDocumentJob(document_id=doc_id1, knowledge_source_id=ks_id, user_id=user_id),

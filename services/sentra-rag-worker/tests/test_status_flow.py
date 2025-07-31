@@ -35,7 +35,7 @@ def test_document_status_enum():
     print("\nTesting document status enum...")
     
     try:
-        from sentra_shared.domain.entities.document_entity import DocumentStatus
+        from sentra_core.domain.entities.document_entity import DocumentStatus
         
         # Test that all new status values exist
         expected_statuses = ['PENDING', 'PROCESSING', 'EXTRACTING', 'CHUNKING', 'EMBEDDING', 'INDEXING', 'INDEXED', 'FAILED']
@@ -71,7 +71,7 @@ def test_simple_logging():
     print("\nTesting simple logging...")
     
     try:
-        from sentra_shared.core.logging import get_logger, set_request_id, get_request_id, configure_logging
+        from sentra_core.core.logging import get_logger, set_request_id, get_request_id, configure_logging
         
         # Configure logging for testing
         configure_logging(debug=True)
@@ -106,8 +106,8 @@ def test_knowledge_repository():
     print("\nTesting knowledge repository...")
     
     try:
-        from sentra_shared.domain.repository.knowledge_source_repository import KnowledgeRepository
-        from sentra_shared.domain.entities.document_entity import DocumentStatus
+        from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
+        from sentra_core.domain.entities.document_entity import DocumentStatus
         from uuid import UUID
         
         # Mock database session
@@ -154,7 +154,7 @@ def test_document_entity():
     print("\nTesting document entity...")
     
     try:
-        from sentra_shared.domain.entities.document_entity import DocumentEntity, DocumentStatus
+        from sentra_core.domain.entities.document_entity import DocumentEntity, DocumentStatus
         
         # Test that DocumentEntity class is importable (basic structure test)
         # We can't instantiate it without a database, but we can check the class exists

@@ -1,11 +1,11 @@
 # sentra_brain_api/features/conversation/api_service.py
 
 from sqlalchemy.orm import Session
-from sentra_shared.domain.services.conversation_service import ConversationService
-from sentra_shared.domain.repository.conversation_repository import ConversationRepository
-from sentra_shared.infra.nosql.mongo_conversation_repository import MongoConversationRepository
-from sentra_shared.domain.entities.conversation_entity import ConversationEntity
-from sentra_shared.domain.entities.user_entity import UserEntity
+from sentra_core.domain.services.conversation_service import ConversationService
+from sentra_core.domain.repository.conversation_repository import ConversationRepository
+from sentra_core.infra.nosql.mongo_conversation_repository import MongoConversationRepository
+from sentra_core.domain.entities.conversation_entity import ConversationEntity
+from sentra_core.domain.entities.user_entity import UserEntity
 
 from sentra_brain_api.features.conversation.schemas import (
     CreateConversationRequest,
