@@ -38,9 +38,8 @@ function AppGuard() {
         <Route path="/chat" element={<ChatPage />} />
         <Route path="/c/:conversationId" element={<ChatPage />} />
         <Route path="/knowledge" element={<KnowledgePage />} />
-        <Route path="/knowledge/source/:sourceId" element={<KnowledgePage />} />
-        <Route path="/knowledge/source/:sourceId/document/:documentId" element={<KnowledgePage />} />
-        <Route path="/knowledge/document/:documentId" element={<KnowledgePage />} />
+        <Route path="/knowledge/sources/:sourceId" element={<KnowledgePage />} />
+        <Route path="/knowledge/documents/:documentId" element={<KnowledgePage />} />
         <Route path="/prompts" element={<PromptsPage />} />
         <Route path="/skills" element={<SkillsPage />} />
         <Route path="/settings" element={<Settings />} />

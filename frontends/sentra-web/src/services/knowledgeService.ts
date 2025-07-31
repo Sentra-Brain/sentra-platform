@@ -13,13 +13,13 @@ import type {
 export const knowledgeService = {
   // Knowledge Sources
   listKnowledgeSources(limit = 100, offset = 0): Promise<KnowledgeSourceListResponse> {
-    return httpClient.get('/knowledge/knowledge-sources', {
+    return httpClient.get('/knowledge-sources', {
       params: { limit, offset },
     });
   },
 
   createKnowledgeSource(data: CreateKnowledgeSourceRequest): Promise<KnowledgeSource> {
-    return httpClient.post('/knowledge/knowledge-sources', data);
+    return httpClient.post('/knowledge-sources', data);
   },
 
   // Documents
@@ -30,15 +30,27 @@ export const knowledgeService = {
   ): Promise<DocumentListResponse> {
     const params: Record<string, unknown> = { limit, offset };
     return httpClient.get(
-      `/knowledge/knowledge-sources/${knowledgeSourceId}/documents`,
+      `/knowledge-sources/${knowledgeSourceId}/documents`,
       { params }
     );
   },
 
+  // List all documents across sources
+  listAllDocuments(
+    knowledgeSourceId?: string,
+    limit = 100,
+    offset = 0
+  ): Promise<DocumentListResponse> {
+    const params: Record<string, unknown> = { limit, offset };
+    if (knowledgeSourceId) {
+      params.knowledge_source_id = knowledgeSourceId;
+    }
+    return httpClient.get('/documents', { params });
+  },
+
   uploadDocument(
     file: File,
-    data: DocumentUploadRequest,
-    knowledgeSourceId?: string
+    data: DocumentUploadRequest
   ): Promise<Document> {
     const formData = new FormData();
     formData.append('file', file);
@@ -46,84 +58,28 @@ export const knowledgeService = {
     if (data.description) {
       formData.append('description', data.description);
     }
-    if (knowledgeSourceId) {
-      formData.append('knowledge_source_id', knowledgeSourceId);
-    }
 
-    return httpClient.post('/knowledge/upload', formData, {
+    return httpClient.post('/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
     });
   },
 
-  // Upload multiple documents to a specific knowledge source
-  uploadMultipleDocuments(
-    files: File[],
-    knowledgeSourceId?: string
-  ): Promise<Document[]> {
-    const uploadPromises = files.map(file => {
-      const data: DocumentUploadRequest = {
-        display_name: file.name.replace(/\.[^/.]+$/, ''), // Remove file extension
-      };
-      return this.uploadDocument(file, data, knowledgeSourceId);
-    });
-    
-    return Promise.all(uploadPromises);
-  },
-
-  // Create knowledge source from folder upload
-  uploadFolderAsKnowledgeSource(
-    files: File[],
-    sourceData: CreateKnowledgeSourceRequest
-  ): Promise<{
-    knowledgeSource: KnowledgeSource;
-    documents: Document[];
-    progress: (uploaded: number, total: number) => void;
-  }> {
-    // First create the knowledge source
-    return this.createKnowledgeSource(sourceData).then(async (knowledgeSource) => {
-      const documents: Document[] = [];
-
-      // Upload files one by one to show progress
-      for (const file of files) {
-        try {
-          const data: DocumentUploadRequest = {
-            display_name: file.name.replace(/\.[^/.]+$/, ''),
-          };
-          const document = await this.uploadDocument(file, data, knowledgeSource.id);
-          documents.push(document);
-        } catch (error) {
-          console.error(`Failed to upload ${file.name}:`, error);
-          // Continue with other files
-        }
-      }
-
-      return {
-        knowledgeSource,
-        documents,
-        progress: () => {
-          // This is a placeholder - in a real implementation, 
-          // we'd use a callback mechanism for progress updates
-        }
-      };
-    });
-  },
-
   // Enable/Disable knowledge source
   updateKnowledgeSourceStatus(knowledgeSourceId: string, enabled: boolean): Promise<KnowledgeSource> {
-    return httpClient.put(`/knowledge/knowledge-sources/${knowledgeSourceId}/status`, null, {
+    return httpClient.put(`/knowledge-sources/${knowledgeSourceId}/status`, null, {
       params: { enabled },
     });
   },
 
   // Re-index document  
   reindexDocument(documentId: string): Promise<Document> {
-    return httpClient.post(`/knowledge/documents/${documentId}/reindex`);
+    return httpClient.post(`/documents/${documentId}/reindex`);
   },
 
   // Remove document (mark for removal)
   removeDocument(documentId: string): Promise<Document> {
-    return httpClient.del(`/knowledge/documents/${documentId}`);
+    return httpClient.del(`/documents/${documentId}`);
   },
 };

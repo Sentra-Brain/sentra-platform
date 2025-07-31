@@ -1,71 +1,53 @@
 // src/hooks/useKnowledgeNavigation.ts
-// Hook for URL-based knowledge navigation
-import { useParams, useNavigate } from 'react-router-dom';
-import type { KnowledgeTreeNode } from '../models/knowledgeModels';
+// Simple navigation for knowledge sources and documents
+import { useCallback } from 'react';
+import { useNavigate, useLocation, useParams } from 'react-router-dom';
 
 export const useKnowledgeNavigation = () => {
-  const params = useParams<{
-    sourceId?: string;
-    documentId?: string;
-  }>();
   const navigate = useNavigate();
+  const location = useLocation();
+  const params = useParams();
 
-  const navigateToKnowledgeSource = (sourceId: string) => {
-    navigate(`/knowledge/source/${sourceId}`);
-  };
+  const navigateToKnowledgeSource = useCallback((sourceId: string) => {
+    navigate(`/knowledge/sources/${sourceId}`);
+  }, [navigate]);
 
-  const navigateToDocument = (documentId: string, sourceId?: string) => {
-    if (sourceId) {
-      navigate(`/knowledge/source/${sourceId}/document/${documentId}`);
-    } else {
-      navigate(`/knowledge/document/${documentId}`);
-    }
-  };
+  const navigateToDocument = useCallback((documentId: string) => {
+    navigate(`/knowledge/documents/${documentId}`);
+  }, [navigate]);
 
-  const navigateToKnowledge = () => {
+  const navigateToKnowledgeHome = useCallback(() => {
     navigate('/knowledge');
-  };
+  }, [navigate]);
 
-  const getSelectedNodeFromUrl = (
-    knowledgeSources: any[],
-    documents: any[]
-  ): KnowledgeTreeNode | undefined => {
-    const { sourceId, documentId } = params;
+  const getCurrentSourceId = useCallback((): string | undefined => {
+    return params.sourceId;
+  }, [params]);
 
-    if (documentId) {
-      // Find document by ID
-      const document = documents.find(doc => doc.id === documentId);
-      if (document) {
-        return {
-          id: document.id,
-          name: document.display_name,
-          type: 'document',
-          document,
-        };
-      }
-    }
+  const getCurrentDocumentId = useCallback((): string | undefined => {
+    return params.documentId;
+  }, [params]);
 
-    if (sourceId) {
-      // Find knowledge source by ID
-      const source = knowledgeSources.find(ks => ks.id === sourceId);
-      if (source) {
-        return {
-          id: source.id,
-          name: source.name,
-          type: 'knowledge-source',
-          knowledgeSource: source,
-        };
-      }
-    }
+  const isOnKnowledgePage = useCallback((): boolean => {
+    return location.pathname.startsWith('/knowledge');
+  }, [location]);
 
-    return undefined;
-  };
+  const isOnSourcePage = useCallback((): boolean => {
+    return location.pathname.includes('/knowledge/sources/');
+  }, [location]);
+
+  const isOnDocumentPage = useCallback((): boolean => {
+    return location.pathname.includes('/knowledge/documents/');
+  }, [location]);
 
   return {
-    params,
     navigateToKnowledgeSource,
     navigateToDocument,
-    navigateToKnowledge,
-    getSelectedNodeFromUrl,
+    navigateToKnowledgeHome,
+    getCurrentSourceId,
+    getCurrentDocumentId,
+    isOnKnowledgePage,
+    isOnSourcePage,
+    isOnDocumentPage,
   };
 };
