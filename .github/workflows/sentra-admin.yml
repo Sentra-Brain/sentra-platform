@@ -4,11 +4,11 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/sentra-admin/**'
+      - 'frontends/sentra-admin/**'
       - '.github/workflows/cicd-sentra-admin.yml'
   pull_request:
     paths:
-      - 'apps/sentra-admin/**'
+      - 'frontends/sentra-admin/**'
       - '.github/workflows/cicd-sentra-admin.yml'
   workflow_dispatch:
 
@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/sentra-admin
+        working-directory: frontends/sentra-admin
     steps:
       - uses: actions/checkout@v4
 
@@ -30,7 +30,7 @@ jobs:
         with:
           node-version: 20
           cache: 'npm'
-          cache-dependency-path: apps/sentra-admin/package-lock.json
+          cache-dependency-path: frontends/sentra-admin/package-lock.json
 
       - name: Install dependencies
         run: npm ci
@@ -48,7 +48,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: sentra-admin-build
-          path: apps/sentra-admin/dist
+          path: frontends/sentra-admin/dist
 
   docker-build-and-push:
     if: github.ref == 'refs/heads/main'
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: apps/sentra-admin
+        working-directory: frontends/sentra-admin
     steps:
       - uses: actions/checkout@v4
 

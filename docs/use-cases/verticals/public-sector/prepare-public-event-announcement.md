@@ -23,7 +23,7 @@ City hall communication teams can use Sentra Brain to automatically generate ann
 
 ## Extensions
 
-- MCP integration with public website CMS or social media management platforms.
+- MCP integration with public frontends/website CMS or social media management platforms.
 - Admin templates for different event types.
 
 ## Notes

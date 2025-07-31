@@ -5,13 +5,13 @@ on:
     branches:
       - main
     paths:
-      - 'website/**'
+      - 'frontends/website/**'
   pull_request:
     types: [opened, synchronize, reopened, closed]
     branches:
       - main
     paths:
-      - 'website/**'
+      - 'frontends/website/**'
   workflow_dispatch:
 
 jobs:
@@ -33,7 +33,7 @@ jobs:
           azure_static_web_apps_api_token: ${{ secrets.WEB_SITE_DEPLOYMENT_TOKEN }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           action: "upload"
-          app_location: "website"
+          app_location: "frontends/website"
           api_location: ""
           output_location: "dist"
 
@@ -46,6 +46,6 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.WEB_SITE_DEPLOYMENT_TOKEN }}
           action: "close"
-          app_location: "website"
+          app_location: "frontends/website"
           api_location: ""
           output_location: "dist"

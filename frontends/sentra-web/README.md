@@ -78,6 +78,6 @@ npm run dev
 ## Related Services
 
 - **Backend API:** [services/sentra-api](../../services/sentra-api)
-- **Admin Panel:** [apps/sentra-admin](../sentra-admin)
+- **Admin Panel:** [frontends/sentra-admin](../sentra-admin)
 
 ---

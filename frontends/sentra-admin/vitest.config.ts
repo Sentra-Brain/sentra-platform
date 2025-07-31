@@ -1,4 +1,4 @@
-// apps/sentra-admin/vitest.config.ts
+// frontends/sentra-admin/vitest.config.ts
 import { defineConfig } from 'vitest/config';
 
 export default defineConfig({

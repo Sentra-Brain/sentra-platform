@@ -78,4 +78,4 @@ graph TD
   - `/services/`: LLM, RAG, MCP, Auth services.
   - `/deploy/`: Docker Compose/Kubernetes manifests, configuration.
   - `/docs/arc42/`: Architecture documentation.
-  - `/website/`: Marketing and documentation frontend.
+  - `/frontends/website/`: Marketing and documentation frontend.
