@@ -79,7 +79,8 @@ jobs:
         run: |
           docker build -f services/sentra-rag-worker/Dockerfile \
             -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:${{ steps.get_version.outputs.version }} \
-            ../../
+            .
+        working-directory: .
 
       - name: Push Docker image
         run: |
