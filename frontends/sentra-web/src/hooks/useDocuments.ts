@@ -1,6 +1,6 @@
 // src/hooks/useDocuments.ts
 // Simple state management for documents
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { knowledgeService } from '../services/knowledgeService';
 import { notifyError } from '../lib/notify';
 import type { Document, DocumentUploadRequest } from '../models/knowledgeModels';
@@ -8,14 +8,26 @@ import type { Document, DocumentUploadRequest } from '../models/knowledgeModels'
 export const useDocuments = () => {
   const [documentsBySource, setDocumentsBySource] = useState<Record<string, Document[]>>({});
   const [loadingDocuments, setLoadingDocuments] = useState<Record<string, boolean>>({});
+  const loadingRef = useRef<Record<string, boolean>>({});
+  const documentsRef = useRef<Record<string, Document[]>>({});
+
+  // Keep documentsRef in sync with state
+  documentsRef.current = documentsBySource;
 
   const loadDocumentsForSource = useCallback(async (sourceId: string): Promise<Document[]> => {
-    // Return cached documents if already loaded and not currently loading
-    if (documentsBySource[sourceId] && !loadingDocuments[sourceId]) {
-      return documentsBySource[sourceId];
+    // Check if already loading to prevent duplicate calls
+    if (loadingRef.current[sourceId]) {
+      return documentsRef.current[sourceId] || [];
     }
 
+    // Check if already loaded
+    if (documentsRef.current[sourceId] && !loadingRef.current[sourceId]) {
+      return documentsRef.current[sourceId];
+    }
+
+    loadingRef.current[sourceId] = true;
     setLoadingDocuments(prev => ({ ...prev, [sourceId]: true }));
+    
     try {
       const response = await knowledgeService.listDocuments(sourceId);
       const documents = response.documents;
@@ -25,9 +37,10 @@ export const useDocuments = () => {
       notifyError(`Failed to load documents for source: ${err}`);
       return [];
     } finally {
+      loadingRef.current[sourceId] = false;
       setLoadingDocuments(prev => ({ ...prev, [sourceId]: false }));
     }
-  }, [documentsBySource, loadingDocuments]);
+  }, []); // No dependencies to prevent re-creation
 
   const uploadDocument = useCallback(async (file: File, data: DocumentUploadRequest): Promise<Document> => {
     const newDocument = await knowledgeService.uploadDocument(file, data);

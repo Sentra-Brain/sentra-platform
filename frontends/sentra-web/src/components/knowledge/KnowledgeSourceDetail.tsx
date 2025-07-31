@@ -38,7 +38,7 @@ const KnowledgeSourceDetail: React.FC<KnowledgeSourceDetailProps> = ({
     if (sourceId) {
       loadDocumentsForSource(sourceId);
     }
-  }, [sourceId, loadDocumentsForSource]);
+  }, [sourceId]); // Remove loadDocumentsForSource from dependencies
 
   const handleToggleStatus = async () => {
     if (!source) return;

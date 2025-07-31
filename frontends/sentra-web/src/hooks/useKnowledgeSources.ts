@@ -49,7 +49,7 @@ export const useKnowledgeSources = () => {
 
   useEffect(() => {
     loadSources();
-  }, [loadSources]);
+  }, []); // Remove loadSources from dependencies to prevent re-calls
 
   return {
     sources,

@@ -10,6 +10,7 @@ import { isTokenExpired } from '../utils/tokenUtils';
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [skipInitialLoad, setSkipInitialLoad] = useState(false);
   const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
 
   const getToken = () => localStorage.getItem('jwt') || sessionStorage.getItem('jwt') || null;
@@ -108,6 +109,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Skip the initial load if we just logged in to prevent duplicate API calls
+    if (skipInitialLoad) {
+      setSkipInitialLoad(false);
+      return;
+    }
+
     const token = getToken();
     
     setAuthToken(token);
@@ -140,7 +147,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
       })
       .finally(() => setLoading(false));
-  }, [refreshAccessToken]);
+  }, [refreshAccessToken, skipInitialLoad]);
 
   const login = async (email: string, password: string, remember = true) => {
     try {
@@ -153,11 +160,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       const user = await userService.getCurrentUser(response.access_token);
       setUser(user);
+      setLoading(false); // Set loading to false since we have the user
+      setSkipInitialLoad(true); // Skip the next useEffect to prevent duplicate call
 
       return true;
     } catch (err) {
       console.error('[AuthContext] login error', err);
       setUser(null);
+      setLoading(false);
       return false;
     }
   };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { conversationService } from '../services/conversationService';
 import { chatService } from '../services/chatService';
 import type {
@@ -17,11 +18,13 @@ export type ChatContextType = {
   waitingForAnswer: boolean;
   loadConversations: () => Promise<void>;
   selectConversation: (id: string) => Promise<void>;
+  loadConversationById: (id: string) => Promise<void>;
   createConversation: (data: CreateConversationRequest) => Promise<void>;
   updateConversation: (id: string, data: UpdateConversationRequest) => Promise<void>;
   deleteConversation: (id: string) => Promise<void>;
   sendMessage: (text: string) => Promise<void>;
   stopMessage: () => void;
+  clearCurrentConversation: () => void;
 };
 
 export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
@@ -30,39 +33,39 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const [isStreaming, setIsStreaming] = useState(false);
   const [waitingForAnswer, setWaitingForAnswer] = useState(false);
   const controllerRef = useRef<() => void | null>(null);
+  const navigate = useNavigate();
 
   const loadConversations = async () => {
     try {
       const list = await conversationService.list();
       setConversations(list);
     } catch (error) {
-      console.log('[ChatContext] Backend unavailable, using mock conversations for development', error);
-      // Provide mock conversations for development
-      if (import.meta.env.DEV) {
-        setConversations([
-          {
-            id: 'mock-conv-1',
-            title: 'React Component Design',
-            created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
-          },
-          {
-            id: 'mock-conv-2', 
-            title: 'TypeScript Best Practices',
-            created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
-          },
-          {
-            id: 'mock-conv-3',
-            title: 'API Integration Patterns',
-            created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
-          }
-        ]);
-      }
+      console.error('[ChatContext] Failed to load conversations', error);
+      setConversations([]);
     }
   };
 
   const selectConversation = async (id: string) => {
     const details = await conversationService.get(id);
     setCurrentConversation(details);
+    // Navigate to the conversation URL
+    navigate(`/c/${id}`);
+  };
+
+  const loadConversationById = async (id: string) => {
+    try {
+      const details = await conversationService.get(id);
+      setCurrentConversation(details);
+    } catch (error) {
+      console.error('[ChatContext] Failed to load conversation', error);
+      setCurrentConversation(null);
+      // Navigate back to chat if conversation doesn't exist
+      navigate('/chat');
+    }
+  };
+
+  const clearCurrentConversation = () => {
+    setCurrentConversation(null);
   };
 
   const createConversation = async (data: CreateConversationRequest) => {
@@ -84,6 +87,8 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
     await loadConversations();
     if (currentConversation?.id === id) {
       setCurrentConversation(null);
+      // Navigate back to chat home when deleting current conversation
+      navigate('/chat');
     }
   };
 
@@ -193,11 +198,13 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
         waitingForAnswer,
         loadConversations,
         selectConversation,
+        loadConversationById,
         createConversation,
         updateConversation,
         deleteConversation,
         sendMessage,
         stopMessage,
+        clearCurrentConversation,
       }}
     >
       {children}
