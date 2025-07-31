@@ -28,3 +28,13 @@ class KnowledgeSourceService:
         requested = Path(raw_path).resolve()
         if not requested.is_relative_to(self.mount_path.resolve()):
             raise ValueError(f"Path must be under {self.mount_path}")
+
+    def delete_knowledge_source(self, source_id: UUID) -> KnowledgeSourceEntity:
+        """Soft delete a knowledge source"""
+        source = self.repository.get(source_id)
+        if not source:
+            raise ValueError("Knowledge source not found.")
+        
+        # Perform soft delete
+        self.repository.delete(source_id, soft=True)
+        return source

@@ -155,3 +155,117 @@ class KnowledgeApiService:
 
     def remove_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
         return self.document_svc.mark_for_removal(UUID(document_id), user.id)
+
+    def get_knowledge_source(self, source_id: str, user: UserEntity) -> KnowledgeSourceEntity:
+        """Get a single knowledge source by ID"""
+        source = self.knowledge_repo.get(UUID(source_id))
+        if not source:
+            raise SentraHTTPException(
+                status_code=404,
+                code="KNOWLEDGE_SOURCE_NOT_FOUND",
+                message=f"Knowledge source with ID {source_id} not found",
+                path=f"/knowledge/sources/{source_id}"
+            )
+        return source
+
+    def delete_knowledge_source(self, source_id: str, user: UserEntity) -> KnowledgeSourceEntity:
+        """Delete a knowledge source (admin only)"""
+        try:
+            return self.knowledge_svc.delete_knowledge_source(UUID(source_id))
+        except Exception as e:
+            raise SentraHTTPException(
+                status_code=500,
+                code="DELETE_KNOWLEDGE_SOURCE_FAILED",
+                message="Could not delete knowledge source",
+                details=str(e),
+                path=f"/knowledge/sources/{source_id}",
+                suggestion="Check if source has documents or database constraints."
+            )
+
+    def upload_document_to_source(self, knowledge_source_id: str, file: UploadFile, request: DocumentUploadRequest, user: UserEntity) -> DocumentEntity:
+        """Upload a document to a specific knowledge source"""
+        ext = Path(file.filename).suffix.lower()
+        if ext not in ALLOWED_FILE_TYPES:
+            raise SentraHTTPException(
+                status_code=400,
+                code="INVALID_FILE_TYPE",
+                message=f"File type '{ext}' is not allowed. Allowed types: {', '.join(ALLOWED_FILE_TYPES)}",
+                path=f"/knowledge/sources/{knowledge_source_id}/documents"
+            )
+
+        # Get the specified knowledge source
+        source = self.knowledge_repo.get(UUID(knowledge_source_id))
+        if not source:
+            raise SentraHTTPException(
+                status_code=404,
+                code="KNOWLEDGE_SOURCE_NOT_FOUND",
+                message=f"Knowledge source with ID {knowledge_source_id} not found",
+                path=f"/knowledge/sources/{knowledge_source_id}/documents"
+            )
+
+        try:
+            abs_path, rel_path = self._file_storage.save_file(file.file, file.filename, user.id)
+        except Exception as e:
+            raise SentraHTTPException(
+                status_code=500,
+                code="FILE_STORAGE_ERROR",
+                message="Could not save file to storage.",
+                details=str(e),
+                path=f"/knowledge/sources/{knowledge_source_id}/documents",
+                suggestion="Check file system permissions."
+            )
+
+        document = DocumentEntity(
+            filename=file.filename,
+            display_name=request.display_name,
+            description=request.description,
+            filetype=ALLOWED_FILE_TYPES[ext],
+            path=rel_path,
+            created_by_id=user.id,
+            knowledge_source_id=source.id
+        )
+        document = self.document_repo.create(document)
+
+        try:
+            with self.indexing_publisher:
+                self.indexing_publisher.publish_indexing_job(
+                    document_id=str(document.id),
+                    document_path=rel_path,
+                    knowledge_source_id=str(source.id),
+                    filename=file.filename,
+                    uploaded_by=str(user.id)
+                )
+        except Exception as e:
+            logger.warning(f"Indexing failed for document {document.id}: {e}")
+
+        return document
+
+    def get_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
+        """Get a single document by ID"""
+        doc = self.document_repo.get(UUID(document_id))
+        if not doc:
+            raise SentraHTTPException(
+                status_code=404,
+                code="DOCUMENT_NOT_FOUND",
+                message=f"Document with ID {document_id} not found",
+                path=f"/knowledge/documents/{document_id}"
+            )
+        return doc
+
+    def update_document(self, document_id: str, display_name: Optional[str], description: Optional[str], user: UserEntity) -> DocumentEntity:
+        """Update document metadata"""
+        doc = self.document_repo.get(UUID(document_id))
+        if not doc:
+            raise SentraHTTPException(
+                status_code=404,
+                code="DOCUMENT_NOT_FOUND",
+                message=f"Document with ID {document_id} not found",
+                path=f"/knowledge/documents/{document_id}"
+            )
+        
+        if display_name is not None:
+            doc.display_name = display_name
+        if description is not None:
+            doc.description = description
+            
+        return self.document_repo.update(doc)
