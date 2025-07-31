@@ -117,27 +117,22 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
   };
 
   const handleCreate = async () => {
-    if (selectedFiles.length === 0) {
-      setError('Please select at least one file');
-      return;
-    }
-
     setUploading(true);
     setStep('progress');
     setError(null);
     setUploadProgress({ uploaded: 0, total: selectedFiles.length });
 
     try {
-      // Create the knowledge source with folder upload
-      await knowledgeService.uploadFolderAsKnowledgeSource(
-        selectedFiles,
-        formData
-      );
+      // Create the knowledge source even if no files are selected
+      const knowledgeSource = await knowledgeService.createKnowledgeSource(formData);
+
+      if (selectedFiles.length > 0) {
+        // Upload files only if they are selected
+        const documents = await knowledgeService.uploadMultipleDocuments(selectedFiles, knowledgeSource.id);
+        setUploadProgress({ uploaded: documents.length, total: selectedFiles.length });
+      }
 
       setSuccess(true);
-      setUploadProgress({ uploaded: selectedFiles.length, total: selectedFiles.length });
-      
-      // Wait a moment to show success, then close
       setTimeout(() => {
         onCreateComplete();
         handleClose();
@@ -388,8 +383,7 @@ const CreateKnowledgeSourceDialog: React.FC<CreateKnowledgeSourceDialogProps> = 
               {step === 'upload' && (
                 <button
                   onClick={handleCreate}
-                  disabled={selectedFiles.length === 0}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2"
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2"
                 >
                   <FolderPlus size={16} />
                   Create & Upload

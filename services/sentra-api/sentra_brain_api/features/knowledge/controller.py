@@ -109,8 +109,6 @@ class KnowledgeController:
                 total=total
             )
 
-
-
         @self.router.delete("/documents/{document_id}", response_model=DocumentResponse)
         async def remove_document(
             document_id: str,

@@ -24,16 +24,15 @@ export const knowledgeService = {
 
   // Documents
   listDocuments(
-    knowledgeSourceId?: string,
+    knowledgeSourceId: string,
     limit = 100,
     offset = 0
   ): Promise<DocumentListResponse> {
     const params: Record<string, unknown> = { limit, offset };
-    if (knowledgeSourceId) {
-      params.knowledge_source_id = knowledgeSourceId;
-    }
-
-    return httpClient.get('/knowledge/documents', { params });
+    return httpClient.get(
+      `/knowledge/knowledge-sources/${knowledgeSourceId}/documents`,
+      { params }
+    );
   },
 
   uploadDocument(

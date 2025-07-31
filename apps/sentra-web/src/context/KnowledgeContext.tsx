@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { knowledgeService } from '../services/knowledgeService';
 import { useKnowledgeNavigation } from '../hooks/useKnowledgeNavigation';
 import type {
@@ -13,7 +13,7 @@ import { notifyError } from '../lib/notify';
 export type KnowledgeContextType = {
   // Data
   knowledgeSources: KnowledgeSource[];
-  documents: Document[];
+  documentsBySourceId: Record<string, Document[]>;
   treeNodes: KnowledgeTreeNode[];
   
   // Selected state
@@ -42,11 +42,14 @@ export type KnowledgeContextType = {
   
   // Upload dialog helpers
   getUserUploadSource: () => KnowledgeSource | undefined;
+  loadDocumentsForSource: (sourceId: string) => Promise<void>;
+  getDocumentsForSource: (sourceId: string) => Document[] | undefined;
 };
 
 export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) => {
   const [knowledgeSources, setKnowledgeSources] = useState<KnowledgeSource[]>([]);
-  const [documents, setDocuments] = useState<Document[]>([]);
+  const [documentsBySourceId, setDocumentsBySourceId] = useState<Record<string, Document[]>>({});
+  const [loadingSources, setLoadingSources] = useState<Set<string>>(new Set());
   const [selectedNode, setSelectedNode] = useState<KnowledgeTreeNode | undefined>();
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
@@ -60,18 +63,39 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
     getSelectedNodeFromUrl 
   } = useKnowledgeNavigation();
 
+  const loadDocumentsForSource = useCallback(async (sourceId: string) => {
+    if (loadingSources.has(sourceId)) return;
+
+    setLoadingSources((prev) => new Set(prev).add(sourceId));
+    try {
+      const documents = await knowledgeService.listDocuments(sourceId);
+      if (Array.isArray(documents)) {
+        setDocumentsBySourceId((prev) => ({ ...prev, [sourceId]: documents }));
+      } else {
+        console.error(`Unexpected response format for documents:`, documents);
+      }
+    } catch (err) {
+      console.error(`Failed to load documents for source ${sourceId}:`, err);
+      notifyError(err);
+    } finally {
+      setLoadingSources((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(sourceId);
+        return newSet;
+      });
+    }
+  }, [loadingSources]);
+
+  const getDocumentsForSource = (sourceId: string): Document[] | undefined => {
+    return documentsBySourceId[sourceId];
+  };
+
   const loadData = async () => {
     setLoading(true);
     setError(null);
     try {
-      const [sourcesResponse] = await Promise.all([
-        knowledgeService.listKnowledgeSources(),
-        // TODO: review this because we don't need to get documents, in general,
-        // we need to get documents per knowledge source
-        // knowledgeService.listDocuments(undefined, undefined, 1000),
-      ]);
+      const sourcesResponse = await knowledgeService.listKnowledgeSources();
       setKnowledgeSources(sourcesResponse.sources);
-      // setDocuments(documentsResponse.documents);
     } catch (err) {
       setError('Failed to load knowledge data');
       console.error('Error loading knowledge data:', err);
@@ -86,17 +110,15 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
   };
 
   const selectNode = (node: KnowledgeTreeNode) => {
-    if (node.type === 'visibility-group' || node.type === 'knowledge-source') {
-      toggleExpanded(node.id);
-    }
-    
-    // Navigate based on node type
     if (node.type === 'knowledge-source') {
+      if (!documentsBySourceId[node.id]) {
+        loadDocumentsForSource(node.id);
+      }
       navigateToKnowledgeSource(node.id);
     } else if (node.type === 'document' && node.document) {
       navigateToDocument(node.document.id, node.document.knowledge_source_id);
     }
-    
+
     setSelectedNode(node);
   };
 
@@ -146,11 +168,8 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
       },
     };
 
-    // Group sources by visibility
     knowledgeSources.forEach((source) => {
-      const sourceDocuments = documents.filter(
-        (doc) => doc.knowledge_source_id === source.id
-      );
+      const sourceDocuments = documentsBySourceId[source.id] || [];
 
       const sourceNode: KnowledgeTreeNode = {
         id: source.id,
@@ -159,12 +178,14 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
         knowledgeSource: source,
         documentCount: sourceDocuments.length,
         expanded: expandedNodes.has(source.id),
-        children: sourceDocuments.map((doc) => ({
-          id: doc.id,
-          name: doc.display_name,
-          type: 'document',
-          document: doc,
-        })),
+        children: expandedNodes.has(source.id)
+          ? sourceDocuments.map((doc) => ({
+              id: doc.id,
+              name: doc.display_name,
+              type: 'document',
+              document: doc,
+            }))
+          : [],
       };
 
       visibilityGroups[source.visibility].children!.push(sourceNode);
@@ -173,25 +194,25 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
     return Object.values(visibilityGroups);
   };
 
-  const treeNodes = buildTreeNodes();
+  const treeNodes = React.useMemo(buildTreeNodes, [knowledgeSources, documentsBySourceId, expandedNodes]);
 
   useEffect(() => {
     loadData();
   }, []);
 
-  // Sync selectedNode with URL
   useEffect(() => {
-    if (knowledgeSources.length > 0 || documents.length > 0) {
-      const nodeFromUrl = getSelectedNodeFromUrl(knowledgeSources, documents);
+    if (knowledgeSources.length > 0) {
+      const allDocuments: Document[] = Object.values(documentsBySourceId).flat();
+      const nodeFromUrl = getSelectedNodeFromUrl(knowledgeSources, allDocuments);
       setSelectedNode(nodeFromUrl);
     }
-  }, [knowledgeSources, documents, getSelectedNodeFromUrl]);
+  }, [knowledgeSources, documentsBySourceId, getSelectedNodeFromUrl]);
 
   return (
     <KnowledgeContext.Provider
       value={{
         knowledgeSources,
-        documents,
+        documentsBySourceId,
         treeNodes,
         selectedNode,
         expandedNodes,
@@ -208,6 +229,8 @@ export const KnowledgeProvider = ({ children }: { children: React.ReactNode }) =
         setShowCreateSourceDialog,
         refresh,
         getUserUploadSource,
+        loadDocumentsForSource,
+        getDocumentsForSource,
       }}
     >
       {children}
