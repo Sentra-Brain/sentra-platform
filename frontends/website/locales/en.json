@@ -18,7 +18,8 @@
     "subtitle": "Deploy your own AI platform, fully private and modular. Your data stays in your hands — your models, your knowledge, your infrastructure. No external servers, no hidden costs."
   },
   "hero": {
-    "title": "Your Data. Your AI. Your Rules.",
+    "title_top": "Your Data. Your Rules.",
+    "title_bottom": "Your AI",
     "subtitle": "Deploy your own AI platform, fully private and modular. Your data stays in your hands — your models, your knowledge, your infrastructure. No external servers, no hidden costs.",
     "cta": "Request Your Personalized Demo"
   },

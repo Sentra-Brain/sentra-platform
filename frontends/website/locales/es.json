@@ -18,7 +18,8 @@
     "subtitle": "Despliega tu propia plataforma de IA, totalmente privada y modular. Tus datos siempre bajo control: tus modelos, tu conocimiento, tu infraestructura. Sin servidores externos ni costes ocultos."
   },
   "hero": {
-    "title": "Tus datos. Tu IA. Tus reglas.",
+    "title_top": "Tus datos. Tus reglas.",
+    "title_bottom": "Tu IA",
     "subtitle": "Despliega tu propia plataforma de IA, totalmente privada y modular. Tus datos siempre bajo control: tus modelos, tu conocimiento, tu infraestructura. Sin servidores externos ni costes ocultos.",
     "cta": "Solicita tu demo personalizada"
   },
