@@ -1,19 +1,24 @@
 // src/components/Sidebar.tsx
 import React, { useState } from 'react';
 import { useChat } from '../hooks/useChat';
-import { MessageSquare, BookOpen, Edit3, Wrench, Settings } from 'lucide-react';
+import { MessageSquare, BookOpen, Edit3, Wrench, Settings, PanelLeftClose, PanelLeftOpen, Plus, MoreVertical } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import UserMenu from './UserMenu';
 import './Sidebar.css';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  collapsed: boolean;
+  onToggle: () => void;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ collapsed, onToggle }) => {
   const {
     conversations,
     currentConversation,
     selectConversation,
     createConversation,
   } = useChat();
-  const [collapsed, setCollapsed] = useState(false);
+  const [conversationMenuOpen, setConversationMenuOpen] = useState<string | null>(null);
   const location = useLocation();
 
   const navigationItems = [
@@ -24,24 +29,31 @@ const Sidebar: React.FC = () => {
     { path: '/settings', label: 'Settings', icon: Settings },
   ];
 
+  const handleNewConversation = () => {
+    createConversation({ content: '' });
+  };
+
+  const handleConversationMenuClick = (conversationId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setConversationMenuOpen(conversationMenuOpen === conversationId ? null : conversationId);
+  };
+
   return (
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''}`}>
       <div className="sidebar-top-row">
-        <div 
-          className="sidebar-logo" 
-          onClick={() => collapsed && setCollapsed(false)}
-          onMouseEnter={() => collapsed && setCollapsed(false)}
-        >
+        <div className="sidebar-logo">
           <img src="/sentra_brain_logo_64.png" alt="Sentra Brain Logo" />
-          {collapsed && <span className="logo-tooltip">Open sidebar</span>}
         </div>
-        <button
-          className="sidebar-toggle"
-          onClick={() => setCollapsed((c) => !c)}
-          title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        >
-          {collapsed ? '→' : '←'}
-        </button>
+        {!collapsed && (
+          <button
+            className="sidebar-toggle-internal"
+            onClick={onToggle}
+            title="Collapse sidebar"
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose size={16} />
+          </button>
+        )}
       </div>
 
       <div id="sidebar-content" className="sidebar-content">
@@ -76,10 +88,12 @@ const Sidebar: React.FC = () => {
           <>
             <div className="sidebar-header">
               <button
-                className="new-conv-btn"
-                onClick={() => createConversation({ content: '' })}
+                className="new-conv-btn secondary"
+                onClick={handleNewConversation}
+                aria-label="Start new conversation"
               >
-                + New Chat
+                <Plus size={16} />
+                <span>New Conversation</span>
               </button>
             </div>
             <ul className="conversation-list">
@@ -91,7 +105,34 @@ const Sidebar: React.FC = () => {
                   }`}
                   onClick={() => selectConversation(conv.id)}
                 >
-                  {conv.title || 'Untitled'}
+                  <span className="conversation-title">
+                    {conv.title || 'Untitled'}
+                  </span>
+                  <button
+                    className="conversation-menu-btn"
+                    onClick={(e) => handleConversationMenuClick(conv.id, e)}
+                    title="Conversation options"
+                    aria-label="Conversation options"
+                  >
+                    <MoreVertical size={14} />
+                  </button>
+                  
+                  {conversationMenuOpen === conv.id && (
+                    <div className="conversation-dropdown">
+                      <button onClick={() => {
+                        console.log('Rename conversation:', conv.id);
+                        setConversationMenuOpen(null);
+                      }}>
+                        Rename
+                      </button>
+                      <button onClick={() => {
+                        console.log('Delete conversation:', conv.id);
+                        setConversationMenuOpen(null);
+                      }} className="danger">
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>
@@ -99,12 +140,18 @@ const Sidebar: React.FC = () => {
         )}
       </div>
 
-      {/* Hover area for expansion when collapsed */}
+      {/* Expand button when collapsed */}
       {collapsed && (
-        <div 
-          className="sidebar-hover-expand"
-          onMouseEnter={() => setCollapsed(false)}
-        />
+        <div className="sidebar-expand-section">
+          <button
+            className="sidebar-expand-btn"
+            onClick={onToggle}
+            title="Expand sidebar"
+            aria-label="Expand sidebar"
+          >
+            <PanelLeftOpen size={16} />
+          </button>
+        </div>
       )}
 
       <div className="sidebar-footer">

@@ -113,6 +113,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setAuthToken(token);
     setRefreshTokenFunction(refreshAccessToken);
     
+    // Development mode: provide mock user when no backend is available
+    if (import.meta.env.DEV && !token) {
+      console.log('[AuthContext] Development mode: setting mock user');
+      setUser({
+        id: 'mock-user-id',
+        email: 'demo@sentra.ai',
+        full_name: 'Demo User',
+        username: 'demo',
+        disabled: false
+      });
+      setLoading(false);
+      return;
+    }
+    
     if (!token) {
       setUser(null);
       setLoading(false);
