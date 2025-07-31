@@ -1,6 +1,6 @@
 // src/components/knowledge/KnowledgeDetailPanel.tsx
 // Detail panel for selected knowledge source or document
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { RefreshCw, Folder, File, Calendar, User, Settings, Power, PowerOff } from 'lucide-react';
 import type {
   KnowledgeSource,
@@ -23,7 +23,17 @@ const KnowledgeDetailPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
-  const loadDocuments = async (knowledgeSourceId: string) => {
+  // Get display name for the knowledge source creator
+  const { displayName: creatorDisplayName } = useUserDisplayName(
+    selectedNode?.knowledgeSource?.created_by
+  );
+
+  // Get display name for document uploader (when viewing a document)
+  const { displayName: uploaderDisplayName } = useUserDisplayName(
+    selectedNode?.type === 'document' ? selectedNode.document?.uploaded_by : undefined
+  );
+
+  const loadDocuments = useCallback(async (knowledgeSourceId: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -35,7 +45,7 @@ const KnowledgeDetailPanel: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const toggleKnowledgeSourceStatus = async (knowledgeSource: KnowledgeSource) => {
     const newStatus = knowledgeSource.status === 'active';
@@ -69,7 +79,7 @@ const KnowledgeDetailPanel: React.FC = () => {
     } else {
       setDocuments([]);
     }
-  }, [selectedNode]);
+  }, [selectedNode, loadDocuments]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -218,7 +228,7 @@ const KnowledgeDetailPanel: React.FC = () => {
     </div>
   );
 
-  const renderDocumentDetail = (document: Document) => {    
+  const renderDocumentDetail = (document: Document) => {
     return (
       <div className="detail-content">
         <div className="detail-header">
