@@ -13,13 +13,13 @@ import type {
 export const knowledgeService = {
   // Knowledge Sources
   listKnowledgeSources(limit = 100, offset = 0): Promise<KnowledgeSourceListResponse> {
-    return httpClient.get('/knowledge-sources', {
+    return httpClient.get('/knowledge/sources', {
       params: { limit, offset },
     });
   },
 
   createKnowledgeSource(data: CreateKnowledgeSourceRequest): Promise<KnowledgeSource> {
-    return httpClient.post('/knowledge-sources', data);
+    return httpClient.post('/knowledge/sources', data);
   },
 
   // Documents
@@ -30,7 +30,7 @@ export const knowledgeService = {
   ): Promise<DocumentListResponse> {
     const params: Record<string, unknown> = { limit, offset };
     return httpClient.get(
-      `/knowledge-sources/${knowledgeSourceId}/documents`,
+      `/knowledge/sources/${knowledgeSourceId}/documents`,
       { params }
     );
   },
@@ -68,7 +68,7 @@ export const knowledgeService = {
 
   // Enable/Disable knowledge source
   updateKnowledgeSourceStatus(knowledgeSourceId: string, enabled: boolean): Promise<KnowledgeSource> {
-    return httpClient.put(`/knowledge-sources/${knowledgeSourceId}/status`, null, {
+    return httpClient.put(`/knowledge/sources/${knowledgeSourceId}/status`, null, {
       params: { enabled },
     });
   },
