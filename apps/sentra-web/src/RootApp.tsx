@@ -12,7 +12,6 @@ import Settings from './pages/Settings';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import Spinner from './components/Spinner';
-import KnowledgeDemoPage from './pages/KnowledgeDemoPage';
 import { ToastContainer } from 'react-toastify';
 
 function AppGuard() {
@@ -58,7 +57,6 @@ export default function RootApp() {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
-          <Route path="/demo" element={<KnowledgeDemoPage />} />
           <Route path="/*" element={<AppGuard />} />
         </Routes>
       </BrowserRouter>

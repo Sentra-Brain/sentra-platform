@@ -23,16 +23,6 @@ const KnowledgeDetailPanel: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [isTogglingStatus, setIsTogglingStatus] = useState(false);
 
-  // Get display name for the knowledge source creator
-  const { displayName: creatorDisplayName } = useUserDisplayName(
-    selectedNode?.knowledgeSource?.created_by
-  );
-
-  // Get display name for document uploader (when viewing a document)
-  const { displayName: uploaderDisplayName } = useUserDisplayName(
-    selectedNode?.type === 'document' ? selectedNode.document?.uploaded_by : undefined
-  );
-
   const loadDocuments = useCallback(async (knowledgeSourceId: string) => {
     setLoading(true);
     setError(null);
