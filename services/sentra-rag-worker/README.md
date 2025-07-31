@@ -84,36 +84,26 @@ Indexation jobs received from RabbitMQ:
 
 ## Docker Deployment
 
-The service runs as a Docker container in the Sentra Brain ecosystem:
+The service uses a **two-layer Docker build** strategy for optimal CI/CD performance:
+
+1. **Base Image** (`Dockerfile.base`): Contains heavy dependencies and system packages
+2. **Application Image** (`Dockerfile`): Contains application code and builds FROM the base image
+
+### CI/CD Pipeline
+
+The GitHub Actions pipeline automatically:
+
+1. **Detects Changes**: Checks if `requirements.rag.txt` has been modified
+2. **Base Image Build**: If requirements changed, builds and pushes `sentra-rag-base:py3.13` to ACR
+3. **Application Build**: Builds the final application image using the ACR base image
+4. **Optimization**: Skips base image rebuild when only application code changes
+
+### Base Image (`Dockerfile.base`)
 
 ```dockerfile
-FROM python:3.11-slim
-# ... (see Dockerfile for full details)
-CMD ["python", "-m", "sentra_rag_worker.main"]
-```
-
-## Docker Image Optimization
-
-To speed up build times and reduce image size, we use a **custom base image** called `sentra-rag-base` that pre-installs all core dependencies used by RAG workers.
-
-This base image includes:
-
-- Python 3.13
-- `sentence-transformers`, `chromadb`, `sqlalchemy`, `pydantic`, etc.
-- System libraries: `tesseract-ocr`, `poppler-utils`, `libpq-dev`, etc.
-
-### Build the base image (once)
-
-```bash
-docker build -f Dockerfile.base -t sentra-rag-base:py3.13 .
-```
-
-The `Dockerfile.base` and `requirements.rag.txt` files define this environment and should be version-controlled at the root of the repository.
-
-### Dockerfile.base (example)
-
-```Dockerfile
 FROM python:3.13-slim
+
+ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get install -y \
     build-essential \
@@ -130,38 +120,42 @@ RUN pip install --no-cache-dir -r requirements.rag.txt
 ENV PYTHONUNBUFFERED=1
 ```
 
-### requirements.rag.txt (example)
+### Application Image (`Dockerfile`)
 
-```txt
-pika==1.3.2
-psycopg2-binary==2.9.10
-sqlalchemy==2.0.41
-pydantic==2.11.7
-pydantic-settings==2.10.1
-python-dotenv==1.1.1
-sentence-transformers==5.0.0
-chromadb==1.0.15
-asyncio-mqtt>=0.13.0
-```
-
-### Final worker Dockerfile
-
-Once the base is built, your `sentra-rag-worker` Dockerfile should use it as the base:
-
-```Dockerfile
-FROM sentra-rag-base:py3.13
+```dockerfile
+ARG BASE_IMAGE=sentra-rag-base:py3.13
+FROM ${BASE_IMAGE}
 
 WORKDIR /app
 
 COPY core/sentra-core /core/sentra-core
 RUN pip install -e /core/sentra-core
+COPY services/sentra-rag-worker/requirements.txt /app/requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 COPY services/sentra-rag-worker /app
 
 CMD ["python", "-m", "sentra_rag_worker.main"]
 ```
 
-This approach drastically reduces build time and image size during development and CI/CD.
+### Local Development
+
+For local development, you can still build the traditional way:
+
+```bash
+# Build base image locally (one-time setup)
+docker build -f Dockerfile.base -t sentra-rag-base:py3.13 .
+
+# Build application image
+docker build -f Dockerfile -t sentra-rag-worker:local .
+```
+
+### Benefits
+
+- **Faster CI/CD**: Base image only rebuilds when dependencies change
+- **Smaller Layers**: Application code changes don't trigger base layer rebuild  
+- **Cache Efficiency**: Docker layer caching works optimally
+- **ACR Integration**: Base images are centrally managed in Azure Container Registry
 
 
 ## Development

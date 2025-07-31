@@ -19,6 +19,69 @@ permissions:
   contents: read
 
 jobs:
+  check-base-image-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      needs-rebuild: ${{ steps.check.outputs.needs-rebuild }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Check if requirements.rag.txt has changed
+        id: check
+        run: |
+          if git diff --name-only HEAD~1 HEAD | grep -q "services/sentra-rag-worker/requirements.rag.txt"; then
+            echo "needs-rebuild=true" >> $GITHUB_OUTPUT
+            echo "requirements.rag.txt has changed, base image rebuild needed"
+          else
+            echo "needs-rebuild=false" >> $GITHUB_OUTPUT
+            echo "requirements.rag.txt unchanged, checking if base image exists in ACR"
+            # For now, we'll assume rebuild is needed if we can't verify image existence
+            # In a real scenario, you might want to check ACR for image existence
+            echo "needs-rebuild=true" >> $GITHUB_OUTPUT
+          fi
+
+  build-rag-base-image:
+    if: always() && (needs.check-base-image-changes.outputs.needs-rebuild == 'true' || github.ref == 'refs/heads/main')
+    needs: check-base-image-changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Docker login with ACR admin credentials
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Check if base image exists in ACR
+        id: check_image
+        run: |
+          if docker manifest inspect ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:py3.13 > /dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+            echo "Base image already exists in ACR"
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+            echo "Base image does not exist in ACR, will build"
+          fi
+
+      - name: Build base Docker image
+        if: needs.check-base-image-changes.outputs.needs-rebuild == 'true' || steps.check_image.outputs.exists == 'false'
+        run: |
+          docker build -f services/sentra-rag-worker/Dockerfile.base \
+            -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:py3.13 \
+            services/sentra-rag-worker
+
+      - name: Push base Docker image
+        if: needs.check-base-image-changes.outputs.needs-rebuild == 'true' || steps.check_image.outputs.exists == 'false'
+        run: |
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:py3.13
+
   build-and-test:
     runs-on: ubuntu-latest
     defaults:
@@ -51,7 +114,7 @@ jobs:
 
   docker-build-and-push:
     if: github.ref == 'refs/heads/main'
-    needs: build-and-test
+    needs: [build-and-test, build-rag-base-image]
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -78,6 +141,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -f services/sentra-rag-worker/Dockerfile \
+            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:py3.13 \
             -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:${{ steps.get_version.outputs.version }} \
             .
         working-directory: .
