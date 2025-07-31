@@ -32,8 +32,32 @@ export const ChatProvider = ({ children }: { children: React.ReactNode }) => {
   const controllerRef = useRef<() => void | null>(null);
 
   const loadConversations = async () => {
-    const list = await conversationService.list();
-    setConversations(list);
+    try {
+      const list = await conversationService.list();
+      setConversations(list);
+    } catch (error) {
+      console.log('[ChatContext] Backend unavailable, using mock conversations for development', error);
+      // Provide mock conversations for development
+      if (import.meta.env.DEV) {
+        setConversations([
+          {
+            id: 'mock-conv-1',
+            title: 'React Component Design',
+            created_at: new Date(Date.now() - 86400000).toISOString(), // 1 day ago
+          },
+          {
+            id: 'mock-conv-2', 
+            title: 'TypeScript Best Practices',
+            created_at: new Date(Date.now() - 172800000).toISOString(), // 2 days ago
+          },
+          {
+            id: 'mock-conv-3',
+            title: 'API Integration Patterns',
+            created_at: new Date(Date.now() - 259200000).toISOString(), // 3 days ago
+          }
+        ]);
+      }
+    }
   };
 
   const selectConversation = async (id: string) => {
