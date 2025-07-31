@@ -6,7 +6,7 @@ from sentra_core.core.logging import get_logger
 from sentra_rag_worker.core.config import settings
 from sentra_core.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
 from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
+from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 
 logger = get_logger(__name__)
 
@@ -22,7 +22,7 @@ class FolderScanner:
         '.md': DocumentFileType.MD
     }
 
-    def __init__(self, repo: KnowledgeRepository):
+    def __init__(self, repo: KnowledgeSourceRepository):
         self.repo = repo
 
     def scan_folder_sources(self) -> List[Dict[str, Any]]:

@@ -106,13 +106,13 @@ def test_knowledge_repository():
     print("\nTesting knowledge repository...")
     
     try:
-        from sentra_core.domain.repository.knowledge_source_repository import KnowledgeRepository
+        from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
         from sentra_core.domain.entities.document_entity import DocumentStatus
         from uuid import UUID
         
         # Mock database session
         mock_db = MagicMock()
-        repo = KnowledgeRepository(mock_db)
+        repo = KnowledgeSourceRepository(mock_db)
         
         # Mock document entity
         mock_document = MagicMock()
