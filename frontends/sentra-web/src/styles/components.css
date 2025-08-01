@@ -59,7 +59,9 @@
   background: var(--sentra-accent);
   color: white;
   font-weight: bold;
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   cursor: pointer;
   transition:
     background 0.2s ease,

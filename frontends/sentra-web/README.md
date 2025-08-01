@@ -1,83 +1,69 @@
-# Sentra Web (User Chat Interface)
+# React + TypeScript + Vite
 
-This folder contains the source code and Docker configuration for the **Sentra Brain end-user frontend application**.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
----
+Currently, two official plugins are available:
 
-## Purpose
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-- Provides a secure chat and search interface for end-users:
-  - LLM chat with optional RAG context (document search).
-  - Document search independent of chat.
-  - CRM/ERP data requests via MCP servers.
-- Handles user authentication against the Sentra API.
-- Displays user profile information and conversation history (where enabled).
+## Expanding the ESLint configuration
 
----
+If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
 
-## Functional Scope
+```js
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
 
-| Feature                | Description                                                   |
-|-----------------------|---------------------------------------------------------------|
-| User Login            | Auth via Sentra API (SQL backend)                             |
-| Chat with LLM         | Standard query submission                                     |
-| Chat with RAG         | Select one or more knowledge bases (datasources)              |
-| Document Search (RAG) | Search documents without chat flow                            |
-| CRM/ERP Data Request  | Trigger MCP CRM/Action requests (future-ready)                |
-| Responsive UI         | Mobile and desktop compatible                                 |
+      // Remove tseslint.configs.recommended and replace with this
+      ...tseslint.configs.recommendedTypeChecked,
+      // Alternatively, use this for stricter rules
+      ...tseslint.configs.strictTypeChecked,
+      // Optionally, add this for stylistic rules
+      ...tseslint.configs.stylisticTypeChecked,
 
----
-
-## Technology Stack
-
-- **Frontend Framework:** React / Next.js
-- **UI Styling:** Tailwind CSS
-- **State Management:** Local Storage or Redux (if implemented)
-- **Backend Connection:** REST API via Sentra API
-
----
-
-## Runtime Architecture
-
-- Communicates exclusively with Sentra API:
-  - **Authentication:** Token-based (JWT or similar).
-  - **Chat Flow:** User → API → LLM (+ optional RAG).
-  - **Document Retrieval:** User → API → RAG Engine.
-  - **CRM/ERP (MCP):** User → API → MCP Server(s).
-
-For detailed runtime diagrams, see `/docs/arc42/06_runtime_view.md`.
-
----
-
-## Development Workflow
-
-```bash
-npm install
-npm run dev
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
 ```
 
-- Uses port `3100` in development (see `docker-compose.dev.yml`).
-- Mounted volumes enabled for live reload via Docker.
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
----
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
 
-## Deployment Notes
-
-- Production builds are created via:
-  ```bash
-  npm run build
-  ```
-- Final images are published as:
-  ```
-  sentrabrain.azurecr.io/sentra-web:latest
-  ```
-- Managed by `docker-compose.yml` (production) and `docker-compose.dev.yml` (development).
-
----
-
-## Related Services
-
-- **Backend API:** [services/sentra-api](../../services/sentra-api)
-- **Admin Panel:** [frontends/sentra-admin](../sentra-admin)
-
----
+export default tseslint.config([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
