@@ -13,7 +13,8 @@ export function useConversations() {
     conversations,
     currentConversationId,
     selectedConversationDetails,
-    loading,
+    loadingList,
+    loadingConversation,
     error,
   } = useAppSelector((state) => state.conversation)
 
@@ -21,7 +22,8 @@ export function useConversations() {
     conversations,
     currentConversationId,
     selectedConversationDetails,
-    loading,
+    loadingList,
+    loadingConversation,
     error,
     loadConversations: () => dispatch(fetchConversations()),
     loadConversationDetails: (id: string) => dispatch(fetchConversationById(id)),

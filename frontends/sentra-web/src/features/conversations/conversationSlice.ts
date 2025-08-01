@@ -17,7 +17,8 @@ interface ConversationsState {
   currentConversationId: string | null
   
   selectedConversationDetails: ConversationDetails | null
-  loading: boolean
+  loadingList: boolean // for conversation list  
+  loadingConversation: boolean // for chat page
   error: string | null
 }
 
@@ -25,7 +26,8 @@ const initialState: ConversationsState = {
   conversations: [],
   currentConversationId: null,
   selectedConversationDetails: null,
-  loading: false,
+  loadingList: false,
+  loadingConversation: false, // for chat page
   error: null,
 }
 
@@ -68,29 +70,29 @@ const conversationSlice = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchConversations.pending, (state) => {
-        state.loading = true
+        state.loadingList = true
         state.error = null
       })
       .addCase(fetchConversations.fulfilled, (state, action) => {
-        state.loading = false
+        state.loadingList = false
         state.conversations = action.payload
       })
       .addCase(fetchConversations.rejected, (state, action) => {
-        state.loading = false
+        state.loadingList = false
         state.error = action.error.message ?? 'Error fetching conversations'
       })
 
       // fetchConversationById
       .addCase(fetchConversationById.pending, (state) => {
-        state.loading = true
+        state.loadingConversation = true
         state.selectedConversationDetails = null
       })
       .addCase(fetchConversationById.fulfilled, (state, action) => {
-        state.loading = false
+        state.loadingConversation = false
         state.selectedConversationDetails = action.payload
       })
       .addCase(fetchConversationById.rejected, (state, action) => {
-        state.loading = false
+        state.loadingConversation = false
         state.error = action.error.message ?? 'Error loading conversation'
       })
 

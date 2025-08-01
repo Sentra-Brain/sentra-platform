@@ -7,7 +7,7 @@ export default function ChatPage() {
   const {
     selectedConversationDetails,
     loadConversationDetails,
-    loading,
+    loadingConversation,
     error,
   } = useConversations()
 
@@ -20,7 +20,7 @@ export default function ChatPage() {
 
   // === Render logic ===
 
-  if (loading) {
+  if (loadingConversation) {
     return (
       <div className="p-4 text-sm text-gray-400">
         Loading conversation...
