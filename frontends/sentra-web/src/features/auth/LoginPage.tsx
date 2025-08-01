@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAppSelector } from '../../store/hooks'
 import { useAuth } from '../../hooks/useAuth'
+import { useLocation } from 'react-router-dom'
 import './LoginPage.css'
 
 export default function LoginPage() {
@@ -14,13 +15,13 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
   const token = useAppSelector((state) => state.auth.token)
+  const location = useLocation()
 
-  // ✅ Redirect if already logged in
   useEffect(() => {
-    if (token) {
-      navigate('/c', { replace: true })
+    if (token && location.pathname === '/login') {
+      navigate('/', { replace: true })
     }
-  }, [token, navigate])
+  }, [token, navigate, location.pathname])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
