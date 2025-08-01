@@ -7,6 +7,7 @@ import {
 } from '@reduxjs/toolkit'
 import { conversationService } from '../../services/conversationService'
 import type {
+  ConversationDetails,
   ConversationListItem,
   CreateConversationRequest,
 } from '../../models/conversationModels'
@@ -14,6 +15,8 @@ import type {
 interface ConversationsState {
   conversations: ConversationListItem[]
   currentConversationId: string | null
+  
+  selectedConversationDetails: ConversationDetails | null
   loading: boolean
   error: string | null
 }
@@ -21,6 +24,7 @@ interface ConversationsState {
 const initialState: ConversationsState = {
   conversations: [],
   currentConversationId: null,
+  selectedConversationDetails: null,
   loading: false,
   error: null,
 }
@@ -40,6 +44,15 @@ export const createConversation = createAsyncThunk(
     return await conversationService.create(data)
   }
 )
+
+// 🔍 Fetch single conversation by ID
+export const fetchConversationById = createAsyncThunk(
+  'conversations/fetchById',
+  async (id: string) => {
+    return await conversationService.get(id)
+  }
+)
+
 
 const conversationSlice = createSlice({
   name: 'conversations',
@@ -66,6 +79,23 @@ const conversationSlice = createSlice({
         state.loading = false
         state.error = action.error.message ?? 'Error fetching conversations'
       })
+
+      // fetchConversationById
+      .addCase(fetchConversationById.pending, (state) => {
+        state.loading = true
+        state.selectedConversationDetails = null
+      })
+      .addCase(fetchConversationById.fulfilled, (state, action) => {
+        state.loading = false
+        state.selectedConversationDetails = action.payload
+      })
+      .addCase(fetchConversationById.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message ?? 'Error loading conversation'
+      })
+
+
+
       .addCase(createConversation.fulfilled, (state, action) => {
         const newConv: ConversationListItem = {
           id: action.payload.id,
