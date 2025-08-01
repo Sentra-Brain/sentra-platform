@@ -1,23 +1,25 @@
 // src/components/layout/GlobalTopBar.tsx
-import { useState } from "react";
-import { Search, UserCircle } from "lucide-react";
-import { useLocation } from "react-router-dom";
-import { useAppSelector } from "../../store/hooks";
+import { useState } from 'react';
+import { Search, UserCircle } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { useAppSelector } from '../../store/hooks';
 // import GlobalMenuPanel from './GlobalMenuPanel';
+
+
 
 export default function GlobalTopBar() {
   const location = useLocation();
   const user = useAppSelector((s) => s.auth.user);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
 
   const getBreadcrumb = () => {
     const path = location.pathname;
-    if (path.startsWith("/c")) return "Sentra / Chat";
-    if (path.startsWith("/k")) return "Sentra / Knowledge";
-    if (path.startsWith("/prompts")) return "Sentra / Prompts";
-    if (path.startsWith("/skills")) return "Sentra / Skills";
-    if (path.startsWith("/settings")) return "Sentra / Settings";
-    return "Sentra";
+    if (path.startsWith('/c')) return 'Sentra / Chat';
+    if (path.startsWith('/k')) return 'Sentra / Knowledge';
+    if (path.startsWith('/prompts')) return 'Sentra / Prompts';
+    if (path.startsWith('/skills')) return 'Sentra / Skills';
+    if (path.startsWith('/settings')) return 'Sentra / Settings';
+    return 'Sentra';
   };
 
   return (
@@ -76,7 +78,7 @@ export default function GlobalTopBar() {
               text-sm text-[var(--sentra-text)] 
               rounded transition 
               placeholder:text-[var(--sentra-text)] placeholder:opacity-60 
-              focus:outline-none focus:border-[var(--sentra-accent)] focus:ring-2 focus:ring-[var(--sentra-accent)]
+              focus:outline-none focus:border-[var(--sentra-accent)] focus:ring-1/2 focus:ring-[var(--sentra-accent)]
             "
           />
         </div>
@@ -97,5 +99,7 @@ export default function GlobalTopBar() {
         )}
       </div>
     </header>
+    
+  
   );
 }
