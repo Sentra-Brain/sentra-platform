@@ -1,13 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Outlet } from 'react-router-dom';
 import { ChatProvider } from '../context/ChatContext';
-import { Sidebar, TopBar } from '../components';
+import { Sidebar } from '../components';
+import GlobalTopBar from '../components/GlobalTopBar';
 
 const AppShell: React.FC = () => {
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => !prev);
+  };
+
   return (
     <ChatProvider>
       <div className="app-root" style={{ display: 'flex', height: '100vh', width: '100vw', overflow: 'hidden' }}>
-        <Sidebar />
+        <GlobalTopBar 
+          sidebarCollapsed={sidebarCollapsed} 
+          onToggleSidebar={toggleSidebar} 
+        />
+        <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
         <div
           className="main-content"
           style={{ 
@@ -15,10 +26,10 @@ const AppShell: React.FC = () => {
             display: 'flex', 
             flexDirection: 'column', 
             minWidth: 0,
-            overflow: 'hidden'
+            overflow: 'hidden',
+            marginTop: '56px' // Account for global top bar height
             }}
           >
-            <TopBar />
             <div style={{ 
               flex: 1, 
               display: 'flex', 

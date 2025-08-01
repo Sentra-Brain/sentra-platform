@@ -6,11 +6,13 @@ import { AuthContext } from './AuthContextInstance';
 import type { User } from '../models/user';
 import { setAuthToken, setRefreshTokenFunction } from '../lib/httpClient';
 import { isTokenExpired } from '../utils/tokenUtils';
+import { requestCache } from '../lib/requestCache';
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const refreshPromiseRef = useRef<Promise<boolean> | null>(null);
+  const initializedRef = useRef(false);
 
   const getToken = () => localStorage.getItem('jwt') || sessionStorage.getItem('jwt') || null;
   const getRefreshToken = () => localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token') || null;
@@ -88,6 +90,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return refreshPromiseRef.current;
   }, []);
 
+  // Cached getCurrentUser function that prevents duplicate calls
+  const getCurrentUserCached = useCallback(async (token: string): Promise<User> => {
+    return requestCache.get(
+      `users/me/${token.substring(0, 10)}`, // Use token prefix as cache key
+      () => userService.getCurrentUser(token),
+      { ttl: 10 * 60 * 1000 } // Cache for 10 minutes
+    );
+  }, []);
+
   const getValidAccessToken = async (): Promise<string | null> => {
     const token = getToken();
     if (!token) {
@@ -108,51 +119,74 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   useEffect(() => {
+    // Only initialize once to prevent duplicate API calls on route changes
+    if (initializedRef.current) {
+      return;
+    }
+    
+    initializedRef.current = true;
+    console.log('[AuthContext] Initializing authentication state');
+
     const token = getToken();
     
     setAuthToken(token);
     setRefreshTokenFunction(refreshAccessToken);
     
     if (!token) {
+      console.log('[AuthContext] No token found, user not authenticated');
       setUser(null);
       setLoading(false);
       return;
     }
 
-    userService.getCurrentUser(token)
-      .then(setUser)
+    // Fetch user data with caching to prevent duplicate calls
+    getCurrentUserCached(token)
+      .then(userData => {
+        console.log('[AuthContext] User authenticated successfully');
+        setUser(userData);
+      })
       .catch(err => {
-        console.error('[AuthContext] getCurrentUser error', err);
+        console.error('[AuthContext] Failed to get current user:', err);
+        // Token might be invalid, clear it
+        clearTokens();
+        setAuthToken(null);
         setUser(null);
+        requestCache.invalidate('users/me');
       })
       .finally(() => setLoading(false));
-  }, [refreshAccessToken]);
+  }, []); // Empty dependencies to run only once
 
   const login = async (email: string, password: string, remember = true) => {
     try {
+      console.log('[AuthContext] Attempting login');
       const response = await authService.login(email, password);
 
-      console.log('[AuthContext] login success', response);
-
+      console.log('[AuthContext] Login successful, storing tokens');
       storeTokens(response.access_token, response.refresh_token, remember);
       setAuthToken(response.access_token);
 
-      const user = await userService.getCurrentUser(response.access_token);
-      setUser(user);
+      // Use cached getCurrentUser to prevent duplicate calls
+      const userData = await getCurrentUserCached(response.access_token);
+      setUser(userData);
+      setLoading(false);
 
       return true;
     } catch (err) {
-      console.error('[AuthContext] login error', err);
+      console.error('[AuthContext] Login failed:', err);
       setUser(null);
+      setLoading(false);
       return false;
     }
   };
 
   const logout = () => {
+    console.log('[AuthContext] Logging out');
     clearTokens();
     setAuthToken(null);
     setRefreshTokenFunction(null);
     setUser(null);
+    // Clear all cached requests on logout
+    requestCache.clear();
   };
 
   return (

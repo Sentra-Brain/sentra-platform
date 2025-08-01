@@ -1,47 +1,45 @@
 // src/hooks/useDocuments.ts
-// Simple state management for documents
+// Simple state management for documents with request deduplication
 import { useState, useCallback } from 'react';
 import { knowledgeService } from '../services/knowledgeService';
 import { notifyError } from '../lib/notify';
+import { requestCache } from '../lib/requestCache';
 import type { Document, DocumentUploadRequest } from '../models/knowledgeModels';
 
 export const useDocuments = () => {
   const [documentsBySource, setDocumentsBySource] = useState<Record<string, Document[]>>({});
-  const [loadingDocuments, setLoadingDocuments] = useState<Record<string, boolean>>({});
 
   const loadDocumentsForSource = useCallback(async (sourceId: string): Promise<Document[]> => {
-    // Return cached documents if already loaded and not currently loading
-    if (documentsBySource[sourceId] && !loadingDocuments[sourceId]) {
-      return documentsBySource[sourceId];
-    }
-
-    setLoadingDocuments(prev => ({ ...prev, [sourceId]: true }));
     try {
-      const response = await knowledgeService.listDocuments(sourceId);
+      // Use request cache to prevent duplicate concurrent calls and infinite loops
+      const response = await requestCache.get(
+        `knowledge/sources/${sourceId}/documents`,
+        () => knowledgeService.listDocuments(sourceId),
+        { ttl: 2 * 60 * 1000 } // Cache for 2 minutes
+      );
+      
       const documents = response.documents;
       setDocumentsBySource(prev => ({ ...prev, [sourceId]: documents }));
       return documents;
     } catch (err) {
       notifyError(`Failed to load documents for source: ${err}`);
       return [];
-    } finally {
-      setLoadingDocuments(prev => ({ ...prev, [sourceId]: false }));
     }
-  }, [documentsBySource, loadingDocuments]);
+  }, []); // No dependencies to prevent re-creation and infinite loops
 
-  const uploadDocument = useCallback(async (file: File, data: DocumentUploadRequest): Promise<Document> => {
-    const newDocument = await knowledgeService.uploadDocument(file, data);
+  const uploadDocument = useCallback(async (knowledgeSourceId: string, file: File, data: DocumentUploadRequest): Promise<Document> => {
+    const newDocument = await knowledgeService.uploadDocument(knowledgeSourceId, file, data);
     
-    // Add to the upload source's documents (the API automatically determines the upload source)
-    if (newDocument.knowledge_source_id) {
-      setDocumentsBySource(prev => ({
-        ...prev,
-        [newDocument.knowledge_source_id]: [
-          ...(prev[newDocument.knowledge_source_id] || []),
-          newDocument
-        ]
-      }));
-    }
+    // Add to the specified source's documents
+    setDocumentsBySource(prev => ({
+      ...prev,
+      [knowledgeSourceId]: [
+        ...(prev[knowledgeSourceId] || []),
+        newDocument
+      ]
+    }));
+    // Invalidate cache for this source
+    requestCache.invalidate(`knowledge/sources/${knowledgeSourceId}/documents`);
     
     return newDocument;
   }, []);
@@ -56,6 +54,8 @@ export const useDocuments = () => {
         [removedDocument.knowledge_source_id]: (prev[removedDocument.knowledge_source_id] || [])
           .filter(doc => doc.id !== documentId)
       }));
+      // Invalidate cache for this source
+      requestCache.invalidate(`knowledge/sources/${removedDocument.knowledge_source_id}/documents`);
     }
   }, []);
 
@@ -69,6 +69,8 @@ export const useDocuments = () => {
         [reindexedDocument.knowledge_source_id]: (prev[reindexedDocument.knowledge_source_id] || [])
           .map(doc => doc.id === documentId ? reindexedDocument : doc)
       }));
+      // Invalidate cache for this source
+      requestCache.invalidate(`knowledge/sources/${reindexedDocument.knowledge_source_id}/documents`);
     }
   }, []);
 
@@ -84,12 +86,15 @@ export const useDocuments = () => {
     return undefined;
   }, [documentsBySource]);
 
-  const isLoadingSource = useCallback((sourceId: string): boolean => {
-    return loadingDocuments[sourceId] || false;
-  }, [loadingDocuments]);
+  const isLoadingSource = useCallback((_sourceId: string): boolean => {
+    // We'll rely on the request cache for loading state - always return false for now
+    // In the future, we could enhance the request cache to expose loading state
+    return false;
+  }, []);
 
   const refreshDocumentsForSource = useCallback(async (sourceId: string): Promise<void> => {
-    // Force refresh by removing from cache first
+    // Invalidate cache first, then reload
+    requestCache.invalidate(`knowledge/sources/${sourceId}/documents`);
     setDocumentsBySource(prev => {
       const updated = { ...prev };
       delete updated[sourceId];

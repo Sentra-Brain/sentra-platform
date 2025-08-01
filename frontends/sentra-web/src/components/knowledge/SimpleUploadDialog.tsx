@@ -10,12 +10,14 @@ interface SimpleUploadDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onUploadComplete?: () => void;
+  knowledgeSourceId: string;
 }
 
 const SimpleUploadDialog: React.FC<SimpleUploadDialogProps> = ({
   isOpen,
   onClose,
   onUploadComplete,
+  knowledgeSourceId,
 }) => {
   const { uploadDocument } = useDocuments();
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -35,7 +37,7 @@ const SimpleUploadDialog: React.FC<SimpleUploadDialogProps> = ({
       // Upload files one by one
       for (const file of selectedFiles) {
         const displayName = file.name.replace(/\.[^/.]+$/, ''); // Remove extension
-        await uploadDocument(file, { display_name: displayName });
+        await uploadDocument(knowledgeSourceId, file, { display_name: displayName });
       }
       
       notifySuccess(`Successfully uploaded ${selectedFiles.length} file(s)`);

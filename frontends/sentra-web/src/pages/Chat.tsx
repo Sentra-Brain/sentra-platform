@@ -1,29 +1,21 @@
 // src/pages/Chat.tsx
-// This file defines the main chat interface of the application
+// This file defines an alternative chat interface implementation
+// Note: Currently not used in routing - ChatPage.tsx is the active implementation
 import React from 'react';
 import ChatArea from '../components/ChatArea';
 import MessageInput from '../components/MessageInput';
-import Sidebar from '../components/Sidebar';
-import TopBar from '../components/TopBar';
 
 const Chat: React.FC = () => {
   return (
-    <div className="flex h-screen">
-      <Sidebar />
-      <div className="flex flex-col flex-1 min-w-0">
-        <TopBar />
-        <div className="flex-1 flex flex-col p-4 overflow-auto">
-          <ChatArea />
-        </div>
-        <div className="p-4">
-          <MessageInput />
-        </div>
-
-        <div className="text-xs text-center text-muted-foreground pb-4">
-          Sentra can make mistakes. Check important info.
-        </div>
+    <>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <ChatArea />
       </div>
-    </div>
+      <MessageInput />
+      <div className="p-4 text-sm text-center text-slate-400">
+        Sentra can make mistakes. Check important info.
+      </div>
+    </>
   );
 };
 
