@@ -1,42 +1,27 @@
-import { useState, type ReactNode } from 'react'
-import { useLocation } from 'react-router-dom'
-import ChatSidebar from './sidebar/ChatSidebar'
-import KnowledgeSidebar from './sidebar/KnowledgeSidebar'
-import SettingsSidebar from './sidebar/SettingsSidebar'
-import GlobalTopBar from './GlobalTopBar'
+import { useState, type ReactNode } from "react";
+import GlobalTopBar from "./GlobalTopBar";
+import SidebarLayout from "./Sidebar";
+import "../../styles/Sidebar.css";
 
 interface Props {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export default function Layout({ children }: Props) {
-  const { pathname } = useLocation()
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
-  const toggleSidebar = () => setSidebarCollapsed((prev) => !prev)
-
-  const getSidebar = () => {
-    if (sidebarCollapsed) return null
-
-    if (pathname.startsWith('/c')) return <ChatSidebar />
-    if (pathname.startsWith('/k')) return <KnowledgeSidebar />
-    if (pathname.startsWith('/s')) return <SettingsSidebar />
-    return null
-  }
+  const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
 
   return (
     <div className="flex flex-col min-h-screen bg-sentra-primary text-sentra-text">
       {/* Always fixed at top */}
-      <GlobalTopBar
-        sidebarCollapsed={sidebarCollapsed}
-        onToggleSidebar={toggleSidebar}
-      />
+      <GlobalTopBar />
 
       {/* Content below topbar */}
       <div className="flex flex-1 pt-14">
-        {getSidebar()}
+        <SidebarLayout collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
         <main className="flex-1 overflow-y-auto p-4">{children}</main>
       </div>
     </div>
-  )
+  );
 }

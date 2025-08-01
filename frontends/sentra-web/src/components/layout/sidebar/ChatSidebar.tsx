@@ -1,6 +1,6 @@
-import SidebarSection from './Shared/SidebarSection'
-import SidebarItem from './Shared/SidebarItem'
-import { PlusCircle } from 'lucide-react'
+import SidebarSection from "./Shared/SidebarSection";
+import SidebarItem from "./Shared/SidebarItem";
+import { PlusCircle } from "lucide-react";
 
 export default function ChatSidebar() {
   return (
@@ -10,5 +10,5 @@ export default function ChatSidebar() {
         {/* TODO: Render list of conversations */}
       </SidebarSection>
     </>
-  )
+  );
 }

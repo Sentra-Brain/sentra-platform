@@ -1,31 +1,23 @@
 // src/components/layout/GlobalTopBar.tsx
-import { useState } from 'react';
-import { Menu, Search, UserCircle } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../store/hooks';
-import GlobalMenuPanel from './GlobalMenuPanel';
+import { useState } from "react";
+import { Search, UserCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { useAppSelector } from "../../store/hooks";
+// import GlobalMenuPanel from './GlobalMenuPanel';
 
-interface GlobalTopBarProps {
-  sidebarCollapsed: boolean;
-  onToggleSidebar: () => void;
-}
-
-export default function GlobalTopBar({
-  sidebarCollapsed,
-  onToggleSidebar,
-}: GlobalTopBarProps) {
+export default function GlobalTopBar() {
   const location = useLocation();
   const user = useAppSelector((s) => s.auth.user);
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
 
   const getBreadcrumb = () => {
     const path = location.pathname;
-    if (path.startsWith('/c')) return 'Sentra / Chat';
-    if (path.startsWith('/k')) return 'Sentra / Knowledge';
-    if (path.startsWith('/prompts')) return 'Sentra / Prompts';
-    if (path.startsWith('/skills')) return 'Sentra / Skills';
-    if (path.startsWith('/settings')) return 'Sentra / Settings';
-    return 'Sentra';
+    if (path.startsWith("/c")) return "Sentra / Chat";
+    if (path.startsWith("/k")) return "Sentra / Knowledge";
+    if (path.startsWith("/prompts")) return "Sentra / Prompts";
+    if (path.startsWith("/skills")) return "Sentra / Skills";
+    if (path.startsWith("/settings")) return "Sentra / Settings";
+    return "Sentra";
   };
 
   return (
@@ -40,7 +32,7 @@ export default function GlobalTopBar({
     >
       {/* Left */}
       <div className="flex items-center gap-4 flex-shrink-0 min-w-0">
-        <button
+        {/* <button
           onClick={onToggleSidebar}
           title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
@@ -51,7 +43,7 @@ export default function GlobalTopBar({
           "
         >
           <Menu size={20} />
-        </button>
+        </button> */}
 
         <img
           src="/sentra_brain_logo_64.png"
@@ -105,7 +97,5 @@ export default function GlobalTopBar({
         )}
       </div>
     </header>
-    
-  
   );
 }
