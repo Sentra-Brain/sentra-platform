@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { Menu, Search, UserCircle } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { useAppSelector } from '../../store/hooks';
+import GlobalMenuPanel from './GlobalMenuPanel';
 
 interface GlobalTopBarProps {
   sidebarCollapsed: boolean;
@@ -104,5 +105,7 @@ export default function GlobalTopBar({
         )}
       </div>
     </header>
+    
+  
   );
 }
