@@ -1,35 +1,108 @@
-import { useDispatch, useSelector } from 'react-redux'
-import type { RootState } from '../../store'
-import { toggleSidebar } from '../../store/slices/uiSlice'
-import UserMenu from './UserMenu'
+// src/components/layout/GlobalTopBar.tsx
+import { useState } from 'react';
+import { Menu, Search, UserCircle } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
+import { useAppSelector } from '../../store/hooks';
 
-export default function Topbar() {
-  const dispatch = useDispatch()
-  const isCollapsed = useSelector((state: RootState) => state.ui.isSidebarCollapsed)
+interface GlobalTopBarProps {
+  sidebarCollapsed: boolean;
+  onToggleSidebar: () => void;
+}
+
+export default function GlobalTopBar({
+  sidebarCollapsed,
+  onToggleSidebar,
+}: GlobalTopBarProps) {
+  const location = useLocation();
+  const user = useAppSelector((s) => s.auth.user);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const getBreadcrumb = () => {
+    const path = location.pathname;
+    if (path.startsWith('/c')) return 'Sentra / Chat';
+    if (path.startsWith('/k')) return 'Sentra / Knowledge';
+    if (path.startsWith('/prompts')) return 'Sentra / Prompts';
+    if (path.startsWith('/skills')) return 'Sentra / Skills';
+    if (path.startsWith('/settings')) return 'Sentra / Settings';
+    return 'Sentra';
+  };
 
   return (
-    <header className="h-14 flex items-center justify-between px-4 border-b border-gray-700 bg-sentra-primary-dark">
-      <div className="flex items-center gap-4">
-        <button onClick={() => dispatch(toggleSidebar())}>
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
+    <header
+      className="
+        fixed top-0 left-0 right-0 z-50 h-14 
+        flex items-center justify-between 
+        px-4 border-b shadow 
+        bg-[var(--sentra-primary-dark)] 
+        border-[var(--sentra-primary)]
+      "
+    >
+      {/* Left */}
+      <div className="flex items-center gap-4 flex-shrink-0 min-w-0">
+        <button
+          onClick={onToggleSidebar}
+          title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          aria-label={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          className="
+            p-2 rounded transition hover:bg-[var(--sentra-primary)]
+            focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--sentra-accent)]
+            text-[var(--sentra-text)]
+          "
+        >
+          <Menu size={20} />
         </button>
-        {isCollapsed && <div className="sidebar-collapsed">Sidebar is collapsed</div>}
-        <input
-          type="text"
-          placeholder="Search..."
-          className="bg-sentra-primary rounded px-3 py-1 text-sm w-64 outline-none border border-gray-600 focus:ring-1 focus:ring-sentra-accent"
+
+        <img
+          src="/sentra_brain_logo_64.png"
+          alt="Sentra Logo"
+          className="w-7 h-7 object-contain"
         />
+
+        <span className="text-sm font-medium text-[var(--sentra-text)] whitespace-nowrap hidden sm:inline">
+          {getBreadcrumb()}
+        </span>
       </div>
 
-      <UserMenu />
+      {/* Center */}
+      <div className="flex-1 flex justify-center px-2 max-w-[600px]">
+        <div className="relative w-full max-w-md hidden sm:flex">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--sentra-text)] opacity-60 pointer-events-none"
+          />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search..."
+            aria-label="Global search"
+            className="
+              w-full bg-[var(--sentra-primary)] 
+              border border-[var(--sentra-primary-light)] 
+              pl-10 pr-3 py-2 
+              text-sm text-[var(--sentra-text)] 
+              rounded transition 
+              placeholder:text-[var(--sentra-text)] placeholder:opacity-60 
+              focus:outline-none focus:border-[var(--sentra-accent)] focus:ring-2 focus:ring-[var(--sentra-accent)]
+            "
+          />
+        </div>
+      </div>
+
+      {/* Right */}
+      <div className="flex items-center gap-3 flex-shrink-0">
+        {user && (
+          <div
+            title={user.full_name || user.email}
+            className="
+              p-1 rounded-full hover:bg-[var(--sentra-primary)]
+              cursor-pointer transition
+            "
+          >
+            <UserCircle size={24} className="text-[var(--sentra-text)]" />
+          </div>
+        )}
+      </div>
     </header>
-  )
+  );
 }
