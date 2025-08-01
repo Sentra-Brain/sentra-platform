@@ -18,12 +18,14 @@ class CreateConversationRequest(BaseModel):
 
 class CreateConversationResponse(BaseModel):
     id: str = Field(..., description="Unique identifier of the conversation")
+    title: str = Field(..., description="Title of the conversation")
+    # initial_prompt: str = Field(..., description="Initial prompt for the conversation")
+    created_at: datetime = Field(..., description="Creation timestamp")
 
     model_config = {
         "from_attributes": True,
         "populate_by_name": True
     }
-
 
 class ConversationListItemResponse(BaseModel):
     id: str = Field(..., description="Unique identifier of the conversation")
@@ -35,7 +37,6 @@ class ConversationListItemResponse(BaseModel):
         "populate_by_name": True
     }
 
-
 class MessageResponse(BaseModel):
     role: Literal["user", "assistant", "system"] = Field(..., description="Role of the message sender")
     content: str = Field(..., description="Content of the message")
@@ -45,9 +46,9 @@ class MessageResponse(BaseModel):
         "from_attributes": True
     }
 
-
 class ConversationResponse(BaseMongoModel):
     title: Optional[str] = None
+    
     description: Optional[str] = None
     initial_prompt: Optional[str] = None
     created_at: datetime

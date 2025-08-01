@@ -28,6 +28,8 @@ export type CreateConversationRequest = {
 
 export type CreateConversationResponse = {
   id: string;
+  title: string;
+  created_at: string;
 };
 
 export type UpdateConversationRequest = {

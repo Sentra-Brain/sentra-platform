@@ -5,7 +5,7 @@ import type { SignupResponse } from '../models/signupResponse'
 import type { SignupRequest } from '../models/signupRequest'
 
 export const userService = {
-  // Obtiene el usuario actual usando el token desde el interceptor
+  // Gets the current user from the API
   getCurrentUser(): Promise<User> {
     return apiClient.get<User>('/users/me').then(res => res.data)
   },
