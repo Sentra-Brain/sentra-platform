@@ -4,6 +4,8 @@ import { logout, loginSuccess } from '../features/auth/authSlice'
 import { authService } from './authService'
 import { toast } from 'react-toastify'
 import { tokenStorage } from '../utils/tokenStorage'
+import type { SentraApiError } from '../models/apiError'
+import { showApiErrorToast } from '../utils/showApiErrorToast'
 
 // Base Axios instance
 const apiClient = axios.create({
@@ -43,6 +45,7 @@ apiClient.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // === Handle token refresh ==
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
 
@@ -91,6 +94,24 @@ apiClient.interceptors.response.use(
       } finally {
         isRefreshing = false
       }
+    }
+    // === Handle other errors ===
+    const { response } = error
+    if (response && response.data && response.data.status === 'error') {
+      const apiError = response.data as SentraApiError
+
+      const message = apiError.error.message || 'Unexpected error occurred.'
+      const requestId = apiError.error.requestId
+      
+      showApiErrorToast(apiError)
+
+      // Optional: log error details to Sentry or console
+      console.error('API Error:', {
+        message,
+        details: apiError.error.details,
+        path: apiError.error.path,
+        requestId,
+      })
     }
 
     return Promise.reject(error)

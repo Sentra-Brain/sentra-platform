@@ -1,6 +1,7 @@
 # sentra_brain_api/infra/postgres_service.py
 
 import time
+from typing import Generator
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError
@@ -18,19 +19,22 @@ from sentra_core.domain.entities.user_entity import UserEntity
 logger = get_logger(__name__)
 
 # Create database engine
-engine = create_engine(settings.database_url, pool_pre_ping=True)
+engine = create_engine(
+    settings.database_url,
+    pool_size=10,
+    max_overflow=20,
+    pool_timeout=30,
+    pool_pre_ping=True
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db() -> Session:
-    """Get database session."""
+def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
-        return db
-    except Exception as e:
-        logger.error(f"Error creating database session: {e}")
+        yield db
+    finally:
         db.close()
-        raise
 
 
 def init_db():
