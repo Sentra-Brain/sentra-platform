@@ -97,7 +97,6 @@ button,
   padding: 0.5rem;
   border-radius: 0.375rem;
   background: none;
-  border: 1px solid var(--sentra-accent-light);
   color: var(--sentra-text);
   cursor: pointer;
   font-size: 0.875rem;

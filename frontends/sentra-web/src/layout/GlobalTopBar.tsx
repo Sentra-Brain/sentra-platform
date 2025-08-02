@@ -1,13 +1,16 @@
 // src/layout/GlobalTopBar.tsx
-import { UserCircle } from "lucide-react";
+import { Moon, Sun, UserCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
-import { useAppSelector } from "@store/hooks";
+import { toggleTheme } from '@store/slices/uiSlice';
+import { useAppDispatch, useAppSelector } from "@store/hooks";
 
 import SearchInput from "@features/search/SearchInput";
 // import GlobalMenuPanel from './GlobalMenuPanel';
 
 export default function GlobalTopBar() {
   const location = useLocation();
+  const dispatch = useAppDispatch();
+  const theme = useAppSelector((s) => s.ui.theme);
   const user = useAppSelector((s) => s.auth.user);
 
   const getBreadcrumb = () => {
@@ -21,7 +24,9 @@ export default function GlobalTopBar() {
   };
 
   return (
-<header className="h-14 w-full flex items-center justify-between px-4 border-b shadow bg-[var(--sentra-primary-dark)] border-[var(--sentra-primary)] z-10 shrink-0">      {/* Left */}
+    <header className="h-14 w-full flex items-center justify-between px-4 border-b shadow bg-[var(--sentra-primary-dark)] border-[var(--sentra-primary)] z-10 shrink-0">
+      {" "}
+      {/* Left */}
       <div className="flex items-center gap-4 flex-shrink-0 min-w-0">
         {/* <button
           onClick={onToggleSidebar}
@@ -46,21 +51,29 @@ export default function GlobalTopBar() {
           {getBreadcrumb()}
         </span>
       </div>
-
       {/* Center */}
       <div className="flex-1 flex justify-center px-2 max-w-[600px]">
         <SearchInput />
       </div>
-
       {/* Right */}
       <div className="flex items-center gap-3 flex-shrink-0">
+        {/* Theme toggle button */}
+        <button
+          onClick={() => dispatch(toggleTheme())}
+          title="Toggle theme"
+          className="p-2 rounded-full transition hover:bg-[var(--sentra-primary)] text-[var(--sentra-text)]"
+        >
+          {theme === "dark" ? <Sun size={20} /> : <Moon size={20} />}
+        </button>
+
+        {/* User avatar */}
         {user && (
           <div
             title={user.full_name || user.email}
             className="
-              p-1 rounded-full hover:bg-[var(--sentra-primary)]
-              cursor-pointer transition
-            "
+        p-1 rounded-full hover:bg-[var(--sentra-primary)]
+        cursor-pointer transition
+      "
           >
             <UserCircle size={24} className="text-[var(--sentra-text)]" />
           </div>

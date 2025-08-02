@@ -36,7 +36,7 @@ export default function ChatPage() {
   }
 
   if (loadingConversation) {
-    return <div className="p-4 text-sm text-gray-400">Loading conversation...</div>
+    return <div className="p-4 text-sm text-[var(--sentra-neutral)]">Loading conversation...</div>
   }
 
   if (error) {

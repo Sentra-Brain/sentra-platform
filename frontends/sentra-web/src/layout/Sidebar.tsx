@@ -61,18 +61,18 @@ export default function SidebarLayout({
           const isActive =
             pathname === path || pathname.startsWith(path.slice(0, 2)); // crude matching
           return (
-            <Link
-              key={path}
-              to={path}
-              className={`flex items-center px-2 py-2 rounded-md text-sm font-medium ${
-                isActive
-                  ? "bg-sentra-accent text-white"
-                  : "hover:bg-sentra-accent-light text-gray-300"
-              }`}
-            >
-              <Icon className="w-4 h-4 mr-2" />
-              {!collapsed && <span>{label}</span>}
-            </Link>
+<Link
+  key={path}
+  to={path}
+  className={`flex items-center px-2 py-2 rounded-md text-sm font-medium transition-colors ${
+    isActive
+      ? "bg-[var(--sentra-accent)] text-[var(--sentra-primary)]"
+      : "hover:bg-[var(--sentra-primary-light)] text-[var(--sentra-neutral)]"
+  }`}
+>
+  <Icon className="w-4 h-4 mr-2" />
+  {!collapsed && <span>{label}</span>}
+</Link>
           );
         })}
       </nav>

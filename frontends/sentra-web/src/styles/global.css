@@ -27,6 +27,8 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
+    background-color: var(--sentra-primary);
+  color: var(--sentra-text);
 }
 
 @keyframes spin {

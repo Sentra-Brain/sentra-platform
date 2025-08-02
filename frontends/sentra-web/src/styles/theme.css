@@ -10,10 +10,13 @@
 
 /* Light theme example */
 [data-theme="light"] {
-  --sentra-primary: #f4f4f7;
-  --sentra-primary-dark: #e0e0e0;
+  --sentra-primary: #eee;
+  --sentra-primary-light: #f3f3f0;
+  --sentra-primary-dark: #d6d6dc;
+
   --sentra-accent: #007acc;
-  --sentra-accent-light: #66b2ff;
+  --sentra-accent-light: #cce9ff;
+
   --sentra-neutral: #1e1e2f;
-  --sentra-text: #1e1e2f;
+  --sentra-text: #202020;
 }

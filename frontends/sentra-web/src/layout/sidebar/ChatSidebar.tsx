@@ -33,7 +33,7 @@ export default function ChatSidebar() {
       <SidebarItem icon={PlusCircle} label="New chat" onClick={handleNewChat} />
 
       {loadingList && (
-        <div className="px-3 py-2 text-sm text-gray-400">Loading...</div>
+        <div className="px-3 py-2 text-sm text-[var(--sentra-neutral)]">Loading...</div>
       )}
 
       <ul className="conversation-list">

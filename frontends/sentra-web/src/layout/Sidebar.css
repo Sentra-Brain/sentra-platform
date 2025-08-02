@@ -183,8 +183,13 @@
 
 .conversation-item.active {
   background: var(--sentra-accent-light);
-  color: var(--sentra-primary-dark);
-  font-weight: 500;
+  background: var(--sentra-accent-light);
+  color: var(--sentra-neutral);
+  font-weight: 600;
+  border: 1px solid var(--sentra-accent);
+}
+.conversation-item.active:hover {
+  background: var(--sentra-primary);
 }
 
 .conversation-title {
