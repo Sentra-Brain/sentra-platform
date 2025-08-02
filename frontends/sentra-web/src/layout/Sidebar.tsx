@@ -41,12 +41,20 @@ export default function SidebarLayout({
         collapsed ? "collapsed" : ""
       } bg-sentra-primary-dark text-white transition-all duration-200`}
     >
-      {/* Top: Logo + toggle */}
-      <div className="flex items-center justify-end  px-3 py-2">
-        <button onClick={onToggle} className="text-sm">
-          {collapsed ? "⯈" : "⯇"}
-        </button>
-      </div>
+{/* Top: Logo + toggle */}
+<div
+  className="flex justify-end px-2 pt-2 pb-1"
+  style={{ maxHeight: '1rem' }}
+>
+  <button
+    onClick={onToggle}
+    className="sidebar-toggle-internal"
+    title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+  >
+    {collapsed ? '⯈' : '⯇'}
+  </button>
+</div>
+
       {/* Navigation */}
       <nav className="sidebar-navigation">
         {navItems.map(({ path, icon: Icon, label }) => {

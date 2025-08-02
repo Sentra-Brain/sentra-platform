@@ -2,12 +2,7 @@
   width: 220px;
   background: var(--sentra-primary-dark);
   color: var(--sentra-text);
-  display: flex;
-  flex-direction: column;
   transition: width 0.2s ease;
-  height: 100vh;
-  position: relative;
-  flex-shrink: 0;
   border-right: 1px solid var(--sentra-primary);
 }
 

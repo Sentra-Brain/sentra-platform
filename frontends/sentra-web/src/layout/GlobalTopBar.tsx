@@ -21,16 +21,7 @@ export default function GlobalTopBar() {
   };
 
   return (
-    <header
-      className="
-        fixed top-0 left-0 right-0 z-50 h-14 
-        flex items-center justify-between 
-        px-4 border-b shadow 
-        bg-[var(--sentra-primary-dark)] 
-        border-[var(--sentra-primary)]
-      "
-    >
-      {/* Left */}
+<header className="h-14 w-full flex items-center justify-between px-4 border-b shadow bg-[var(--sentra-primary-dark)] border-[var(--sentra-primary)] z-10 shrink-0">      {/* Left */}
       <div className="flex items-center gap-4 flex-shrink-0 min-w-0">
         {/* <button
           onClick={onToggleSidebar}

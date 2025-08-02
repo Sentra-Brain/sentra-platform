@@ -8,18 +8,22 @@ interface Props {
 
 export default function Layout({ children }: Props) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-
   const toggleSidebar = () => setSidebarCollapsed((prev) => !prev);
 
   return (
-    <div className="flex flex-col min-h-screen bg-sentra-primary text-sentra-text">
-      {/* Always fixed at top */}
+    <div className="h-screen w-screen flex flex-col bg-sentra-primary text-sentra-text">
+      {/* Top Bar */}
       <GlobalTopBar />
 
-      {/* Content below topbar */}
-      <div className="flex flex-1 pt-14">
+      {/* Main area */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Sidebar */}
         <SidebarLayout collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
-        <main className="flex-1 overflow-y-auto p-4">{children}</main>
+
+        {/* Scrollable content area */}
+        <main className="flex-1 overflow-y-auto p-4">
+          {children}
+        </main>
       </div>
     </div>
   );
