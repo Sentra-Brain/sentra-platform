@@ -4,6 +4,8 @@ import { tokenStorage } from '@shared/utils/tokenStorage'
 type ChatSendPayload = {
   conversation_id: string
   content: string
+  message_id: string
+  response_message_id: string
 }
 
 type StreamedMessage = {

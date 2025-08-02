@@ -1,68 +1,71 @@
-import { useState, useRef } from 'react'
-import { Plus, Settings, Mic, Send, X, ChevronDown } from 'lucide-react'
-import { useAppDispatch, useAppSelector } from '@store/hooks'
-import {
-  setStreaming,
-  setWaitingForAnswer,
-} from '@features/chat/chatSlice'
-import { chatService } from './chatService'
-import './MessageInput.css'
+import { useState, useRef } from "react";
+import { Plus, Settings, Mic, Send, X, ChevronDown } from "lucide-react";
+import { useAppDispatch, useAppSelector } from "@store/hooks";
+import { v4 as uuidv4 } from "uuid";
+import { setStreaming, setWaitingForAnswer } from "@features/chat/chatSlice";
+import { chatService } from "./chatService";
+import "./MessageInput.css";
 
 const MessageInput = () => {
-  const [value, setValue] = useState('')
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [value, setValue] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const dispatch = useAppDispatch()
-  const isStreaming = useAppSelector((s) => s.chat.isStreaming)
+  const dispatch = useAppDispatch();
+  const isStreaming = useAppSelector((s) => s.chat.isStreaming);
   const conversationId = useAppSelector(
     (s) => s.conversation.currentConversationId
-  )
+  );
 
   const handleSend = async () => {
-    const content = value.trim()
-    if (!content || !conversationId || isStreaming) return
+    const userMessageId = uuidv4();
+    const assistantMessageId = uuidv4();
+    const content = value.trim();
+    if (!content || !conversationId || isStreaming) return;
 
-    dispatch(setStreaming(true))
-    dispatch(setWaitingForAnswer(true))
+    dispatch(setStreaming(true));
+    dispatch(setWaitingForAnswer(true));
 
     try {
       await chatService.sendMessageStream(
-        { conversation_id: conversationId, content },
+        { 
+          conversation_id: conversationId, 
+          content,
+          message_id: userMessageId,
+          response_message_id: assistantMessageId
+        },
         (chunk) => {
-          console.log('Received chunk:', chunk)
+          console.log("Received chunk:", chunk);
         },
         (error) => {
-          console.error('Streaming error:', error)
+          console.error("Streaming error:", error);
         }
-      )
-      setValue('')
+      );
+      setValue("");
     } catch (err) {
-      console.error('Failed to send message:', err)
+      console.error("Failed to send message:", err);
       // optionally dispatch(setChatError(...))
     } finally {
-      dispatch(setStreaming(false))
-      dispatch(setWaitingForAnswer(false))
+      dispatch(setStreaming(false));
+      dispatch(setWaitingForAnswer(false));
     }
-  }
+  };
 
   const handleStop = () => {
     // TODO: add abort logic if needed
-    dispatch(setStreaming(false))
-  }
+    dispatch(setStreaming(false));
+  };
 
-  const handleKeyDown = async (
-    e: React.KeyboardEvent<HTMLTextAreaElement>
-  ) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      await handleSend()
+  const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      await handleSend();
     }
-  }
+  };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     // TODO: Implement file upload
-    e.target.value = ''
-  }
+    e.target.value = "";
+  };
 
   return (
     <div className="message-input-container">
@@ -82,8 +85,8 @@ const MessageInput = () => {
           onKeyDown={handleKeyDown}
           placeholder={
             conversationId
-              ? 'Type a message...'
-              : 'Ask anything to start a new conversation...'
+              ? "Type a message..."
+              : "Ask anything to start a new conversation..."
           }
           rows={1}
           disabled={isStreaming}
@@ -120,7 +123,7 @@ const MessageInput = () => {
         <ChevronDown size={20} />
       </button>
     </div>
-  )
-}
+  );
+};
 
-export default MessageInput
+export default MessageInput;
