@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { useConversations } from '../hooks/useConversations'
+import { useConversations } from './useConversations'
 
 export default function ConversationsInitializer() {
   const { loadConversations } = useConversations()

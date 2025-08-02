@@ -1,32 +1,42 @@
-import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
+// src/store/slices/chatSlice.ts
+import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 
-export interface ChatMessage {
-  id: string
-  role: 'user' | 'assistant' | 'system'
-  content: string
-  createdAt: string
-}
-
-interface ChatState {
-  messages: ChatMessage[]
-}
+type ChatState = {
+  waitingForAnswer: boolean;
+  isStreaming: boolean; // linked to streaming state
+  inputDisabled: boolean;
+};
 
 const initialState: ChatState = {
-  messages: [],
-}
+  waitingForAnswer: false,
+  isStreaming: false, // linked to streaming state
+  inputDisabled: false, // optionally linked
+};
 
 const chatSlice = createSlice({
-  name: 'chat',
+  name: "chat",
   initialState,
   reducers: {
-    addMessage(state, action: PayloadAction<ChatMessage>) {
-      state.messages.push(action.payload)
+    setWaitingForAnswer(state, action: PayloadAction<boolean>) {
+      state.waitingForAnswer = action.payload;
     },
-    clearMessages(state) {
-      state.messages = []
+    setStreaming(state, action: PayloadAction<boolean>) {
+      state.isStreaming = action.payload;
+    },
+    setInputDisabled(state, action: PayloadAction<boolean>) {
+      state.inputDisabled = action.payload;
+    },
+    resetChatState(state) {
+      state.waitingForAnswer = false;
+      state.inputDisabled = false;
     },
   },
-})
+});
 
-export const { addMessage, clearMessages } = chatSlice.actions
-export default chatSlice.reducer
+export const {
+  setWaitingForAnswer,
+  setStreaming,
+  setInputDisabled,
+  resetChatState,
+} = chatSlice.actions
+export default chatSlice.reducer;

@@ -1,7 +1,7 @@
 import SidebarSection from "./Shared/SidebarSection";
 import SidebarItem from "./Shared/SidebarItem";
 import { PlusCircle } from "lucide-react";
-import { useConversations } from "../../../hooks/useConversations";
+import { useConversations } from "@features/conversations/useConversations";
 import { useNavigate, useLocation } from "react-router-dom";
 import { ConversationItem } from "./ConversationItem";
 

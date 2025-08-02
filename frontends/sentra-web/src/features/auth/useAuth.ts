@@ -1,10 +1,10 @@
-import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { loginSuccess, logout, markRehydrated } from '../features/auth/authSlice';
-import { authService } from '../services/authService';
-import { userService } from '../services/userService';
-import { parseJWT, isTokenExpired } from '../utils/tokenUtils';
+import { useAppDispatch, useAppSelector } from '@store/hooks';
+import { loginSuccess, logout, markRehydrated } from './authSlice';
+import { authService } from './authService';
+import { userService } from '@features/user/userService';
+import { parseJWT, isTokenExpired } from '@shared/utils/tokenUtils';
 import { toast } from 'react-toastify';
-import { tokenStorage } from '../utils/tokenStorage';
+import { tokenStorage } from '@shared/utils/tokenStorage';
 
 export function useAuth() {
   const dispatch = useAppDispatch();

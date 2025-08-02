@@ -1,6 +1,7 @@
 // src/services/conversationService.ts
 
-import apiClient from './apiClient'
+
+import apiClient from '@shared/api/apiClient'
 import type {
   ConversationListItem,
   ConversationDetails,
@@ -9,7 +10,7 @@ import type {
   UpdateConversationRequest,
   UpdateConversationResponse,
   DeleteConversationResponse,
-} from '../models/conversationModels'
+} from './types/conversationModels'
 
 export const conversationService = {
   list(): Promise<ConversationListItem[]> {

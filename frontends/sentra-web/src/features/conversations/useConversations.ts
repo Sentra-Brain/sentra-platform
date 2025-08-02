@@ -1,11 +1,11 @@
-import { useAppDispatch, useAppSelector } from '../store/hooks'
+import { useAppDispatch, useAppSelector } from '@store/hooks'
 import {
   fetchConversations,
   fetchConversationById,
   selectConversation,
   clearConversation,
   createConversation,
-} from '../features/conversations/conversationSlice'
+} from './conversationSlice'
 
 export function useConversations() {
   const dispatch = useAppDispatch()

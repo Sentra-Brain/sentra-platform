@@ -1,4 +1,4 @@
-// src/components/layout/GlobalMenuPanel.tsx
+// src/layout/GlobalMenuPanel.tsx
 
 import { X } from 'lucide-react'
 import { useEffect } from 'react'

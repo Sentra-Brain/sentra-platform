@@ -1,7 +1,7 @@
 // src/models/knowledgeModels.ts
 // TypeScript models for Knowledge Management API
 
-import type { UserRef } from "./user";
+import type { UserRef } from "@features/user/types/user";
 
 // Const enums matching the backend (using const assertions for better TypeScript support)
 export const KnowledgeSourceType = {
@@ -93,8 +93,6 @@ export interface Document {
   knowledge_source_id: string;
   chunks_count?: number;
 }
-
-
 
 export interface DocumentUploadRequest {
   display_name: string;

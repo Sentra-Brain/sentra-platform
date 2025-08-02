@@ -1,9 +1,9 @@
 import axios from 'axios'
-import { store } from '../store'
-import { logout, loginSuccess } from '../features/auth/authSlice'
-import { authService } from './authService'
+import { store } from '../../store'
+import { logout, loginSuccess } from '../../features/auth/authSlice'
+import { authService } from '../../features/auth/authService'
 import { toast } from 'react-toastify'
-import { tokenStorage } from '../utils/tokenStorage'
+import { tokenStorage } from '@shared/utils/tokenStorage'
 import type { SentraApiError } from '../models/apiError'
 import { showApiErrorToast } from '../utils/showApiErrorToast'
 

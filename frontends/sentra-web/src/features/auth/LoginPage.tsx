@@ -1,8 +1,8 @@
 // src/features/auth/LoginPage.tsx
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useAppSelector } from '../../store/hooks'
-import { useAuth } from '../../hooks/useAuth'
+import { useAppSelector } from '@store/hooks'
+import { useAuth } from './useAuth'
 import { useLocation } from 'react-router-dom'
 import './LoginPage.css'
 

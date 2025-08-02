@@ -8,6 +8,7 @@ import { Link } from "react-router-dom";
 import ChatSidebar from "./sidebar/ChatSidebar";
 import KnowledgeSidebar from "./sidebar/KnowledgeSidebar";
 import SettingsSidebar from "./sidebar/SettingsSidebar";
+import "./Sidebar.css";
 // import UserMenu from './UserMenu'
 
 interface SidebarLayoutProps {

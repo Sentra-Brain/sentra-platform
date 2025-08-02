@@ -5,8 +5,8 @@ import { store } from './store'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import './styles/global.css'
-import SessionInitializer from './components/SessionInitializer'
-import ConversationsInitializer from './components/ConversationsInitializer'
+import SessionInitializer from './features/auth/SessionInitializer'
+import ConversationsInitializer from './features/conversations/ConversationsInitializer'
 
 export default function App() {
   return (

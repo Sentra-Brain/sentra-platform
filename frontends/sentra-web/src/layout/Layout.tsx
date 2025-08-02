@@ -1,7 +1,6 @@
 import { useState, type ReactNode } from "react";
 import GlobalTopBar from "./GlobalTopBar";
 import SidebarLayout from "./Sidebar";
-import "../../styles/Sidebar.css";
 
 interface Props {
   children: ReactNode;

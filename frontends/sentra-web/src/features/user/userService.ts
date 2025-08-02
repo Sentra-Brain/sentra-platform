@@ -1,8 +1,9 @@
 // src/services/userService.ts
-import apiClient from './apiClient'
-import type { User } from '../models/user'
-import type { SignupResponse } from '../models/signupResponse'
-import type { SignupRequest } from '../models/signupRequest'
+import apiClient from '@shared/api/apiClient'
+import type { User } from './types/user'
+import type { SignupRequest } from './types/signupRequest'
+import type { SignupResponse } from './types/signupResponse'
+
 
 export const userService = {
   // Gets the current user from the API

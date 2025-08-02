@@ -1,25 +1,23 @@
-// src/components/layout/GlobalTopBar.tsx
-import { useState } from 'react';
-import { Search, UserCircle } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
-import { useAppSelector } from '../../store/hooks';
+// src/layout/GlobalTopBar.tsx
+import { UserCircle } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import { useAppSelector } from "@store/hooks";
+
+import SearchInput from "@features/search/SearchInput";
 // import GlobalMenuPanel from './GlobalMenuPanel';
-
-
 
 export default function GlobalTopBar() {
   const location = useLocation();
   const user = useAppSelector((s) => s.auth.user);
-  const [searchQuery, setSearchQuery] = useState('');
 
   const getBreadcrumb = () => {
     const path = location.pathname;
-    if (path.startsWith('/c')) return 'Sentra / Chat';
-    if (path.startsWith('/k')) return 'Sentra / Knowledge';
-    if (path.startsWith('/prompts')) return 'Sentra / Prompts';
-    if (path.startsWith('/skills')) return 'Sentra / Skills';
-    if (path.startsWith('/settings')) return 'Sentra / Settings';
-    return 'Sentra';
+    if (path.startsWith("/c")) return "Sentra / Chat";
+    if (path.startsWith("/k")) return "Sentra / Knowledge";
+    if (path.startsWith("/prompts")) return "Sentra / Prompts";
+    if (path.startsWith("/skills")) return "Sentra / Skills";
+    if (path.startsWith("/settings")) return "Sentra / Settings";
+    return "Sentra";
   };
 
   return (
@@ -60,28 +58,7 @@ export default function GlobalTopBar() {
 
       {/* Center */}
       <div className="flex-1 flex justify-center px-2 max-w-[600px]">
-        <div className="relative w-full max-w-md hidden sm:flex">
-          <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--sentra-text)] opacity-60 pointer-events-none"
-          />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search..."
-            aria-label="Global search"
-            className="
-              w-full bg-[var(--sentra-primary)] 
-              border border-[var(--sentra-primary-light)] 
-              pl-10 pr-3 py-2 
-              text-sm text-[var(--sentra-text)] 
-              rounded transition 
-              placeholder:text-[var(--sentra-text)] placeholder:opacity-60 
-              focus:outline-none focus:border-[var(--sentra-accent)] focus:ring-1/2 focus:ring-[var(--sentra-accent)]
-            "
-          />
-        </div>
+        <SearchInput />
       </div>
 
       {/* Right */}
@@ -99,7 +76,5 @@ export default function GlobalTopBar() {
         )}
       </div>
     </header>
-    
-  
   );
 }

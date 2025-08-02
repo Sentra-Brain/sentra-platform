@@ -1,8 +1,8 @@
 // features/auth/authThunks.ts
 
 import { createAsyncThunk } from '@reduxjs/toolkit'
-import { userService } from '../../services/userService'
-import type { User } from '../../models/user'
+import { userService } from '@features/user/userService'
+import type { User } from '@features/user/types/user'
 import type { RootState } from '../../store'
 
 export const fetchCurrentUser = createAsyncThunk<User, void, { state: RootState }>(

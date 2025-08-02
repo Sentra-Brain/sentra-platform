@@ -1,4 +1,5 @@
 /* tsconfig.json */
+// Root config: delegates to app (React) and node (Vite config)
 {
   "files": [],
   "references": [

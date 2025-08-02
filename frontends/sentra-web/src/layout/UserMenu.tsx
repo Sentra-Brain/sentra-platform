@@ -1,4 +1,4 @@
-// src/components/layout/UserMenu.tsx
+// src/layout/UserMenu.tsx
 export default function UserMenu() {
   return (
     <div className="flex items-center">

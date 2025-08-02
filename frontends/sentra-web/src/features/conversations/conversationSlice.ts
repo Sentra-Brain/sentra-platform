@@ -5,12 +5,12 @@ import {
   createAsyncThunk,
   type PayloadAction,
 } from '@reduxjs/toolkit'
-import { conversationService } from '../../services/conversationService'
+import { conversationService } from './conversationService'
 import type {
   ConversationDetails,
   ConversationListItem,
   CreateConversationRequest,
-} from '../../models/conversationModels'
+} from './types/conversationModels'
 
 interface ConversationsState {
   conversations: ConversationListItem[]
