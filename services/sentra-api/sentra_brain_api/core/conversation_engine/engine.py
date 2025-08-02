@@ -3,6 +3,7 @@ import json
 import logging
 from typing import AsyncGenerator
 from datetime import datetime, timezone
+import uuid
 
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
 from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
@@ -33,8 +34,9 @@ class ConversationEngine:
         now = datetime.now(timezone.utc).isoformat()
 
         context = await self._load_context(request.user_id, request.conversation_id)
-        user_msg = self._make_message("user", request.content, now)
+        user_msg = self._make_message("user", request.content, now, now, message_id=request.message_id)
         await self._persist_user_message(request, user_msg)
+
 
         payload = self.prompt_factory.build_payload(
             context=context,
@@ -51,7 +53,7 @@ class ConversationEngine:
             yield ConversationDelta(content="(No response)", final=True)
             return
 
-        assistant_msg = self._make_message("assistant", buffer, now)
+        assistant_msg = self._make_message("assistant", buffer, now, message_id=request.response_message_id)
         await self._persist_assistant_message(request, assistant_msg)
 
         context.append(assistant_msg)
@@ -123,6 +125,7 @@ class ConversationEngine:
 
     def _make_message(self, role: str, content: str, timestamp: str, **extra) -> dict:
         return {
+            "id": extra.get("message_id") or extra.get("response_message_id") or uuid.uuid4().hex,
             "role": role,
             "content": content,
             "timestamp": timestamp,

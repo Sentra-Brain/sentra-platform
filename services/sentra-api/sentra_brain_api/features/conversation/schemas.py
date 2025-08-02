@@ -1,4 +1,4 @@
-# sentra_brain_api/features/conversation/schemas.py
+# sentra-brain_api/features/conversation/schemas.py
 
 from datetime import datetime
 from typing import List, Literal, Optional

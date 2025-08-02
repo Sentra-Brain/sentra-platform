@@ -1,4 +1,4 @@
-// src/services/chatService.ts
+// sentra-web/src/features/chat/chatService.ts
 import { tokenStorage } from '@shared/utils/tokenStorage'
 
 type ChatSendPayload = {
