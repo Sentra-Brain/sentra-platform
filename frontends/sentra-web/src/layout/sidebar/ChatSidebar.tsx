@@ -3,7 +3,7 @@ import SidebarItem from "./Shared/SidebarItem";
 import { PlusCircle } from "lucide-react";
 import { useConversations } from "@features/conversations/useConversations";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ConversationItem } from "./ConversationItem";
+import { ConversationItem } from "@features/conversations/ConversationItem";
 
 export default function ChatSidebar() {
   const { conversations, currentConversationId, select, clear, loadingList } =
