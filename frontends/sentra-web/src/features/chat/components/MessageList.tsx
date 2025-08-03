@@ -1,8 +1,6 @@
 import { useEffect, useRef } from 'react'
 import MessageBubble from './MessageBubble'
-import type { ConversationDetails } from '@features/conversations/types/conversationModels'
-
-type ChatMessage = ConversationDetails['messages'][number]
+import type { ChatMessage } from '@features/conversations/types/conversationModels'
 
 export default function MessageList({ messages }: { messages: ChatMessage[] }) {
   const endRef = useRef<HTMLDivElement | null>(null)

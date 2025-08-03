@@ -1,75 +1,97 @@
 // src/features/chat/hooks/useChatActions.ts
-import { useAppDispatch } from '@store/hooks'
+import { useAppDispatch, useAppSelector } from '@store/hooks'
 import { v4 as uuidv4 } from 'uuid'
-
 import {
   createConversation,
   selectConversation,
   fetchConversationById,
 } from '@features/conversations/conversationSlice'
-
-import { chatService } from '@features/chat/chatService'
 import {
+  addMessage,
+  updateLastAssistantMessage,
   setStreaming,
   setWaitingForAnswer,
 } from '@features/chat/chatSlice'
-
+import { chatService } from '@features/chat/chatService'
 import { conversationService } from '@features/conversations/conversationService'
 
 export function useChatActions() {
   const dispatch = useAppDispatch()
+  const currentConversationId = useAppSelector(s => s.conversation.currentConversationId)
 
-  const startNewConversation = async (initialPrompt: string) => {
-    // 1. Crear conversación vacía (sin initial_prompt)
-    const conversation = await dispatch(
-      createConversation({ content: initialPrompt }) // `initial_prompt` es opcional, pero puede ir aquí
-    ).unwrap()
+  const sendMessage = async (content: string) => {
+    const trimmed = content.trim()
+    if (!trimmed) return
 
-    const conversationId = conversation.id
+    dispatch(setStreaming(true))
+    dispatch(setWaitingForAnswer(true))
+
     const userMessageId = uuidv4()
     const assistantMessageId = uuidv4()
 
-    // 2. Cambiar estado global para indicar que ya hay conversación activa
-    dispatch(selectConversation(conversationId))
+    // ➕ Add user message immediately
+    dispatch(addMessage({
+      id: userMessageId,
+      role: 'user',
+      content: trimmed,
+      timestamp: Date.now(),
+    }))
 
-    // 3. Opcionalmente, cargar conversación completa (para mostrar mensajes vacíos, etc.)
-    dispatch(fetchConversationById(conversationId))
+    let conversationId = currentConversationId
 
-    // 4. Iniciar stream con el primer mensaje del usuario
-    dispatch(setStreaming(true))
-    dispatch(setWaitingForAnswer(true))
+    // 🆕 If no active conversation, create one first
+    if (!conversationId) {
+      const newConv = await dispatch(createConversation({ content })).unwrap()
+      conversationId = newConv.id
+      dispatch(selectConversation(conversationId))
+      dispatch(fetchConversationById(conversationId)) // preload full conversation view
+    }
+
+    // 📡 Start streaming the assistant response
+    let assistantStarted = false
 
     chatService.sendMessageStream(
       {
         conversation_id: conversationId,
-        content: initialPrompt,
+        content: trimmed,
         message_id: userMessageId,
         response_message_id: assistantMessageId,
       },
       (chunk) => {
-        // Aquí normalmente ya lo procesa chatSlice via SSE events o similar
-        console.log('Streamed chunk:', chunk)
+        if (chunk.role === 'assistant') {
+          if (!assistantStarted) {
+            dispatch(addMessage({
+              id: assistantMessageId,
+              role: 'assistant',
+              content: chunk.content,
+              timestamp: Date.now(),
+            }))
+            assistantStarted = true
+          } else {
+            dispatch(updateLastAssistantMessage(chunk.content))
+          }
+
+          if (chunk.final) {
+            dispatch(setWaitingForAnswer(false))
+          }
+        }
       },
       (err) => {
-        console.error('Streaming failed', err)
-        // Podrías despachar un error si tienes setChatError(...)
+        console.error('Streaming error:', err)
+        dispatch(setWaitingForAnswer(false))
       }
     )
 
-    // 5. En paralelo, generar título para la conversación
-    conversationService
-      .update(conversationId, { title: '...' }) // <-- puede ir vacío o con título temporal
-      .then(() => {
-        // Posteriormente el título se actualizará desde el backend al finalizar la generación
-      })
-      .catch((err) => {
-        console.warn('Failed to request title generation', err)
-      })
-
-    // 6. Liberar flags (si no lo gestiona el streaming completo)
+    // 🧹 Cleanup flags (in case stream doesn’t do it)
     dispatch(setStreaming(false))
-    dispatch(setWaitingForAnswer(false))
+
+    // 🧠 Trigger title generation in background
+    if (!currentConversationId) {
+      conversationService.update(conversationId, { title: '...' }).catch(err => {
+        console.warn('Failed to trigger title generation', err)
+      })
+    }
   }
 
-  return { startNewConversation }
+  return { sendMessage }
 }

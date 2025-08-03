@@ -17,7 +17,7 @@ class ConversationRepository(BaseRepository[ConversationEntity]):
         self.db.commit()
         return conversation_id
     
-    def get_by_user_id(self, user_id: str):
+    def get_conversations_by_user_id(self, user_id: str):
         return self.db.query(ConversationEntity).filter(ConversationEntity.created_by_id == user_id).all()
     
     def update_title(self, conversation_id: str, title: str):

@@ -8,17 +8,19 @@ export type ConversationListItem = {
 
 export type MessageRole = 'user' | 'assistant' | 'system';
 
+export type ChatMessage = {
+  id: string;
+  role: MessageRole;
+  content: string;
+  timestamp: number;
+};
+
 export type ConversationDetails = {
   id: string;
   title: string;
   description?: string;
   initial_prompt?: string;
-  messages: Array<{
-    id: string;
-    role: MessageRole;
-    content: string;
-    timestamp: number;
-  }>;
+  messages: Array<ChatMessage>;
 };
 
 export type CreateConversationRequest = {

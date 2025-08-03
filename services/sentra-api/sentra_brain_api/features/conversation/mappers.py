@@ -4,11 +4,19 @@ from sentra_core.domain.entities.conversation_entity import ConversationEntity
 from sentra_brain_api.features.conversation.schemas import (
     ConversationListItemResponse,
     ConversationResponse,
+    CreateConversationResponse,
     MessageResponse
 )
 
 def entity_to_list_item_response(entity: ConversationEntity) -> ConversationListItemResponse:
     return ConversationListItemResponse(
+        id=str(entity.id),
+        title=entity.title or "Untitled",
+        created_at=entity.created_at
+    )
+
+def entity_to_creation_response(entity: ConversationEntity) -> CreateConversationResponse:
+    return CreateConversationResponse(
         id=str(entity.id),
         title=entity.title or "Untitled",
         created_at=entity.created_at

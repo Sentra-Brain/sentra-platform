@@ -15,7 +15,7 @@ class ConversationService:
         self.sql_repo = sql_repo
         self.mongo_repo = mongo_repo
 
-    def create_conversation(self, user: UserEntity, content: str, conversation: ConversationEntity) -> str:
+    def create_conversation(self, user: UserEntity, conversation: ConversationEntity) -> str:
         conversation = self.sql_repo.create(conversation)
 
         messages = []
@@ -25,12 +25,6 @@ class ConversationService:
                 "content": conversation.initial_prompt,
                 "timestamp": datetime.now(timezone.utc).isoformat()
             })
-
-        messages.append({
-            "role": "user",
-            "content": content,
-            "timestamp": (datetime.now(timezone.utc) + timedelta(milliseconds=1)).isoformat()
-        })
 
         self.mongo_repo.create_conversation(
             conversation_id=str(conversation.id),
@@ -42,10 +36,10 @@ class ConversationService:
             created_at=conversation.created_at.isoformat()
         )
 
-        return str(conversation.id)
+        return conversation
 
     def get_user_conversations(self, user_id: UUID) -> list[ConversationEntity]:
-        return self.sql_repo.get_by_user_id(user_id)
+        return self.sql_repo.get_conversations_by_user_id(user_id)
 
     def get_conversation(self, conversation_id: str, user_id: str) -> dict:
         return self.mongo_repo.get_conversation_by_id(conversation_id, user_id)

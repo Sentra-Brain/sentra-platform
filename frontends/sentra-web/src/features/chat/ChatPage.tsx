@@ -1,28 +1,34 @@
 // features/chat/ChatPage.tsx
-import { useAppSelector } from '@store/hooks'
-import ChatHeader from './components/ChatHeader'
-import ChatContent from './components/ChatContent'
-import ChatFooter from './components/ChatFooter'
-import ChatInputContainer from './components/ChatInputContainer'
+import { useAppSelector } from "@store/hooks";
+import ChatHeader from "./components/ChatHeader";
+import ChatContent from "./components/ChatContent";
+import ChatFooter from "./components/ChatFooter";
+import ChatInputContainer from "./components/ChatInputContainer";
 
-import { useEffect } from 'react'
-import { useAppDispatch } from '@store/hooks'
-import { fetchConversationById } from '@features/conversations/conversationSlice'
-
+import { setMessages } from "./chatSlice";
+import { useEffect } from "react";
+import { useAppDispatch } from "@store/hooks";
+import { fetchConversationById } from "@features/conversations/conversationSlice";
+import type { ConversationDetails } from "@features/conversations/types/conversationModels";
 
 export default function ChatPage() {
-  const dispatch = useAppDispatch()
+  const dispatch = useAppDispatch();
   const currentConversationId = useAppSelector(
     (state) => state.conversation.currentConversationId
-  )
+  );
 
   useEffect(() => {
     if (currentConversationId) {
-      dispatch(fetchConversationById(currentConversationId))
+      dispatch(fetchConversationById(currentConversationId)).then((res) => {
+        const payload = res.payload as ConversationDetails;
+        if (payload?.messages) {
+          dispatch(setMessages(payload.messages));
+        }
+      });
     }
-  }, [currentConversationId, dispatch])
+  }, [currentConversationId, dispatch]);
 
-  const isConversationActive = !!currentConversationId
+  const isConversationActive = !!currentConversationId;
 
   return (
     <div className="flex flex-col h-full w-full">
@@ -40,5 +46,5 @@ export default function ChatPage() {
         </div>
       )}
     </div>
-  )
+  );
 }
