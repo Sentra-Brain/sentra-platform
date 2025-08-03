@@ -7,13 +7,7 @@ from sentra_core.model.base_mongo_model import BaseMongoModel
 
 
 class CreateConversationRequest(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    initial_prompt: Optional[str] = Field(
-        default=None,
-        description="Optional system prompt to be used as conversation initializer"
-    )
-    content: str = Field(..., description="First user message in the conversation")
+    initial_prompt: str = Field(..., description="Initial User Prompt for the conversation")
 
 
 class CreateConversationResponse(BaseModel):

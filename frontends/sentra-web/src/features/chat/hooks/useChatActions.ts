@@ -41,7 +41,7 @@ export function useChatActions() {
 
     // 🆕 If no active conversation, create one first
     if (!conversationId) {
-      const newConv = await dispatch(createConversation({ content })).unwrap()
+      const newConv = await dispatch(createConversation({ initial_prompt: trimmed })).unwrap()
       conversationId = newConv.id
       dispatch(selectConversation(conversationId))
       dispatch(fetchConversationById(conversationId)) // preload full conversation view

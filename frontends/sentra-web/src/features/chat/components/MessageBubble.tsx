@@ -14,7 +14,7 @@ export default function MessageBubble({ role, content }: Props) {
 
   return (
     <div
-      className={`rounded-xl px-4 py-3 max-w-[768px] w-full ${
+      className={`rounded-xl px-4 py-3 max-w-[768px] ${
         isUser
           ? 'bg-[var(--sentra-primary-light)] self-end text-right'
           : 'bg-[var(--sentra-background-muted)] self-start'

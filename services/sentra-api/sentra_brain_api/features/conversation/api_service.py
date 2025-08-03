@@ -1,5 +1,6 @@
 # sentra_brain_api/features/conversation/api_service.py
 
+from datetime import datetime, timezone
 import uuid
 from sqlalchemy.orm import Session
 from sentra_core.core.logging import get_logger
@@ -38,20 +39,20 @@ class ConversationApiService:
 
     async def create_conversation(self, user: UserEntity, request: CreateConversationRequest) -> CreateConversationResponse:
         # Determine the title before creating the conversation
-        title = request.title
-        if not title and request.content:
-            try:
-                title = self.title_service.generate_initial_title(request.content)
-            except Exception as e:
-                logger.warning(f"Failed to generate initial title: {e}")
-                title = None
+
+        try:
+            title = self.title_service.generate_initial_title(request.initial_prompt)
+        except Exception as e:
+            logger.warning(f"Failed to generate initial title: {e}")
+            title = None
 
         # Create and persist conversation with precomputed title
         conversation = ConversationEntity(
             created_by_id=user.id,
             title=title,
-            description=request.description,
             initial_prompt=request.initial_prompt,
+            created_at=datetime.now(timezone.utc),
+            updated_at=datetime.now(timezone.utc)            
         )
 
         conversation = self.service.create_conversation(
@@ -60,28 +61,22 @@ class ConversationApiService:
         )
 
         return entity_to_creation_response(conversation)
-
-    async def generate_llm_title(self, user: UserEntity, conversation_id: uuid.UUID) -> str:
-        # 1. Get conversation and messages
+    
+    async def generate_llm_title_for_conversation(self, user: UserEntity, conversation_id: str) -> UpdateConversationResponse:
         conversation = self.service.get_conversation(conversation_id, user.id)
-        if not conversation:
-            raise SentraHTTPException(
-                status_code=404,
-                detail="Conversation not found"
-            )
+        if not conversation.initial_prompt:
+            raise ValueError("Cannot generate LLM title: missing initial prompt")
 
-        # 2. Generate LLM title
-        llm_title = await self.title_service.generate_llm_title(conversation.initial_prompt)
-        if not llm_title:
-            raise SentraHTTPException(
-                status_code=500,
-                detail="Failed to generate title"
-            )
+        title = await self.title_service.generate_llm_title(conversation.initial_prompt)
+        if title:
+            self.service.update_title(conversation_id, str(user.id), title)
+            conversation.title = title
 
-        # 3. Update title
-        self.service.update_title(conversation_id, str(user.id), llm_title)
-
-        return llm_title
+        return UpdateConversationResponse(
+            id=conversation.id,
+            title=conversation.title,
+            description=conversation.description
+        )
 
     def list_user_conversations(self, user: UserEntity) -> list[ConversationListItemResponse]:
         conversations = self.service.get_user_conversations(user.id)

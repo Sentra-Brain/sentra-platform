@@ -24,10 +24,7 @@ export type ConversationDetails = {
 };
 
 export type CreateConversationRequest = {
-  title?: string;
-  description?: string;
-  initial_prompt?: string;
-  content: string;
+  initial_prompt: string;
 };
 
 export type CreateConversationResponse = {

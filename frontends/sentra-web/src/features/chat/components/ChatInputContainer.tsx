@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   Plus, Settings, Mic, Send, X, ChevronDown, Paperclip,
 } from 'lucide-react'
@@ -8,6 +8,7 @@ import { useChatActions } from '../hooks/useChatActions'
 export default function ChatInputContainer() {
   const [value, setValue] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const { sendMessage } = useChatActions()
   const isStreaming = useAppSelector(s => s.chat.isStreaming)
@@ -29,24 +30,41 @@ export default function ChatInputContainer() {
   }
 
   const handleStop = () => {
-    // Future: handle abort logic
+    // Future: abort logic
   }
 
-  return (
-    <div className="w-full max-w-[768px] bg-[var(--sentra-primary-dark)] border border-[var(--sentra-accent-light)] rounded-xl px-4 py-3 shadow-md flex items-end gap-2">
-      <button className="icon-btn" disabled title="Coming soon">
-        <Plus size={18} />
-      </button>
-      <button className="icon-btn" disabled title="Coming soon">
-        <Paperclip size={18} />
-      </button>
-      <button className="icon-btn" disabled title="Tools (coming soon)">
-        <Settings size={18} />
-      </button>
+  // Auto resize
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto'
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`
+    }
+  }, [value])
 
-      <div className="flex-1">
+  return (
+    <div className="
+      w-full max-w-[768px]
+      border border-[var(--sentra-accent-light)]
+      bg-[var(--sentra-primary-dark)]
+      rounded-xl shadow-md
+      px-4 py-3
+      flex flex-col gap-2
+      focus-within:ring-2 focus-within:ring-blue-500
+      transition-all duration-200
+    ">
+      {/* Text input */}
+      <div className="w-full">
         <textarea
-          className="w-full resize-none bg-transparent text-[var(--sentra-text)] placeholder-[var(--sentra-muted)] focus:outline-none"
+          ref={textareaRef}
+          className="
+            w-full max-h-[200px] min-h-[32px]
+            resize-none overflow-y-auto
+            bg-transparent
+            text-[var(--sentra-text)] placeholder-[var(--sentra-muted)]
+            focus:outline-none
+            scrollbar-thin scrollbar-thumb-[var(--sentra-accent-light)]
+            pr-1
+          "
           rows={1}
           placeholder="Type a message..."
           value={value}
@@ -56,30 +74,47 @@ export default function ChatInputContainer() {
         />
       </div>
 
-      <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
+      {/* Toolbar */}
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <button className="icon-btn" disabled title="Coming soon">
+            <Plus size={18} />
+          </button>
+          <button className="icon-btn" disabled title="Coming soon">
+            <Paperclip size={18} />
+          </button>
+          <button className="icon-btn" disabled title="Tools (coming soon)">
+            <Settings size={18} />
+          </button>
+        </div>
 
-      <button className="icon-btn" disabled title="Dictate (coming soon)">
-        <Mic size={18} />
-      </button>
+        <input type="file" ref={fileInputRef} hidden onChange={handleFileUpload} />
 
-      {isStreaming ? (
-        <button className="icon-btn" onClick={handleStop} title="Stop">
-          <X size={18} />
-        </button>
-      ) : (
-        <button
-          className="icon-btn send"
-          onClick={handleSend}
-          title="Send"
-          disabled={!value.trim()}
-        >
-          <Send size={18} />
-        </button>
-      )}
+        <div className="flex items-center gap-2">
+          <button className="icon-btn" disabled title="Dictate (coming soon)">
+            <Mic size={18} />
+          </button>
 
-      <button className="icon-btn" title="Scroll to bottom">
-        <ChevronDown size={20} />
-      </button>
+          {isStreaming ? (
+            <button className="icon-btn" onClick={handleStop} title="Stop">
+              <X size={18} />
+            </button>
+          ) : (
+            <button
+              className="icon-btn send"
+              onClick={handleSend}
+              title="Send"
+              disabled={!value.trim()}
+            >
+              <Send size={18} />
+            </button>
+          )}
+
+          <button className="icon-btn" title="Scroll to bottom">
+            <ChevronDown size={20} />
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
