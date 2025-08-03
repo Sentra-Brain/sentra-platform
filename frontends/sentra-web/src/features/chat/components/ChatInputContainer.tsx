@@ -1,12 +1,20 @@
+// features/chat/components/ChatInputContainer.tsx
 import { useState, useRef } from "react";
-import { Plus, Settings, Mic, Send, X, ChevronDown } from "lucide-react";
-import { useAppDispatch, useAppSelector } from "@store/hooks";
+import {
+  Plus,
+  Settings,
+  Mic,
+  Send,
+  X,
+  ChevronDown,
+  Paperclip,
+} from "lucide-react";
 import { v4 as uuidv4 } from "uuid";
+import { useAppDispatch, useAppSelector } from "@store/hooks";
+import { chatService } from "../chatService";
 import { setStreaming, setWaitingForAnswer } from "@features/chat/chatSlice";
-import { chatService } from "./chatService";
-import "./MessageInput.css";
 
-const MessageInput = () => {
+export default function ChatInputContainer() {
   const [value, setValue] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -17,42 +25,43 @@ const MessageInput = () => {
   );
 
   const handleSend = async () => {
+    const content = value.trim();
+    console.log("[SEND] Triggered", { content, conversationId, isStreaming });
+
+    if (!content || !conversationId || isStreaming) {
+      console.log("[SEND] Aborted — Invalid input or streaming in progress");
+      return;
+    }
+
     const userMessageId = uuidv4();
     const assistantMessageId = uuidv4();
-    const content = value.trim();
-    if (!content || !conversationId || isStreaming) return;
 
     dispatch(setStreaming(true));
     dispatch(setWaitingForAnswer(true));
 
     try {
-      await chatService.sendMessageStream(
-        { 
-          conversation_id: conversationId, 
+      console.log("[SEND] Calling chatService.sendMessageStream()");
+      chatService.sendMessageStream(
+        {
+          conversation_id: conversationId,
           content,
           message_id: userMessageId,
-          response_message_id: assistantMessageId
+          response_message_id: assistantMessageId,
         },
         (chunk) => {
-          console.log("Received chunk:", chunk);
+          console.log("[STREAM] Received chunk:", chunk);
         },
         (error) => {
-          console.error("Streaming error:", error);
+          console.error("[STREAM] Error:", error);
         }
       );
       setValue("");
     } catch (err) {
-      console.error("Failed to send message:", err);
-      // optionally dispatch(setChatError(...))
+      console.error("[SEND] Failed:", err);
     } finally {
       dispatch(setStreaming(false));
       dispatch(setWaitingForAnswer(false));
     }
-  };
-
-  const handleStop = () => {
-    // TODO: add abort logic if needed
-    dispatch(setStreaming(false));
   };
 
   const handleKeyDown = async (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -63,32 +72,40 @@ const MessageInput = () => {
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    // TODO: Implement file upload
+    // Placeholder for future file support
     e.target.value = "";
   };
 
+  const handleStop = () => {
+    dispatch(setStreaming(false));
+  };
+
   return (
-    <div className="message-input-container">
+    <div className="w-full max-w-[768px] bg-[var(--sentra-primary-dark)] border border-[var(--sentra-accent-light)] rounded-xl px-4 py-3 shadow-md flex items-end gap-2">
       <button className="icon-btn" disabled title="Coming soon">
         <Plus size={18} />
+      </button>
+
+      <button className="icon-btn" disabled title="Coming soon">
+        <Paperclip size={18} />
       </button>
 
       <button className="icon-btn" disabled title="Tools (coming soon)">
         <Settings size={18} />
       </button>
 
-      <div className="message-input-wrapper">
+      <div className="flex-1">
         <textarea
-          className="message-input"
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          onKeyDown={handleKeyDown}
+          className="w-full resize-none bg-transparent text-[var(--sentra-text)] placeholder-[var(--sentra-muted)] focus:outline-none"
+          rows={1}
           placeholder={
             conversationId
               ? "Type a message..."
               : "Ask anything to start a new conversation..."
           }
-          rows={1}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          onKeyDown={handleKeyDown}
           disabled={isStreaming}
         />
       </div>
@@ -119,11 +136,9 @@ const MessageInput = () => {
         </button>
       )}
 
-      <button className="scroll-to-bottom-btn" title="Scroll to bottom">
+      <button className="icon-btn" title="Scroll to bottom">
         <ChevronDown size={20} />
       </button>
     </div>
   );
-};
-
-export default MessageInput;
+}

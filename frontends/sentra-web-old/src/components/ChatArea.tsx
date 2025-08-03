@@ -38,6 +38,7 @@ const ChatArea: React.FC = () => {
               key={msg.id || `${msg.role}-${msg.timestamp}`}
               className={`message-bubble ${msg.role}`}
             >
+               <div style={{ fontSize: '0.6rem', opacity: 0.4 }}>{msg.id}</div> {/* Debug info */}
               <ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown>
             </div>
           ))}

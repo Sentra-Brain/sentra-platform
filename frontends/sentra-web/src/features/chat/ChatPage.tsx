@@ -1,82 +1,44 @@
-import { useEffect, useRef } from 'react'
-import { useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import { useConversations } from '@features/conversations/useConversations'
+// features/chat/ChatPage.tsx
 import { useAppSelector } from '@store/hooks'
-import MesssageInput from './MessageInput'
-import './ChatPage.css'
+import ChatHeader from './components/ChatHeader'
+import ChatContent from './components/ChatContent'
+import ChatFooter from './components/ChatFooter'
+import ChatInputContainer from './components/ChatInputContainer'
+
+import { useEffect } from 'react'
+import { useAppDispatch } from '@store/hooks'
+import { fetchConversationById } from '@features/conversations/conversationSlice'
+
 
 export default function ChatPage() {
-  const { id } = useParams<{ id: string }>()
-  const {
-    selectedConversationDetails,
-    loadConversationDetails,
-    loadingConversation,
-    error,
-  } = useConversations()
-
-  const waitingForAnswer = useAppSelector((s) => s.chat.waitingForAnswer)
-  const user = useAppSelector((s) => s.auth.user)
-
-  const endRef = useRef<HTMLDivElement>(null)
+  const dispatch = useAppDispatch()
+  const currentConversationId = useAppSelector(
+    (state) => state.conversation.currentConversationId
+  )
 
   useEffect(() => {
-    if (id) loadConversationDetails(id)
-  }, [id])
+    if (currentConversationId) {
+      dispatch(fetchConversationById(currentConversationId))
+    }
+  }, [currentConversationId, dispatch])
 
-  useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [selectedConversationDetails?.messages.length])
-
-  const getFirstName = () => {
-    if (user?.full_name) return user.full_name.split(' ')[0]
-    if (user?.username) return user.username[0].toUpperCase() + user.username.slice(1)
-    return 'there'
-  }
-
-  if (loadingConversation) {
-    return <div className="p-4 text-sm text-[var(--sentra-neutral)]">Loading conversation...</div>
-  }
-
-  if (error) {
-    return <div className="p-4 text-sm text-red-500">{error}</div>
-  }
-
-  if (!id || !selectedConversationDetails) {
-    return (
-      <div className="empty-state">
-        <div className="empty-state-content">
-          <h2>Welcome back, {getFirstName()}.</h2>
-          <p>Ask anything to start a new conversation.</p>          
-        </div>
-      </div>
-    )
-  }
-
-  const messages = selectedConversationDetails.messages
+  const isConversationActive = !!currentConversationId
 
   return (
-    <main className="chat-area">
-      <div className="messages">
-        {messages.map((msg) => (
-          <div
-            key={msg.timestamp.toString()}
-            className={`message-bubble ${msg.role}`}
-          >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {msg.content}
-            </ReactMarkdown>
-          </div>
-        ))}
-
-        {waitingForAnswer && (
-          <div className="waiting-bubble">Waiting...</div>
-        )}
-
-        <div ref={endRef} />
-        <MesssageInput />
-      </div>
-    </main>
+    <div className="flex flex-col h-full w-full">
+      {isConversationActive ? (
+        <>
+          <ChatHeader />
+          <ChatContent />
+          <ChatFooter>
+            <ChatInputContainer />
+          </ChatFooter>
+        </>
+      ) : (
+        <div className="flex-1 flex items-center justify-center px-4">
+          <ChatInputContainer />
+        </div>
+      )}
+    </div>
   )
 }

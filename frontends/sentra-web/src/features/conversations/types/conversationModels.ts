@@ -6,6 +6,8 @@ export type ConversationListItem = {
   created_at: string;
 };
 
+export type MessageRole = 'user' | 'assistant' | 'system';
+
 export type ConversationDetails = {
   id: string;
   title: string;
@@ -13,7 +15,7 @@ export type ConversationDetails = {
   initial_prompt?: string;
   messages: Array<{
     id: string;
-    role: string;
+    role: MessageRole;
     content: string;
     timestamp: number;
   }>;

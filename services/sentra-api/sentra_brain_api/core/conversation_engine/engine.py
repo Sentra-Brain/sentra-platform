@@ -34,7 +34,7 @@ class ConversationEngine:
         now = datetime.now(timezone.utc).isoformat()
 
         context = await self._load_context(request.user_id, request.conversation_id)
-        user_msg = self._make_message("user", request.content, now, now, message_id=request.message_id)
+        user_msg = self._make_message("user", request.content, now, message_id=request.message_id)
         await self._persist_user_message(request, user_msg)
 
 
