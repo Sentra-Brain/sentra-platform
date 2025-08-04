@@ -24,6 +24,12 @@ export default function AppRoutes() {
         {/* Knowledge routes */}
         <Route path="/k" element={<Navigate to="/k/private" />} />
         <Route path="/k/:visibility" element={<KnowledgePage />} />
+        <Route
+          path="/k/:visibility/s/:sourceId/d/:documentId"
+          element={<KnowledgePage />}
+        />
+        <Route path="/k/:visibility/s/:sourceId" element={<KnowledgePage />} />
+        <Route path="/k/:visibility" element={<KnowledgePage />} />
 
         <Route path="/s" element={<SettingsPage />} />
         <Route path="/search" element={<SearchPage />} />

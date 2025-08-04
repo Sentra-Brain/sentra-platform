@@ -1,15 +1,23 @@
 // features/knowledge/KnowledgePage.tsx
-import { useParams, useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
-import { useKnowledge } from './useKnowledge';
-import KnowledgeStatsBar from './components/KnowledgeStatsBar';
-import KnowledgeSourceList from './components/KnowledgeSourceList';
-import KnowledgeDetailsPanel from './components/KnowledgeDetailsPanel';
-import type { KnowledgeSourceVisibility } from './types/knowledgeModels';
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import { useKnowledge } from "./useKnowledge";
+import KnowledgeStatsBar from "./components/KnowledgeStatsBar";
+import KnowledgeSourceList from "./components/KnowledgeSourceList";
+import KnowledgeDetailsPanel from "./components/KnowledgeDetailsPanel";
+import type { KnowledgeSourceVisibility } from "./types/knowledgeModels";
 
 export default function KnowledgePage() {
   const navigate = useNavigate();
-  const { visibility: visibilityParam } = useParams<{ visibility: string }>();
+  const {
+    visibility: visibilityParam,
+    sourceId,
+    documentId,
+  } = useParams<{
+    visibility: string;
+    sourceId?: string;
+    documentId?: string;
+  }>();
 
   const {
     visibility,
@@ -17,22 +25,52 @@ export default function KnowledgePage() {
     changeVisibility,
     loadSources,
     loadDocuments,
+    selectSourceById,
+    selectDocumentById,
     selectedSourceId,
   } = useKnowledge();
 
   // Ensure the URL param maps to a valid visibility
   useEffect(() => {
-    const allowed: KnowledgeSourceVisibility[] = ['private', 'shared', 'org-wide'];
-    if (!visibilityParam || !allowed.includes(visibilityParam as KnowledgeSourceVisibility)) {
-      navigate('/k/private', { replace: true });
+    const allowed: KnowledgeSourceVisibility[] = [
+      "private",
+      "shared",
+      "org-wide",
+    ];
+    const param = visibilityParam as KnowledgeSourceVisibility;
+
+    if (!param || !allowed.includes(param)) {
+      navigate("/k/private", { replace: true });
+    } else if (param !== visibility) {
+      changeVisibility(param);
     }
-  }, [visibilityParam, navigate, changeVisibility]);
+  }, [visibilityParam, visibility, navigate, changeVisibility]);
 
   useEffect(() => {
-  if (sources.length === 0) {
-    loadSources();
-  }
-}, [sources.length, loadSources]);
+    const allowed: KnowledgeSourceVisibility[] = [
+      "private",
+      "shared",
+      "org-wide",
+    ];
+    const param = visibilityParam as KnowledgeSourceVisibility;
+
+    if (!param || !allowed.includes(param)) {
+      navigate("/k/private", { replace: true });
+    } else if (param !== visibility) {
+      changeVisibility(param);
+    }
+  }, [visibilityParam, visibility, navigate, changeVisibility]);
+
+  useEffect(() => {
+    if (sources.length === 0) {
+      loadSources();
+    }
+  }, [sources.length, loadSources]);
+
+  useEffect(() => {
+    if (sourceId) selectSourceById(sourceId);
+    if (documentId) selectDocumentById(documentId);
+  }, [sourceId, documentId]);
 
   useEffect(() => {
     if (selectedSourceId) loadDocuments(selectedSourceId);

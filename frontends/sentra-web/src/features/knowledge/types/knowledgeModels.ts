@@ -78,7 +78,7 @@ export interface KnowledgeSourceListResponse {
 }
 
 // Document interfaces
-export interface Document {
+export interface KnowledgeDocument {
   id: string;
   filename: string;
   display_name: string;
@@ -100,7 +100,7 @@ export interface DocumentUploadRequest {
 }
 
 export interface DocumentListResponse {
-  documents: Document[];
+  documents: KnowledgeDocument[];
   total: number;
 }
 
@@ -111,7 +111,7 @@ export interface KnowledgeTreeNode {
   type: 'visibility-group' | 'knowledge-source' | 'document';
   visibility?: KnowledgeSourceVisibility;
   knowledgeSource?: KnowledgeSource;
-  document?: Document;
+  document?: KnowledgeDocument;
   children?: KnowledgeTreeNode[];
   expanded?: boolean;
   documentCount?: number;

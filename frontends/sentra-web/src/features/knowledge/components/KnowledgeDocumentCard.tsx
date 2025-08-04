@@ -1,8 +1,8 @@
-import type { Document } from '../types/knowledgeModels';
+import type { KnowledgeDocument } from '../types/knowledgeModels';
 import { FileText, Loader, CheckCircle2, XCircle } from 'lucide-react';
 
 interface Props {
-  document: Document;
+  document: KnowledgeDocument;
   selected?: boolean;
   onClick?: () => void;
 }

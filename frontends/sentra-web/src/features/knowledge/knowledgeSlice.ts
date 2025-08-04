@@ -1,11 +1,15 @@
 // 🧠 Redux Slice: knowledgeSlice.ts
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import { knowledgeService } from './knowledgeService';
+import {
+  createSlice,
+  createAsyncThunk,
+  type PayloadAction,
+} from "@reduxjs/toolkit";
+import { knowledgeService } from "./knowledgeService";
 import type {
   KnowledgeSource,
-  Document,
+  KnowledgeDocument,
   KnowledgeSourceVisibility,
-} from './types/knowledgeModels';
+} from "./types/knowledgeModels";
 
 interface KnowledgeState {
   visibility: KnowledgeSourceVisibility;
@@ -14,7 +18,7 @@ interface KnowledgeState {
   sourcesLoaded: boolean;
   sourcesLoading: boolean;
 
-  documents: Document[];
+  documents: KnowledgeDocument[];
   documentsLoaded: boolean;
   documentsLoading: boolean;
 
@@ -25,7 +29,7 @@ interface KnowledgeState {
 }
 
 const initialState: KnowledgeState = {
-  visibility: 'private',
+  visibility: "private",
 
   sources: [],
   sourcesLoaded: false,
@@ -45,12 +49,12 @@ const initialState: KnowledgeState = {
 // Thunks
 // ───────────────────────────────────────────────────────
 export const fetchKnowledgeSources = createAsyncThunk(
-  'knowledge/fetchSources',
+  "knowledge/fetchSources",
   async () => knowledgeService.listSources()
 );
 
 export const fetchDocumentsForSource = createAsyncThunk(
-  'knowledge/fetchDocumentsForSource',
+  "knowledge/fetchDocumentsForSource",
   async (sourceId: string) => knowledgeService.listDocumentsBySource(sourceId)
 );
 
@@ -58,7 +62,7 @@ export const fetchDocumentsForSource = createAsyncThunk(
 // Slice
 // ───────────────────────────────────────────────────────
 const knowledgeSlice = createSlice({
-  name: 'knowledge',
+  name: "knowledge",
   initialState,
   reducers: {
     setVisibility(state, action: PayloadAction<KnowledgeSourceVisibility>) {
@@ -84,6 +88,27 @@ const knowledgeSlice = createSlice({
       state.selectedDocumentId = null;
       state.documents = [];
       state.documentsLoaded = false;
+    },
+    updateDocumentMetadata(
+      state,
+      action: PayloadAction<{
+        id: string;
+        changes: Partial<Pick<KnowledgeDocument, "display_name" | "description">>;
+      }>
+    ) {
+      const doc = state.documents.find((d) => d.id === action.payload.id);
+      if (doc) Object.assign(doc, action.payload.changes);
+    },
+    markDocumentAsReindexing(
+      state,
+      action: PayloadAction<string> // documentId
+    ) {
+      const doc = state.documents.find((d) => d.id === action.payload);
+      if (doc) {
+        doc.status = "queued";
+        doc.status_message = "Reindex requested";
+        doc.error = undefined;
+      }
     },
   },
   extraReducers: (builder) => {
@@ -124,6 +149,8 @@ export const {
   selectSource,
   selectDocument,
   clearSelection,
+  updateDocumentMetadata,
+  markDocumentAsReindexing,
 } = knowledgeSlice.actions;
 
 export default knowledgeSlice.reducer;
