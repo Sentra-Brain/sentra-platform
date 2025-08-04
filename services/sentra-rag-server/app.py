@@ -114,14 +114,11 @@ async def search_knowledge_get(
 async def get_rag_context(request: ContextRequest):
     """Generate formatted context for LLM injection."""
     try:
-        context = await rag_engine.get_context(
+        context, chunk_count = await rag_engine.get_context(
             query=request.query,
             knowledge_source_id=request.knowledge_source_id,
             max_tokens=request.max_tokens
         )
-        
-        # Count chunks in context (rough estimation)
-        chunk_count = context.count("Source:") if context else 0
         
         return ContextResponse(
             query=request.query,
