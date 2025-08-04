@@ -36,7 +36,7 @@
       "@layout/*": ["layout/*"],
       "@routes/*": ["routes/*"]
     },
-     "types": ["vite/client"] // Include Vite types for better IDE support
+    "types": ["vite/client"] // Include Vite types for better IDE support
   },
   "include": ["src"]
 }
