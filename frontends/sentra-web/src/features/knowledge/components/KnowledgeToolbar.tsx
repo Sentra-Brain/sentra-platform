@@ -1,4 +1,3 @@
-// features/knowledge/components/KnowledgeToolbar.tsx
 import { useState } from 'react';
 import { Plus, UploadCloud, RefreshCcw } from 'lucide-react';
 import { useKnowledge } from '../useKnowledge';
@@ -11,7 +10,13 @@ interface Props {
 }
 
 export default function KnowledgeToolbar({ visibility }: Props) {
-  const { sources, documents, loadSources, loadDocuments, selectedSourceId } = useKnowledge();
+  const {
+    sources,
+    documentsBySource,
+    loadSources,
+    loadDocuments,
+    selectedSourceId,
+  } = useKnowledge();
 
   const [createOpen, setCreateOpen] = useState(false);
   const [uploadOpen, setUploadOpen] = useState(false);
@@ -29,6 +34,11 @@ export default function KnowledgeToolbar({ visibility }: Props) {
 
   const visibleSources = sources.filter((s) => s.visibility === visibility);
 
+  const totalDocuments = visibleSources.reduce((count, source) => {
+    const docs = documentsBySource[source.id] ?? [];
+    return count + docs.length;
+  }, 0);
+
   return (
     <>
       <p className="text-sm text-[var(--sentra-neutral)]">{labelMap[visibility]}</p>
@@ -36,7 +46,7 @@ export default function KnowledgeToolbar({ visibility }: Props) {
       <div className="bg-[var(--sentra-primary-dark)] border border-[var(--sentra-accent-light)] px-4 py-3 rounded-md flex items-center justify-between">
         <div className="flex items-center gap-4 text-sm">
           <span>📁 <b>{visibleSources.length}</b> sources</span>
-          <span>📄 <b>{documents.length}</b> documents</span>
+          <span>📄 <b>{totalDocuments}</b> documents</span>
         </div>
 
         <div className="flex items-center gap-2">

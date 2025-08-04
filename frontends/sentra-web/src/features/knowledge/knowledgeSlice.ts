@@ -1,4 +1,3 @@
-// 🧠 Redux Slice: knowledgeSlice.ts
 import {
   createSlice,
   createAsyncThunk,
@@ -20,7 +19,7 @@ interface KnowledgeState {
   sourcesLoaded: boolean;
   sourcesLoading: boolean;
 
-  documents: KnowledgeDocument[];
+  documentsBySource: Record<string, KnowledgeDocument[]>;
   documentsLoaded: boolean;
   documentsLoading: boolean;
 
@@ -37,7 +36,7 @@ const initialState: KnowledgeState = {
   sourcesLoaded: false,
   sourcesLoading: false,
 
-  documents: [],
+  documentsBySource: {},
   documentsLoaded: false,
   documentsLoading: false,
 
@@ -57,13 +56,33 @@ export const fetchKnowledgeSources = createAsyncThunk(
 
 export const fetchDocumentsForSource = createAsyncThunk(
   "knowledge/fetchDocumentsForSource",
-  async (sourceId: string) => knowledgeService.listDocumentsBySource(sourceId)
+  async (sourceId: string) => {
+    const res = await knowledgeService.listDocumentsBySource(sourceId);
+    return { sourceId, documents: res.documents };
+  }
 );
 
 export const createKnowledgeSource = createAsyncThunk(
   "knowledge/createSource",
   async (data: CreateKnowledgeSourceRequest) => {
     return knowledgeService.createSource(data);
+  }
+);
+
+export const fetchSourcesWithDocuments = createAsyncThunk(
+  "knowledge/fetchSourcesWithDocuments",
+  async () => {
+    const { sources } = await knowledgeService.listSources();
+    const documentsBySource: Record<string, KnowledgeDocument[]> = {};
+
+    for (const source of sources) {
+      const { documents } = await knowledgeService.listDocumentsBySource(
+        source.id
+      );
+      documentsBySource[source.id] = documents;
+    }
+
+    return { sources, documentsBySource };
   }
 );
 
@@ -82,7 +101,6 @@ export const uploadDocumentToSource = createAsyncThunk(
   }
 );
 
-
 // ───────────────────────────────────────────────────────
 // Slice
 // ───────────────────────────────────────────────────────
@@ -96,14 +114,12 @@ const knowledgeSlice = createSlice({
       state.selectedDocumentId = null;
       state.sourcesLoaded = false;
       state.sources = [];
-      state.documents = [];
+      state.documentsBySource = {};
       state.documentsLoaded = false;
     },
     selectSource(state, action: PayloadAction<string | null>) {
       state.selectedSourceId = action.payload;
       state.selectedDocumentId = null;
-      state.documents = [];
-      state.documentsLoaded = false;
     },
     selectDocument(state, action: PayloadAction<string | null>) {
       state.selectedDocumentId = action.payload;
@@ -111,8 +127,6 @@ const knowledgeSlice = createSlice({
     clearSelection(state) {
       state.selectedSourceId = null;
       state.selectedDocumentId = null;
-      state.documents = [];
-      state.documentsLoaded = false;
     },
     updateSourceMetadata(
       state,
@@ -135,14 +149,19 @@ const knowledgeSlice = createSlice({
         >;
       }>
     ) {
-      const doc = state.documents.find((d) => d.id === action.payload.id);
+      const sourceId = state.selectedSourceId;
+      if (!sourceId) return;
+
+      const docList = state.documentsBySource[sourceId];
+      const doc = docList?.find((d) => d.id === action.payload.id);
       if (doc) Object.assign(doc, action.payload.changes);
     },
-    markDocumentAsReindexing(
-      state,
-      action: PayloadAction<string> // documentId
-    ) {
-      const doc = state.documents.find((d) => d.id === action.payload);
+    markDocumentAsReindexing(state, action: PayloadAction<string>) {
+      const sourceId = state.selectedSourceId;
+      if (!sourceId) return;
+
+      const docList = state.documentsBySource[sourceId];
+      const doc = docList?.find((d) => d.id === action.payload);
       if (doc) {
         doc.status = "processing";
         doc.status_message = "Reindex requested";
@@ -171,7 +190,8 @@ const knowledgeSlice = createSlice({
         state.error = undefined;
       })
       .addCase(fetchDocumentsForSource.fulfilled, (state, action) => {
-        state.documents = action.payload.documents;
+        state.documentsBySource[action.payload.sourceId] =
+          action.payload.documents;
         state.documentsLoaded = true;
         state.documentsLoading = false;
       })
@@ -185,7 +205,30 @@ const knowledgeSlice = createSlice({
         state.sourcesLoaded = true;
       })
       .addCase(uploadDocumentToSource.fulfilled, (state, action) => {
-        state.documents.push(action.payload);
+        const sourceId = action.payload.knowledge_source_id;
+        if (!state.documentsBySource[sourceId]) {
+          state.documentsBySource[sourceId] = [];
+        }
+        state.documentsBySource[sourceId].push(action.payload);
+      })
+      .addCase(fetchSourcesWithDocuments.pending, (state) => {
+        state.sourcesLoading = true;
+        state.documentsLoading = true;
+        state.error = undefined;
+      })
+      .addCase(fetchSourcesWithDocuments.fulfilled, (state, action) => {
+        state.sources = action.payload.sources;
+        state.sourcesLoaded = true;
+        state.sourcesLoading = false;
+
+        state.documentsBySource = action.payload.documentsBySource;
+        state.documentsLoaded = true;
+        state.documentsLoading = false;
+      })
+      .addCase(fetchSourcesWithDocuments.rejected, (state, action) => {
+        state.sourcesLoading = false;
+        state.documentsLoading = false;
+        state.error = action.error.message;
       });
   },
 });

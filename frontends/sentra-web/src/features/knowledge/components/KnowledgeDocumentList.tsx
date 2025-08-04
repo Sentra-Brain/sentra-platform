@@ -1,13 +1,15 @@
-// features/knowledge/components/KnowledgeDocumentList.tsx
 import { useKnowledge } from '../useKnowledge';
 import KnowledgeDocumentCard from './KnowledgeDocumentCard';
 
 export default function KnowledgeDocumentList() {
   const {
-    documents,
+    selectedSourceId,
+    documentsBySource,
     selectedDocumentId,
     selectDocumentById,
   } = useKnowledge();
+
+  const documents = selectedSourceId ? documentsBySource[selectedSourceId] ?? [] : [];
 
   const handleSelect = (id: string) => {
     if (id === selectedDocumentId) {

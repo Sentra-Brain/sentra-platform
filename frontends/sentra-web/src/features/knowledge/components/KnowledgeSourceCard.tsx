@@ -9,9 +9,9 @@ interface Props {
 }
 
 export default function KnowledgeSourceCard({ source, selected, onClick }: Props) {
-  const { documents } = useKnowledge();
+  const { documentsBySource } = useKnowledge();
 
-  const docCount = documents.filter((d) => d.knowledge_source_id === source.id).length;
+  const docCount = documentsBySource[source.id]?.length || 0;
 
   const statusBadge = {
     active: <span className="text-green-400 text-xs font-medium">🟢 Active</span>,

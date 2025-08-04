@@ -1,7 +1,7 @@
 // features/knowledge/useKnowledge.ts
 import { useAppDispatch, useAppSelector } from "@store/hooks";
 import {
-  fetchKnowledgeSources,
+  fetchSourcesWithDocuments,
   fetchDocumentsForSource,
   setVisibility,
   selectSource,
@@ -29,7 +29,7 @@ export function useKnowledge() {
 
   const loadSources = (force = false) => {
     if (force || (!state.sourcesLoaded && !state.sourcesLoading)) {
-      dispatch(fetchKnowledgeSources());
+      dispatch(fetchSourcesWithDocuments());
     }
   };
 
@@ -70,6 +70,11 @@ export function useKnowledge() {
     }
   };
 
+  const selectDocumentWithSource = (sourceId: string, documentId: string) => {
+    dispatch(selectSource(sourceId));
+    dispatch(selectDocument(documentId));
+  };
+
   const resetSelection = () => dispatch(clearSelection());
 
   const updateDocumentMetadata = async (
@@ -104,6 +109,7 @@ export function useKnowledge() {
     changeVisibility,
     selectSourceById,
     selectDocumentById,
+    selectDocumentWithSource,
     resetSelection,
     updateDocumentMetadata,
     createNewSource,

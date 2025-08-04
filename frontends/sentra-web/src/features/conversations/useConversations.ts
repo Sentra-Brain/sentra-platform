@@ -29,7 +29,7 @@ export function useConversations() {
     loadConversationDetails: (id: string) => dispatch(fetchConversationById(id)),
     select: (id: string) => dispatch(selectConversation(id)),
     clear: () => dispatch(clearConversation()),
-    create: (content: string, title?: string, description?: string, initial_prompt?: string) =>
-      dispatch(createConversation({ content, title, description, initial_prompt })),
+    create: (initial_prompt?: string) =>
+      dispatch(createConversation({ initial_prompt: initial_prompt ?? '' })),
   }
 }
