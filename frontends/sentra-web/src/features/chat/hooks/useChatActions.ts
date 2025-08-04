@@ -87,7 +87,7 @@ export function useChatActions() {
 
     // 🧠 Trigger title generation in background
     if (!currentConversationId) {
-      conversationService.update(conversationId, { title: '...' }).catch(err => {
+      conversationService.generateLlmTitle(conversationId).catch(err => {
         console.warn('Failed to trigger title generation', err)
       })
     }

@@ -3,9 +3,10 @@ import PrivateRoute from "./PrivateRoute";
 
 import LoginPage from "../features/auth/LoginPage";
 import ChatPage from "../features/chat/ChatPage";
-import KnowledgePage from "../features/knowledge/KnowledgePage";
+
 import SettingsPage from "../features/settings/SettingsPage";
 import SearchPage from "../features/search/SearchPage";
+import KnowledgePage from "@features/knowledge/KnowledgePage";
 
 export default function AppRoutes() {
   return (
@@ -19,9 +20,11 @@ export default function AppRoutes() {
         <Route path="/c" element={<ChatPage />} />
         <Route path="/" element={<ChatPage />} />
         <Route path="/c/:id" element={<ChatPage />} />
-        <Route path="/k" element={<KnowledgePage />} />
-        <Route path="/k/:sourceId" element={<KnowledgePage />} />
-        <Route path="/k/:sourceId/d/:docId" element={<KnowledgePage />} />
+
+        {/* Knowledge routes */}
+        <Route path="/k" element={<Navigate to="/k/private" />} />
+        <Route path="/k/:visibility" element={<KnowledgePage />} />
+
         <Route path="/s" element={<SettingsPage />} />
         <Route path="/search" element={<SearchPage />} />
       </Route>

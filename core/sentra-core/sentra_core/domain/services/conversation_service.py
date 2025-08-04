@@ -31,7 +31,6 @@ class ConversationService:
             user_id=str(user.id),
             messages=messages,
             title=conversation.title,
-            description=conversation.description,
             initial_prompt=conversation.initial_prompt,
             created_at=conversation.created_at.isoformat()
         )
