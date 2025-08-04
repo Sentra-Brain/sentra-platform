@@ -5,20 +5,20 @@
 @tailwind components;
 @tailwind utilities;
 
-
 /* Base Typography and Body Setup */
 html {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
 }
 
-
 body {
-  overflow: hidden; 
+  overflow: hidden;
 }
 
 /* Root container layout helper */
@@ -27,11 +27,22 @@ body {
   width: 100vw;
   display: flex;
   flex-direction: column;
-    background-color: var(--sentra-primary);
+  background-color: var(--sentra-primary);
+  background-image: linear-gradient(
+      90deg,
+      var(--grid-color) 1px,
+      transparent 1px
+    ),
+    linear-gradient(var(--grid-color) 1px, transparent 1px);
+  background-size: 40px 40px;
   color: var(--sentra-text);
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

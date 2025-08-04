@@ -6,6 +6,8 @@
   --sentra-accent-light: #a3cfff;
   --sentra-neutral: #f4f4f7;
   --sentra-text: #f4f4f4;
+
+  --grid-color: rgba(255, 255, 255, 0.015); 
 }
 
 /* Light theme example */
@@ -19,4 +21,6 @@
 
   --sentra-neutral: #1e1e2f;
   --sentra-text: #202020;
+
+  --grid-color: rgba(0, 0, 0, 0.015);
 }
