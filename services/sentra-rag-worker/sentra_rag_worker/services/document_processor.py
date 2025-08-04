@@ -7,8 +7,9 @@ from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag_worker.services.vector_store_service import VectorStoreService
 from sentra_core.core.logging import get_logger, set_request_id
 from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra_core.domain.repository.document_repository import DocumentRepository
 from sentra_core.infra.sql.postgres_service import create_db_session
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from uuid import UUID
 import os
 
@@ -38,161 +39,109 @@ class DocumentProcessor:
         return self._file_storage
 
     def process_document(self, message: Dict[str, Any]) -> bool:
-        """Process a document indexation job.
-        
-        Args:
-            message: Message from RabbitMQ containing document details
-            
-        Returns:
-            True if processing was successful, False otherwise
-        """
+        request_id = set_request_id(message.get('request_id'))
+        document_id = UUID(message['document_id'])
+        knowledge_source_id = UUID(message['knowledge_source_id'])
+        filepath = message['filepath']
+        filename = message['filename']
+        filetype_str = message['filetype']
+
+        logger.info(f"Processing document {document_id}: {filename}")
+
         try:
-            # Set up request context for tracing
-            request_id = set_request_id(message.get('request_id'))
-            
-            # Extract message fields
-            document_id = UUID(message['document_id'])
-            knowledge_source_id = UUID(message['knowledge_source_id'])
-            filepath = message['filepath']  # This should be relative path
-            filename = message['filename']
-            display_name = message.get('display_name', filename)
-            filetype_str = message['filetype']
-            
-            logger.info(f"Processing document {document_id}: {filename}")
+            filetype = DocumentFileType(filetype_str)
+        except ValueError:
+            self._set_status(document_id, DocumentStatus.FAILED, f"Unsupported file type: {filetype_str}")
+            return False
 
-            # Validate file type
+        db = create_db_session()
+        try:
+            document_repo = DocumentRepository(db)
+            file_storage = self._get_file_storage()
+
+            self._set_status(document_id, DocumentStatus.PROCESSING, repo=document_repo)
+
             try:
-                filetype = DocumentFileType(filetype_str)
-            except ValueError:
-                logger.error(f"Unsupported file type: {filetype_str}")
-                self._update_document_status(document_id, DocumentStatus.FAILED, f"Unsupported file type: {filetype_str}")
-                return False
+                absolute_filepath = file_storage.resolve_document_path(filepath)
+            except ValueError as e:
+                return self._fail(document_id, str(e), repo=document_repo)
 
-            # Create database session
-            db = create_db_session()
+            if not self._validate_file(str(absolute_filepath)):
+                return self._fail(document_id, f"Invalid file: {absolute_filepath}", repo=document_repo)
+
+            self._set_status(document_id, DocumentStatus.EXTRACTING, repo=document_repo)
             try:
-                repo = KnowledgeSourceRepository(db)
-                
-                # Update status to processing
-                self._update_document_status_with_repo(repo, document_id, DocumentStatus.PROCESSING)
+                content = self.extractor.extract_content(str(absolute_filepath), filetype)
+                if not content.strip():
+                    return self._fail(document_id, "No content extracted", repo=document_repo)
+            except Exception as e:
+                return self._fail(document_id, f"Extraction failed: {e}", repo=document_repo)
 
-                # Resolve relative path to absolute path using FileStorageService
-                file_storage = self._get_file_storage()
-                try:
-                    absolute_filepath = file_storage.resolve_document_path(filepath)
-                except ValueError as e:
-                    error_msg = f"Path resolution failed: {e}"
-                    logger.error(error_msg)
-                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                    return False
+            self._set_status(document_id, DocumentStatus.CHUNKING, repo=document_repo)
+            try:
+                chunks = self.chunker.chunk_text(content)
+                if not chunks:
+                    return self._fail(document_id, "No chunks generated", repo=document_repo)
+            except Exception as e:
+                return self._fail(document_id, f"Chunking failed: {e}", repo=document_repo)
 
-                # Step 1: Validation using absolute path
-                if not self._validate_file(str(absolute_filepath)):
-                    error_msg = f"File validation failed: {absolute_filepath}"
-                    logger.error(error_msg)
-                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                    return False
+            self._set_status(document_id, DocumentStatus.EMBEDDING, repo=document_repo)
+            try:
+                embeddings = self.embedding_service.generate_embeddings(chunks)
+                if len(embeddings) != len(chunks):
+                    return self._fail(document_id, "Embedding count mismatch", repo=document_repo)
+            except Exception as e:
+                return self._fail(document_id, f"Embedding failed: {e}", repo=document_repo)
 
-                # Step 2: Content extraction
-                self._update_document_status_with_repo(repo, document_id, DocumentStatus.EXTRACTING)
-                logger.info("extracting")
-                try:
-                    content = self.extractor.extract_content(str(absolute_filepath), filetype)
-                    if not content.strip():
-                        error_msg = "No content extracted from document"
-                        logger.warning(error_msg)
-                        self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                        return False
-                except Exception as e:
-                    error_msg = f"Content extraction failed: {str(e)}"
-                    logger.error(error_msg)
-                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                    return False
-
-                # Step 3: Text chunking
-                self._update_document_status_with_repo(repo, document_id, DocumentStatus.CHUNKING)
-                logger.info("chunking")
-                try:
-                    chunks = self.chunker.chunk_text(content)
-                    if not chunks:
-                        error_msg = "No chunks generated from content"
-                        logger.warning(error_msg)
-                        self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                        return False
-                    
-                    logger.info(f"Generated {len(chunks)} chunks for document {document_id}")
-                except Exception as e:
-                    error_msg = f"Text chunking failed: {str(e)}"
-                    logger.error(error_msg)
-                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                    return False
-
-                # Step 4: Generate embeddings
-                self._update_document_status_with_repo(repo, document_id, DocumentStatus.EMBEDDING)
-                logger.info("embedding")
-                try:
-                    embeddings = self.embedding_service.generate_embeddings(chunks)
-                    if len(embeddings) != len(chunks):
-                        error_msg = "Embedding count mismatch with chunk count"
-                        logger.error(error_msg)
-                        self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                        return False
-                except Exception as e:
-                    error_msg = f"Embedding generation failed: {str(e)}"
-                    logger.error(error_msg)
-                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                    return False
-
-                # Step 5: Index into ChromaDB
-                self._update_document_status_with_repo(repo, document_id, DocumentStatus.INDEXING)
-                logger.info("indexing")
-                try:
-                    chunks_indexed = self.vector_store.index_document_chunks(
-                        document_id=document_id,
-                        knowledge_source_id=knowledge_source_id,
-                        chunks=chunks,
-                        embeddings=embeddings,
-                        filename=filename,
-                        source_type="file"
-                    )
-                    
-                    if chunks_indexed != len(chunks):
-                        error_msg = f"Indexing incomplete: {chunks_indexed}/{len(chunks)} chunks indexed"
-                        logger.warning(error_msg)
-                        self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                        return False
-                        
-                except Exception as e:
-                    error_msg = f"Vector indexing failed: {str(e)}"
-                    logger.error(error_msg)
-                    self._update_document_status_with_repo(repo, document_id, DocumentStatus.FAILED, error_msg)
-                    return False
-
-                # Step 6: Update document status to indexed
-                self._update_document_status_with_repo(
-                    repo, 
-                    document_id, 
-                    DocumentStatus.INDEXED, 
-                    chunks_count=len(chunks)
+            self._set_status(document_id, DocumentStatus.INDEXING, repo=document_repo)
+            try:
+                indexed = self.vector_store.index_document_chunks(
+                    document_id=document_id,
+                    knowledge_source_id=knowledge_source_id,
+                    chunks=chunks,
+                    embeddings=embeddings,
+                    filename=filename,
+                    source_type="file"
                 )
+                if indexed != len(chunks):
+                    return self._fail(document_id, f"Indexed only {indexed}/{len(chunks)} chunks", repo=document_repo)
+            except Exception as e:
+                return self._fail(document_id, f"Indexing failed: {e}", repo=document_repo)
 
-                logger.info(f"Successfully processed document {document_id}: {len(chunks)} chunks indexed")
-                return True
-
-            finally:
-                db.close()
+            self._set_status(document_id, DocumentStatus.INDEXED, repo=document_repo, chunks_count=len(chunks))
+            logger.info(f"Document {document_id} processed successfully.")
+            return True
 
         except Exception as e:
-            logger.error(f"Unexpected error processing document: {e}")
-            try:
-                self._update_document_status(
-                    UUID(message.get('document_id', '00000000-0000-0000-0000-000000000000')),
-                    DocumentStatus.FAILED,
-                    f"Unexpected error: {str(e)}"
-                )
-            except:
-                pass  # Don't let status update failures crash the processor
+            self._set_status(document_id, DocumentStatus.FAILED, f"Unexpected error: {e}")
             return False
+        finally:
+            db.close()
+
+    def _set_status(
+        self, 
+        document_id: UUID, 
+        status: DocumentStatus, 
+        error: Optional[str] = None, 
+        chunks_count: Optional[int] = None, 
+        repo: Optional[DocumentRepository] = None
+    ):
+        try:
+            if not repo:
+                db = create_db_session()
+                repo = DocumentRepository(db)
+                repo.update_status(document_id, status, error, None, chunks_count)
+                db.close()
+            else:
+                repo.update_status(document_id, status, error, None, chunks_count)
+            logger.info(f"Status of document {document_id} set to {status.value}")
+        except Exception as e:
+            logger.error(f"Failed to update document status to {status.value}: {e}")
+
+    def _fail(self, document_id: UUID, error: str, repo: DocumentRepository) -> bool:
+        logger.error(error)
+        self._set_status(document_id, DocumentStatus.FAILED, error, repo=repo)
+        return False
 
     def _validate_file(self, filepath: str) -> bool:
         """Validate that the file exists and is readable."""
@@ -224,27 +173,3 @@ class DocumentProcessor:
         except Exception as e:
             logger.error(f"File validation error: {e}")
             return False
-
-    def _update_document_status(self, document_id: UUID, status: DocumentStatus, error: str = None, chunks_count: int = None):
-        """Update document status using a new database session."""
-        db = create_db_session()
-        try:
-            repo = KnowledgeSourceRepository(db)
-            self._update_document_status_with_repo(repo, document_id, status, error, chunks_count)
-        finally:
-            db.close()
-
-    def _update_document_status_with_repo(
-        self, 
-        repo: KnowledgeSourceRepository, 
-        document_id: UUID, 
-        status: DocumentStatus, 
-        error: str = None, 
-        chunks_count: int = None
-    ):
-        """Update document status using provided repository."""
-        try:
-            repo.update_document_status(document_id, status, error, chunks_count)
-            logger.info(f"Updated document {document_id} status to {status.value}")
-        except Exception as e:
-            logger.error(f"Failed to update document status: {e}")

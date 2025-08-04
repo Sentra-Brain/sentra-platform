@@ -144,7 +144,7 @@ const knowledgeSlice = createSlice({
     ) {
       const doc = state.documents.find((d) => d.id === action.payload);
       if (doc) {
-        doc.status = "queued";
+        doc.status = "processing";
         doc.status_message = "Reindex requested";
         doc.error = undefined;
       }

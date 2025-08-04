@@ -101,6 +101,15 @@ async def update_document(
     doc = service.update_document(document_id, display_name, description, user)
     return to_document_response(doc)
 
+@router.post("/documents/{document_id}/reindex", response_model=DocumentResponse)
+async def reindex_document(
+    document_id: str,
+    user: UserEntity = Depends(get_authenticated_user),
+    service: KnowledgeApiService = Depends(_get_service)
+):
+    doc = service.reindex_document(document_id, user)
+    return to_document_response(doc)
+
 @router.delete("/documents/{document_id}", response_model=DocumentResponse)
 async def remove_document(
     document_id: str,

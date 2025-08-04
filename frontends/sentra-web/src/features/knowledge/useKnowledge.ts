@@ -20,6 +20,7 @@ import type {
 import { knowledgeService } from "./knowledgeService";
 import type { KnowledgeDocument } from "./types/knowledgeModels";
 import { useNavigate } from "react-router-dom";
+import { useCallback } from "react";
 
 export function useKnowledge() {
   const dispatch = useAppDispatch();
@@ -32,16 +33,19 @@ export function useKnowledge() {
     }
   };
 
-  const loadDocuments = (sourceId: string, force = false) => {
-    if (
-      !sourceId ||
-      state.selectedSourceId !== sourceId ||
-      force ||
-      (!state.documentsLoaded && !state.documentsLoading)
-    ) {
+  const loadDocuments = useCallback(
+    (sourceId: string, force = false) => {
+      if (
+        !sourceId ||
+        force ||
+        (state.selectedSourceId === sourceId && state.documentsLoaded)
+      ) {
+        return;
+      }
       dispatch(fetchDocumentsForSource(sourceId));
-    }
-  };
+    },
+    [dispatch, state.selectedSourceId, state.documentsLoaded]
+  );
 
   const changeVisibility = (v: typeof state.visibility) =>
     dispatch(setVisibility(v));
@@ -87,7 +91,6 @@ export function useKnowledge() {
   ) => {
     await dispatch(uploadDocumentToSource({ sourceId, file, payload }));
   };
-  
 
   const reindexDocument = async (id: string) => {
     await knowledgeService.reindexDocument(id); // POST to /reindex

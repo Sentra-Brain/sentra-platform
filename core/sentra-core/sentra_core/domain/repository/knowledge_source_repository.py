@@ -28,3 +28,4 @@ class KnowledgeSourceRepository(BaseRepository[KnowledgeSourceEntity]):
         if auto_index_only:
             query = query.filter(self.model.auto_index == True)
         return query.all()
+    

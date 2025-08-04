@@ -40,11 +40,16 @@ export const DocumentFileType = {
 export type DocumentFileType = (typeof DocumentFileType)[keyof typeof DocumentFileType];
 
 export const DocumentStatus = {
-  QUEUED: 'queued',
-  PROCESSING: 'processing',
-  INDEXED: 'indexed',
-  FAILED: 'failed',
-  TO_BE_REMOVED: 'to_be_removed',
+    PENDING: "pending",
+    PROCESSING: "processing",
+    EXTRACTING: "extracting",
+    CHUNKING: "chunking",
+    EMBEDDING: "embedding",
+    INDEXING: "indexing",
+    INDEXED: "indexed",
+    FAILED: "failed",
+    TO_BE_REMOVED: "to_be_removed",
+    REMOVED: "removed"
 } as const;
 
 export type DocumentStatus = (typeof DocumentStatus)[keyof typeof DocumentStatus];

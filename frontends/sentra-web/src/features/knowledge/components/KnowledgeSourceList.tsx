@@ -1,5 +1,5 @@
 import { useKnowledge } from '../useKnowledge';
-import KnowledgeSourceCard from './KnowledgeSourceCard';
+import DocumentStatusBadge from './DocumentStatusBadge';
 import type { KnowledgeSourceVisibility } from '../types/knowledgeModels';
 
 interface Props {
@@ -11,51 +11,61 @@ export default function KnowledgeSourceList({ visibility }: Props) {
     sources,
     documents,
     selectedSourceId,
+    selectedDocumentId,
     selectSourceById,
     selectDocumentById,
-    resetSelection,
-  } = useKnowledge();  // ← Asegúrate que useKnowledge expone selectDocumentById
+  } = useKnowledge();
 
   const visibleSources = sources.filter((s) => s.visibility === visibility);
 
-  const handleSelect = (id: string) => {
-    if (id === selectedSourceId) {
-      resetSelection();
-    } else {
-      selectSourceById(id);
-    }
-  };
-
   return (
-    <div className="space-y-2">
-      {visibleSources.map((source) => (
-        <div key={source.id}>
-          <KnowledgeSourceCard
-            source={source}
-            selected={source.id === selectedSourceId}
-            onClick={() => handleSelect(source.id)}
-          />
+    <div className="space-y-1">
+      {visibleSources.map((source) => {
+        const docsForSource = documents.filter(
+          (doc) => doc.knowledge_source_id === source.id
+        );
 
-          {/* ⬇️ Render documents if this source is selected */}
-          {source.id === selectedSourceId && (
-            <div className="ml-6 mt-1 space-y-1">
-              {documents.length === 0 ? (
-                <div className="text-sm text-muted">No documents</div>
+        return (
+          <div key={source.id}>
+            {/* Source line */}
+            <div
+              onClick={() => selectSourceById(source.id)}
+              className={`flex items-center justify-between cursor-pointer px-2 py-1 rounded-r-md hover:bg-[var(--sentra-primary-light)] ${
+                source.id === selectedSourceId
+                  ? 'border-l-4 border-[var(--sentra-accent)] bg-[var(--sentra-primary)]'
+                  : ''
+              }`}
+            >
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                📁 {source.display_name}
+                <span className="text-muted text-xs">{docsForSource.length} docs</span>
+              </div>
+            </div>
+
+            {/* Always show docs */}
+            <div className="ml-4 mt-1 space-y-1">
+              {docsForSource.length === 0 ? (
+                <div className="text-xs text-muted italic pl-1">No documents</div>
               ) : (
-                documents.map((doc) => (
+                docsForSource.map((doc) => (
                   <div
                     key={doc.id}
-                    className="text-sm px-2 py-1 rounded hover:bg-[var(--sentra-primary-light)] cursor-pointer"
-                    onClick={() => selectDocumentById(doc.id)}  // ✅ Aquí está el fix
+                    onClick={() => selectDocumentById(doc.id)}
+                    className={`flex items-center justify-between text-sm px-2 py-1 rounded cursor-pointer hover:bg-[var(--sentra-primary-light)] ${
+                      doc.id === selectedDocumentId
+                        ? 'border-l-4 border-[var(--sentra-accent)] bg-[var(--sentra-primary)]'
+                        : ''
+                    }`}
                   >
-                    📄 {doc.filename}
+                    <div className="truncate">📄 {doc.display_name || '(Untitled)'}</div>
+                    <DocumentStatusBadge status={doc.status} />
                   </div>
                 ))
               )}
             </div>
-          )}
-        </div>
-      ))}
+          </div>
+        );
+      })}
     </div>
   );
 }
