@@ -1,4 +1,4 @@
-# sentra_brain_api/infra/mongo_conversation_repository.py
+# sentra-core/sentra_core/infra/nosql/mongo_conversation_repository.py
 from datetime import datetime, timezone
 from pymongo import MongoClient
 from sentra_core.infra.nosql.mongo_settings import settings
@@ -31,6 +31,7 @@ class MongoConversationRepository:
         doc = {
             "_id": conversation_id,
             "user_id": user_id,
+            "initial_prompt": fields.get("initial_prompt", ""),
             "created_at": datetime.now(timezone.utc).isoformat(),
             "messages": messages,
             **{k: v for k, v in fields.items() if v is not None} 

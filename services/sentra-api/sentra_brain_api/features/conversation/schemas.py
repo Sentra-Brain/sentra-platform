@@ -1,4 +1,4 @@
-# sentra_brain_api/features/conversation/schemas.py
+# sentra-brain_api/features/conversation/schemas.py
 
 from datetime import datetime
 from typing import List, Literal, Optional
@@ -7,23 +7,19 @@ from sentra_core.model.base_mongo_model import BaseMongoModel
 
 
 class CreateConversationRequest(BaseModel):
-    title: Optional[str] = None
-    description: Optional[str] = None
-    initial_prompt: Optional[str] = Field(
-        default=None,
-        description="Optional system prompt to be used as conversation initializer"
-    )
-    content: str = Field(..., description="First user message in the conversation")
+    initial_prompt: str = Field(..., description="Initial User Prompt for the conversation")
 
 
 class CreateConversationResponse(BaseModel):
     id: str = Field(..., description="Unique identifier of the conversation")
+    title: str = Field(..., description="Title of the conversation")
+    # initial_prompt: str = Field(..., description="Initial prompt for the conversation")
+    created_at: datetime = Field(..., description="Creation timestamp")
 
     model_config = {
         "from_attributes": True,
         "populate_by_name": True
     }
-
 
 class ConversationListItemResponse(BaseModel):
     id: str = Field(..., description="Unique identifier of the conversation")
@@ -35,7 +31,6 @@ class ConversationListItemResponse(BaseModel):
         "populate_by_name": True
     }
 
-
 class MessageResponse(BaseModel):
     role: Literal["user", "assistant", "system"] = Field(..., description="Role of the message sender")
     content: str = Field(..., description="Content of the message")
@@ -45,9 +40,9 @@ class MessageResponse(BaseModel):
         "from_attributes": True
     }
 
-
 class ConversationResponse(BaseMongoModel):
     title: Optional[str] = None
+    
     description: Optional[str] = None
     initial_prompt: Optional[str] = None
     created_at: datetime

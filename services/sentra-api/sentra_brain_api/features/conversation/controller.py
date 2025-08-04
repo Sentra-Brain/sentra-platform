@@ -41,6 +41,18 @@ class ConversationController:
             service: ConversationApiService = Depends(self._get_service)
         ):
             return await service.create_conversation(current_user, body)
+        
+        @self.router.post(
+            "/{conversation_id}/generate-title",
+            response_model=UpdateConversationResponse,
+            description="Generate a better conversation title using LLM"
+        )
+        async def generate_llm_title_for_conversation(
+            conversation_id: str,
+            current_user: UserEntity = Depends(get_authenticated_user),
+            service: ConversationApiService = Depends(self._get_service),
+        ):
+            return await service.generate_llm_title_for_conversation(current_user, conversation_id)
 
         @self.router.get(
             "/",
