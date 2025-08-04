@@ -9,7 +9,14 @@ import {
   clearSelection,
   updateDocumentMetadata as updateDocMetadataAction,
   markDocumentAsReindexing,
+  createKnowledgeSource,
+  updateSourceMetadata,
+  uploadDocumentToSource,
 } from "./knowledgeSlice";
+import type {
+  CreateKnowledgeSourceRequest,
+  DocumentUploadRequest,
+} from "./types/knowledgeModels";
 import { knowledgeService } from "./knowledgeService";
 import type { KnowledgeDocument } from "./types/knowledgeModels";
 import { useNavigate } from "react-router-dom";
@@ -38,7 +45,6 @@ export function useKnowledge() {
 
   const changeVisibility = (v: typeof state.visibility) =>
     dispatch(setVisibility(v));
-
 
   const selectSourceById = (id: string | null) => {
     dispatch(selectSource(id));
@@ -70,6 +76,19 @@ export function useKnowledge() {
     dispatch(updateDocMetadataAction({ id, changes }));
   };
 
+  const createNewSource = async (data: CreateKnowledgeSourceRequest) => {
+    await dispatch(createKnowledgeSource(data));
+  };
+
+  const uploadToSource = async (
+    sourceId: string,
+    file: File,
+    payload: DocumentUploadRequest
+  ) => {
+    await dispatch(uploadDocumentToSource({ sourceId, file, payload }));
+  };
+  
+
   const reindexDocument = async (id: string) => {
     await knowledgeService.reindexDocument(id); // POST to /reindex
     dispatch(markDocumentAsReindexing(id));
@@ -84,6 +103,9 @@ export function useKnowledge() {
     selectDocumentById,
     resetSelection,
     updateDocumentMetadata,
+    createNewSource,
+    uploadToSource,
+    updateSourceMetadata,
     reindexDocument,
   };
 }

@@ -32,6 +32,15 @@ export const knowledgeService = {
       .then((res) => res.data);
   },
 
+  updateSourceMetadata(
+    id: string,
+    data: Partial<Pick<KnowledgeSource, "name" | "description" | "auto_index">>
+  ) {
+    return apiClient
+      .patch(`/knowledge/sources/${id}`, data)
+      .then((res) => res.data);
+  },
+
   deleteSource(id: string): Promise<KnowledgeSource> {
     return apiClient.delete(`/knowledge/sources/${id}`).then((res) => res.data);
   },

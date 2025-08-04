@@ -9,6 +9,8 @@ import type {
   KnowledgeSource,
   KnowledgeDocument,
   KnowledgeSourceVisibility,
+  CreateKnowledgeSourceRequest,
+  DocumentUploadRequest,
 } from "./types/knowledgeModels";
 
 interface KnowledgeState {
@@ -58,6 +60,29 @@ export const fetchDocumentsForSource = createAsyncThunk(
   async (sourceId: string) => knowledgeService.listDocumentsBySource(sourceId)
 );
 
+export const createKnowledgeSource = createAsyncThunk(
+  "knowledge/createSource",
+  async (data: CreateKnowledgeSourceRequest) => {
+    return knowledgeService.createSource(data);
+  }
+);
+
+export const uploadDocumentToSource = createAsyncThunk(
+  "knowledge/uploadDocument",
+  async ({
+    sourceId,
+    file,
+    payload,
+  }: {
+    sourceId: string;
+    file: File;
+    payload: DocumentUploadRequest;
+  }) => {
+    return knowledgeService.uploadDocument(sourceId, file, payload);
+  }
+);
+
+
 // ───────────────────────────────────────────────────────
 // Slice
 // ───────────────────────────────────────────────────────
@@ -89,11 +114,25 @@ const knowledgeSlice = createSlice({
       state.documents = [];
       state.documentsLoaded = false;
     },
+    updateSourceMetadata(
+      state,
+      action: PayloadAction<{
+        id: string;
+        changes: Partial<
+          Pick<KnowledgeSource, "name" | "description" | "auto_index">
+        >;
+      }>
+    ) {
+      const s = state.sources.find((src) => src.id === action.payload.id);
+      if (s) Object.assign(s, action.payload.changes);
+    },
     updateDocumentMetadata(
       state,
       action: PayloadAction<{
         id: string;
-        changes: Partial<Pick<KnowledgeDocument, "display_name" | "description">>;
+        changes: Partial<
+          Pick<KnowledgeDocument, "display_name" | "description">
+        >;
       }>
     ) {
       const doc = state.documents.find((d) => d.id === action.payload.id);
@@ -140,6 +179,13 @@ const knowledgeSlice = createSlice({
         state.documentsLoading = false;
         state.documentsLoaded = false;
         state.error = action.error.message;
+      })
+      .addCase(createKnowledgeSource.fulfilled, (state, action) => {
+        state.sources.push(action.payload);
+        state.sourcesLoaded = true;
+      })
+      .addCase(uploadDocumentToSource.fulfilled, (state, action) => {
+        state.documents.push(action.payload);
       });
   },
 });
@@ -150,6 +196,7 @@ export const {
   selectDocument,
   clearSelection,
   updateDocumentMetadata,
+  updateSourceMetadata,
   markDocumentAsReindexing,
 } = knowledgeSlice.actions;
 

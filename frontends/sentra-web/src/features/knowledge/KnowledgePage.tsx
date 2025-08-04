@@ -2,10 +2,10 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useEffect } from "react";
 import { useKnowledge } from "./useKnowledge";
-import KnowledgeStatsBar from "./components/KnowledgeStatsBar";
 import KnowledgeSourceList from "./components/KnowledgeSourceList";
 import KnowledgeDetailsPanel from "./components/KnowledgeDetailsPanel";
 import type { KnowledgeSourceVisibility } from "./types/knowledgeModels";
+import KnowledgeToolbar from "./components/KnowledgeToolbar";
 
 export default function KnowledgePage() {
   const navigate = useNavigate();
@@ -80,7 +80,7 @@ export default function KnowledgePage() {
     <div className="p-4 h-full flex flex-col gap-4">
       <h1 className="text-xl font-semibold">📚 Knowledge Management</h1>
 
-      <KnowledgeStatsBar visibility={visibility} />
+      <KnowledgeToolbar visibility={visibility} />
 
       <div className="flex flex-1 overflow-hidden">
         <div className="w-1/3 overflow-y-auto pr-4">
