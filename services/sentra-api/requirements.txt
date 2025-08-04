@@ -18,6 +18,9 @@ python-multipart
 
 uvicorn
 
+# RAG dependencies
+sentence-transformers==5.0.0
+
 # OpenTelemetry instrumentation
 opentelemetry-api
 opentelemetry-sdk
