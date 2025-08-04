@@ -36,19 +36,24 @@ export default function ChatSidebar() {
         <div className="px-3 py-2 text-sm text-[var(--sentra-neutral)]">Loading...</div>
       )}
 
-      <ul className="conversation-list">
-        {conversations.map((conv) => (
-          <ConversationItem
-            key={conv.id}
-            id={conv.id}
-            title={conv.title || "Untitled"}
-            active={conv.id === currentConversationId}
-            onSelect={handleSelect}
-            onRename={(id) => console.log("Rename", id)}
-            onDelete={(id) => console.log("Delete", id)}
-          />
-        ))}
-      </ul>
+
+
+      {/* 🎯 Scrollable container */}
+      <div className="overflow-y-auto max-h-[calc(100vh-350px)] pr-1">
+        <ul className="conversation-list space-y-1">
+          {conversations.map((conv) => (
+            <ConversationItem
+              key={conv.id}
+              id={conv.id}
+              title={conv.title || "Untitled"}
+              active={conv.id === currentConversationId}
+              onSelect={handleSelect}
+              onRename={(id) => console.log("Rename", id)}
+              onDelete={(id) => console.log("Delete", id)}
+            />
+          ))}
+        </ul>
+      </div>
     </SidebarSection>
   );
 }
