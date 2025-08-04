@@ -15,7 +15,7 @@ from sentra_brain_api.features.admin.settings.controller import SettingsControll
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.controller import ConversationController
-from sentra_brain_api.features.knowledge.routes import sources, documents, rag
+from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
@@ -79,7 +79,6 @@ def create_app(
     app.include_router(conversation_controller.router, prefix="/conversations", tags=["conversations"])
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
-    app.include_router(rag.router, prefix="/knowledge/rag", tags=["knowledge", "rag"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
 
