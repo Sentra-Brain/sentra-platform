@@ -39,6 +39,16 @@ class DocumentProcessor:
         return self._file_storage
 
     def process_document(self, message: Dict[str, Any]) -> bool:
+        """
+        Processes a document through extraction, chunking, embedding, and storage.
+
+        Args:
+            message (Dict[str, Any]): Dictionary containing document metadata and file information.
+                Expected keys: 'request_id', 'document_id', 'knowledge_source_id', 'filepath', 'filename', 'filetype'.
+
+        Returns:
+            bool: True if processing succeeds, False otherwise.
+        """
         request_id = set_request_id(message.get('request_id'))
         document_id = UUID(message['document_id'])
         knowledge_source_id = UUID(message['knowledge_source_id'])
