@@ -13,6 +13,6 @@ class EmbeddingProvider(ABC):
         pass
 
     @abstractmethod
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
         """Embed multiple documents."""
         pass

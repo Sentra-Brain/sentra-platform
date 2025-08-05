@@ -26,8 +26,8 @@ class SentenceTransformersEmbeddingProvider(EmbeddingProvider):
 
     def embed_query(self, text: str) -> List[float]:
         logger.info("Generating embedding for query")
-        return self.model.encode([text], normalize_embeddings=True)[0].tolist()  # ✅ convert to List[float]
+        return self.model.encode([text], normalize_embeddings=True)[0].tolist()
 
-    def embed_documents(self, texts: List[str]) -> List[List[float]]:
+    def generate_embeddings(self, texts: List[str]) -> List[List[float]]:
         logger.info(f"Generating embeddings for {len(texts)} documents")
         return self.model.encode(texts, normalize_embeddings=True).tolist()
