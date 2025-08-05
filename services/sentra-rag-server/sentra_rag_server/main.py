@@ -14,16 +14,7 @@ logger = logging.get_logger("sentra_rag_server")
 # Initialize RAG engine
 rag_engine = RAGEngine()
 
-async def app_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
-    logger.info("🔧 Initializing RAG engine...")
-    # Startup: init Chroma vector store if needed
-    if isinstance(rag_engine.rag_service.vector_store, ChromaHttpVectorStore):
-        logger.info("🔧 Initializing Chroma HTTP Vector Store...")
-        await rag_engine.rag_service.vector_store.init()
-        logger.info("✅ Chroma HTTP Vector Store initialized")
-    yield
-    # No teardown needed
-
+# Create FastAPI app
 app = FastAPI(
     title="Sentra RAG Server",
     description="REST API for RAG (Retrieval-Augmented Generation) operations",
