@@ -6,8 +6,9 @@ import os
 import signal
 import sys
 import uuid
-from typing import Dict, Any
+from typing import List, Dict, Any, Optional
 
+from sentra_core.domain.repository.document_repository import DocumentRepository
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
@@ -109,8 +110,10 @@ class RAGWorker:
     async def _perform_folder_scan(self):
         db = create_db_session()
         try:
-            repo = KnowledgeSourceRepository(db)
-            scanner = FolderScanner(repo)
+            logger.info("🔍 Scanning folder sources for new files")
+            knowledge_source_repo = KnowledgeSourceRepository(db)
+            document_repo = DocumentRepository(db)
+            scanner = FolderScanner(knowledge_source_repo, document_repo)
 
             new_jobs = scanner.scan_folder_sources()
             if new_jobs:
