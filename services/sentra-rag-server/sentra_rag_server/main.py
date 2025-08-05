@@ -1,4 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query
+from fastapi.responses import RedirectResponse
 from sentra_core.core import logging
 from sentra_rag.vector_store.chroma_http import ChromaHttpVectorStore
 from sentra_rag_server.rag_engine import RAGEngine
@@ -109,6 +110,11 @@ async def get_rag_context(request: ContextRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context generation failed: {str(e)}")
 
+
+@app.get("/", include_in_schema=False, response_class=RedirectResponse)
+async def redirect_to_swagger():
+    logger.info("Redirect to swagger...")
+    return RedirectResponse(url="/docs")
     
 if __name__ == "__main__":
     import uvicorn
