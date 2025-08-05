@@ -2,7 +2,7 @@
 
 
 from sentra_rag_worker.core.config import settings
-from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
+# from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.document_removal_processor import DocumentRemovalProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
@@ -44,7 +44,7 @@ class RAGWorker:
         logger.info("Starting sentra-rag-worker...")
         
         # Setup observability
-        instrument_worker()
+        # instrument_worker()
         
         self.running = True
         
@@ -103,7 +103,7 @@ class RAGWorker:
         logger.info(f"Received signal {signum}, initiating shutdown...")
         self.running = False
 
-    def _process_indexing_message_linear(self, message: Dict[str, Any]) -> bool:
+    async def _process_indexing_message_linear(self, message: Dict[str, Any]) -> bool:
         """
         Process indexing message with linear flow: validate → process → acknowledge.
         No retries, no requeueing. Process once and mark done.
@@ -142,7 +142,7 @@ class RAGWorker:
             }
 
             # Process document (handles all errors internally)
-            success = self.document_processor.process_document(processing_message)
+            success = await self.document_processor.process_document(processing_message)
             
             # Always acknowledge - no retries
             if success:

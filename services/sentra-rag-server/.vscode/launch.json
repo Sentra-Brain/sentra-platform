@@ -1,0 +1,46 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Sentra RAG Server (Local)",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/sentra_rag_server/main.py",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONUNBUFFERED": "1",
+        "PYTHONPATH": "${workspaceFolder}"
+      },
+      "args": ["run"]
+    },
+    {
+      "name": "pytest Sentra RAG Server",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "env": {
+        "PYTEST_ADDOPTS": "--no-cov"
+      },
+      "module": "pytest",
+      "cwd": "${workspaceRoot}/tests",
+      "envFile": "${workspaceFolder}/services/sentra-rag-server/tests/.env.test",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Remote Attach",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5680
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app"
+        }
+      ],
+    //   "preLaunchTask": "Docker: Build and Run"
+    },
+  ]
+}

@@ -1,10 +1,10 @@
 from pathlib import Path
 from sentra_core.domain.entities.document_entity import DocumentFileType, DocumentStatus
 from sentra_core.domain.services.file_storage import FileStorageService
+from sentra_rag.embeddings.provider import get_embedding_provider
 from sentra_rag_worker.services.document_extractor import DocumentExtractor
-from sentra_rag_worker.services.embedding_service import EmbeddingService
 from sentra_rag_worker.services.text_chunker import TextChunker
-from sentra_rag_worker.services.vector_store_service import VectorStoreService
+from sentra_rag.vector_store.service import get_vector_store_service
 from sentra_core.core.logging import get_logger, set_request_id
 from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 from sentra_core.domain.repository.document_repository import DocumentRepository
@@ -12,18 +12,18 @@ from sentra_core.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any, Optional
 from uuid import UUID
 import os
-
+ 
 logger = get_logger(__name__)
 
 
 class DocumentProcessor:
-    """Main orchestrator for document processing pipeline."""
+    """Main orchestrator for document processing pipeline.""" 
 
     def __init__(self):
         self.extractor = DocumentExtractor()
         self.chunker = TextChunker()
-        self.embedding_service = EmbeddingService()
-        self.vector_store = VectorStoreService()
+        self.embedding_service = get_embedding_provider()
+        self.vector_store = get_vector_store_service()
         self._file_storage = None
     
     def _get_settings(self):
@@ -38,7 +38,7 @@ class DocumentProcessor:
             self._file_storage = FileStorageService(settings.knowledge_mount_path)
         return self._file_storage
 
-    def process_document(self, message: Dict[str, Any]) -> bool:
+    async def process_document(self, message: Dict[str, Any]) -> bool:
         """
         Processes a document through extraction, chunking, embedding, and storage.
 
@@ -105,7 +105,7 @@ class DocumentProcessor:
 
             self._set_status(document_id, DocumentStatus.INDEXING, repo=document_repo)
             try:
-                indexed = self.vector_store.index_document_chunks(
+                indexed = await self.vector_store.index_document_chunks(
                     document_id=document_id,
                     knowledge_source_id=knowledge_source_id,
                     chunks=chunks,

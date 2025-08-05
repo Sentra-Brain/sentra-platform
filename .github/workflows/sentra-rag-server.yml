@@ -1,0 +1,93 @@
+name: Sentra API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'services/sentra-rag-server/**'
+      - 'core/sentra-rag/**'
+      - '.github/workflows/cicd-sentra-rag-server.yml'
+  pull_request:
+    paths:
+      - 'services/sentra-rag-server/**'
+      - 'core/sentra-rag/**'
+      - '.github/workflows/cicd-sentra-rag-server.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/sentra-rag-server
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Lint with flake8
+        run: |
+          pip install flake8
+          flake8 sentra_brain_api --count --select=E9,F63,F7,F82 --show-source --statistics
+          flake8 sentra_brain_api --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+      - name: Run tests
+        run: |
+          pip install pytest
+          pytest
+
+  docker-build-and-push:
+    if: github.ref == 'refs/heads/main'
+    needs: build-and-test
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/sentra-rag-server
+    steps:
+      - uses: actions/checkout@v4
+
+
+      - name: Extract version from constants.py
+        id: get_version
+        run: |
+          echo "version=$(grep -o 'VERSION = "[^"]*"' sentra_brain_api/core/constants.py | cut -d'"' -f2)" >> $GITHUB_OUTPUT
+
+      - name: Azure Login (Service Principal)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Docker login with ACR admin credentials
+        run: echo ${{ secrets.ACR_PASSWORD }} | docker login ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }} -u ${{ secrets.ACR_USERNAME }} --password-stdin
+
+      - name: Build Docker image
+        run: |
+          docker build -f services/sentra-rag-server/Dockerfile \
+            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:latest \
+            -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:${{ steps.get_version.outputs.version }} \
+            .
+        working-directory: .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:${{ steps.get_version.outputs.version }}
+
+      - name: Tag and push 'latest'
+        run: |
+          docker tag ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:${{ steps.get_version.outputs.version }} \
+            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:latest
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:latest

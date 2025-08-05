@@ -1,53 +1,33 @@
 from fastapi import FastAPI, HTTPException, Query
-from fastapi.responses import JSONResponse
-from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
-from uuid import UUID
-from rag_engine import RAGEngine
+from sentra_core.core import logging
+from sentra_rag.vector_store.chroma_http import ChromaHttpVectorStore
+from sentra_rag_server.rag_engine import RAGEngine
+from sentra_rag_server.schemas import SearchRequest, SearchResponse, SearchResult, ContextRequest, ContextResponse
+from typing import AsyncGenerator, Optional
+import os
 import uvicorn
 
+logging.configure_logging()
+logger = logging.get_logger("sentra_rag_server")
+
+# Initialize RAG engine
+rag_engine = RAGEngine()
+
+async def app_lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    logger.info("🔧 Initializing RAG engine...")
+    # Startup: init Chroma vector store if needed
+    if isinstance(rag_engine.rag_service.vector_store, ChromaHttpVectorStore):
+        logger.info("🔧 Initializing Chroma HTTP Vector Store...")
+        await rag_engine.rag_service.vector_store.init()
+        logger.info("✅ Chroma HTTP Vector Store initialized")
+    yield
+    # No teardown needed
 
 app = FastAPI(
     title="Sentra RAG Server",
     description="REST API for RAG (Retrieval-Augmented Generation) operations",
     version="1.0.0"
 )
-
-# Initialize RAG engine
-rag_engine = RAGEngine()
-
-
-# Pydantic models for request/response
-class SearchRequest(BaseModel):
-    query: str = Field(..., description="Search query")
-    knowledge_source_id: Optional[str] = Field(None, description="Optional knowledge source filter")
-    limit: Optional[int] = Field(10, description="Maximum number of results")
-
-
-class ContextRequest(BaseModel):
-    query: str = Field(..., description="Query for context generation")
-    knowledge_source_id: Optional[str] = Field(None, description="Optional knowledge source filter")  
-    max_tokens: Optional[int] = Field(4000, description="Maximum tokens in context")
-
-
-class SearchResult(BaseModel):
-    chunk_id: str
-    content: str
-    metadata: Dict[str, Any]
-    relevance_score: float
-
-
-class SearchResponse(BaseModel):
-    query: str
-    results: List[SearchResult]
-    total_results: int
-
-
-class ContextResponse(BaseModel):
-    query: str
-    context: str
-    chunk_count: int
-
 
 # Routes
 @app.get("/health")
@@ -129,6 +109,17 @@ async def get_rag_context(request: ContextRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context generation failed: {str(e)}")
 
-
+    
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    import uvicorn
+    debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
+    logging.configure_logging(debug=debug_mode)
+    logger = logging.get_logger("sentra_rag_server")
+
+    if debug_mode:
+        logger.info("✅ Debug mode enabled: waiting for debugger on port 5680")
+        import debugpy
+        debugpy.listen(("0.0.0.0", 5680))
+        debugpy.wait_for_client()
+
+    uvicorn.run(app, host="0.0.0.0", port=9100, log_level="debug" if debug_mode else "info")

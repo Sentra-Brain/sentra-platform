@@ -52,6 +52,26 @@ services:
     env_file:
       - ../services/sentra-api/.env
 
+  sentra-rag-server:
+    build:
+      context: ../
+      dockerfile: services/sentra-rag-server/Dockerfile
+    image: sentra-rag-server:dev
+    container_name: sentra-rag-server
+    ports:
+      - "5680:5680"   # Python debugpy
+      - "9100:9100"   
+    volumes:
+      - ../services/sentra-rag-server:/app
+      - ../core/sentra-core:/core/sentra-core
+      - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - ../services/sentra-rag-server/.env
+    depends_on:
+      - sentra-vector-db
+
   sentra-rag-worker:
     build:
       context: ../

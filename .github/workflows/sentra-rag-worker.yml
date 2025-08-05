@@ -141,7 +141,7 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -f services/sentra-rag-worker/Dockerfile \
-            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:py3.13 \
+            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:latest \
             -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:${{ steps.get_version.outputs.version }} \
             .
         working-directory: .

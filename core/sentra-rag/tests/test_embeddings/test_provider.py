@@ -2,9 +2,9 @@ import pytest
 from unittest.mock import Mock, patch
 from sentra_rag.embeddings.provider import (
     EmbeddingProvider,
-    SentenceTransformersProvider,
     get_embedding_provider
 )
+from sentra_rag.embeddings.sentence_transformers_provider import SentenceTransformersProvider
 
 
 class TestEmbeddingProvider:

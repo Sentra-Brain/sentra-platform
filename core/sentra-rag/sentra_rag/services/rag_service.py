@@ -1,7 +1,8 @@
+# /sentra-rag/sentra_rag/services/rag_service.py
 from typing import List, Dict, Any, Optional
 from uuid import UUID
 from sentra_rag.embeddings.provider import get_embedding_provider
-from sentra_rag.vector_store.service import VectorStoreService
+from sentra_rag.vector_store.service import get_vector_store_service
 from sentra_rag.core.settings import rag_settings
 
 
@@ -10,7 +11,7 @@ class RAGQueryService:
 
     def __init__(self):
         self.embedding_provider = get_embedding_provider()
-        self.vector_store = VectorStoreService()
+        self.vector_store = get_vector_store_service()
 
     async def search_documents(
         self,
@@ -36,7 +37,7 @@ class RAGQueryService:
         query_embedding = self.embedding_provider.embed_query(query)
         
         # Query the vector store
-        results = await self.vector_store.query_similar_documents(
+        raw_results = await self.vector_store.query_similar_chunks(
             query_embedding=query_embedding,
             knowledge_source_id=knowledge_source_id,
             limit=limit
@@ -44,16 +45,15 @@ class RAGQueryService:
         
         # Format results for API response
         formatted_results = []
-        if results.get('ids') and len(results['ids']) > 0:
-            for i in range(len(results['ids'][0])):
-                chunk_data = {
-                    "chunk_id": results['ids'][0][i],
-                    "content": results['documents'][0][i],
-                    "metadata": results['metadatas'][0][i],
-                    "relevance_score": 1.0 - results['distances'][0][i]  # Convert distance to similarity
-                }
-                formatted_results.append(chunk_data)
-        
+        for result in raw_results:
+            chunk_data = {
+                "chunk_id": result["id"],
+                "content": result["document"],
+                "metadata": result["metadata"],
+                "relevance_score": 1.0 - result["distance"],  # Convert distance to similarity
+            }
+            formatted_results.append(chunk_data)
+
         return formatted_results
 
     async def get_context_for_query(
@@ -93,10 +93,10 @@ class RAGQueryService:
         for chunk in chunks:
             content = chunk['content']
             metadata = chunk['metadata']
-            
-            # Estimate tokens (rough approximation: 1 token ≈ 4 characters)
-            chunk_tokens = len(content) // 4
-            
+
+            # Estimate tokens (rough approximation: 1 token ≈ CHARACTERS_PER_TOKEN_APPROX characters)
+            chunk_tokens = len(content) // rag_settings.tokens_per_character
+
             if estimated_tokens + chunk_tokens > max_tokens:
                 break
             

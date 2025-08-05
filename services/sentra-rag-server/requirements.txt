@@ -1,8 +1,7 @@
-fastapi==0.115.5
-uvicorn[standard]==0.33.1
-httpx==0.28.1
-pydantic==2.11.7
-python-dotenv==1.1.1
-
-# Local packages (install in editable mode) 
--e ../../core/sentra-rag[ml]
+fastapi
+httpx
+pydantic
+python-dotenv
+python-jose
+uvicorn
+debugpy

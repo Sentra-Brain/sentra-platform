@@ -1,5 +1,7 @@
-from sentra_rag.services import RAGQueryService
-from sentra_rag.core import rag_settings
+# /sentra-rag-server/sentra_rag_server/rag_engine.py
+# Core RAG engine for processing queries and managing context
+from sentra_rag.services.rag_service import RAGQueryService
+from sentra_rag.core.settings import rag_settings
 
 
 class RAGEngine:
