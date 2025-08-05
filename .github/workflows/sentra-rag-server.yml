@@ -1,4 +1,4 @@
-name: Sentra API
+name: Sentra RAG Server
 
 on:
   push:
