@@ -1,8 +1,12 @@
+debugpy
 fastapi
 httpx
 pydantic
+pytest
+pytest-asyncio
+pytest-cov
+pytest-dotenv
+pytest-mock
 python-dotenv
 python-jose
 uvicorn
-debugpy
-pytest
