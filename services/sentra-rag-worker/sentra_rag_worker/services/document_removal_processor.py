@@ -11,7 +11,7 @@ This processor handles the complete removal workflow:
 import os
 from typing import Dict, Any
 from uuid import UUID
-from sentra_rag_worker.services.vector_store_service import VectorStoreService
+from sentra_rag.vector_store.service import get_vector_store_service
 from sentra_core.core.logging import get_logger
 from sentra_core.domain.entities.document_entity import DocumentEntity
 from sentra_core.domain.enums.document import DocumentStatus
@@ -29,9 +29,9 @@ class DocumentRemovalProcessor:
     """
 
     def __init__(self):
-        self.vector_store = VectorStoreService()
+        self.vector_store = get_vector_store_service()
 
-    def process_removal_job(self, message: Dict[str, Any]) -> bool:
+    async def process_removal_job(self, message: Dict[str, Any]) -> bool:
         """
         Process a document removal job.
         
@@ -63,7 +63,7 @@ class DocumentRemovalProcessor:
 
             # Step 3: Remove from ChromaDB vector store
             try:
-                deleted_chunks = self.vector_store.delete_document_chunks(document_id)
+                deleted_chunks = await self.vector_store.delete_document_chunks(document_id)
                 logger.info(f"Removed {deleted_chunks} chunks from vector store for document {document_id}")
             except Exception as e:
                 logger.warning(f"Failed to remove chunks from vector store for document {document_id}: {e}")

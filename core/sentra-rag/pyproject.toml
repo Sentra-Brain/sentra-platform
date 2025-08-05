@@ -1,20 +1,17 @@
 [project]
-name = "sentra-core"
-version = "0.2.0"
-description = "Shared logic for Sentra Brain"
+name = "sentra-rag"
+version = "0.1.0"
+description = "RAG-specific logic: embeddings, vector store, chunking"
 authors = [{ name = "Juan G Carmona" }]
 readme = "README.md"
 requires-python = ">=3.9"
 
 # main dependencies
 dependencies = [
-  "aio-pika",
-  "psycopg2-binary",
+  "httpx",
   "pydantic",
   "pydantic-settings",
-  "pymongo",
-  "sqlalchemy",
-  "passlib[bcrypt]",
+  "python-dotenv",
 ]
 
 # Optional dependencies
@@ -27,8 +24,13 @@ dev = [
   "debugpy==1.8.15",
 ]
 
+ml = [
+  "sentence-transformers==5.0.0",
+  "chromadb==1.0.15",
+]
+
 [tool.setuptools]
-packages = ["sentra_core"]
+packages = ["sentra_rag"]
 
 [build-system]
 requires = ["setuptools", "wheel"]

@@ -61,6 +61,8 @@
   font-weight: bold;
   text-align: center;
   cursor: pointer;
+  
+  display: block;
   transition:
     background 0.2s ease,
     box-shadow 0.2s ease;

@@ -9,10 +9,10 @@ COPY core/sentra-rag /core/sentra-rag
 RUN pip install -e /core/sentra-core
 RUN pip install -e /core/sentra-rag
 
-# Install worker-specific requirements
-COPY services/sentra-rag-worker/requirements.txt /app/requirements.txt
+# Install rag-server-specific requirements
+COPY services/sentra-rag-server/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY services/sentra-rag-worker /app
+COPY services/sentra-rag-server /app
 
-CMD ["python", "-m", "sentra_rag_worker.main"]
+CMD ["python", "-m", "sentra_rag_server.main"]

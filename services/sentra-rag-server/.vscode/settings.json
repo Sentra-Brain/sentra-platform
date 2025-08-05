@@ -1,0 +1,31 @@
+{
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [], // now controlled by pytest.ini
+
+  // Optional: if you use coverage gutters
+  "coverage-gutters.coverageFileNames": ["coverage.xml"],
+  "coverage-gutters.showGutterCoverage": true,
+  "coverage-gutters.showLineCoverage": true,
+
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#ff88a8",
+    "activityBar.background": "#ff88a8",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#d0ffbf",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#ff88a8",
+    "statusBar.background": "#ff5583",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#ff225e",
+    "statusBarItem.remoteBackground": "#ff5583",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#ff5583",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#ff558399",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "peacock.color": "#FF5583"
+}
