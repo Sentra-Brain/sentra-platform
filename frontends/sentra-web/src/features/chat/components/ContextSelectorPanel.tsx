@@ -64,51 +64,57 @@ export default function ContextSelectorPanel({ isOpen, onClose, onApply }: Props
   const handleSourceToggle = (sourceId: string) => {
     setLocalContext(prev => {
       const isSelected = prev.sourceIds.includes(sourceId);
-      let newSourceIds: string[];
       let newDocumentIds = [...prev.documentIds];
 
       if (isSelected) {
         // Remove source and all its documents
-        newSourceIds = prev.sourceIds.filter(id => id !== sourceId);
+        const newSourceIds = prev.sourceIds.filter(id => id !== sourceId);
         const sourceDocuments = documentsBySource[sourceId] || [];
         newDocumentIds = newDocumentIds.filter(
           docId => !sourceDocuments.some(doc => doc.id === docId)
         );
+        return {
+          ...prev,
+          sourceIds: newSourceIds,
+          documentIds: newDocumentIds,
+        };
       } else {
         // Add source
-        newSourceIds = [...prev.sourceIds, sourceId];
+        const newSourceIds = [...prev.sourceIds, sourceId];
+        return {
+          ...prev,
+          sourceIds: newSourceIds,
+          documentIds: newDocumentIds,
+        };
       }
-
-      return {
-        ...prev,
-        sourceIds: newSourceIds,
-        documentIds: newDocumentIds,
-      };
     });
   };
 
   const handleDocumentToggle = (sourceId: string, documentId: string) => {
     setLocalContext(prev => {
       const isSelected = prev.documentIds.includes(documentId);
-      let newDocumentIds: string[];
-      let newSourceIds = [...prev.sourceIds];
 
       if (isSelected) {
         // Remove document
-        newDocumentIds = prev.documentIds.filter(id => id !== documentId);
+        const newDocumentIds = prev.documentIds.filter(id => id !== documentId);
+        return {
+          ...prev,
+          sourceIds: [...prev.sourceIds],
+          documentIds: newDocumentIds,
+        };
       } else {
         // Add document and ensure source is also selected
-        newDocumentIds = [...prev.documentIds, documentId];
-        if (!newSourceIds.includes(sourceId)) {
-          newSourceIds.push(sourceId);
-        }
+        const newDocumentIds = [...prev.documentIds, documentId];
+        const newSourceIds = prev.sourceIds.includes(sourceId) 
+          ? [...prev.sourceIds]
+          : [...prev.sourceIds, sourceId];
+        
+        return {
+          ...prev,
+          sourceIds: newSourceIds,
+          documentIds: newDocumentIds,
+        };
       }
-
-      return {
-        ...prev,
-        sourceIds: newSourceIds,
-        documentIds: newDocumentIds,
-      };
     });
   };
 
