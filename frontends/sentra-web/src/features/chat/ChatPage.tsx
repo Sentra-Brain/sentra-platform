@@ -22,7 +22,18 @@ export default function ChatPage() {
       dispatch(fetchConversationById(currentConversationId)).then((res) => {
         const payload = res.payload as ConversationDetails;
         if (payload?.messages) {
-          dispatch(setMessages(payload.messages));
+          // Filter out system messages that match user messages (to avoid duplication)
+          const filteredMessages = payload.messages.filter((message, _, array) => {
+            if (message.role === 'system') {
+              // Check if there's a user message with the same content
+              const hasMatchingUserMessage = array.some(
+                (msg) => msg.role === 'user' && msg.content.trim() === message.content.trim()
+              );
+              return !hasMatchingUserMessage;
+            }
+            return true;
+          });
+          dispatch(setMessages(filteredMessages));
         }
       });
     }
