@@ -20,13 +20,11 @@ export function useChatActions() {
   const dispatch = useAppDispatch()
   const currentConversationId = useAppSelector(s => s.conversation.currentConversationId)
   const userId = useAppSelector(s => s.auth.user?.id)
-  const knowledgeSources = useAppSelector(s => s.knowledge.sources)
-  const documentsBySource = useAppSelector(s => s.knowledge.documentsBySource)
-  const context_source_ids = knowledgeSources.map(s => s.id)
+  const { selectedContext } = useAppSelector(s => s.chat)
 
-  const context_document_ids = Object.values(documentsBySource)
-    .flat()
-    .map(d => d.id)
+  // Use selected context or empty arrays if RAG is disabled
+  const context_source_ids = selectedContext.useRag ? selectedContext.sourceIds : []
+  const context_document_ids = selectedContext.useRag ? selectedContext.documentIds : []
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim()
