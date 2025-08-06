@@ -37,7 +37,7 @@ class ConversationEngine:
         now = datetime.now(timezone.utc).isoformat()
 
         if request.context_source_ids or request.context_document_ids:
-            yield ConversationDelta(content="💡 Searching in the Knowledge Base...", final=False)
+            yield ConversationDelta(content="💡 Searching in the Knowledge Base... \\r\\n", final=False)
 
         rag_chunks = await self.rag_client.retrieve_relevant_chunks(
             query=request.content,

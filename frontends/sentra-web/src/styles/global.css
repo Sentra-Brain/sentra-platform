@@ -5,6 +5,14 @@
 @tailwind components;
 @tailwind utilities;
 
+
+@theme {
+  --color-text-base: var(--sentra-text);
+  --color-prose-code: var(--sentra-accent);
+  --color-prose-bg: var(--sentra-primary-dark);
+  --color-prose-border: var(--sentra-accent-light);
+}
+
 /* Base Typography and Body Setup */
 html {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
