@@ -69,7 +69,7 @@ class ConversationService:
         deleted = False
 
         conversation = self.sql_repo.get(conversation_id)
-        if conversation and str(conversation.user_id) == user_id:
+        if conversation and str(conversation.created_by_id) == user_id:
             self.sql_repo.delete(conversation_id)
             deleted = True
 

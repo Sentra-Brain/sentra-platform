@@ -18,6 +18,14 @@ import { conversationService } from '@features/conversations/conversationService
 export function useChatActions() {
   const dispatch = useAppDispatch()
   const currentConversationId = useAppSelector(s => s.conversation.currentConversationId)
+  const userId = useAppSelector(s => s.auth.user?.id)
+  const knowledgeSources = useAppSelector(s => s.knowledge.sources)
+  const documentsBySource = useAppSelector(s => s.knowledge.documentsBySource)
+  const context_source_ids = knowledgeSources.map(s => s.id)
+
+  const context_document_ids = Object.values(documentsBySource)
+    .flat()
+    .map(d => d.id)
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim()
@@ -52,10 +60,13 @@ export function useChatActions() {
 
     chatService.sendMessageStream(
       {
+        user_id: userId,
         conversation_id: conversationId,
-        content: trimmed,
         message_id: userMessageId,
         response_message_id: assistantMessageId,
+        content: trimmed,
+        context_source_ids: context_source_ids,
+        context_document_ids: context_document_ids,
       },
       (chunk) => {
         if (chunk.role === 'assistant') {

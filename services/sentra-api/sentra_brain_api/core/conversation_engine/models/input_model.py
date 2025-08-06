@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, Field
 
 class ConversationRequest(BaseModel):
@@ -11,4 +11,13 @@ class ConversationRequest(BaseModel):
     parent_message_id: Optional[str] = Field(default=None, description="ID of the parent message")
     intent_override: Optional[str] = Field(default=None, description="Intent to override")
     stream: Optional[bool] = Field(default=True, description="Whether to stream the response")
+
+    context_source_ids: Optional[List[str]] = Field(
+        default=None,
+        description="List of knowledge source IDs to use for RAG"
+    )
+    context_document_ids: Optional[List[str]] = Field(
+        default=None,
+        description="List of document IDs to use for RAG"
+    )
 
