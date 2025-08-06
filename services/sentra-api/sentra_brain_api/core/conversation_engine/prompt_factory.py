@@ -1,60 +1,64 @@
-from typing import Optional
-from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE
+# updated PromptFactory to accept RAG chunks and build final payload with optimal ordering
+from typing import Optional, List, Dict
+from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE, SYSTEM_PROMPT
+from sentra_brain_api.core.conversation_engine.rag.rag_formatting import format_chunks_grouped
+from sentra_brain_api.core.conversation_engine.rag.rag_chunk import RagChunk
 
 class PromptFactory:
-    def __init__(self, system_prompt: Optional[str] = None):
-        self.default_system_prompt = system_prompt or (
-            "You are Sentra, a private AI assistant deployed securely in a business environment. "
-            "Be helpful, accurate, and concise. Maintain user privacy. Avoid speculation."
-        )
+    def __init__(self):
+        self.default_system_prompt = SYSTEM_PROMPT
 
     def build_payload(
         self,
-        context: list[dict],
-        new_message: dict,
+        context: List[Dict],
+        new_message: Dict,
+        rag_chunks: Optional[List[RagChunk]] = None,
         *,
         temperature: float = 0.7,
         top_p: float = 0.95,
         presence_penalty: float = 0.0,
         frequency_penalty: float = 0.0,
         max_tokens: int = 1024,
-    ) -> dict:
+    ) -> Dict:
         """
         Constructs the final payload for the LLM server, including:
-        - system prompt
-        - initial user intent (if present)
-        - trimmed conversation window
-        - the new message
-        - generation config
+        1. System prompt
+        2. Optional: RAG context (formatted)
+        3. Optional: Initial user intent (first user message)
+        4. Context window (trimmed to fit)
+        5. Current user message
         """
-        messages = []
+        messages: List[Dict] = []
 
         # 1. System prompt
-        messages.append({
-            "role": "system",
-            "content": self.default_system_prompt
-        })
+        messages.append({"role": "system", "content": self.default_system_prompt})
 
-        # 2. Highlight initial user intent
-        if context:
-            first_user = next((m for m in context if m["role"] == "user"), None)
-            if first_user:
-                messages.append({
-                    "role": "user",
-                    "content": f"(initial intent) {first_user['content']}"
-                })
+        # 2. Inject RAG context if present
+        if rag_chunks:
+            messages.append({
+                "role": "system",
+                "content": "You may use the following internal documents to answer. **Do not copy them verbatim.**\n\n" + format_chunks_grouped(rag_chunks),
+            })
 
-        # 3. Context window
-        trimmed = context[-CONTEXT_WINDOW_SIZE:]
-        messages.extend(trimmed)
+        # 3. Highlight initial user intent (optional)
+        first_user = next((m for m in context if m["role"] == "user"), None)
+        if first_user:
+            messages.append({
+                "role": "user",
+                "content": f"(initial intent) {first_user['content']}"
+            })
 
-        # 4. Current input
+        # 4. Context window trimming
+        trimmed_context = context[-CONTEXT_WINDOW_SIZE:]
+        messages.extend(trimmed_context)
+
+        # 5. Append new user message
         messages.append(new_message)
 
-        # 5. Final payload
+        # Final payload
         return {
             "messages": messages,
-            "stream": True,  # Always stream for OpenAI-compatible LLMs
+            "stream": True,
             "temperature": temperature,
             "top_p": top_p,
             "presence_penalty": presence_penalty,

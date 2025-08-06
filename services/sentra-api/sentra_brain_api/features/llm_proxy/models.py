@@ -11,7 +11,7 @@ class ChatMessage(BaseModel):
 
 
 class ChatCompletionRequest(BaseModel):
-    model: str = Field(..., description="ID of the model to use")
+    model: Optional[str] = Field(None, description="ID of the model to use")
     messages: List[ChatMessage] = Field(..., min_length=1, description="A list of messages comprising the conversation so far")
     stream: Optional[bool] = Field(False, description="Whether to stream back partial progress")
     temperature: Optional[float] = Field(1.0, ge=0.0, le=2.0, description="Sampling temperature")
@@ -37,7 +37,7 @@ class ChatCompletionResponse(BaseModel):
     id: str = Field(..., description="A unique identifier for the chat completion")
     object: Literal["chat.completion"] = Field("chat.completion", description="The object type")
     created: int = Field(..., description="The Unix timestamp when the completion was created")
-    model: str = Field(..., description="The model used for the completion")
+    model: Optional[str] = Field(..., description="The model used for the completion")
     choices: List[ChatCompletionChoice] = Field(..., description="A list of completion choices")
     usage: ChatCompletionUsage = Field(..., description="Usage statistics for the completion request")
 

@@ -2,6 +2,7 @@
 
 from datetime import datetime, timezone
 import uuid
+from annotated_types import doc
 from sqlalchemy.orm import Session
 from sentra_core.core.logging import get_logger
 from sentra_core.domain.entities.conversation_entity import ConversationEntity
@@ -63,7 +64,9 @@ class ConversationApiService:
         return entity_to_creation_response(conversation)
     
     async def generate_llm_title_for_conversation(self, user: UserEntity, conversation_id: str) -> UpdateConversationResponse:
-        conversation = self.service.get_conversation(conversation_id, user.id)
+        doc = self.service.get_conversation(conversation_id, str(user.id))
+        conversation = mongo_doc_to_response(doc)
+        
         if not conversation.initial_prompt:
             raise ValueError("Cannot generate LLM title: missing initial prompt")
 
@@ -73,7 +76,7 @@ class ConversationApiService:
             conversation.title = title
 
         return UpdateConversationResponse(
-            id=conversation.id,
+            conversation_id=conversation_id,
             title=conversation.title,
             description=conversation.description
         )

@@ -70,7 +70,6 @@ class TitleGenerationService:
         user_prompt = f"Message: {user_message}"
 
         request = ChatCompletionRequest(
-            model="sentra-brain",
             messages=[
                 ChatMessage(role="system", content=system_prompt),
                 ChatMessage(role="user", content=user_prompt),

@@ -14,3 +14,12 @@ class VLLMClient:
                     raise RuntimeError(f"LLM error {response.status_code}: {body.decode(errors='replace')}")
                 async for line in response.aiter_lines():
                     yield line
+
+    async def healthcheck(self) -> bool:
+        url = f"{self.base_url}/v1/models"
+        try:
+            async with httpx.AsyncClient(timeout=5) as client:
+                response = await client.get(url)
+                return response.status_code == 200
+        except Exception as e:
+            return False

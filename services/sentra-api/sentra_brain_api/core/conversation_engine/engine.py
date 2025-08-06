@@ -8,8 +8,10 @@ import uuid
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
 from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
 from sentra_brain_api.core.conversation_engine.prompt_factory import PromptFactory
+from sentra_brain_api.core.conversation_engine.rag.rag_formatting import format_chunks_grouped
 from sentra_brain_api.core.conversation_engine.vllm_client import VLLMClient
 from sentra_brain_api.core.conversation_engine.conversations_cache import ConversationsCache
+from sentra_brain_api.core.conversation_engine.rag.rag_client import RagClient
 from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE, USER_CONVERSATION_CACHE_SIZE
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_core.infra.nosql.mongo_conversation_repository import get_conversation_mongo_repository
@@ -18,10 +20,11 @@ logger = logging.getLogger("sentra_brain_engine")
 
 
 class ConversationEngine:
-    def __init__(self, mongo_repo=None, vllm_client=None):
+    def __init__(self, mongo_repo=None, vllm_client=None, rag_client: RagClient=None):
         from sentra_core.core.settings import settings
         self.mongo_repo = mongo_repo or get_conversation_mongo_repository()
         self.vllm_client = vllm_client or VLLMClient(base_url=settings.vllm_server_url)
+        self.rag_client = rag_client or RagClient()
         self.prompt_factory = PromptFactory()
         self.cache = ConversationsCache(
             capacity=USER_CONVERSATION_CACHE_SIZE,
@@ -33,14 +36,25 @@ class ConversationEngine:
 
         now = datetime.now(timezone.utc).isoformat()
 
+        if request.context_source_ids or request.context_document_ids:
+            yield ConversationDelta(content="💡 Searching in the Knowledge Base... \\r\\n", final=False)
+
+        rag_chunks = await self.rag_client.retrieve_relevant_chunks(
+            query=request.content,
+            source_ids=request.context_source_ids,
+            document_ids=request.context_document_ids
+        )
+        
         context = await self._load_context(request.user_id, request.conversation_id)
+
         user_msg = self._make_message("user", request.content, now, message_id=request.message_id)
         await self._persist_user_message(request, user_msg)
 
 
         payload = self.prompt_factory.build_payload(
             context=context,
-            new_message=user_msg
+            new_message=user_msg,
+            rag_chunks=rag_chunks            
         )
 
         buffer = ""

@@ -14,13 +14,16 @@ export default function MessageBubble({ role, content }: Props) {
 
   return (
     <div
-      className={`rounded-xl px-4 py-3 max-w-[768px] ${
+      className={`rounded-xl px-4 py-3 max-w-[768px] prose dark:prose-invert max-w-none ${
         isUser
-          ? 'bg-[var(--sentra-primary-light)] self-end text-right'
-          : 'bg-[var(--sentra-background-muted)] self-start'
+          ? 'bg-[var(--sentra-primary-dark)] self-end text-right'
+          : 'bg-[var(--sentra-primary-light)] self-start'
       }`}
+      style={{ color: 'var(--color-text-base)' }}
     >
-      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>
+        {content}
+      </ReactMarkdown>
     </div>
   )
 }

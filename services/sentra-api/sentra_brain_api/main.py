@@ -1,4 +1,5 @@
 # main.py
+import asyncio
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,7 +36,21 @@ async def lifespan(app: FastAPI):
     app.state._sentra = AppState(
         conversation_engine=ConversationEngine()
     )
+
+    asyncio.create_task(keep_vllm_alive(app))
+    
     yield
+
+
+async def keep_vllm_alive(app: FastAPI):
+    vllm_client = app.state._sentra.conversation_engine.vllm_client
+    while True:
+        healthy = await vllm_client.healthcheck()
+        if not healthy:
+            logger.warning("⚠️ vLLM backend not responding to healthcheck")
+        else:
+            logger.debug("✅ vLLM healthcheck passed")
+        await asyncio.sleep(300)  # every 5 minutes
 
 def create_app(
         mediator=None,
