@@ -5,6 +5,7 @@ import {
   createConversation,
   selectConversation,
   fetchConversationById,
+  updateConversationTitle,
 } from '@features/conversations/conversationSlice'
 import {
   addMessage,
@@ -98,9 +99,24 @@ export function useChatActions() {
 
     // 🧠 Trigger title generation in background
     if (!currentConversationId) {
-      conversationService.generateLlmTitle(conversationId).catch(err => {
-        console.warn('Failed to trigger title generation', err)
-      })
+      conversationService.generateLlmTitle(conversationId)
+        .then(() => {
+          // Fetch the updated conversation to get the new title
+          conversationService.get(conversationId)
+            .then((updatedConv) => {
+              // Update the conversation title in the Redux store
+              dispatch(updateConversationTitle({ 
+                id: conversationId, 
+                title: updatedConv.title 
+              }))
+            })
+            .catch(err => {
+              console.warn('Failed to fetch updated conversation', err)
+            })
+        })
+        .catch(err => {
+          console.warn('Failed to trigger title generation', err)
+        })
     }
   }
 

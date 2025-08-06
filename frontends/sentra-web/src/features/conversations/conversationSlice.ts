@@ -66,6 +66,12 @@ const conversationSlice = createSlice({
     clearConversation(state) {
       state.currentConversationId = null
     },
+    updateConversationTitle(state, action: PayloadAction<{ id: string; title: string }>) {
+      const conversation = state.conversations.find(conv => conv.id === action.payload.id)
+      if (conversation) {
+        conversation.title = action.payload.title
+      }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -110,5 +116,5 @@ const conversationSlice = createSlice({
   },
 })
 
-export const { selectConversation, clearConversation } = conversationSlice.actions
+export const { selectConversation, clearConversation, updateConversationTitle } = conversationSlice.actions
 export default conversationSlice.reducer
