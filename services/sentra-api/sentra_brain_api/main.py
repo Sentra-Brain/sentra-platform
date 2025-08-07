@@ -33,13 +33,21 @@ logger = logging.get_logger("sentra_brain_api")
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("App startup: initializing resources...")
-    postgres_service.init_db()
     
-    app.state._sentra = AppState(
-        conversation_engine=ConversationEngine()
-    )
-
-    asyncio.create_task(keep_vllm_alive(app))
+    # Skip database initialization during testing
+    if os.getenv("TESTING") != "true":
+        postgres_service.init_db()
+        
+        # Only initialize ConversationEngine for non-test environments
+        app.state._sentra = AppState(
+            conversation_engine=ConversationEngine()
+        )
+        
+        # Skip vLLM healthcheck during testing
+        asyncio.create_task(keep_vllm_alive(app))
+    else:
+        # In test mode, create minimal app state without external dependencies
+        app.state._sentra = AppState(conversation_engine=None)
     
     yield
 
