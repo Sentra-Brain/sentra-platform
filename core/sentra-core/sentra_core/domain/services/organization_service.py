@@ -1,0 +1,18 @@
+from sqlalchemy.orm import Session
+from sentra_core.domain.entities.organization_entity import OrganizationEntity
+from sentra_core.domain.repository.organization_repository import OrganizationRepository
+
+
+class OrganizationService:
+    def __init__(self, db: Session):
+        self.repo = OrganizationRepository(db)
+
+    def get_current_org(self) -> OrganizationEntity:
+        return self.repo.db.query(OrganizationEntity).first()
+
+    def update_current_org(self, update_data: dict) -> OrganizationEntity:
+        org = self.get_current_org()
+        for field, value in update_data.items():
+            setattr(org, field, value)
+        self.repo.update(org)
+        return org
