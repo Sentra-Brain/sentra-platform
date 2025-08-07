@@ -18,6 +18,7 @@ from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
+from sentra_brain_api.features.organization.controller import router as organization_router
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_core.core import logging
@@ -96,6 +97,7 @@ def create_app(
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
+    app.include_router(organization_router, prefix="", tags=["organization"])
 
     # Setup observability (only if not in test mode)
     # if os.getenv("TESTING") != "true":
