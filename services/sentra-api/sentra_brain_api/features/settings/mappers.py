@@ -1,5 +1,9 @@
-from sentra_brain_api.features.admin.settings.schemas import SystemSettingsResponse
+# sentra_brain_api/features/settings/mappers.py
+
+from sentra_brain_api.features.settings.schemas import SystemSettingsResponse, ChatSettingsResponse
 from sentra_core.domain.entities.system_settings import SystemSettingsEntity
+from sentra_core.domain.entities.chat_settings import ChatSettingsEntity
+
 
 def to_system_settings_response(settings: SystemSettingsEntity) -> SystemSettingsResponse:
     return SystemSettingsResponse(
@@ -17,4 +21,16 @@ def to_system_settings_response(settings: SystemSettingsEntity) -> SystemSetting
         cache_expiration_hours=settings.cache_expiration_hours,
         context_limit_chars=settings.context_limit_chars,
         default_timezone=settings.default_timezone
+    )
+
+
+def to_chat_settings_response(settings: ChatSettingsEntity) -> ChatSettingsResponse:
+    return ChatSettingsResponse(
+        id=str(settings.id),
+        max_tokens=settings.max_tokens,
+        temperature=settings.temperature,
+        top_p=settings.top_p,
+        top_k=settings.top_k,
+        system_prompt=settings.system_prompt,
+        stop_sequences=settings.stop_sequences
     )
