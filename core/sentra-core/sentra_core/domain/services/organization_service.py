@@ -12,7 +12,14 @@ class OrganizationService:
 
     def update_current_org(self, update_data: dict) -> OrganizationEntity:
         org = self.get_current_org()
+        if not org:
+            raise ValueError("No organization found. Please create an organization first.")
         for field, value in update_data.items():
             setattr(org, field, value)
         self.repo.update(org)
         return org
+
+    def create_organization(self, org_data: dict) -> OrganizationEntity:
+        """Create a new organization. Used for initial setup."""
+        org = OrganizationEntity(**org_data)
+        return self.repo.create(org)
