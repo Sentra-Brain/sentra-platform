@@ -12,7 +12,8 @@ from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARA
 from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
 from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from sentra_brain_api.features.admin.controller import AdminController
-from sentra_brain_api.features.admin.settings.controller import SettingsController
+from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
+from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.controller import ConversationController
@@ -80,6 +81,7 @@ def create_app(
     auth_controller = AuthController()
     user_controller = UserController()
     admin_controller = AdminController()
+    admin_settings_controller = AdminSettingsController()
     settings_controller = SettingsController()
     public_settings_controller = PublicSettingsController()
     conversation_controller = ConversationController()
@@ -89,7 +91,8 @@ def create_app(
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
-    app.include_router(settings_controller.router, prefix="/admin", tags=["admin"])
+    app.include_router(admin_settings_controller.router, prefix="/admin", tags=["admin"])
+    app.include_router(settings_controller.router, prefix="", tags=["settings"])
     app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
     app.include_router(conversation_controller.router, prefix="/conversations", tags=["conversations"])
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
