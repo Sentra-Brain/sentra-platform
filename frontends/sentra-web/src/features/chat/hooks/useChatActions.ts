@@ -13,6 +13,11 @@ import {
   setStreaming,
   setWaitingForAnswer,
 } from '@features/chat/chatSlice'
+import { 
+  stepStarted, 
+  stepUpdated, 
+  clearSteps 
+} from '@features/chat/stepsSlice'
 import { chatService } from '@features/chat/chatService'
 import { conversationService } from '@features/conversations/conversationService'
 
@@ -30,6 +35,9 @@ export function useChatActions() {
     const trimmed = content.trim()
     if (!trimmed) return
 
+    // Clear any previous steps when starting a new message
+    dispatch(clearSteps())
+    
     dispatch(setStreaming(true))
     dispatch(setWaitingForAnswer(true))
 
@@ -83,6 +91,23 @@ export function useChatActions() {
 
           if (chunk.final) {
             dispatch(setWaitingForAnswer(false))
+          }
+        }
+      },
+      (stepEvent) => {
+        // Handle step events
+        if (stepEvent.type === "step_start" && stepEvent.step_id && stepEvent.label) {
+          dispatch(stepStarted({
+            stepId: stepEvent.step_id,
+            label: stepEvent.label
+          }))
+        } else if (stepEvent.type === "step_end" || stepEvent.type === "step_error") {
+          if (stepEvent.step_id) {
+            dispatch(stepUpdated({
+              stepId: stepEvent.step_id,
+              status: stepEvent.type === "step_error" ? "error" : "done",
+              meta: stepEvent.meta
+            }))
           }
         }
       },

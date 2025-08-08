@@ -17,13 +17,25 @@ type StreamedMessage = {
   final: boolean;
 };
 
+type ConversationEvent = {
+  type: "message_delta" | "message_final" | "step_start" | "step_progress" | "step_end" | "step_error";
+  step_id?: string;
+  label?: string;
+  status?: string;
+  content?: string;
+  meta?: any;
+  timestamp?: string;
+};
+
 type OnMessageCallback = (chunk: StreamedMessage) => void;
+type OnStepCallback = (event: ConversationEvent) => void;
 type OnErrorCallback = (error: Error) => void;
 
 export const chatService = {
   sendMessageStream(
     payload: ChatSendPayload,
     onMessage: OnMessageCallback,
+    onStep?: OnStepCallback,
     onError?: OnErrorCallback
   ): () => void {
     const token = tokenStorage.getAccessToken();
@@ -67,10 +79,20 @@ export const chatService = {
             if (!json) continue;
 
             try {
-              const parsed: StreamedMessage = JSON.parse(json);
-              onMessage(parsed);
-              if (parsed.final) {
-                // Stream can close naturally
+              const parsed: ConversationEvent = JSON.parse(json);
+              
+              // Route events based on type
+              if (parsed.type === "message_delta" || parsed.type === "message_final") {
+                // Convert to legacy format for message handling
+                const messageEvent: StreamedMessage = {
+                  role: "assistant",
+                  content: parsed.content || "",
+                  final: parsed.type === "message_final"
+                };
+                onMessage(messageEvent);
+              } else if (parsed.type.startsWith("step_") && onStep) {
+                // Handle step events
+                onStep(parsed);
               }
             } catch (err) {
               console.error("Failed to parse JSON chunk:", json, err);
