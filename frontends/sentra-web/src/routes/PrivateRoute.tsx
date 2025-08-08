@@ -2,6 +2,7 @@ import { Navigate, Outlet } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import type { RootState } from '../store'
 import Layout from '../layout/Layout'
+import ConversationsInitializer from '@features/conversations/ConversationsInitializer'
 
 export default function PrivateRoute() {
   const isAuthenticated = useSelector((state: RootState) => !!state.auth.token)
@@ -13,6 +14,7 @@ export default function PrivateRoute() {
 
   return isAuthenticated ? (
     <Layout>
+      <ConversationsInitializer />
       <Outlet />
     </Layout>
   ) : (
