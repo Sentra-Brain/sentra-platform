@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import uuid
 
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
-from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
+from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta, ConversationEvent
 from sentra_brain_api.core.conversation_engine.prompt_factory import PromptFactory
 from sentra_brain_api.core.conversation_engine.rag.rag_formatting import format_chunks_grouped
 from sentra_brain_api.core.conversation_engine.vllm_client import VLLMClient
@@ -31,19 +31,36 @@ class ConversationEngine:
             on_evict=self._on_cache_evict
         )
 
-    async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationDelta, None]:
+    async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationEvent, None]:
         logger.info(f"[Engine] Starting run: user={request.user_id}, conversation={request.conversation_id}")
 
         now = datetime.now(timezone.utc).isoformat()
 
         if request.context_source_ids or request.context_document_ids:
-            yield ConversationDelta(content="💡 Searching in the Knowledge Base... \\r\\n", final=False)
+            # Emit step_start event for RAG search
+            yield ConversationEvent(
+                type="step_start",
+                step_id="rag_search",
+                label="Searching knowledge base",
+                status="running"
+            )
 
         rag_chunks = await self.rag_client.retrieve_relevant_chunks(
             query=request.content,
             source_ids=request.context_source_ids,
             document_ids=request.context_document_ids
         )
+        
+        if request.context_source_ids or request.context_document_ids:
+            # Emit step_end event for RAG search
+            num_chunks = len(rag_chunks) if rag_chunks else 0
+            yield ConversationEvent(
+                type="step_end",
+                step_id="rag_search",
+                label="Searching knowledge base",
+                status="done",
+                meta={"num_chunks": num_chunks}
+            )
         
         context = await self._load_context(request.user_id, request.conversation_id)
 
@@ -60,11 +77,18 @@ class ConversationEngine:
         buffer = ""
         async for delta in self._vllm_stream(payload):
             buffer += delta
-            yield ConversationDelta(content=delta)
+            # Wrap LLM tokens in message_delta events
+            yield ConversationEvent(
+                type="message_delta",
+                content=delta
+            )
 
         if not buffer.strip():
             logger.warning(f"No LLM response for user={request.user_id} conv={request.conversation_id}")
-            yield ConversationDelta(content="(No response)", final=True)
+            yield ConversationEvent(
+                type="message_final",
+                content="(No response)"
+            )
             return
 
         assistant_msg = self._make_message("assistant", buffer, now, message_id=request.response_message_id)
@@ -73,7 +97,11 @@ class ConversationEngine:
         context.append(assistant_msg)
         self.cache.put(request.user_id, request.conversation_id, context[-CONTEXT_WINDOW_SIZE:])
 
-        yield ConversationDelta(content="", final=True)
+        # Wrap final assistant output in message_final event
+        yield ConversationEvent(
+            type="message_final",
+            content=buffer
+        )
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
 
     async def _vllm_stream(self, payload: dict):
