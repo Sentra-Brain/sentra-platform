@@ -17,13 +17,25 @@ type StreamedMessage = {
   final: boolean;
 };
 
+type ConversationEvent = {
+  type: "message_delta" | "message_final" | "step_start" | "step_progress" | "step_end" | "step_error";
+  step_id?: string;
+  label?: string;
+  status?: string;
+  content?: string;
+  meta?: any;
+  timestamp?: string;
+};
+
 type OnMessageCallback = (chunk: StreamedMessage) => void;
+type OnStepCallback = (event: ConversationEvent) => void;
 type OnErrorCallback = (error: Error) => void;
 
 export const chatService = {
   sendMessageStream(
     payload: ChatSendPayload,
     onMessage: OnMessageCallback,
+    onStep?: OnStepCallback,
     onError?: OnErrorCallback
   ): () => void {
     const token = tokenStorage.getAccessToken();
@@ -67,13 +79,31 @@ export const chatService = {
             if (!json) continue;
 
             try {
-              const parsed: StreamedMessage = JSON.parse(json);
-              onMessage(parsed);
-              if (parsed.final) {
-                // Stream can close naturally
+              const event: ConversationEvent = JSON.parse(json);
+              
+              // Route message_* events to existing chat message logic
+              if (event.type === "message_delta" || event.type === "message_final") {
+                const messageEvent: StreamedMessage = {
+                  role: "assistant",
+                  content: event.content || "",
+                  final: event.type === "message_final"
+                };
+                onMessage(messageEvent);
+              }
+              
+              // Route step_* events to steps callback
+              if ((event.type === "step_start" || event.type === "step_progress" || 
+                   event.type === "step_end" || event.type === "step_error") && onStep) {
+                onStep(event);
               }
             } catch (err) {
-              console.error("Failed to parse JSON chunk:", json, err);
+              // Fallback: try to parse as old StreamedMessage format for backward compatibility
+              try {
+                const parsed: StreamedMessage = JSON.parse(json);
+                onMessage(parsed);
+              } catch (fallbackErr) {
+                console.error("Failed to parse JSON chunk:", json, err);
+              }
             }
           }
         }
