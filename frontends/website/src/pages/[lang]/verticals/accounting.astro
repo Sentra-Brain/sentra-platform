@@ -1,0 +1,56 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getLocalizedPaths } from "../../../utils/localization.ts";
+import { t, defaultLocale, type Locale } from "../../../i18n.ts";
+
+export const getStaticPaths = getLocalizedPaths;
+
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+
+<BaseLayout lang={locale} title={t(locale, "verticals.accounting.title")}>
+  <section class="py-12 text-[var(--sentra-text)]">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <h1 class="text-3xl md:text-5xl font-bold mb-6">
+        {t(locale, "verticals.accounting.title")}
+      </h1>
+      <p class="text-lg mb-10">
+        {t(locale, "verticals.accounting.intro")}
+      </p>
+
+      <div class="grid gap-6 md:grid-cols-2">
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">{t(locale, "verticals.accounting.challenges.title")}</h2>
+          <ul class="list-disc ml-5 space-y-2">
+            <li>{t(locale, "verticals.accounting.challenges.tax")}</li>
+            <li>{t(locale, "verticals.accounting.challenges.payroll")}</li>
+            <li>{t(locale, "verticals.accounting.challenges.forms")}</li>
+            <li>{t(locale, "verticals.accounting.challenges.confidential")}</li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">{t(locale, "verticals.accounting.solutions.title")}</h2>
+          <ul class="list-disc ml-5 space-y-2">
+            <li>{t(locale, "verticals.accounting.solutions.doc_processing")}</li>
+            <li>{t(locale, "verticals.accounting.solutions.form_filling")}</li>
+            <li>{t(locale, "verticals.accounting.solutions.reg_updates")}</li>
+            <li>{t(locale, "verticals.accounting.solutions.audit_ready")}</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="mt-10 bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+        <h2 class="text-xl font-semibold mb-3">{t(locale, "verticals.accounting.security.title")}</h2>
+        <p>{t(locale, "verticals.accounting.security.text")}</p>
+      </div>
+
+      <div class="text-center mt-10">
+        <a href={`/${lang}/pilot`} class="inline-block px-8 py-4 rounded-xl font-semibold bg-[var(--sentra-accent)] text-[var(--sentra-primary)] hover:bg-[var(--sentra-accent-light)] transition">
+          {t(locale, "verticals.accounting.cta")}
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,54 @@
+---
+import BaseLayout from "../../../layouts/BaseLayout.astro";
+import { getLocalizedPaths } from "../../../utils/localization.ts";
+import { t, defaultLocale, type Locale } from "../../../i18n.ts";
+export const getStaticPaths = getLocalizedPaths;
+
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+<BaseLayout lang={locale} title={t(locale, "docs.quickstart.title")}>
+  <section class="py-12 text-[var(--sentra-text)]">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <h1 class="text-3xl md:text-5xl font-bold mb-6">
+        {t(locale, "docs.quickstart.title")}
+      </h1>
+      <p class="text-lg mb-10">
+        {t(locale, "docs.quickstart.subtitle")}
+      </p>
+
+      <div class="space-y-6">
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Prerequisites</h2>
+          <p>{t(locale, "docs.quickstart.steps.prereq")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">1. Clone and Configure</h2>
+          <p>{t(locale, "docs.quickstart.steps.clone")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">2. Start Services</h2>
+          <p>{t(locale, "docs.quickstart.steps.compose")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">3. Access UI</h2>
+          <p>{t(locale, "docs.quickstart.steps.login")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">GPU Requirements</h2>
+          <p>{t(locale, "docs.quickstart.steps.notes")}</p>
+        </div>
+      </div>
+
+      <div class="text-center mt-10">
+        <a href={`/${lang}/pilot`} class="inline-block px-8 py-4 rounded-xl font-semibold bg-[var(--sentra-accent)] text-[var(--sentra-primary)] hover:bg-[var(--sentra-accent-light)] transition">
+          Need Help? Apply for Pilot Program
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

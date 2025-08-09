@@ -3,7 +3,9 @@
     "about": "What is Sentra Brain",
     "architecture": "Technical Architecture",
     "use_cases": "Use Cases",
-    "contact": "Contact"
+    "contact": "Contact",
+    "security": "Security",
+    "pilot": "Pilot Program"
   },
   "footer": {
     "rights": "All rights reserved.",
@@ -21,7 +23,9 @@
     "title_top": "Your Data. Your Rules.",
     "title_bottom": "Your AI",
     "subtitle": "Deploy your own AI platform, fully private and modular. Your data stays in your hands — your models, your knowledge, your infrastructure. No external servers, no hidden costs.",
-    "cta": "Request Your Personalized Demo"
+    "cta": "Request Your Personalized Demo",
+    "subtitle2": "Deploy your private AI platform on your servers in under an hour. Modular LLM, RAG and agentic automations. Zero data leaves your network.",
+    "cta2": "Book a Private Demo"
   },
   "about": {
     "hero": {
@@ -56,6 +60,10 @@
     "hero": {
       "title": "Modular Architecture",
       "subtitle": "Sentra Brain combines LLM serving, secure integrations, document search, automations, and full control in one system."
+    },
+    "callout": {
+      "title": "Data stays inside your perimeter.",
+      "text": "Sentra runs on your hardware. No external servers. Encryption in transit and at rest, RBAC and audit logging built-in."
     },
     "blocks": {
       "llm": {
@@ -119,6 +127,11 @@
         "icon": "🌐",
         "title": "Any Professional Environment",
         "text": "SentraBrain adapts to your company's needs. Contact us to explore how we can help."
+      },
+      "accounting": {
+        "icon": "📊",
+        "title": "Accounting & Administrative Services",
+        "text": "Handle sensitive client financial data, tax filings, and compliance paperwork with private AI automation."
       }
     }
   },
@@ -236,6 +249,87 @@
         "title": "Search Technical Manuals",
         "text": "Quickly search through product manuals, technical guides, and documentation stored locally or in the knowledge base."
       }
+    }
+  },
+  "why_now": {
+    "ai_demand": { "title": "AI demand ↑", "text": "Enterprises need AI that respects data boundaries." },
+    "regulation": { "title": "Regulation ↑", "text": "GDPR and the EU AI Act increase compliance pressure." },
+    "gpu_cost": { "title": "GPU cost ↓", "text": "Falling GPU prices make private, high-performance AI practical." }
+  },
+  "pilot": {
+    "hero": {
+      "title": "Pilot Program (EU)",
+      "subtitle": "A 4–12 week engagement to deploy Sentra on-prem, integrate 1–2 systems, and automate 2–3 high-value workflows."
+    },
+    "includes": {
+      "title": "What's Included",
+      "deploy": "On-prem or hybrid deployment on your GPU server",
+      "integrations": "Secure integrations (CRM/ERP/IDP) via MCP",
+      "automations": "2–3 agentic automations tailored to your process",
+      "security": "Security baseline: RBAC, audit logs, data retention policies"
+    },
+    "ideal": {
+      "title": "Ideal Candidates",
+      "legal": "Legal services needing private document analysis",
+      "finance": "Financial services with strict compliance requirements",
+      "accounting": "Accounting & administrative firms handling sensitive client data",
+      "ops": "Operations teams seeking secure ERP/CRM/HR automation"
+    },
+    "success": {
+      "title": "Pilot Success Criteria",
+      "kpis": "Before/after KPIs (cycle time, accuracy, manual hours saved)",
+      "security": "Security and compliance checks passed",
+      "training": "Team trained; handover completed"
+    },
+    "cta": "Apply for Pilot / Book a Demo"
+  },
+  "security": {
+    "hero": { "title": "Security & Compliance", "subtitle": "How Sentra protects your data inside your network." },
+    "sections": {
+      "data_flow": "Data flow: ingestion → vectorization → inference → automation, all local",
+      "encryption": "Encryption at rest and in transit; secrets in env/VAULT",
+      "isolation": "Model/runtime isolation; no external prompts/calls unless configured",
+      "access": "RBAC, SSO/IDP integration, audit logging",
+      "deploy": "On-prem or hybrid; minimal egress; sizing guidance",
+      "incident": "Incident response and support guidelines"
+    }
+  },
+  "docs": {
+    "quickstart": {
+      "title": "Quickstart: Docker Compose",
+      "subtitle": "Run Sentra on a single GPU server.",
+      "steps": {
+        "prereq": "Prereqs: NVIDIA drivers + Docker + NVIDIA Container Toolkit",
+        "clone": "Clone repo and copy .env.example → .env",
+        "compose": "Run: docker compose up -d",
+        "login": "Access the UI at https://your-host/",
+        "notes": "GPU memory tiers: 16GB (baseline), 24GB (recommended), 48GB+ (heavy workloads)"
+      }
+    }
+  },
+  "verticals": {
+    "accounting": {
+      "title": "Accounting & Administrative Service Firms",
+      "intro": "Accounting and administrative service firms handle sensitive financial and personal data every day—tax filings, payroll, and compliance paperwork. These tasks are repetitive, highly regulated, and cannot be delegated to cloud-based AI without risking client confidentiality. Sentra runs entirely on your infrastructure, bringing automation and AI directly to your office.",
+      "challenges": {
+        "title": "Key Challenges",
+        "tax": "Managing and filing complex tax returns for multiple clients under strict deadlines",
+        "payroll": "Processing payroll while complying with evolving labor laws",
+        "forms": "Handling large volumes of government and compliance forms",
+        "confidential": "Protecting sensitive client financial and personal information"
+      },
+      "solutions": {
+        "title": "Sentra Solutions",
+        "doc_processing": "Automated document ingestion and data extraction from invoices, receipts, and contracts",
+        "form_filling": "Pre-filling tax, compliance, and payroll forms for human review",
+        "reg_updates": "Summarizing and applying regulatory updates to internal processes",
+        "audit_ready": "Maintaining audit-ready logs and compliance documentation automatically"
+      },
+      "security": {
+        "title": "Security First",
+        "text": "Sentra operates on-premises, ensuring all client data stays within your office network. No information is sent to external servers or third-party AI providers unless explicitly configured."
+      },
+      "cta": "Apply for Pilot"
     }
   }
 }
