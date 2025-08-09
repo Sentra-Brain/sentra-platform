@@ -13,7 +13,9 @@
     "terms": "Terms of Service",
     "imprint": "Imprint",
     "ctaText": "Looking for a private AI solution for your company?",
-    "ctaButton": "Get in Touch"
+    "ctaButton": "Get in Touch",
+    "pilotButton": "Join Pilot",
+    "contactButton": "Contact"
   },
   "home": {
     "title": "Your Data. Your AI. Your Rules.",
@@ -143,10 +145,10 @@
   "contact": {
     "hero": {
       "title": "Get in touch",
-      "subtitle": "We'll help you plan, size, and deploy your private AI platform."
+      "subtitle": "I will help you plan, size, and deploy your private AI platform."
     },
     "emailText": "You can contact us directly by email:",
-    "formText": "Or use our contact form here:",
+    "formText": "Or use my contact form here:",
     "formButton": "Open Contact Form",
     "email": {
       "button": "Email us",
@@ -157,7 +159,7 @@
       "number": "+34 670 276 539",
       "href": "https://wa.me/34670276539"
     },
-    "response_time": "Average response within 1 business day."
+    "response_time": "I will reply within one business day."
   },
   "law_firms": {
     "features": {
@@ -267,9 +269,18 @@
     }
   },
   "why_now": {
-    "ai_demand": { "title": "AI demand ↑", "text": "Enterprises need AI that respects data boundaries." },
-    "regulation": { "title": "Regulation ↑", "text": "GDPR and the EU AI Act increase compliance pressure." },
-    "gpu_cost": { "title": "GPU cost ↓", "text": "Falling GPU prices make private, high-performance AI practical." }
+    "ai_demand": {
+      "title": "AI demand ↑",
+      "text": "Enterprises need AI that respects data boundaries."
+    },
+    "regulation": {
+      "title": "Regulation ↑",
+      "text": "GDPR and the EU AI Act increase compliance pressure."
+    },
+    "gpu_cost": {
+      "title": "GPU cost ↓",
+      "text": "Falling GPU prices make private, high-performance AI practical."
+    }
   },
   "pilot": {
     "hero": {
@@ -299,7 +310,10 @@
     "cta": "Apply for Pilot / Book a Demo"
   },
   "security": {
-    "hero": { "title": "Security & Compliance", "subtitle": "How Sentra protects your data inside your network." },
+    "hero": {
+      "title": "Security & Compliance",
+      "subtitle": "How Sentra protects your data inside your network."
+    },
     "sections": {
       "data_flow": "Ingestion → vectorization → inference → automations, all local",
       "encryption": "At rest & in transit; secrets in env/Vault",

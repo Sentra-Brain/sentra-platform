@@ -13,7 +13,9 @@
     "terms": "Términos y Condiciones",
     "imprint": "Aviso Legal",
     "ctaText": "¿Buscas una solución de IA privada para tu empresa?",
-    "ctaButton": "Contactar"
+    "ctaButton": "Contactar",
+    "pilotButton": "Únete al Piloto",
+    "contactButton": "Contactar"
   },
   "home": {
     "title": "Tus datos. Tu IA. Tus reglas.",
@@ -143,10 +145,10 @@
   "contact": {
     "hero": {
       "title": "Hablemos",
-      "subtitle": "Te ayudamos a planificar e instalar tu plataforma de IA privada."
+      "subtitle": "Te ayudo a planificar e instalar tu plataforma de IA privada."
     },
     "emailText": "Puedes contactarnos directamente por correo:",
-    "formText": "O usar nuestro formulario de contacto aquí:",
+    "formText": "O usa mi formulario de contacto aquí:",
     "formButton": "Abrir Formulario",
     "email": {
       "button": "Email",
@@ -157,7 +159,7 @@
       "number": "+34 670 276 539",
       "href": "https://wa.me/34670276539"
     },
-    "response_time": "Respondemos normalmente en 1 día laboral."
+    "response_time": "Respondo normalmente en 1 día laboral."
   },
   "law_firms": {
     "features": {
@@ -267,9 +269,18 @@
     }
   },
   "why_now": {
-    "ai_demand": { "title": "Demanda de IA ↑", "text": "Las empresas necesitan IA que respete los límites de los datos." },
-    "regulation": { "title": "Regulación ↑", "text": "GDPR y la Ley de IA de la UE aumentan la presión de cumplimiento." },
-    "gpu_cost": { "title": "Costo de GPU ↓", "text": "Los precios decrecientes de GPU hacen práctica la IA privada de alto rendimiento." }
+    "ai_demand": {
+      "title": "Demanda de IA ↑",
+      "text": "Las empresas necesitan IA que respete los límites de los datos."
+    },
+    "regulation": {
+      "title": "Regulación ↑",
+      "text": "GDPR y la Ley de IA de la UE aumentan la presión de cumplimiento."
+    },
+    "gpu_cost": {
+      "title": "Costo de GPU ↓",
+      "text": "Los precios decrecientes de GPU hacen práctica la IA privada de alto rendimiento."
+    }
   },
   "pilot": {
     "hero": {
@@ -299,7 +310,10 @@
     "cta": "Aplicar para Piloto / Reservar Demo"
   },
   "security": {
-    "hero": { "title": "Seguridad y Cumplimiento", "subtitle": "Cómo Sentra protege tus datos dentro de tu red." },
+    "hero": {
+      "title": "Seguridad y Cumplimiento",
+      "subtitle": "Cómo Sentra protege tus datos dentro de tu red."
+    },
     "sections": {
       "data_flow": "Ingesta → vectorización → inferencia → automatizaciones, todo local",
       "encryption": "En reposo y en tránsito; secretos en env/Vault",
@@ -323,7 +337,7 @@
   },
   "verticals": {
     "accounting": {
-      "title": "Firmas de Contabilidad y Servicios Administrativos",
+      "title": "Asesorías y Gestorías",
       "intro": "Las firmas de contabilidad y servicios administrativos manejan datos financieros y personales sensibles todos los días: declaraciones de impuestos, nóminas y documentación de cumplimiento. Estas tareas son repetitivas, altamente reguladas y no pueden delegarse a IA basada en la nube sin arriesgar la confidencialidad del cliente. Sentra funciona completamente en tu infraestructura, llevando automatización e IA directamente a tu oficina.",
       "challenges": {
         "title": "Desafíos Clave",

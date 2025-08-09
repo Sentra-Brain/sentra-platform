@@ -1,5 +1,6 @@
 ---
 import BaseLayout from "../../../layouts/BaseLayout.astro";
+import FeatureBox from "../../../components/FeatureBox.astro";
 import { getLocalizedPaths } from "../../../utils/localization.ts";
 import { t, defaultLocale, type Locale } from "../../../i18n.ts";
 
@@ -11,7 +12,7 @@ const locale = lang as Locale;
 
 <BaseLayout lang={locale} title={t(locale, "verticals.accounting.title")}>
   <section class="py-12 text-[var(--sentra-text)]">
-    <div class="container mx-auto px-4 max-w-4xl">
+    <div class="container mx-auto px-4 max-w-6xl">
       <h1 class="text-3xl md:text-5xl font-bold mb-6">
         {t(locale, "verticals.accounting.title")}
       </h1>
@@ -19,31 +20,64 @@ const locale = lang as Locale;
         {t(locale, "verticals.accounting.intro")}
       </p>
 
-      <div class="grid gap-6 md:grid-cols-2">
-        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
-          <h2 class="text-xl font-semibold mb-3">{t(locale, "verticals.accounting.challenges.title")}</h2>
-          <ul class="list-disc ml-5 space-y-2">
-            <li>{t(locale, "verticals.accounting.challenges.tax")}</li>
-            <li>{t(locale, "verticals.accounting.challenges.payroll")}</li>
-            <li>{t(locale, "verticals.accounting.challenges.forms")}</li>
-            <li>{t(locale, "verticals.accounting.challenges.confidential")}</li>
-          </ul>
-        </div>
-
-        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
-          <h2 class="text-xl font-semibold mb-3">{t(locale, "verticals.accounting.solutions.title")}</h2>
-          <ul class="list-disc ml-5 space-y-2">
-            <li>{t(locale, "verticals.accounting.solutions.doc_processing")}</li>
-            <li>{t(locale, "verticals.accounting.solutions.form_filling")}</li>
-            <li>{t(locale, "verticals.accounting.solutions.reg_updates")}</li>
-            <li>{t(locale, "verticals.accounting.solutions.audit_ready")}</li>
-          </ul>
-        </div>
+      <!-- Challenges Section -->
+      <h2 class="text-2xl font-bold mb-6">{t(locale, "verticals.accounting.challenges.title")}</h2>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+        <FeatureBox
+          icon="💰"
+          title="Complex Tax Management"
+          desc={t(locale, "verticals.accounting.challenges.tax")}
+        />
+        <FeatureBox
+          icon="📋"
+          title="Payroll Processing"
+          desc={t(locale, "verticals.accounting.challenges.payroll")}
+        />
+        <FeatureBox
+          icon="📄"
+          title="Government Forms"
+          desc={t(locale, "verticals.accounting.challenges.forms")}
+        />
+        <FeatureBox
+          icon="🔒"
+          title="Client Confidentiality"
+          desc={t(locale, "verticals.accounting.challenges.confidential")}
+        />
       </div>
 
-      <div class="mt-10 bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
-        <h2 class="text-xl font-semibold mb-3">{t(locale, "verticals.accounting.security.title")}</h2>
-        <p>{t(locale, "verticals.accounting.security.text")}</p>
+      <!-- Solutions Section -->
+      <h2 class="text-2xl font-bold mb-6">{t(locale, "verticals.accounting.solutions.title")}</h2>
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
+        <FeatureBox
+          icon="📄"
+          title="Document Processing"
+          desc={t(locale, "verticals.accounting.solutions.doc_processing")}
+        />
+        <FeatureBox
+          icon="✏️"
+          title="Form Pre-filling"
+          desc={t(locale, "verticals.accounting.solutions.form_filling")}
+        />
+        <FeatureBox
+          icon="📢"
+          title="Regulatory Updates"
+          desc={t(locale, "verticals.accounting.solutions.reg_updates")}
+        />
+        <FeatureBox
+          icon="📊"
+          title="Audit Documentation"
+          desc={t(locale, "verticals.accounting.solutions.audit_ready")}
+        />
+      </div>
+
+      <!-- Security Section -->
+      <h2 class="text-2xl font-bold mb-6">{t(locale, "verticals.accounting.security.title")}</h2>
+      <div class="grid gap-6 md:grid-cols-1 mb-12">
+        <FeatureBox
+          icon="🛡️"
+          title={t(locale, "verticals.accounting.security.title")}
+          desc={t(locale, "verticals.accounting.security.text")}
+        />
       </div>
 
       <div class="text-center mt-10">
