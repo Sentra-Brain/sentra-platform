@@ -36,7 +36,7 @@
       "pillar1": {
         "icon": "🔒",
         "title": "Privacidad Total",
-        "text": "Local o híbrido. Los datos permanecen locales."
+        "text": "Local o híbrido. Los datos no salen de tu perímetro."
       },
       "pillar2": {
         "icon": "🔧",
@@ -50,7 +50,7 @@
       }
     },
     "why_now": {
-      "text": "Regulación + protección de IP + costes = IA privada por defecto."
+      "text": "Regulación + Propiuedad Intelectual + costes = IA privada por defecto."
     },
     "motto": "Tu IA. Tus reglas.",
     "cta": "Solicita una Demo"
@@ -106,7 +106,7 @@
       "accounting": {
         "icon": "📊",
         "title": "Gestorías y Asesorías",
-        "text": "Automatiza impuestos, resúmenes contables y trámites con IA privada."
+        "text": "Automatiza impuestos, gestión contable y trámites burocráticos con IA privada."
       },
       "law-firms": {
         "icon": "⚖️",
