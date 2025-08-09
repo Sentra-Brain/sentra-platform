@@ -29,31 +29,30 @@
   },
   "about": {
     "hero": {
-      "title": "Your AI, your rules",
-      "subtitle": "Sentra Brain is the private AI server that puts control back in your hands."
+      "title": "Your AI, inside your business",
+      "subtitle": "Sentra Brain is a private AI server you install on your network—no data leaves your perimeter, no hidden fees. Your Data. Your Rules. Your AI."
     },
-    "problem": {
-      "title": "The Problem",
-      "text": "Using cloud-based AI means giving away your data, intellectual property, and exposing your clients. Regulations like GDPR, HIPAA, or ISO27001 are clear: your data must remain under control."
-    },
-    "solution": {
-      "title": "The Solution",
-      "text": "With Sentra Brain, install your own local or hybrid AI server, customizable and fully private. No external dependencies, no hidden fees."
-    },
-    "benefits": {
-      "benefit1": {
+    "pillars": {
+      "pillar1": {
+        "icon": "🔒",
         "title": "Total Privacy",
-        "text": "Your AI runs within your network. Fully compliant with GDPR, HIPAA and more."
+        "text": "On-prem or hybrid. Data stays local."
       },
-      "benefit2": {
+      "pillar2": {
+        "icon": "🔧",
         "title": "Flexible Integration",
-        "text": "Connect with CRM, ERP, n8n and your custom workflows."
+        "text": "CRM/ERP, Office plugins, MCP."
       },
-      "benefit3": {
+      "pillar3": {
+        "icon": "🚀",
         "title": "No Limits",
-        "text": "Local models, no restricted tokens or pay-per-use costs."
+        "text": "Local models, predictable cost."
       }
     },
+    "why_now": {
+      "text": "Regulatory pressure (GDPR/HIPAA/ISO27001) + IP protection + lowering infra costs make private AI the default choice."
+    },
+    "motto": "Your AI. Your rules.",
     "cta": "Request a Demo"
   },
   "architecture": {
@@ -67,26 +66,32 @@
     },
     "blocks": {
       "llm": {
+        "icon": "🖥️",
         "title": "LLM Serving Engine",
         "text": "Run large language models locally or hybrid. Compatible with private GPT, Qwen, Llama and many more."
       },
       "mcp": {
+        "icon": "🧩",
         "title": "MCP Integration",
         "text": "Secure API layer for CRM, ERP, Office plugins and internal systems."
       },
       "rag": {
+        "icon": "🔍",
         "title": "Document Search (RAG)",
         "text": "Connect your knowledge base with private document search powered by RAG technology."
       },
       "automation": {
+        "icon": "⚙️",
         "title": "Custom Automations",
         "text": "Integrate workflows and actions using tools like n8n, adapted to your processes."
       },
       "security": {
+        "icon": "🛡️",
         "title": "Enterprise-Grade Security",
         "text": "Deploy on-prem or hybrid. Fully compliant with GDPR, HIPAA, ISO27001."
       },
       "support": {
+        "icon": "💻",
         "title": "Certified Hardware & Support",
         "text": "Official packages with Sentra Brain-certified hardware and professional consulting."
       }
@@ -98,51 +103,61 @@
       "subtitle": "Discover how Sentra Brain adapts to multiple sectors with privacy-first AI."
     },
     "sectors": {
+      "accounting": {
+        "icon": "📊",
+        "title": "Accounting & Administrative Services",
+        "text": "Automate tax filings, ledger summaries, and compliance paperwork with private AI."
+      },
       "law-firms": {
         "icon": "⚖️",
         "title": "Law Firms",
-        "text": "Draft contracts, analyze jurisprudence, automate repetitive legal tasks while ensuring GDPR compliance."
+        "text": "Draft, summarize, and search jurisprudence with full GDPR control."
+      },
+      "industrial-smes": {
+        "icon": "🏭",
+        "title": "Industrial SMEs",
+        "text": "Internal knowledge search and SOP automation with local models."
+      },
+      "healthcare": {
+        "icon": "🩺",
+        "title": "Healthcare",
+        "text": "Clinical knowledge and document workflows on infrastructure you control."
+      },
+      "public-sector": {
+        "icon": "🏛️",
+        "title": "Public Sector",
+        "text": "Vendor-independent AI aligned with national security policies."
       },
       "financial-agencies": {
         "icon": "💼",
         "title": "Financial Agencies",
         "text": "Analyze reports, summarize regulations, and process sensitive data securely with private AI."
       },
-      "industrial-smes": {
-        "icon": "🏭",
-        "title": "Industrial SMEs",
-        "text": "Optimize internal processes, customer support, and documentation with local AI models."
-      },
-      "healthcare": {
-        "icon": "🩺",
-        "title": "Healthcare",
-        "text": "Handle patient records, internal knowledge, and decision support without external dependencies."
-      },
-      "public-sector": {
-        "icon": "🏛️",
-        "title": "Public Sector",
-        "text": "Vendor-independent AI services for public administration, respecting national security policies."
-      },
       "general-business": {
         "icon": "🌐",
         "title": "Any Professional Environment",
-        "text": "SentraBrain adapts to your company's needs. Contact us to explore how we can help."
-      },
-      "accounting": {
-        "icon": "📊",
-        "title": "Accounting & Administrative Services",
-        "text": "Handle sensitive client financial data, tax filings, and compliance paperwork with private AI automation."
+        "text": "Private AI will be a requirement; let Sentra be your platform."
       }
     }
   },
   "contact": {
     "hero": {
-      "title": "Get in Touch",
-      "subtitle": "We’re ready to help you set up your private AI platform. Contact us now."
+      "title": "Get in touch",
+      "subtitle": "We'll help you plan, size, and deploy your private AI platform."
     },
     "emailText": "You can contact us directly by email:",
     "formText": "Or use our contact form here:",
-    "formButton": "Open Contact Form"
+    "formButton": "Open Contact Form",
+    "email": {
+      "button": "Email us",
+      "href": "mailto:juan@jgcarmona.com"
+    },
+    "whatsapp": {
+      "button": "WhatsApp",
+      "number": "+34 670 276 539",
+      "href": "https://wa.me/34670276539"
+    },
+    "response_time": "Average response within 1 business day."
   },
   "law_firms": {
     "features": {
@@ -286,12 +301,11 @@
   "security": {
     "hero": { "title": "Security & Compliance", "subtitle": "How Sentra protects your data inside your network." },
     "sections": {
-      "data_flow": "Data flow: ingestion → vectorization → inference → automation, all local",
-      "encryption": "Encryption at rest and in transit; secrets in env/VAULT",
-      "isolation": "Model/runtime isolation; no external prompts/calls unless configured",
-      "access": "RBAC, SSO/IDP integration, audit logging",
-      "deploy": "On-prem or hybrid; minimal egress; sizing guidance",
-      "incident": "Incident response and support guidelines"
+      "data_flow": "Ingestion → vectorization → inference → automations, all local",
+      "encryption": "At rest & in transit; secrets in env/Vault",
+      "isolation": "Runtime isolation; no external calls unless configured",
+      "access": "RBAC, SSO/IdP, audit logging",
+      "deploy": "On-prem or hybrid; minimal egress; sizing guidance"
     }
   },
   "docs": {

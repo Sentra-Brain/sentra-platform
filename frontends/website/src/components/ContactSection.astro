@@ -17,17 +17,38 @@ const locale = lang as Locale;
 
     <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)] shadow-md border border-[var(--sentra-accent-light)]">
 
-      <p class="mb-4">{t(locale, 'contact.emailText')}</p>
+      <div class="grid md:grid-cols-2 gap-4 mb-6">
+        <!-- Email Button -->
+        <a 
+          href={t(locale, 'contact.email.href')} 
+          class="flex items-center justify-center gap-2 px-6 py-3 bg-[var(--sentra-accent)] text-[var(--sentra-primary)] rounded-lg hover:bg-[var(--sentra-accent-light)] transition font-semibold"
+        >
+          <span>📧</span>
+          {t(locale, 'contact.email.button')}
+        </a>
 
-      <a href="mailto:juan@jgcarmona.com" class="btn-primary block mb-4">
-        juan@jgcarmona.com
-      </a>
+        <!-- WhatsApp Button -->
+        <a 
+          href={t(locale, 'contact.whatsapp.href')} 
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center justify-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold"
+        >
+          <span>💬</span>
+          {t(locale, 'contact.whatsapp.button')} {t(locale, 'contact.whatsapp.number')}
+        </a>
+      </div>
 
-      <p class="mb-2">{t(locale, 'contact.formText')}</p>
+      <p class="text-sm text-[var(--sentra-text-muted)] mb-4">
+        {t(locale, 'contact.response_time')}
+      </p>
 
-      <a href="https://jgcarmona.com/contact" target="_blank" class="btn-secondary">
-        {t(locale, 'contact.formButton')}
-      </a>
+      <div class="border-t border-[var(--sentra-accent-light)] pt-4">
+        <p class="mb-2">{t(locale, 'contact.formText')}</p>
+        <a href="https://jgcarmona.com/contact" target="_blank" class="btn-secondary">
+          {t(locale, 'contact.formButton')}
+        </a>
+      </div>
 
     </div>
 

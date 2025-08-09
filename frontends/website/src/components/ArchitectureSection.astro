@@ -14,34 +14,52 @@ const locale = lang as Locale;
       {t(locale, 'architecture.hero.subtitle')}
     </p>
 
-    <div class="mb-8 bg-[var(--sentra-neutral)] p-4 rounded-xl text-[var(--sentra-primary)] border border-[var(--sentra-accent-light)]">
+    <div class="mb-8 bg-slate-800/40 border border-slate-600 p-4 rounded-xl text-[var(--sentra-text)]">
       <strong>{t(locale, "architecture.callout.title")}</strong>
       <p>{t(locale, "architecture.callout.text")}</p>
     </div>
 
     <div class="grid md:grid-cols-3 gap-8">
-      <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
-        <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.llm.title')}</h3>
+      <div class="bg-slate-800/40 border border-slate-600 p-6 rounded-xl text-[var(--sentra-text)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-slate-900/40 p-2 rounded text-2xl">{t(locale, 'architecture.blocks.llm.icon')}</div>
+          <h3 class="text-xl font-semibold">{t(locale, 'architecture.blocks.llm.title')}</h3>
+        </div>
         <p>{t(locale, 'architecture.blocks.llm.text')}</p>
       </div>
-      <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
-        <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.mcp.title')}</h3>
+      <div class="bg-slate-800/40 border border-slate-600 p-6 rounded-xl text-[var(--sentra-text)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-slate-900/40 p-2 rounded text-2xl">{t(locale, 'architecture.blocks.mcp.icon')}</div>
+          <h3 class="text-xl font-semibold">{t(locale, 'architecture.blocks.mcp.title')}</h3>
+        </div>
         <p>{t(locale, 'architecture.blocks.mcp.text')}</p>
       </div>
-      <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
-        <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.rag.title')}</h3>
+      <div class="bg-slate-800/40 border border-slate-600 p-6 rounded-xl text-[var(--sentra-text)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-slate-900/40 p-2 rounded text-2xl">{t(locale, 'architecture.blocks.rag.icon')}</div>
+          <h3 class="text-xl font-semibold">{t(locale, 'architecture.blocks.rag.title')}</h3>
+        </div>
         <p>{t(locale, 'architecture.blocks.rag.text')}</p>
       </div>
-      <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
-        <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.automation.title')}</h3>
+      <div class="bg-slate-800/40 border border-slate-600 p-6 rounded-xl text-[var(--sentra-text)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-slate-900/40 p-2 rounded text-2xl">{t(locale, 'architecture.blocks.automation.icon')}</div>
+          <h3 class="text-xl font-semibold">{t(locale, 'architecture.blocks.automation.title')}</h3>
+        </div>
         <p>{t(locale, 'architecture.blocks.automation.text')}</p>
       </div>
-      <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
-        <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.security.title')}</h3>
+      <div class="bg-slate-800/40 border border-slate-600 p-6 rounded-xl text-[var(--sentra-text)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-slate-900/40 p-2 rounded text-2xl">{t(locale, 'architecture.blocks.security.icon')}</div>
+          <h3 class="text-xl font-semibold">{t(locale, 'architecture.blocks.security.title')}</h3>
+        </div>
         <p>{t(locale, 'architecture.blocks.security.text')}</p>
       </div>
-      <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
-        <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.support.title')}</h3>
+      <div class="bg-slate-800/40 border border-slate-600 p-6 rounded-xl text-[var(--sentra-text)]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-slate-900/40 p-2 rounded text-2xl">{t(locale, 'architecture.blocks.support.icon')}</div>
+          <h3 class="text-xl font-semibold">{t(locale, 'architecture.blocks.support.title')}</h3>
+        </div>
         <p>{t(locale, 'architecture.blocks.support.text')}</p>
       </div>
     </div>
