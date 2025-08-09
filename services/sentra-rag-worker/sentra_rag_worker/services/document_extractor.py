@@ -1,116 +1,90 @@
 
-from bs4 import BeautifulSoup
-from ebooklib import epub
-from mailparser import parse_from_file
-from sentra_core.core.logging import get_logger
+"""
+Backward compatibility adapter for DocumentExtractor.
+
+This module provides compatibility with the existing DocumentExtractor interface
+while internally using the new extraction strategy pattern.
+"""
+
 from sentra_core.domain.entities.document_entity import DocumentFileType
-import chardet
-import docx2txt
-import extract_msg
+from sentra_core.core.logging import get_logger
+from sentra_rag_worker.services.extraction import get_extractor
+from sentra_rag_worker.services.sanitizer import cast_to_markdown
 import os
-import pymupdf
 
 logger = get_logger(__name__)
 
 
 class DocumentExtractor:
-    """Extract clean text content from various document formats."""
+    """Extract clean text content from various document formats.
+    
+    DEPRECATED: This class is maintained for backward compatibility.
+    New code should use the extraction package directly.
+    """
 
     def extract_content(self, filepath: str, filetype: DocumentFileType) -> str:
+        """Extract text content from a document file.
+        
+        Args:
+            filepath: Path to the document file
+            filetype: Document file type
+            
+        Returns:
+            Extracted text content (plain text, not markdown)
+            
+        Raises:
+            FileNotFoundError: If file doesn't exist
+            ValueError: If extraction fails
+        """
         if not os.path.exists(filepath):
             raise FileNotFoundError(f"File not found: {filepath}")
 
+        logger.warning("DocumentExtractor is deprecated. Use extraction package directly.")
+        
         try:
-            logger.info(f"Extracting content from {filepath} (type: {filetype.value})")
-
-            if filetype in {DocumentFileType.TXT, DocumentFileType.MD}:
-                return self._extract_text_file(filepath)
-            elif filetype == DocumentFileType.PDF:
-                return self._extract_pdf(filepath)
-            elif filetype == DocumentFileType.DOCX:
-                return self._extract_docx(filepath)
-            elif filetype == DocumentFileType.HTML:
-                return self._extract_html(filepath)
-            elif filetype == DocumentFileType.EML:
-                return self._extract_eml(filepath)
-            elif filetype == DocumentFileType.MSG:
-                return self._extract_msg(filepath)
-            elif filetype == DocumentFileType.EPUB:
-                return self._extract_epub(filepath)
-            else:
-                raise ValueError(f"Unsupported file type: {filetype}")
-
+            # Use new extraction strategy
+            extractor = get_extractor(filetype)
+            payload = extractor.extract(filepath)
+            
+            # For backward compatibility, return raw text without markdown casting
+            return payload.raw_text
+            
         except Exception as e:
             logger.error(f"Failed to extract content from {filepath}: {e}")
             raise ValueError(f"Content extraction failed: {str(e)}")
 
+    # Keep all the old private methods to avoid breaking any direct usage
     def _extract_text_file(self, filepath: str) -> str:
-        with open(filepath, 'rb') as f:
-            raw = f.read()
-            result = chardet.detect(raw)
-            encoding = result['encoding'] or 'utf-8'
-
-        with open(filepath, 'r', encoding=encoding, errors='ignore') as f:
-            content = f.read()
-        logger.info(f"Successfully extracted {len(content)} characters from text file")
-        return content.strip()
+        from .extraction.text_extractor import TextExtractor
+        extractor = TextExtractor()
+        return extractor.extract(filepath).raw_text
 
     def _extract_pdf(self, filepath: str) -> str:
-        try:
-            with pymupdf.open(filepath) as doc:
-                text = chr(12).join([page.get_text() for page in doc])
-            logger.info(f"Extracted {len(text)} characters from PDF")
-            return text.strip()
-        except Exception as e:
-            raise ValueError(f"PDF extraction failed: {e}")
+        from .extraction.pdf_extractor import PdfExtractor
+        extractor = PdfExtractor()
+        return extractor.extract(filepath).raw_text
 
     def _extract_docx(self, filepath: str) -> str:
-        try:
-            text = docx2txt.process(filepath)
-            logger.info(f"Extracted {len(text)} characters from DOCX")
-            return text.strip()
-        except Exception as e:
-            raise ValueError(f"DOCX extraction failed: {e}")
+        from .extraction.docx_extractor import DocxExtractor
+        extractor = DocxExtractor()
+        return extractor.extract(filepath).raw_text
 
     def _extract_html(self, filepath: str) -> str:
-        try:
-            with open(filepath, 'r', encoding='utf-8', errors='ignore') as f:
-                soup = BeautifulSoup(f, 'lxml')
-            for tag in soup(['script', 'style']):
-                tag.decompose()
-            text = soup.get_text(separator='\n', strip=True)
-            logger.info(f"Extracted {len(text)} characters from HTML")
-            return text
-        except Exception as e:
-            raise ValueError(f"HTML extraction failed: {e}")
+        from .extraction.html_extractor import HtmlExtractor
+        extractor = HtmlExtractor()
+        return extractor.extract(filepath).raw_text
 
     def _extract_eml(self, filepath: str) -> str:
-        try:
-            mail = parse_from_file(filepath)
-            body = mail.body or ''
-            logger.info(f"Extracted {len(body)} characters from EML")
-            return body.strip()
-        except Exception as e:
-            raise ValueError(f"EML extraction failed: {e}")
+        from .extraction.email_extractor import EmlExtractor
+        extractor = EmlExtractor()
+        return extractor.extract(filepath).raw_text
 
     def _extract_msg(self, filepath: str) -> str:
-        try:
-            msg = extract_msg.Message(filepath)
-            body = msg.body or ''
-            logger.info(f"Extracted {len(body)} characters from MSG")
-            return body.strip()
-        except Exception as e:
-            raise ValueError(f"MSG extraction failed: {e}")
+        from .extraction.email_extractor import MsgExtractor
+        extractor = MsgExtractor()
+        return extractor.extract(filepath).raw_text
 
     def _extract_epub(self, filepath: str) -> str:
-        try:
-            book = epub.read_epub(filepath)
-            text = ""
-            for item in book.get_items():
-                if item.get_type() == epub.EpubHtml :
-                    soup = BeautifulSoup(item.get_content(), 'lxml')
-                    text += soup.get_text(separator='\n', strip=True) + "\n"
-            logger.info(f"Extracted {len(text)} characters from EPUB")
-            return text.strip()
-        except Exception as e:
-            raise ValueError(f"EPUB extraction failed: {e}")
+        from .extraction.epub_extractor import EpubExtractor
+        extractor = EpubExtractor()
+        return extractor.extract(filepath).raw_text

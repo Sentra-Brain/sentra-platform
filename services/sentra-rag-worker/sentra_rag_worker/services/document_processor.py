@@ -2,7 +2,9 @@ from pathlib import Path
 from sentra_core.domain.entities.document_entity import DocumentFileType, DocumentStatus
 from sentra_core.domain.services.file_storage import FileStorageService
 from sentra_rag.embeddings.provider import get_embedding_provider
-from sentra_rag_worker.services.document_extractor import DocumentExtractor
+from sentra_rag_worker.services.extraction import get_extractor
+from sentra_rag_worker.services.sanitizer import cast_to_markdown
+from sentra_rag_worker.services.metadata import extract_metadata
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag.vector_store.service import get_vector_store_service
 from sentra_core.core.logging import get_logger, set_request_id
@@ -20,7 +22,6 @@ class DocumentProcessor:
     """Main orchestrator for document processing pipeline.""" 
 
     def __init__(self):
-        self.extractor = DocumentExtractor()
         self.chunker = TextChunker()
         self.embedding_service = get_embedding_provider()
         self.vector_store = get_vector_store_service()
@@ -81,17 +82,51 @@ class DocumentProcessor:
 
             self._set_status(document_id, DocumentStatus.EXTRACTING, repo=document_repo)
             try:
-                content = self.extractor.extract_content(str(absolute_filepath), filetype)
-                if not content.strip():
+                # Get specialized extractor for this file type
+                extractor = get_extractor(filetype)
+                
+                # Extract content and metadata
+                payload = extractor.extract(str(absolute_filepath))
+                
+                if not payload.raw_text or not payload.raw_text.strip():
                     return self._fail(document_id, "No content extracted", repo=document_repo)
+                
+                logger.info(f"Extracted {len(payload.raw_text)} characters, {payload.word_count} words")
+                
             except Exception as e:
                 return self._fail(document_id, f"Extraction failed: {e}", repo=document_repo)
 
+            self._set_status(document_id, DocumentStatus.PROCESSING, "Casting to markdown", repo=document_repo)
+            try:
+                # Cast extracted content to markdown
+                text_md = cast_to_markdown(
+                    payload.raw_text,
+                    filetype,
+                    pages=payload.pages,
+                    html_blocks=payload.html_blocks,
+                    email_headers=payload.email_headers
+                )
+                
+                if not text_md.strip():
+                    return self._fail(document_id, "Markdown casting produced no content", repo=document_repo)
+                
+                # Extract comprehensive metadata
+                metadata = extract_metadata(payload, text_md, filetype, str(absolute_filepath), filename)
+                
+                logger.info(f"Cast to markdown: {len(text_md)} characters, detected title: {metadata.get('extracted_title')}")
+                
+            except Exception as e:
+                return self._fail(document_id, f"Markdown casting failed: {e}", repo=document_repo)
+
             self._set_status(document_id, DocumentStatus.CHUNKING, repo=document_repo)
             try:
-                chunks = self.chunker.chunk_text(content)
+                # Use adaptive chunking based on document type
+                chunks = self.chunker.chunk_text(text_md, filetype)
                 if not chunks:
                     return self._fail(document_id, "No chunks generated", repo=document_repo)
+                    
+                logger.info(f"Generated {len(chunks)} chunks using adaptive strategy for {filetype.value}")
+                
             except Exception as e:
                 return self._fail(document_id, f"Chunking failed: {e}", repo=document_repo)
 
@@ -118,8 +153,14 @@ class DocumentProcessor:
             except Exception as e:
                 return self._fail(document_id, f"Indexing failed: {e}", repo=document_repo)
 
-            self._set_status(document_id, DocumentStatus.INDEXED, repo=document_repo, chunks_count=len(chunks))
-            logger.info(f"Document {document_id} processed successfully.")
+            self._set_status(
+                document_id, 
+                DocumentStatus.INDEXED, 
+                repo=document_repo, 
+                chunks_count=len(chunks),
+                metadata=metadata
+            )
+            logger.info(f"Document {document_id} processed successfully with {len(chunks)} chunks.")
             return True
 
         except Exception as e:
@@ -134,19 +175,60 @@ class DocumentProcessor:
         status: DocumentStatus, 
         error: Optional[str] = None, 
         chunks_count: Optional[int] = None, 
+        metadata: Optional[Dict[str, Any]] = None,
         repo: Optional[DocumentRepository] = None
     ):
         try:
             if not repo:
                 db = create_db_session()
                 repo = DocumentRepository(db)
-                repo.update_status(document_id, status, error, None, chunks_count)
+                
+                # Enhanced status update with metadata
+                self._update_document_with_metadata(repo, document_id, status, error, chunks_count, metadata)
+                
                 db.close()
             else:
-                repo.update_status(document_id, status, error, None, chunks_count)
+                self._update_document_with_metadata(repo, document_id, status, error, chunks_count, metadata)
+                
             logger.info(f"Status of document {document_id} set to {status.value}")
         except Exception as e:
             logger.error(f"Failed to update document status to {status.value}: {e}")
+
+    def _update_document_with_metadata(
+        self,
+        repo: DocumentRepository,
+        document_id: UUID,
+        status: DocumentStatus,
+        error: Optional[str],
+        chunks_count: Optional[int],
+        metadata: Optional[Dict[str, Any]]
+    ):
+        """Update document with status and enriched metadata."""
+        # For now, use the existing update_status method
+        # In a future enhancement, we could extend the repository to handle metadata
+        status_message = None
+        
+        if metadata and status == DocumentStatus.INDEXED:
+            # Create a summary status message with key metadata
+            extracted_title = metadata.get('extracted_title')
+            word_count = metadata.get('word_count')
+            language = metadata.get('language')
+            page_count = metadata.get('page_count')
+            
+            status_parts = []
+            if extracted_title:
+                status_parts.append(f"title: {extracted_title}")
+            if word_count:
+                status_parts.append(f"{word_count} words")
+            if page_count:
+                status_parts.append(f"{page_count} pages")
+            if language:
+                status_parts.append(f"lang: {language}")
+                
+            if status_parts:
+                status_message = ", ".join(status_parts)
+        
+        repo.update_status(document_id, status, error, status_message, chunks_count)
 
     def _fail(self, document_id: UUID, error: str, repo: DocumentRepository) -> bool:
         logger.error(error)
