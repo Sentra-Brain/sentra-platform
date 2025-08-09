@@ -7,10 +7,25 @@ from sentra_core.core.logging import get_logger
 logger = get_logger("sentra_brain_api.mongo_repository")
 
 class MongoConversationRepository:
+    """
+    Repository for managing conversations in MongoDB.
+
+    All conversation and user IDs are handled as Python UUID objects in the application layer.
+    When storing or querying in MongoDB, these UUIDs are always cast to strings (str(UUID)).
+    This ensures compatibility, readability, and interoperability with other tools and services
+    that may access the database.
+
+    When reading documents from MongoDB, the '_id' and 'user_id' fields will be strings.
+    If your domain or API models require UUIDs, you should convert these fields back to UUID
+    objects at the service or entity layer.
+
+    This approach avoids BSON binary UUID storage and guarantees that all IDs are human-readable
+    and consistent across the stack.
+    """
     def __init__(self):
         self.client = MongoClient(
             settings.mongo_url,
-            uuidRepresentation="standard"  # important for UUID handling
+            uuidRepresentation="standard"  # Use standard UUID representation for compatibility
         )
         self.db = self.client[settings.mongo_database]
         logger.info(f"[Mongo] Connected to database {settings.mongo_database} at {settings.mongo_host}:{settings.mongo_port}")
