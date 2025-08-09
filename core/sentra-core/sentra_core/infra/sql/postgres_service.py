@@ -14,6 +14,7 @@ from sentra_core.infra.sql.migrations_check import check_schema_consistency
 from sentra_core.domain.enums.role import Role
 from sentra_core.domain.repository.user_repository import UserRepository
 from sentra_core.domain.entities.system_settings import SystemSettingsEntity
+from sentra_core.domain.entities.chat_settings import ChatSettingsEntity
 from sentra_core.domain.entities.user_entity import UserEntity
 
 logger = get_logger(__name__)
@@ -91,6 +92,11 @@ def init_db():
             db.add(SystemSettingsEntity(max_users=3))
             db.commit()
             logger.info("[init_db] Default system settings created.")
+
+        if not db.query(ChatSettingsEntity).first():
+            db.add(ChatSettingsEntity())
+            db.commit()
+            logger.info("[init_db] Default chat settings created.")
 
     finally:
         db.close()

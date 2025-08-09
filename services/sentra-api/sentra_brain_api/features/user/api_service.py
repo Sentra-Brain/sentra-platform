@@ -5,8 +5,9 @@ from fastapi import HTTPException, status
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.user.mappers import to_user_model
-from sentra_brain_api.features.user.schemas import SignupResponse, UserModel
+from sentra_brain_api.features.user.schemas import SignupResponse, UserModel, UserProfileUpdate
 from sentra_core.core import logging
+from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_core.domain.services.user_service import UserService
 from sentra_core.infra.notifications.notification_service import NotificationService
 from sqlalchemy.orm import Session
@@ -132,3 +133,20 @@ class UserApiService:
 
     def get_user_display_name(self, user_id: UUID) -> str:
         return self.user_service.get_user_display_name(user_id)
+
+    def update_profile_fields(self, user_id: UUID, update_data: UserProfileUpdate) -> UserEntity:
+        user = self.user_service.user_repo.get(user_id)
+        if not user:
+            raise SentraHTTPException(
+                status_code=404,
+                code="USER_NOT_FOUND",
+                message="User not found",
+                path="/me",
+                suggestion="Ensure your session is valid"
+            )
+
+        for field, value in update_data.model_dump(exclude_unset=True).items():
+            setattr(user, field, value)
+
+        self.user_service.user_repo.update(user)
+        return user

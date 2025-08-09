@@ -1,5 +1,6 @@
 
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 from uuid import UUID
 
 from sentra_core.domain.entities.user_entity import UserEntity
@@ -44,3 +45,31 @@ class SignupResponse(BaseModel):
 
 class UserUpdate(BaseModel):
     password: str | None = None
+
+
+class UserProfileUpdate(BaseModel):
+    full_name: Optional[str] = None
+    job_title: Optional[str] = None
+    avatar_url: Optional[str] = None
+    phone_number: Optional[str] = None
+    bio: Optional[str] = None
+    preferred_language: Optional[str] = None
+    timezone: Optional[str] = None
+
+
+class UserProfileResponse(BaseModel):
+    id: UUID
+    username: str
+    email: str
+    full_name: Optional[str]
+    job_title: Optional[str]
+    avatar_url: Optional[str]
+    phone_number: Optional[str]
+    bio: Optional[str]
+    preferred_language: str
+    timezone: str
+    roles: list[str]
+
+    model_config = {
+        "from_attributes": True
+    }
