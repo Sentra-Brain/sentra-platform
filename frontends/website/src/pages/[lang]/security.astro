@@ -1,0 +1,59 @@
+---
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getLocalizedPaths } from "../../utils/localization.ts";
+import { t, defaultLocale, type Locale } from "../../i18n.ts";
+export const getStaticPaths = getLocalizedPaths;
+
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+<BaseLayout lang={locale} title={t(locale, "security.hero.title")}>
+  <section class="py-12 text-[var(--sentra-text)]">
+    <div class="container mx-auto px-4 max-w-4xl">
+      <h1 class="text-3xl md:text-5xl font-bold mb-6">
+        {t(locale, "security.hero.title")}
+      </h1>
+      <p class="text-lg mb-10">
+        {t(locale, "security.hero.subtitle")}
+      </p>
+
+      <div class="grid gap-6 md:grid-cols-1">
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Data Flow</h2>
+          <p>{t(locale, "security.sections.data_flow")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Encryption</h2>
+          <p>{t(locale, "security.sections.encryption")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Isolation</h2>
+          <p>{t(locale, "security.sections.isolation")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Access Control</h2>
+          <p>{t(locale, "security.sections.access")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Deployment</h2>
+          <p>{t(locale, "security.sections.deploy")}</p>
+        </div>
+
+        <div class="bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] p-6 rounded-xl border border-[var(--sentra-accent-light)]">
+          <h2 class="text-xl font-semibold mb-3">Incident Response</h2>
+          <p>{t(locale, "security.sections.incident")}</p>
+        </div>
+      </div>
+
+      <div class="text-center mt-10">
+        <a href={`/${lang}/contact`} class="inline-block px-8 py-4 rounded-xl font-semibold bg-[var(--sentra-accent)] text-[var(--sentra-primary)] hover:bg-[var(--sentra-accent-light)] transition">
+          Contact Us for More Details
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

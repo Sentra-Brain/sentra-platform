@@ -17,25 +17,28 @@ const locale = lang as Locale;
 
     <div class="grid md:grid-cols-3 gap-8">
       {
-        Object.entries(t(locale, "use_cases.sectors")).map(([key, sector]) => (
-          <a
-            href={`/${lang}/for-${key}`}
-            class="block transition-transform hover:scale-[1.02]"
-            key={key}
-          >
-            <FeatureBox
-              icon={sector.icon}
-              title={sector.title}
-              desc={sector.text}
-            />
-          </a>
-        ))
+        Object.entries(t(locale, "use_cases.sectors")).map(([key, sector]) => {
+          const href = key === 'accounting' ? `/${lang}/verticals/accounting` : `/${lang}/for-${key}`;
+          return (
+            <a
+              href={href}
+              class="block transition-transform hover:scale-[1.02]"
+              key={key}
+            >
+              <FeatureBox
+                icon={sector.icon}
+                title={sector.title}
+                desc={sector.text}
+              />
+            </a>
+          );
+        })
       }
     </div>
 
     <div class="text-center mt-16">
       <a
-        href={`/${lang}/contact`}
+        href={`/${lang}/pilot`}
         class="inline-block px-8 py-4 text-lg rounded-xl font-semibold bg-[var(--sentra-accent)] text-[var(--sentra-primary)] hover:bg-[var(--sentra-accent-light)] transition"
       >
         {t(locale, "about.cta")}

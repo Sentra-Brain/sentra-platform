@@ -1,0 +1,13 @@
+---
+// components/WhyNowStrip.astro
+import { t, defaultLocale, type Locale } from "../i18n.ts";
+const lang = Astro.params.lang ?? defaultLocale;
+const locale = lang as Locale;
+---
+<section class="py-6 mt-8 bg-[var(--sentra-neutral)] text-[var(--sentra-primary)] rounded-xl border border-[var(--sentra-accent-light)]">
+  <div class="container mx-auto px-4 text-center grid gap-2 md:grid-cols-3 md:text-left">
+    <div><strong>{t(locale, "why_now.ai_demand.title")}</strong><br/>{t(locale, "why_now.ai_demand.text")}</div>
+    <div><strong>{t(locale, "why_now.regulation.title")}</strong><br/>{t(locale, "why_now.regulation.text")}</div>
+    <div><strong>{t(locale, "why_now.gpu_cost.title")}</strong><br/>{t(locale, "why_now.gpu_cost.text")}</div>
+  </div>
+</section>

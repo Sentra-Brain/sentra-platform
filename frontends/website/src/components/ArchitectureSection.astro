@@ -14,6 +14,11 @@ const locale = lang as Locale;
       {t(locale, 'architecture.hero.subtitle')}
     </p>
 
+    <div class="mb-8 bg-[var(--sentra-neutral)] p-4 rounded-xl text-[var(--sentra-primary)] border border-[var(--sentra-accent-light)]">
+      <strong>{t(locale, "architecture.callout.title")}</strong>
+      <p>{t(locale, "architecture.callout.text")}</p>
+    </div>
+
     <div class="grid md:grid-cols-3 gap-8">
       <div class="bg-[var(--sentra-neutral)] p-6 rounded-xl text-[var(--sentra-primary)]">
         <h3 class="text-xl font-semibold mb-2">{t(locale, 'architecture.blocks.llm.title')}</h3>

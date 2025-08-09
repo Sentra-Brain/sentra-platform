@@ -3,7 +3,9 @@
     "about": "Qué es Sentra Brain",
     "architecture": "Arquitectura Técnica",
     "use_cases": "Casos de Uso",
-    "contact": "Contacto"
+    "contact": "Contacto",
+    "security": "Seguridad",
+    "pilot": "Programa Piloto"
   },
   "footer": {
     "rights": "Todos los derechos reservados.",
@@ -21,7 +23,9 @@
     "title_top": "Tus datos. Tus reglas.",
     "title_bottom": "Tu IA",
     "subtitle": "Despliega tu propia plataforma de IA, totalmente privada y modular. Tus datos siempre bajo control: tus modelos, tu conocimiento, tu infraestructura. Sin servidores externos ni costes ocultos.",
-    "cta": "Solicita tu demo personalizada"
+    "cta": "Solicita tu demo personalizada",
+    "subtitle2": "Despliega tu plataforma de IA privada en tus servidores en menos de una hora. LLM modular, RAG y automatizaciones agénticas. Ningún dato sale de tu red.",
+    "cta2": "Reserva una Demo Privada"
   },
   "about": {
     "hero": {
@@ -56,6 +60,10 @@
     "hero": {
       "title": "Arquitectura Modular",
       "subtitle": "Sentra Brain combina servicio de LLM, integraciones seguras, búsqueda de documentos, automatizaciones y control total en un solo sistema."
+    },
+    "callout": {
+      "title": "Los datos permanecen dentro de tu perímetro.",
+      "text": "Sentra funciona en tu hardware. Sin servidores externos. Cifrado en tránsito y en reposo, RBAC y registro de auditoría incorporados."
     },
     "blocks": {
       "llm": {
@@ -119,6 +127,11 @@
         "icon": "🌐",
         "title": "Cualquier Entorno Profesional",
         "text": "SentraBrain se adapta a las necesidades de tu empresa. Contáctanos para explorar cómo podemos ayudarte."
+      },
+      "accounting": {
+        "icon": "📊",
+        "title": "Servicios de Contabilidad y Administrativos",
+        "text": "Maneja datos financieros sensibles de clientes, declaraciones de impuestos y documentación de cumplimiento con automatización de IA privada."
       }
     }
   },
@@ -236,6 +249,87 @@
         "title": "Buscar manuales técnicos",
         "text": "Busque rápidamente manuales de productos, guías técnicas y documentación almacenada localmente o en la base de conocimientos."
       }
+    }
+  },
+  "why_now": {
+    "ai_demand": { "title": "Demanda de IA ↑", "text": "Las empresas necesitan IA que respete los límites de los datos." },
+    "regulation": { "title": "Regulación ↑", "text": "GDPR y la Ley de IA de la UE aumentan la presión de cumplimiento." },
+    "gpu_cost": { "title": "Costo de GPU ↓", "text": "Los precios decrecientes de GPU hacen práctica la IA privada de alto rendimiento." }
+  },
+  "pilot": {
+    "hero": {
+      "title": "Programa Piloto (UE)",
+      "subtitle": "Un compromiso de 4–12 semanas para desplegar Sentra en sitio, integrar 1–2 sistemas y automatizar 2–3 flujos de trabajo de alto valor."
+    },
+    "includes": {
+      "title": "Qué Incluye",
+      "deploy": "Despliegue en sitio o híbrido en tu servidor GPU",
+      "integrations": "Integraciones seguras (CRM/ERP/IDP) vía MCP",
+      "automations": "2–3 automatizaciones agénticas adaptadas a tu proceso",
+      "security": "Línea base de seguridad: RBAC, logs de auditoría, políticas de retención de datos"
+    },
+    "ideal": {
+      "title": "Candidatos Ideales",
+      "legal": "Servicios legales que necesitan análisis privado de documentos",
+      "finance": "Servicios financieros con requisitos estrictos de cumplimiento",
+      "accounting": "Firmas de contabilidad y administración que manejan datos sensibles de clientes",
+      "ops": "Equipos de operaciones buscando automatización segura de ERP/CRM/HR"
+    },
+    "success": {
+      "title": "Criterios de Éxito del Piloto",
+      "kpis": "KPIs antes/después (tiempo de ciclo, precisión, horas manuales ahorradas)",
+      "security": "Controles de seguridad y cumplimiento aprobados",
+      "training": "Equipo capacitado; transferencia completada"
+    },
+    "cta": "Aplicar para Piloto / Reservar Demo"
+  },
+  "security": {
+    "hero": { "title": "Seguridad y Cumplimiento", "subtitle": "Cómo Sentra protege tus datos dentro de tu red." },
+    "sections": {
+      "data_flow": "Flujo de datos: ingesta → vectorización → inferencia → automatización, todo local",
+      "encryption": "Cifrado en reposo y en tránsito; secretos en env/VAULT",
+      "isolation": "Aislamiento de modelo/tiempo de ejecución; sin prompts/llamadas externas a menos que se configure",
+      "access": "RBAC, integración SSO/IDP, registro de auditoría",
+      "deploy": "En sitio o híbrido; egreso mínimo; guía de dimensionamiento",
+      "incident": "Directrices de respuesta a incidentes y soporte"
+    }
+  },
+  "docs": {
+    "quickstart": {
+      "title": "Inicio Rápido: Docker Compose",
+      "subtitle": "Ejecuta Sentra en un solo servidor GPU.",
+      "steps": {
+        "prereq": "Prerrequisitos: controladores NVIDIA + Docker + NVIDIA Container Toolkit",
+        "clone": "Clonar repo y copiar .env.example → .env",
+        "compose": "Ejecutar: docker compose up -d",
+        "login": "Acceder a la UI en https://tu-host/",
+        "notes": "Niveles de memoria GPU: 16GB (base), 24GB (recomendado), 48GB+ (cargas pesadas)"
+      }
+    }
+  },
+  "verticals": {
+    "accounting": {
+      "title": "Firmas de Contabilidad y Servicios Administrativos",
+      "intro": "Las firmas de contabilidad y servicios administrativos manejan datos financieros y personales sensibles todos los días: declaraciones de impuestos, nóminas y documentación de cumplimiento. Estas tareas son repetitivas, altamente reguladas y no pueden delegarse a IA basada en la nube sin arriesgar la confidencialidad del cliente. Sentra funciona completamente en tu infraestructura, llevando automatización e IA directamente a tu oficina.",
+      "challenges": {
+        "title": "Desafíos Clave",
+        "tax": "Gestionar y presentar declaraciones de impuestos complejas para múltiples clientes bajo estrictos plazos",
+        "payroll": "Procesar nóminas mientras cumple con leyes laborales en evolución",
+        "forms": "Manejar grandes volúmenes de formularios gubernamentales y de cumplimiento",
+        "confidential": "Proteger información financiera y personal sensible del cliente"
+      },
+      "solutions": {
+        "title": "Soluciones Sentra",
+        "doc_processing": "Ingesta automatizada de documentos y extracción de datos de facturas, recibos y contratos",
+        "form_filling": "Pre-llenado de formularios de impuestos, cumplimiento y nómina para revisión humana",
+        "reg_updates": "Resumir y aplicar actualizaciones regulatorias a procesos internos",
+        "audit_ready": "Mantener logs listos para auditoría y documentación de cumplimiento automáticamente"
+      },
+      "security": {
+        "title": "Seguridad Primero",
+        "text": "Sentra opera en sitio, asegurando que todos los datos del cliente permanezcan dentro de la red de tu oficina. No se envía información a servidores externos o proveedores de IA de terceros a menos que se configure explícitamente."
+      },
+      "cta": "Aplicar para Piloto"
     }
   }
 }
