@@ -21,6 +21,17 @@ class CreateConversationRequest(BaseModel):
         "populate_by_name": True
     }
 
+class CreateConversationResponse(BaseModel):
+    id: UUID = Field(..., description="Unique identifier of the conversation")
+    title: str = Field(..., description="Title of the conversation")
+    created_at: datetime = Field(..., description="Creation timestamp")
+
+    model_config = {
+        "from_attributes": True,
+        "populate_by_name": True
+    }
+
+class ConversationListItemResponse(BaseModel):
     id: UUID = Field(..., description="Unique identifier of the conversation")
     title: str = Field(..., description="Conversation title")
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -35,13 +46,8 @@ class MessageResponse(BaseModel):
     content: str = Field(..., description="Content of the message")
     timestamp: datetime = Field(..., description="Timestamp of the message")
 
-    model_config = {
-        "from_attributes": True
-    }
-
 class ConversationResponse(BaseMongoModel):
-    title: Optional[str] = None
-    
+    title: Optional[str] = None    
     description: Optional[str] = None
     initial_prompt: Optional[str] = None
     created_at: datetime
@@ -53,15 +59,17 @@ class UpdateConversationRequest(BaseModel):
     title: Optional[str] = Field(None, description="Updated title for the conversation")
     description: Optional[str] = Field(None, description="Updated description for the conversation")
 
-
-    conversation_id: UUID = Field(..., description="Unique identifier of the updated conversation")
-    title: Optional[str] = Field(None, description="Updated title of the conversation")
-    description: Optional[str] = Field(None, description="Updated description of the conversation")
-
     model_config = {
         "from_attributes": True,
         "populate_by_name": True
     }
+    
+class UpdateConversationResponse(BaseModel):
+    conversation_id: UUID = Field(..., description="Unique identifier of the updated conversation")
+    title: Optional[str] = Field(None, description="Updated title of the conversation")
+    description: Optional[str] = Field(None, description="Updated description of the conversation")
+
+
 
 
 class DeleteConversationResponse(BaseModel):

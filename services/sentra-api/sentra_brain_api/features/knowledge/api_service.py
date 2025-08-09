@@ -128,37 +128,36 @@ class KnowledgeApiService:
     def list_knowledge_sources(self, user: UserEntity, limit: int, offset: int) -> tuple[List[KnowledgeSourceEntity], int]:
         return self.knowledge_repo.list_by_user(user.id, limit, offset), self.knowledge_repo.count_by_user(user.id)
 
-    def list_documents(self, user: UserEntity, source_id: Optional[str], limit: int, offset: int) -> tuple[List[DocumentEntity], int]:
-        source_uuid = UUID(source_id) if source_id else None
+    def list_documents(self, user: UserEntity, source_id: Optional[UUID], limit: int, offset: int) -> tuple[List[DocumentEntity], int]:
         return (
-            self.document_repo.list_by_user_or_source(user.id, source_uuid, limit, offset),
-            self.document_repo.count_by_user_or_source(user.id, source_uuid)
+            self.document_repo.list_by_user_or_source(user.id, source_id, limit, offset),
+            self.document_repo.count_by_user_or_source(user.id, source_id)
         )
 
-    def update_knowledge_source_status(self, source_id: str, enabled: bool) -> KnowledgeSourceEntity:
-        return self.knowledge_svc.update_status(UUID(source_id), enabled)
+    def update_knowledge_source_status(self, source_id: UUID, enabled: bool) -> KnowledgeSourceEntity:
+        return self.knowledge_svc.update_status(source_id, enabled)
 
-    def reindex_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
-        doc = self.document_svc.mark_for_reindex(UUID(document_id), user.id)
+    def reindex_document(self, document_id: UUID, user: UserEntity) -> DocumentEntity:
+        doc = self.document_svc.mark_for_reindex(document_id, user.id)
         try:
             with self.indexing_publisher:
                 self.indexing_publisher.publish_indexing_job(
-                    document_id=str(doc.id),
+                    document_id=doc.id,
                     document_path=doc.path,
-                    knowledge_source_id=str(doc.knowledge_source_id),
+                    knowledge_source_id=doc.knowledge_source_id,
                     filename=doc.filename,
-                    uploaded_by=str(user.id)
+                    uploaded_by=user.id
                 )
         except Exception as e:
             logger.warning(f"Indexing failed for document {doc.id}: {e}")
         return doc
 
-    def remove_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
-        return self.document_svc.mark_for_removal(UUID(document_id), user.id)
+    def remove_document(self, document_id: UUID, user: UserEntity) -> DocumentEntity:
+        return self.document_svc.mark_for_removal(document_id, user.id)
 
-    def get_knowledge_source(self, source_id: str, user: UserEntity) -> KnowledgeSourceEntity:
+    def get_knowledge_source(self, source_id: UUID, user: UserEntity) -> KnowledgeSourceEntity:
         """Get a single knowledge source by ID"""
-        source = self.knowledge_repo.get(UUID(source_id))
+        source = self.knowledge_repo.get(source_id)
         if not source:
             raise SentraHTTPException(
                 status_code=404,
@@ -168,10 +167,10 @@ class KnowledgeApiService:
             )
         return source
 
-    def delete_knowledge_source(self, source_id: str, user: UserEntity) -> KnowledgeSourceEntity:
+    def delete_knowledge_source(self, source_id: UUID, user: UserEntity) -> KnowledgeSourceEntity:
         """Delete a knowledge source (admin only)"""
         try:
-            return self.knowledge_svc.delete_knowledge_source(UUID(source_id))
+            return self.knowledge_svc.delete_knowledge_source(source_id)
         except Exception as e:
             raise SentraHTTPException(
                 status_code=500,
@@ -182,7 +181,7 @@ class KnowledgeApiService:
                 suggestion="Check if source has documents or database constraints."
             )
 
-    def upload_document_to_source(self, knowledge_source_id: str, file: UploadFile, request: DocumentUploadRequest, user: UserEntity) -> DocumentEntity:
+    def upload_document_to_source(self, knowledge_source_id: UUID, file: UploadFile, request: DocumentUploadRequest, user: UserEntity) -> DocumentEntity:
         """Upload a document to a specific knowledge source"""
         ext = Path(file.filename).suffix.lower()
         if ext not in ALLOWED_FILE_TYPES:
@@ -194,7 +193,7 @@ class KnowledgeApiService:
             )
 
         # Get the specified knowledge source
-        source = self.knowledge_repo.get(UUID(knowledge_source_id))
+        source = self.knowledge_repo.get(knowledge_source_id)
         if not source:
             raise SentraHTTPException(
                 status_code=404,
@@ -229,20 +228,20 @@ class KnowledgeApiService:
         try:
             with self.indexing_publisher:
                 self.indexing_publisher.publish_indexing_job(
-                    document_id=str(document.id),
+                    document_id=document.id,
                     document_path=rel_path,
-                    knowledge_source_id=str(source.id),
+                    knowledge_source_id=source.id,
                     filename=file.filename,
-                    uploaded_by=str(user.id)
+                    uploaded_by=user.id
                 )
         except Exception as e:
             logger.warning(f"Indexing failed for document {document.id}: {e}")
 
         return document
 
-    def get_document(self, document_id: str, user: UserEntity) -> DocumentEntity:
+    def get_document(self, document_id: UUID, user: UserEntity) -> DocumentEntity:
         """Get a single document by ID"""
-        doc = self.document_repo.get(UUID(document_id))
+        doc = self.document_repo.get(document_id)
         if not doc:
             raise SentraHTTPException(
                 status_code=404,
@@ -252,9 +251,9 @@ class KnowledgeApiService:
             )
         return doc
 
-    def update_document(self, document_id: str, display_name: Optional[str], description: Optional[str], user: UserEntity) -> DocumentEntity:
+    def update_document(self, document_id: UUID, display_name: Optional[str], description: Optional[str], user: UserEntity) -> DocumentEntity:
         """Update document metadata"""
-        doc = self.document_repo.get(UUID(document_id))
+        doc = self.document_repo.get(document_id)
         if not doc:
             raise SentraHTTPException(
                 status_code=404,
