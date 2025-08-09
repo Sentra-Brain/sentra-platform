@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import uuid
 
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
-from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
+from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
 from sentra_brain_api.core.conversation_engine.prompt_factory import PromptFactory
 from sentra_brain_api.core.conversation_engine.rag.rag_formatting import format_chunks_grouped
 from sentra_brain_api.core.conversation_engine.vllm_client import VLLMClient
@@ -31,19 +31,51 @@ class ConversationEngine:
             on_evict=self._on_cache_evict
         )
 
-    async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationDelta, None]:
+    async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationEvent, None]:
         logger.info(f"[Engine] Starting run: user={request.user_id}, conversation={request.conversation_id}")
 
         now = datetime.now(timezone.utc).isoformat()
+        task_run_id = None
 
+        # Emit RAG step events if context is requested
         if request.context_source_ids or request.context_document_ids:
-            yield ConversationDelta(content="💡 Searching in the Knowledge Base... \\r\\n", final=False)
+            task_run_id = uuid.uuid4().hex
+            
+            # Start RAG search step
+            step_start_event = ConversationEvent(
+                type="step_start",
+                task_type="rag_search",
+                task_run_id=task_run_id,
+                label="Searching Knowledge Base",
+                status="searching",
+                content="💡 Searching in the Knowledge Base..."
+            )
+            yield step_start_event
+            await self._persist_step_event(request, step_start_event)
 
         rag_chunks = await self.rag_client.retrieve_relevant_chunks(
             query=request.content,
             source_ids=request.context_source_ids,
             document_ids=request.context_document_ids
         )
+
+        # Emit RAG step end if we started a RAG search
+        if task_run_id:
+            step_end_event = ConversationEvent(
+                type="step_end",
+                task_type="rag_search",
+                task_run_id=task_run_id,
+                label="Knowledge Base Search Complete",
+                status="completed",
+                content=f"Found {len(rag_chunks)} relevant chunks",
+                meta={
+                    "chunks_found": len(rag_chunks),
+                    "source_ids": request.context_source_ids,
+                    "document_ids": request.context_document_ids
+                }
+            )
+            yield step_end_event
+            await self._persist_step_event(request, step_end_event)
         
         context = await self._load_context(request.user_id, request.conversation_id)
 
@@ -60,11 +92,17 @@ class ConversationEngine:
         buffer = ""
         async for delta in self._vllm_stream(payload):
             buffer += delta
-            yield ConversationDelta(content=delta)
+            yield ConversationEvent(
+                type="message_delta",
+                content=delta
+            )
 
         if not buffer.strip():
             logger.warning(f"No LLM response for user={request.user_id} conv={request.conversation_id}")
-            yield ConversationDelta(content="(No response)", final=True)
+            yield ConversationEvent(
+                type="message_final",
+                content="(No response)"
+            )
             return
 
         assistant_msg = self._make_message("assistant", buffer, now, message_id=request.response_message_id)
@@ -73,7 +111,10 @@ class ConversationEngine:
         context.append(assistant_msg)
         self.cache.put(request.user_id, request.conversation_id, context[-CONTEXT_WINDOW_SIZE:])
 
-        yield ConversationDelta(content="", final=True)
+        yield ConversationEvent(
+            type="message_final",
+            content=""
+        )
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
 
     async def _vllm_stream(self, payload: dict):
@@ -179,6 +220,33 @@ class ConversationEngine:
                 details=str(e),
                 path="/chat/send"
             )
+
+    async def _persist_step_event(self, request: ConversationRequest, event: ConversationEvent):
+        """Persist step events as system messages in MongoDB"""
+        try:
+            system_message = {
+                "id": event.event_id,
+                "role": "system",
+                "content": event.content,
+                "timestamp": event.timestamp,
+                "event_type": event.type,
+                "task_type": event.task_type,
+                "task_run_id": event.task_run_id,
+                "step_id": event.step_id,
+                "label": event.label,
+                "status": event.status,
+                "meta": event.meta
+            }
+            
+            self.mongo_repo.append_message(
+                conversation_id=request.conversation_id,
+                user_id=request.user_id,
+                message=system_message
+            )
+        except Exception as e:
+            logger.error(f"Failed to persist step event: {e}")
+            # Don't raise exception for step events to avoid breaking the conversation flow
+            # but log the error for monitoring
 
     def _on_cache_evict(self, user_id: str, conversation_id: str, messages: list[dict]):
         logger.info(f"[Cache] Evicted: user_id={user_id}, conversation_id={conversation_id}, messages={len(messages)}")
