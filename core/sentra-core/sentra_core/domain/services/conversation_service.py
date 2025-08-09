@@ -15,7 +15,7 @@ class ConversationService:
         self.sql_repo = sql_repo
         self.mongo_repo = mongo_repo
 
-    def create_conversation(self, user: UserEntity, conversation: ConversationEntity) -> str:
+    def create_conversation(self, user: UserEntity, conversation: ConversationEntity) -> ConversationEntity:
         conversation = self.sql_repo.create(conversation)
 
         messages = []
@@ -27,8 +27,8 @@ class ConversationService:
             })
 
         self.mongo_repo.create_conversation(
-            conversation_id=str(conversation.id),
-            user_id=str(user.id),
+            conversation_id=conversation.id,
+            user_id=user.id,
             messages=messages,
             title=conversation.title,
             initial_prompt=conversation.initial_prompt,
@@ -38,10 +38,10 @@ class ConversationService:
         return conversation
 
     def get_user_conversations(self, user_id: UUID) -> list[ConversationEntity]:
-        return self.sql_repo.get_conversations_by_user_id(str(user_id))
+        return self.sql_repo.get_conversations_by_user_id(user_id)
 
     def get_conversation(self, conversation_id: UUID, user_id: UUID) -> dict:
-        return self.mongo_repo.get_conversation_by_id(str(conversation_id), str(user_id))
+        return self.mongo_repo.get_conversation_by_id(conversation_id, user_id)
 
     def update_conversation(self, conversation_id: UUID, user_id: UUID, title: Optional[str], description: Optional[str]) -> Optional[ConversationEntity]:
         conversation = self.sql_repo.get(conversation_id)
