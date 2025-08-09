@@ -38,12 +38,12 @@ class ConversationService:
         return conversation
 
     def get_user_conversations(self, user_id: UUID) -> list[ConversationEntity]:
-        return self.sql_repo.get_conversations_by_user_id(user_id)
+        return self.sql_repo.get_conversations_by_user_id(str(user_id))
 
-    def get_conversation(self, conversation_id: str, user_id: str) -> dict:
-        return self.mongo_repo.get_conversation_by_id(conversation_id, user_id)
+    def get_conversation(self, conversation_id: UUID, user_id: UUID) -> dict:
+        return self.mongo_repo.get_conversation_by_id(str(conversation_id), str(user_id))
 
-    def update_conversation(self, conversation_id: str, user_id: str, title: Optional[str], description: Optional[str]) -> Optional[ConversationEntity]:
+    def update_conversation(self, conversation_id: UUID, user_id: UUID, title: Optional[str], description: Optional[str]) -> Optional[ConversationEntity]:
         conversation = self.sql_repo.get(conversation_id)
         if not conversation:
             return None
@@ -65,11 +65,11 @@ class ConversationService:
 
         return conversation
 
-    def delete_conversation(self, conversation_id: str, user_id: str) -> bool:
+    def delete_conversation(self, conversation_id: UUID, user_id: UUID) -> bool:
         deleted = False
 
         conversation = self.sql_repo.get(conversation_id)
-        if conversation and str(conversation.created_by_id) == user_id:
+        if conversation and conversation.created_by_id == user_id:
             self.sql_repo.delete(conversation_id)
             deleted = True
 
@@ -80,6 +80,6 @@ class ConversationService:
 
         return deleted or result.deleted_count > 0
 
-    def update_title(self, conversation_id: str, user_id: str, title: str):
+    def update_title(self, conversation_id: UUID, user_id: UUID, title: str):
         self.sql_repo.update_title(conversation_id, title)
         self.mongo_repo.update_conversation(conversation_id, {"title": title})

@@ -1,3 +1,4 @@
+from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
@@ -48,7 +49,7 @@ class ConversationController:
             description="Generate a better conversation title using LLM"
         )
         async def generate_llm_title_for_conversation(
-            conversation_id: str,
+            conversation_id: UUID,
             current_user: UserEntity = Depends(get_authenticated_user),
             service: ConversationApiService = Depends(self._get_service),
         ):
@@ -71,7 +72,7 @@ class ConversationController:
             description="Retrieve a specific conversation by its ID"
         )
         def get_conversation_by_id(
-            conversation_id: str,
+            conversation_id: UUID,
             current_user: UserEntity = Depends(get_authenticated_user),
             service: ConversationApiService = Depends(self._get_service)
         ):
@@ -83,7 +84,7 @@ class ConversationController:
             description="Update title and description of a conversation"
         )
         def update_conversation(
-            conversation_id: str,
+            conversation_id: UUID,
             request: UpdateConversationRequest,
             current_user: UserEntity = Depends(get_authenticated_user),
             service: ConversationApiService = Depends(self._get_service)
@@ -96,7 +97,7 @@ class ConversationController:
             description="Delete a conversation"
         )
         def delete_conversation(
-            conversation_id: str,
+            conversation_id: UUID,
             current_user: UserEntity = Depends(get_authenticated_user),
             service: ConversationApiService = Depends(self._get_service)
         ):
