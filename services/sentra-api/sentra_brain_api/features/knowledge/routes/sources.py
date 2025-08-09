@@ -1,6 +1,7 @@
 # sentra_brain_api/features/knowledge/routes/sources.py
 
 from fastapi import APIRouter, Depends, Query, HTTPException
+from uuid import UUID
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -60,7 +61,7 @@ async def create_knowledge_source(
 
 @router.get("/{knowledge_source_id}", response_model=KnowledgeSourceResponse)
 async def get_knowledge_source(
-    knowledge_source_id: str,
+    knowledge_source_id: UUID,
     user: UserEntity = Depends(get_authenticated_user),
     service: KnowledgeApiService = Depends(_get_service)
 ):
@@ -71,7 +72,7 @@ async def get_knowledge_source(
 
 @router.patch("/{knowledge_source_id}", response_model=KnowledgeSourceResponse)
 async def update_knowledge_source(
-    knowledge_source_id: str,
+    knowledge_source_id: UUID,
     enabled: Optional[bool] = None,
     user: UserEntity = Depends(_require_admin),
     service: KnowledgeApiService = Depends(_get_service)
@@ -87,7 +88,7 @@ async def update_knowledge_source(
 
 @router.delete("/{knowledge_source_id}", response_model=KnowledgeSourceResponse)
 async def delete_knowledge_source(
-    knowledge_source_id: str,
+    knowledge_source_id: UUID,
     user: UserEntity = Depends(_require_admin),
     service: KnowledgeApiService = Depends(_get_service)
 ):

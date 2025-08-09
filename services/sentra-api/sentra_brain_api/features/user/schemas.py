@@ -1,4 +1,6 @@
+
 from pydantic import BaseModel, EmailStr
+from uuid import UUID
 
 from sentra_core.domain.entities.user_entity import UserEntity
 
@@ -10,7 +12,7 @@ class TokenData(BaseModel):
     username: str | None = None
     
 class UserModel(BaseModel):
-    id: str | None = None  # UUID as string for frontend compatibility
+    id: UUID | None = None
     username: str
     email: EmailStr | None = None
     full_name: str | None = None
