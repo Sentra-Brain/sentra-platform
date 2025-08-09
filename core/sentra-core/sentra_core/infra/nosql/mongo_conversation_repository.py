@@ -18,21 +18,21 @@ class MongoConversationRepository:
     def get_conversations_collection(self):
         return self.db["conversations"]
 
-    def get_conversation_by_id(self, conversation_id: UUID, user_id: UUID) -> dict:
+    def get_conversation_by_id(self, conversation_id: UUID, user_id: UUID) -> dict | None:
         collection = self.get_conversations_collection()
         doc = collection.find_one({
-            "_id": conversation_id,
-            "user_id": user_id
+            "_id": str(conversation_id),
+            "user_id": str(user_id)
         })
         if not doc:
             logger.warning(f"[Mongo] Conversation not found with ID {conversation_id} for user {user_id}")
         return doc
     
-    def create_conversation(self, conversation_id: UUID, user_id: UUID, messages: list[dict], **fields):
+    def create_conversation(self, conversation_id: UUID, user_id: UUID, messages: list[dict], **fields) -> dict:
         collection = self.get_conversations_collection()
         doc = {
-            "_id": conversation_id,
-            "user_id": user_id,
+            "_id": str(conversation_id),
+            "user_id": str(user_id),
             "initial_prompt": fields.get("initial_prompt", ""),
             "created_at": datetime.now(timezone.utc),
             "messages": messages,
@@ -42,22 +42,22 @@ class MongoConversationRepository:
         logger.info(f"[Mongo] Created conversation with {len(messages)} messages")
         return doc
     
-    def update_conversation(self, conversation_id: UUID, updates: dict):
+    def update_conversation(self, conversation_id: UUID, updates: dict) -> int:
         collection = self.get_conversations_collection()
         result = collection.update_one(
-            {"_id": conversation_id},
+            {"_id": str(conversation_id)},
             {"$set": updates}
         )
         if result.modified_count == 0:
             logger.warning(f"[Mongo] No conversation found to update with ID {conversation_id}")
         return result.modified_count
     
-    def append_message(self, conversation_id: UUID, user_id: UUID, message: dict):
+    def append_message(self, conversation_id: UUID, user_id: UUID, message: dict) -> int:
         collection = self.get_conversations_collection()
         result = collection.update_one(
             {
-                "_id": conversation_id,
-                "user_id": user_id
+                "_id": str(conversation_id),
+                "user_id": str(user_id)
             },
             {
                 "$push": {"messages": message}
