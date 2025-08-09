@@ -15,13 +15,14 @@ export default function LoginPage() {
   const navigate = useNavigate()
   const { login } = useAuth()
   const token = useAppSelector((state) => state.auth.token)
+  const rehydrated = useAppSelector((state) => state.auth.rehydrated)
   const location = useLocation()
 
   useEffect(() => {
-    if (token && location.pathname === '/login') {
+    if (rehydrated && token && location.pathname === '/login') {
       navigate('/', { replace: true })
     }
-  }, [token, navigate, location.pathname])
+  }, [rehydrated, token, navigate, location.pathname])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()

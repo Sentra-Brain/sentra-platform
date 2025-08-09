@@ -1,6 +1,7 @@
 # sentra_brain_api/features/knowledge/routes/documents.py
 
 from fastapi import APIRouter, Depends, UploadFile, File, Form, Query, HTTPException
+from uuid import UUID
 from sqlalchemy.orm import Session
 from typing import Optional
 
@@ -31,7 +32,7 @@ def _get_service(db: Session = Depends(get_db)) -> KnowledgeApiService:
 # Routes for /knowledge/sources/{id}/documents
 @router.get("/sources/{knowledge_source_id}/documents", response_model=DocumentListResponse)
 async def list_documents_in_source(
-    knowledge_source_id: str,
+    knowledge_source_id: UUID,
     user: UserEntity = Depends(get_authenticated_user),
     service: KnowledgeApiService = Depends(_get_service)
 ):
@@ -44,7 +45,7 @@ async def list_documents_in_source(
 
 @router.post("/sources/{knowledge_source_id}/documents", response_model=DocumentResponse)
 async def upload_document_to_source(
-    knowledge_source_id: str,
+    knowledge_source_id: UUID,
     file: UploadFile = File(...),
     display_name: str = Form(...),
     description: Optional[str] = Form(None),
@@ -64,7 +65,7 @@ async def upload_document_to_source(
 # Routes for /knowledge/documents (root level document operations)
 @router.get("/documents", response_model=DocumentListResponse)
 async def list_all_documents(
-    knowledge_source_id: Optional[str] = Query(None),
+    knowledge_source_id: Optional[UUID] = Query(None),
     limit: int = Query(100), 
     offset: int = Query(0),
     user: UserEntity = Depends(get_authenticated_user),
@@ -79,7 +80,7 @@ async def list_all_documents(
 
 @router.get("/documents/{document_id}", response_model=DocumentResponse)
 async def get_document(
-    document_id: str,
+    document_id: UUID,
     user: UserEntity = Depends(get_authenticated_user),
     service: KnowledgeApiService = Depends(_get_service)
 ):
@@ -90,7 +91,7 @@ async def get_document(
 
 @router.patch("/documents/{document_id}", response_model=DocumentResponse)
 async def update_document(
-    document_id: str,
+    document_id: UUID,
     display_name: Optional[str] = None,
     description: Optional[str] = None,
     user: UserEntity = Depends(get_authenticated_user),
@@ -103,7 +104,7 @@ async def update_document(
 
 @router.post("/documents/{document_id}/reindex", response_model=DocumentResponse)
 async def reindex_document(
-    document_id: str,
+    document_id: UUID,
     user: UserEntity = Depends(get_authenticated_user),
     service: KnowledgeApiService = Depends(_get_service)
 ):
@@ -112,7 +113,7 @@ async def reindex_document(
 
 @router.delete("/documents/{document_id}", response_model=DocumentResponse)
 async def remove_document(
-    document_id: str,
+    document_id: UUID,
     user: UserEntity = Depends(get_authenticated_user),
     service: KnowledgeApiService = Depends(_get_service)
 ):

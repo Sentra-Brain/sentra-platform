@@ -6,7 +6,6 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import './styles/global.css'
 import SessionInitializer from '@features/auth/SessionInitializer'
-import ConversationsInitializer from '@features/conversations/ConversationsInitializer'
 import ThemeProvider from '@layout/ThemeProvider'
 
 export default function App() {
@@ -15,7 +14,6 @@ export default function App() {
       <BrowserRouter>
         <SessionInitializer />
         <ThemeProvider />
-        <ConversationsInitializer />
         <AppRoutes />
         <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
       </BrowserRouter>

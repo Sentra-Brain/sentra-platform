@@ -1,14 +1,14 @@
-import os
+
+from bs4 import BeautifulSoup
+from ebooklib import epub
+from mailparser import parse_from_file
 from sentra_core.core.logging import get_logger
 from sentra_core.domain.entities.document_entity import DocumentFileType
-
 import chardet
-import fitz  # PyMuPDF
 import docx2txt
-from bs4 import BeautifulSoup
-from mailparser import parse_from_file
-from ebooklib import epub
 import extract_msg
+import os
+import pymupdf
 
 logger = get_logger(__name__)
 
@@ -57,8 +57,8 @@ class DocumentExtractor:
 
     def _extract_pdf(self, filepath: str) -> str:
         try:
-            doc = fitz.open(filepath)
-            text = "\n".join(page.get_text() for page in doc)
+            with pymupdf.open(filepath) as doc:
+                text = chr(12).join([page.get_text() for page in doc])
             logger.info(f"Extracted {len(text)} characters from PDF")
             return text.strip()
         except Exception as e:
@@ -107,7 +107,7 @@ class DocumentExtractor:
             book = epub.read_epub(filepath)
             text = ""
             for item in book.get_items():
-                if item.get_type() == epub.ITEM_DOCUMENT:
+                if item.get_type() == epub.EpubHtml :
                     soup = BeautifulSoup(item.get_content(), 'lxml')
                     text += soup.get_text(separator='\n', strip=True) + "\n"
             logger.info(f"Extracted {len(text)} characters from EPUB")

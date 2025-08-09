@@ -6,6 +6,7 @@ indexing jobs, abstracting away the low-level AMQP transport details.
 """
 
 import json
+from uuid import UUID
 import pika
 from typing import Dict, Any, List
 from sentra_core.core.logging import get_logger
@@ -61,9 +62,9 @@ class IndexingJobPublisher:
     
     def publish_indexing_job(
         self, 
-        document_id: str, 
+        document_id: UUID, 
         document_path: str, 
-        knowledge_source_id: str,
+        knowledge_source_id: UUID,
         filename: str = None,
         uploaded_by: str = None
     ) -> bool:
@@ -85,9 +86,9 @@ class IndexingJobPublisher:
         
         # Create standardized job message
         job = {
-            "document_id": document_id,
+            "document_id": str(document_id),
             "document_path": document_path,
-            "knowledge_source_id": knowledge_source_id,
+            "knowledge_source_id": str(knowledge_source_id),
             "action": "index_document"
         }
         
@@ -170,9 +171,9 @@ class IndexingJobPublisher:
 
 # Convenience function for backward compatibility
 def create_indexing_job(
-    document_id: str,
+    document_id: UUID,
     document_path: str, 
-    knowledge_source_id: str,
+    knowledge_source_id: UUID,
     filename: str = None,
     uploaded_by: str = None
 ) -> Dict[str, Any]:
@@ -183,9 +184,9 @@ def create_indexing_job(
     before publishing them.
     """
     job = {
-        "document_id": document_id,
+        "document_id": str(document_id),
         "document_path": document_path,
-        "knowledge_source_id": knowledge_source_id,
+        "knowledge_source_id": str(knowledge_source_id),
         "action": "index_document"
     }
     

@@ -6,15 +6,16 @@ from contextvars import ContextVar
 from sentra_core.core import constants
 
 # Context variable to store request_id across async calls
-request_id_context: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
+from typing import Union
+request_id_context: ContextVar[Optional[uuid.UUID]] = ContextVar('request_id', default=None)
+
 
 class RequestContextFilter(logging.Filter):
     """Filter to inject request_id into log records for tracing."""
-    
     def filter(self, record):
         request_id = request_id_context.get()
         if request_id:
-            record.request_id = request_id
+            record.request_id = str(request_id)
         else:
             record.request_id = "no-request-id"
         return True
@@ -61,14 +62,18 @@ def get_logger(name: str | None = None) -> logging.Logger:
     return logging.getLogger(name)
 
 
-def set_request_id(request_id: str = None) -> str:
-    """Set the request_id for the current context. Returns the request_id."""
+def set_request_id(request_id: Union[str, uuid.UUID, None] = None) -> uuid.UUID:
+    """Set the request_id for the current context. Returns the request_id as UUID."""
     if request_id is None:
-        request_id = str(uuid.uuid4())
-    request_id_context.set(request_id)
-    return request_id
+        request_id_obj = uuid.uuid4()
+    elif isinstance(request_id, uuid.UUID):
+        request_id_obj = request_id
+    else:
+        request_id_obj = uuid.UUID(str(request_id))
+    request_id_context.set(request_id_obj)
+    return request_id_obj
 
 
-def get_request_id() -> Optional[str]:
-    """Get the current request_id from context."""
+def get_request_id() -> Optional[uuid.UUID]:
+    """Get the current request_id from context as UUID."""
     return request_id_context.get()

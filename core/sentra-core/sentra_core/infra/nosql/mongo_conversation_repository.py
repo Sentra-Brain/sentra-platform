@@ -1,38 +1,55 @@
-# sentra-core/sentra_core/infra/nosql/mongo_conversation_repository.py
 from datetime import datetime, timezone
+from uuid import UUID
 from pymongo import MongoClient
 from sentra_core.infra.nosql.mongo_settings import settings
 from sentra_core.core.logging import get_logger
 
-logger = get_logger("sentra_brain_api.mongo_service")
+logger = get_logger("sentra_brain_api.mongo_repository")
 
 class MongoConversationRepository:
+    """
+    Repository for managing conversations in MongoDB.
+
+    All conversation and user IDs are handled as Python UUID objects in the application layer.
+    When storing or querying in MongoDB, these UUIDs are always cast to strings (str(UUID)).
+    This ensures compatibility, readability, and interoperability with other tools and services
+    that may access the database.
+
+    When reading documents from MongoDB, the '_id' and 'user_id' fields will be strings.
+    If your domain or API models require UUIDs, you should convert these fields back to UUID
+    objects at the service or entity layer.
+
+    This approach avoids BSON binary UUID storage and guarantees that all IDs are human-readable
+    and consistent across the stack.
+    """
     def __init__(self):
-        self.client = MongoClient(settings.mongo_url)
+        self.client = MongoClient(
+            settings.mongo_url,
+            uuidRepresentation="standard"  # Use standard UUID representation for compatibility
+        )
         self.db = self.client[settings.mongo_database]
         logger.info(f"[Mongo] Connected to database {settings.mongo_database} at {settings.mongo_host}:{settings.mongo_port}")
 
     def get_conversations_collection(self):
         return self.db["conversations"]
 
-    def get_conversation_by_id(self, conversation_id: str, user_id: str) -> dict:
+    def get_conversation_by_id(self, conversation_id: UUID, user_id: UUID) -> dict | None:
         collection = self.get_conversations_collection()
         doc = collection.find_one({
-            "_id": conversation_id,
-            "user_id": user_id
+            "_id": str(conversation_id),
+            "user_id": str(user_id)
         })
-
         if not doc:
             logger.warning(f"[Mongo] Conversation not found with ID {conversation_id} for user {user_id}")
         return doc
     
-    def create_conversation(self, conversation_id: str, user_id: str, messages: list[dict], **fields):
+    def create_conversation(self, conversation_id: UUID, user_id: UUID, messages: list[dict], **fields) -> dict:
         collection = self.get_conversations_collection()
         doc = {
-            "_id": conversation_id,
-            "user_id": user_id,
+            "_id": str(conversation_id),
+            "user_id": str(user_id),
             "initial_prompt": fields.get("initial_prompt", ""),
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(timezone.utc),
             "messages": messages,
             **{k: v for k, v in fields.items() if v is not None} 
         }
@@ -40,22 +57,22 @@ class MongoConversationRepository:
         logger.info(f"[Mongo] Created conversation with {len(messages)} messages")
         return doc
     
-    def update_conversation(self, conversation_id: str, updates: dict):
+    def update_conversation(self, conversation_id: UUID, updates: dict) -> int:
         collection = self.get_conversations_collection()
         result = collection.update_one(
-            {"_id": conversation_id},
+            {"_id": str(conversation_id)},
             {"$set": updates}
         )
         if result.modified_count == 0:
             logger.warning(f"[Mongo] No conversation found to update with ID {conversation_id}")
         return result.modified_count
     
-    def append_message(self, conversation_id: str, user_id: str, message: dict):
+    def append_message(self, conversation_id: UUID, user_id: UUID, message: dict) -> int:
         collection = self.get_conversations_collection()
         result = collection.update_one(
             {
-                "_id": conversation_id,
-                "user_id": user_id
+                "_id": str(conversation_id),
+                "user_id": str(user_id)
             },
             {
                 "$push": {"messages": message}

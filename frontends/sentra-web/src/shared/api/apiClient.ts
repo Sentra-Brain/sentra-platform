@@ -9,7 +9,7 @@ import { showApiErrorToast } from '../utils/showApiErrorToast'
 
 // Base Axios instance
 const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:8100',
+  baseURL: import.meta.env.VITE_SENTRA_API_URL || 'http://localhost:8100',
   headers: {
     'Content-Type': 'application/json',
   },

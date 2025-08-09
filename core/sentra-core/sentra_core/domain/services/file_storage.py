@@ -9,6 +9,7 @@ between the API producer and RAG worker consumer.
 import os
 import re
 from pathlib import Path
+from uuid import UUID
 from typing import Optional, Tuple, BinaryIO
 
 from sentra_core.core.logging import get_logger
@@ -61,7 +62,7 @@ class FileStorageService:
         
         return sanitized
     
-    def create_user_upload_directory(self, user_id: str) -> Path:
+    def create_user_upload_directory(self, user_id: UUID) -> Path:
         """
         Create and return the upload directory for a specific user.
         
@@ -110,7 +111,7 @@ class FileStorageService:
                 new_name = f"{stem}_{timestamp}{suffix}"
                 return parent / new_name
     
-    def save_file(self, file_content: BinaryIO, filename: str, user_id: str) -> Tuple[Path, str]:
+    def save_file(self, file_content: BinaryIO, filename: str, user_id: UUID) -> Tuple[Path, str]:
         """
         Save file content using original filename.
         

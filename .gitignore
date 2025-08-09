@@ -11,6 +11,9 @@ code_summary.txt
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
 
+# gpg
+*.gpg
+
 # Mono auto generated files
 mono_crash.*
 

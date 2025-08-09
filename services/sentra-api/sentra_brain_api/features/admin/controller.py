@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status, Depends
+from uuid import UUID
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.authorization import get_admin_user
 from sentra_brain_api.features.user.schemas import UserModel
@@ -34,7 +35,7 @@ class AdminController:
                     )
 
         @self.router.put("/users/{user_id}/enable", response_model=UserModel)
-        def enable_user(user_id: int, db: Session = Depends(get_db)):
+        def enable_user(user_id: UUID, db: Session = Depends(get_db)):
             logger.info(f"an admin user is enabling user {user_id}")
             try:
                 enabled_user = self.admin_service.enable_user(user_id, db)
@@ -49,7 +50,7 @@ class AdminController:
                 )
 
         @self.router.delete("/users/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-        def delete_user(user_id: int, db: Session = Depends(get_db)):
+        def delete_user(user_id: UUID, db: Session = Depends(get_db)):
             logger.info(f"An admin user is deleting user with id {user_id}")
             try:
                 self.admin_service.delete_user(user_id, db)

@@ -14,14 +14,17 @@ export function useAuth() {
     try {
       const { access_token, refresh_token } = await authService.login(email, password);
 
+      // Store tokens first!
+      tokenStorage.setTokens(access_token, refresh_token, remember);
+
       const payload = parseJWT(access_token);
       if (!payload) throw new Error('Invalid token');
 
       const roles = payload.roles?.split(',') ?? [];
+      // Now the token is in storage, so this request will have the Authorization header
       const currentUser = await userService.getCurrentUser();
 
       dispatch(loginSuccess({ token: access_token, roles, user: currentUser }));
-      tokenStorage.setTokens(access_token, refresh_token, remember);
 
       return true;
     } catch (error) {
