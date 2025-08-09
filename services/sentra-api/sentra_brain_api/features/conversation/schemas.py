@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from typing import List, Literal, Optional
+from uuid import UUID
 from pydantic import BaseModel, Field
 from sentra_core.model.base_mongo_model import BaseMongoModel
 
@@ -10,8 +11,7 @@ class CreateConversationRequest(BaseModel):
     initial_prompt: str = Field(..., description="Initial User Prompt for the conversation")
 
 
-class CreateConversationResponse(BaseModel):
-    id: str = Field(..., description="Unique identifier of the conversation")
+    id: UUID = Field(..., description="Unique identifier of the conversation")
     title: str = Field(..., description="Title of the conversation")
     # initial_prompt: str = Field(..., description="Initial prompt for the conversation")
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -21,8 +21,7 @@ class CreateConversationResponse(BaseModel):
         "populate_by_name": True
     }
 
-class ConversationListItemResponse(BaseModel):
-    id: str = Field(..., description="Unique identifier of the conversation")
+    id: UUID = Field(..., description="Unique identifier of the conversation")
     title: str = Field(..., description="Conversation title")
     created_at: datetime = Field(..., description="Creation timestamp")
 
@@ -55,8 +54,7 @@ class UpdateConversationRequest(BaseModel):
     description: Optional[str] = Field(None, description="Updated description for the conversation")
 
 
-class UpdateConversationResponse(BaseModel):
-    conversation_id: str = Field(..., description="Unique identifier of the updated conversation")
+    conversation_id: UUID = Field(..., description="Unique identifier of the updated conversation")
     title: Optional[str] = Field(None, description="Updated title of the conversation")
     description: Optional[str] = Field(None, description="Updated description of the conversation")
 
