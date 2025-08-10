@@ -30,31 +30,29 @@ export function useChatActions() {
     const trimmed = content.trim()
     if (!trimmed) return
 
-    dispatch(setStreaming(true))
-    dispatch(setWaitingForAnswer(true))
-
     let conversationId = currentConversationId
     const userMessageId = uuidv4()
     const assistantMessageId = uuidv4()
 
-    // 🆕 If no active conversation, create one first
     if (!conversationId) {
-      // Send initial_prompt to backend, which will create the first user message
       const newConv = await dispatch(createConversation({ initial_prompt: trimmed })).unwrap()
       conversationId = newConv.id
       dispatch(selectConversation(conversationId))
-      await dispatch(fetchConversationById(conversationId)) // preload full conversation view
-      // The user message is already in the conversation, so don't add it locally
-      // Set userMessageId to the id of the first user message if needed (optional)
-    } else {
-      // ➕ Add user message immediately for existing conversation
-      dispatch(addMessage({
-        id: userMessageId,
-        role: 'user',
-        content: trimmed,
-        timestamp: Date.now(),
-      }))
-    }
+      await dispatch(fetchConversationById(conversationId)) 
+    } 
+
+    dispatch(setStreaming(true))
+    dispatch(setWaitingForAnswer(true))
+
+
+    // ➕ Add user message immediately for existing conversation
+    dispatch(addMessage({
+      id: userMessageId,
+      role: 'user',
+      content: trimmed,
+      timestamp: Date.now(),
+    }))
+    
 
     // 📡 Start streaming the assistant response
     let assistantStarted = false

@@ -26,12 +26,12 @@ class ConversationService:
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "is_system_prompt": True
         }]
-        if initial_user_prompt:
-            messages.append({
-                "role": "user",
-                "content": initial_user_prompt,
-                "timestamp": (datetime.now(timezone.utc) + timedelta(milliseconds=1)).isoformat()
-            })
+        # if initial_user_prompt:
+        #     messages.append({
+        #         "role": "user",
+        #         "content": initial_user_prompt,
+        #         "timestamp": (datetime.now(timezone.utc) + timedelta(milliseconds=1)).isoformat()
+        #     })
 
         self.mongo_repo.create_conversation(
             conversation_id=conversation.id,
