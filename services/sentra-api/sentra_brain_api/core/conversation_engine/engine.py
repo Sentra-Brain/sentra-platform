@@ -3,7 +3,7 @@ import json
 import logging
 from typing import AsyncGenerator
 from datetime import datetime, timezone
-import uuid
+from uuid import UUID, uuid4
 
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
 from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
@@ -39,7 +39,7 @@ class ConversationEngine:
 
         # Emit RAG step events if context is requested
         if request.context_source_ids or request.context_document_ids:
-            task_run_id = uuid.uuid4().hex
+            task_run_id = uuid4().hex
             
             # Start RAG search step
             step_start_event = ConversationEvent(
@@ -55,8 +55,8 @@ class ConversationEngine:
 
         rag_chunks = await self.rag_client.retrieve_relevant_chunks(
             query=request.content,
-            source_ids=request.context_source_ids,
-            document_ids=request.context_document_ids
+            source_ids=request.context_source_ids or [],
+            document_ids=request.context_document_ids or []
         )
 
         # Emit RAG step end if we started a RAG search
@@ -135,7 +135,7 @@ class ConversationEngine:
             except Exception as e:
                 logger.error(f"Unexpected error in streaming loop: {e}")
 
-    async def _load_context(self, user_id: str, conversation_id: str) -> list[dict]:
+    async def _load_context(self, user_id: UUID, conversation_id: UUID) -> list[dict]:
         try:
             cached = self.cache.get(user_id, conversation_id)
             if cached is not None:
@@ -180,7 +180,7 @@ class ConversationEngine:
 
     def _make_message(self, role: str, content: str, timestamp: str, **extra) -> dict:
         return {
-            "id": extra.get("message_id") or extra.get("response_message_id") or uuid.uuid4().hex,
+            "id": str(extra.get("message_id") or extra.get("response_message_id") or uuid4().hex),
             "role": role,
             "content": content,
             "timestamp": timestamp,

@@ -22,7 +22,7 @@ def get_authenticated_user(token: str = Depends(oauth2_scheme),
 
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])
-        username: str = payload.get("sub")
+        username = payload.get("sub")
         if not username:
             logger.warning("Token received with no subject (sub)")
             raise SentraHTTPException(
@@ -44,9 +44,9 @@ def get_authenticated_user(token: str = Depends(oauth2_scheme),
             suggestion="Request a new token"
         )
 
-    user = user_repo.get_by_username(token_data.username)
+    user = user_repo.get_by_username(username)
     if user is None:
-        logger.warning(f"Token refers to nonexistent user: '{token_data.username}'")
+        logger.warning(f"Token refers to nonexistent user: '{username}'")
         raise SentraHTTPException(
             status_code=401,
             code="USER_NOT_FOUND",

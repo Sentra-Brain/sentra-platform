@@ -67,21 +67,27 @@ class MongoConversationRepository:
             logger.warning(f"[Mongo] No conversation found to update with ID {conversation_id}")
         return result.modified_count
     
-    def append_message(self, conversation_id: UUID, user_id: UUID, message: dict) -> int:
+
+    def _stringify_uuids(self, obj):
+        from uuid import UUID
+        if isinstance(obj, UUID):
+            return str(obj)
+        if isinstance(obj, dict):
+            return {k: self._stringify_uuids(v) for k, v in obj.items()}
+        if isinstance(obj, list):
+            return [self._stringify_uuids(v) for v in obj]
+        return obj
+
+    def append_message(self, conversation_id: UUID, user_id: UUID | None, message: dict) -> int:
         collection = self.get_conversations_collection()
+        safe_message = self._stringify_uuids(message)  # <-- NORMALIZE UUIDs to strings
         result = collection.update_one(
-            {
-                "_id": str(conversation_id),
-                "user_id": str(user_id)
-            },
-            {
-                "$push": {"messages": message}
-            }
+            {"_id": str(conversation_id), "user_id": str(user_id)},
+            {"$push": {"messages": safe_message}}
         )
         if result.modified_count == 0:
             logger.warning(f"[Mongo] Failed to append message. Conversation not found: {conversation_id} for user: {user_id}")
         return result.modified_count
-
 
 mongo_service_instance = MongoConversationRepository()
 

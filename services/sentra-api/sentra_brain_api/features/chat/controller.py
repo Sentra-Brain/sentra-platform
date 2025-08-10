@@ -29,7 +29,7 @@ class ChatController:
             request: Request,
             current_user: UserEntity = Depends(get_authenticated_user)
         ):
-            body.user_id = str(current_user.id)
+            body.user_id = current_user.id
             
             app_state: AppState = request.app.state._sentra
             engine = app_state.conversation_engine

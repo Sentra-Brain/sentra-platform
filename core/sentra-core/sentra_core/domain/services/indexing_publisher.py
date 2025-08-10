@@ -67,7 +67,7 @@ class IndexingJobPublisher:
         document_path: str, 
         knowledge_source_id: UUID,
         filename: Optional[str] = None,
-        uploaded_by: Optional[str] = None,
+        uploaded_by: Optional[UUID] = None,
     ) -> bool:
         """
         Publish a single document indexing job.
