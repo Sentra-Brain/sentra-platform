@@ -8,13 +8,8 @@ from sentra_core.model.base_mongo_model import BaseMongoModel
 
 
 class CreateConversationRequest(BaseModel):
+    # id: UUID = Field(..., description="Unique identifier of the conversation")
     initial_prompt: str = Field(..., description="Initial User Prompt for the conversation")
-
-
-    id: UUID = Field(..., description="Unique identifier of the conversation")
-    title: str = Field(..., description="Title of the conversation")
-    # initial_prompt: str = Field(..., description="Initial prompt for the conversation")
-    created_at: datetime = Field(..., description="Creation timestamp")
 
     model_config = {
         "from_attributes": True,

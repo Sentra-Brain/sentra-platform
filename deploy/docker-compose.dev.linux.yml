@@ -51,7 +51,20 @@ services:
       - sentrabrain-dev-net
     env_file:
       - ../services/sentra-api/.env
+    depends_on:
+      - sentra-sql-db
+      - sentra-nosql-db
+      - sentra-vector-db
+      - rabbitmq
 
+  sentra-rag-base:
+    build:
+      context: ../services/sentra-rag-base
+      dockerfile: Dockerfile
+    image: sentra-rag-base:latest
+    container_name: sentra-rag-base
+    restart: no
+  
   sentra-rag-server:
     build:
       context: ../
@@ -143,14 +156,15 @@ services:
   sentra-nosql-db:
     image: mongo:7
     container_name: sentra-nosql-db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: changeit
     ports:
       - "27017:27017"
     volumes:
       - sentra-nosql-data:/data/db
     networks:
       - sentrabrain-dev-net
-    env_file:
-      - .dev.env
 
   sentra-vector-db:
     image: ghcr.io/chroma-core/chroma:latest
