@@ -33,7 +33,7 @@ class MongoConversationRepository:
     def get_conversations_collection(self):
         return self.db["conversations"]
 
-    def get_conversation_by_id(self, conversation_id: UUID, user_id: UUID) -> dict | None:
+    def get_conversation_by_id(self, conversation_id: UUID, user_id: UUID) -> dict:
         collection = self.get_conversations_collection()
         doc = collection.find_one({
             "_id": str(conversation_id),
@@ -41,6 +41,7 @@ class MongoConversationRepository:
         })
         if not doc:
             logger.warning(f"[Mongo] Conversation not found with ID {conversation_id} for user {user_id}")
+            raise ValueError(f"Conversation not found: {conversation_id} for user: {user_id}")
         return doc
     
     def create_conversation(self, conversation_id: UUID, user_id: UUID, messages: list[dict], **fields) -> dict:
@@ -48,10 +49,9 @@ class MongoConversationRepository:
         doc = {
             "_id": str(conversation_id),
             "user_id": str(user_id),
-            "initial_prompt": fields.get("initial_prompt", ""),
             "created_at": datetime.now(timezone.utc),
             "messages": messages,
-            **{k: v for k, v in fields.items() if v is not None} 
+            **{k: v for k, v in fields.items() if v is not None and k != "initial_prompt"}
         }
         collection.insert_one(doc)
         logger.info(f"[Mongo] Created conversation with {len(messages)} messages")
