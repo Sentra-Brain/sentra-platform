@@ -14,9 +14,14 @@ export default function MessageList({ messages }: { messages: ChatMessage[] }) {
     }
   }, [messages.length, waitingForAnswer]) // scroll when messages change or waiting state changes
 
+  // Filter out the initial system prompt message (role === 'system' && is_system_prompt)
+  const filteredMessages = messages.filter(
+    (msg) => !(msg.role === 'system' && (msg as ChatMessage).is_system_prompt)
+  )
+
   return (
     <div className="flex flex-col gap-4 overflow-y-auto">
-      {messages.map((msg) => (
+      {filteredMessages.map((msg) => (
         <MessageBubble key={msg.id} {...msg} />
       ))}
       {waitingForAnswer && <WaitingForAnswer />}

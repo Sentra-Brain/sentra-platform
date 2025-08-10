@@ -48,7 +48,6 @@ class ConversationApiService:
         conversation = ConversationEntity(
             created_by_id=user.id,
             title=title,
-            initial_prompt=request.initial_prompt,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
         )
@@ -70,10 +69,13 @@ class ConversationApiService:
 
         conversation = mongo_doc_to_response(doc)
 
-        if not conversation.initial_prompt:
-            raise ValueError("Cannot generate LLM title: missing initial prompt")
 
-        title = await self.title_service.generate_llm_title(conversation.initial_prompt)
+        # Find the first user message to use as the prompt
+        first_user_message = next((m for m in conversation.messages if m.role == "user"), None)
+        if not first_user_message:
+            raise ValueError("Cannot generate LLM title: missing user message")
+
+        title = await self.title_service.generate_llm_title(first_user_message.content)
         if title:
             self.service.update_title(conversation_id, user.id, title)
             conversation.title = title

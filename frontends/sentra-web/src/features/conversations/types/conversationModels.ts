@@ -13,6 +13,7 @@ export type ChatMessage = {
   role: MessageRole;
   content: string;
   timestamp: number;
+  is_system_prompt?: boolean; // Optional flag for system prompt messages
 };
 
 export type ConversationDetails = {

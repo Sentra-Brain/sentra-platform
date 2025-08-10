@@ -22,7 +22,8 @@ class ConversationService:
         messages = [{
             "role": "system",
             "content": SYSTEM_PROMPT,
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "is_system_prompt": True
         }]
         if initial_user_prompt:
             messages.append({
