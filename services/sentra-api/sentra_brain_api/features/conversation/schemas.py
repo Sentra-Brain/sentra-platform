@@ -37,9 +37,11 @@ class ConversationListItemResponse(BaseModel):
     }
 
 class MessageResponse(BaseModel):
+    id: UUID = Field(..., description="Unique identifier of the message")
     role: Literal["user", "assistant", "system"] = Field(..., description="Role of the message sender")
     content: str = Field(..., description="Content of the message")
     timestamp: datetime = Field(..., description="Timestamp of the message")
+    is_system_prompt: Optional[bool] = Field(None, description="Indicates if the message is a system prompt")
 
 class ConversationResponse(BaseMongoModel):
     title: Optional[str] = None    

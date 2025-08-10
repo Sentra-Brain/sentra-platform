@@ -20,6 +20,7 @@ class ConversationService:
         conversation = self.sql_repo.create(conversation)
 
         messages = [{
+            "id": conversation.id,
             "role": "system",
             "content": SYSTEM_PROMPT,
             "timestamp": datetime.now(timezone.utc).isoformat(),
