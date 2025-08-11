@@ -7,6 +7,8 @@ from uuid import UUID
 import httpx
 import logging
 
+from sentra_brain_api.crosscutting.json_sanitize import as_str_list
+
 logger = logging.getLogger("rag_client")
 
 class RagClient:
@@ -23,8 +25,8 @@ class RagClient:
     ) -> List[RagChunk]:
         payload = {
             "query": query,
-            "source_ids": source_ids or [],
-            "document_ids": document_ids or [],
+            "source_ids": as_str_list(source_ids),
+            "document_ids": as_str_list(document_ids),
             "limit": limit
         }
 
