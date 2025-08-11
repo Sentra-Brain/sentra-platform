@@ -40,6 +40,23 @@ class ChatController:
                         yield f"data: {event.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.error(f"Error occurred while streaming response: {e}")
-                    yield f"data: {json.dumps({'error': str(e)})}\n\n"
+                    err_evt = ConversationEvent(
+                        type="step_error",
+                        task_type="chat_pipeline",
+                        label="Streaming failed",
+                        status="error",
+                        content=str(e),
+                        meta={"path": "/chat/send"}
+                    )
+                    yield f"data: {err_evt.model_dump_json()}\n\n"
 
-            return StreamingResponse(stream(), media_type="text/event-stream; charset=utf-8")
+            return StreamingResponse(
+                stream(),
+                media_type="text/event-stream; charset=utf-8",
+                headers={
+                    "Cache-Control": "no-cache, no-transform",
+                    "X-Accel-Buffering": "no",      # Nginx
+                    "Connection": "keep-alive",
+                },
+            )
+

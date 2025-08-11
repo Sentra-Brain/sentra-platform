@@ -28,6 +28,7 @@ class MongoConversationRepository:
             uuidRepresentation="standard"  # Use standard UUID representation for compatibility
         )
         self.db = self.client[settings.mongo_database]
+        self.get_conversations_collection().create_index([("user_id", 1), ("_id", 1)], name="by_user_and_id")
         logger.info(f"[Mongo] Connected to database {settings.mongo_database} at {settings.mongo_host}:{settings.mongo_port}")
 
     def get_conversations_collection(self):

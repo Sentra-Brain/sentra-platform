@@ -108,7 +108,7 @@ class ConversationEngine:
             logger.warning(f"No LLM response for user={request.user_id} conv={request.conversation_id}")
             yield ConversationEvent(
                 type="message_final",
-                content="(No response)"
+                content="(No answer provided by the assistant)"
             )
             return
 
@@ -126,21 +126,32 @@ class ConversationEngine:
 
     async def _stream_llm(self, payload: dict):
         async for line in self.llm_client.chat_completion(payload):
-            if not line.strip():
+            if not line:
                 continue
 
-            if line.startswith("data:"):
-                line = line[len("data:"):].strip()
+            # normalizar y quitar prefijo 'data:'
+            raw = line.strip()
+            if not raw:
+                continue
+            if raw.lower().startswith("data:"):
+                raw = raw[5:].strip()
+                
+            if raw == "[DONE]":
+                break
+
+            if not raw or raw.startswith(":"):
+                continue
 
             try:
-                data = json.loads(line)
+                data = json.loads(raw)
                 delta = data.get("choices", [{}])[0].get("delta", {}).get("content", "")
                 if delta:
                     yield delta
-            except json.JSONDecodeError as e:
-                logger.warning(f"Streaming JSON parse error: {e} | line: {line!r}")
+            except json.JSONDecodeError:
+                logger.debug(f"Streaming non-JSON line ignored: {raw!r}")
             except Exception as e:
                 logger.error(f"Unexpected error in streaming loop: {e}")
+
 
     async def _load_context(self, user_id: UUID, conversation_id: UUID) -> list[dict]:
         try:
@@ -235,22 +246,21 @@ class ConversationEngine:
             )
 
     async def _persist_step_event(self, request: ConversationRequest, event: ConversationEvent):
-        """Persist step events as system messages in MongoDB"""
         try:
             system_message = {
                 "id": event.event_id,
                 "role": "system",
                 "content": event.content,
                 "timestamp": event.timestamp,
+                "type": event.type,
                 "event_type": event.type,
                 "task_type": event.task_type,
                 "task_run_id": event.task_run_id,
                 "step_id": event.step_id,
                 "label": event.label,
                 "status": event.status,
-                "meta": event.meta
+                "meta": json_safe(event.meta) if event.meta is not None else None,
             }
-            
             self.mongo_repo.append_message(
                 conversation_id=request.conversation_id,
                 user_id=request.user_id,
@@ -258,8 +268,7 @@ class ConversationEngine:
             )
         except Exception as e:
             logger.error(f"Failed to persist step event: {e}")
-            # Don't raise exception for step events to avoid breaking the conversation flow
-            # but log the error for monitoring
+
 
     def _on_cache_evict(self, user_id: str, conversation_id: str, messages: list[dict]):
         logger.info(f"[Cache] Evicted: user_id={user_id}, conversation_id={conversation_id}, messages={len(messages)}")
