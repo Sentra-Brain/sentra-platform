@@ -8,22 +8,29 @@ from uuid import UUID, uuid4
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
 from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
 from sentra_brain_api.core.conversation_engine.prompt_factory import PromptFactory
-from sentra_brain_api.core.conversation_engine.rag.rag_formatting import format_chunks_grouped
-from sentra_brain_api.core.conversation_engine.vllm_client import VLLMClient
 from sentra_brain_api.core.conversation_engine.conversations_cache import ConversationsCache
 from sentra_brain_api.core.conversation_engine.rag.rag_client import RagClient
 from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE, USER_CONVERSATION_CACHE_SIZE
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_core.infra.nosql.mongo_conversation_repository import get_conversation_mongo_repository
+from sentra_core.core.settings import settings
+from sentra_brain_api.core.conversation_engine.llm.factory import build_llm_client
+from sentra_brain_api.crosscutting.json_sanitize import json_safe
+
 
 logger = logging.getLogger("sentra_brain_engine")
 
 
 class ConversationEngine:
-    def __init__(self, mongo_repo=None, vllm_client=None, rag_client=None):
-        from sentra_core.core.settings import settings
+    def __init__(self, mongo_repo=None, llm_client=None, rag_client=None):
+
         self.mongo_repo = mongo_repo or get_conversation_mongo_repository()
-        self.vllm_client = vllm_client or VLLMClient(base_url=settings.vllm_server_url)
+        self.llm_client = llm_client or build_llm_client(
+            engine=settings.llm_engine,
+            vllm_url=settings.vllm_server_url,
+            llama_url=settings.llama_server_url,
+            request_timeout=None,
+        )
         self.rag_client = rag_client or RagClient()
         self.prompt_factory = PromptFactory()
         self.cache = ConversationsCache(
@@ -90,7 +97,7 @@ class ConversationEngine:
         )
 
         buffer = ""
-        async for delta in self._vllm_stream(payload):
+        async for delta in self._stream_llm(payload):
             buffer += delta
             yield ConversationEvent(
                 type="message_delta",
@@ -117,8 +124,8 @@ class ConversationEngine:
         )
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
 
-    async def _vllm_stream(self, payload: dict):
-        async for line in self.vllm_client.chat_completion(payload):
+    async def _stream_llm(self, payload: dict):
+        async for line in self.llm_client.chat_completion(payload):
             if not line.strip():
                 continue
 
@@ -179,13 +186,19 @@ class ConversationEngine:
             )
 
     def _make_message(self, role: str, content: str, timestamp: str, **extra) -> dict:
+        mid = extra.pop("message_id", None)
+        rid = extra.pop("response_message_id", None)
+        final_id = str(mid or rid or uuid4().hex)
+
+        safe_extra = {k: json_safe(v) for k, v in extra.items() if v is not None}
+
         return {
-            "id": str(extra.get("message_id") or extra.get("response_message_id") or uuid4().hex),
+            "id": final_id,
             "role": role,
             "content": content,
             "timestamp": timestamp,
-            **extra
-        }
+            **safe_extra
+        }        
 
     async def _persist_user_message(self, request: ConversationRequest, message: dict):
         try:
