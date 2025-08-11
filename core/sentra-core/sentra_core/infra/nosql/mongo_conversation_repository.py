@@ -43,18 +43,18 @@ class MongoConversationRepository:
             logger.warning(f"[Mongo] Conversation not found with ID {conversation_id} for user {user_id}")
             raise ValueError(f"Conversation not found: {conversation_id} for user: {user_id}")
         return doc
-    
-    def create_conversation(self, conversation_id: UUID, user_id: UUID, messages: list[dict], **fields) -> dict:
+
+    def create_conversation(self, conversation_id: UUID, user_id: UUID, **fields) -> dict:
         collection = self.get_conversations_collection()
         doc = {
             "_id": str(conversation_id),
             "user_id": str(user_id),
             "created_at": datetime.now(timezone.utc),
-            "messages": messages,
+            "messages": [],
             **{k: v for k, v in fields.items() if v is not None and k != "initial_prompt"}
         }
         collection.insert_one(doc)
-        logger.info(f"[Mongo] Created conversation with {len(messages)} messages")
+        logger.info(f"[Mongo] Created conversation placeholder for ID {conversation_id} and user {user_id}")
         return doc
     
     def update_conversation(self, conversation_id: UUID, updates: dict) -> int:

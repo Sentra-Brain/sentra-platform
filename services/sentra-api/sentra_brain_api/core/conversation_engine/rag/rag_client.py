@@ -1,9 +1,10 @@
 # sentra_brain_api/core/conversation_engine/rag_client.py
 
-import httpx
-from typing import List, Optional
 from sentra_brain_api.core.conversation_engine.rag.rag_chunk import RagChunk
 from sentra_brain_api.core.conversation_engine.rag.rag_client_setings import settings 
+from typing import List, Optional
+from uuid import UUID
+import httpx
 import logging
 
 logger = logging.getLogger("rag_client")
@@ -16,8 +17,8 @@ class RagClient:
     async def retrieve_relevant_chunks(
         self,
         query: str,
-        source_ids: Optional[List[str]] = None,
-        document_ids: Optional[List[str]] = None,
+        source_ids: Optional[List[UUID]] = None,
+        document_ids: Optional[List[UUID]] = None,
         limit: int = 5
     ) -> List[RagChunk]:
         payload = {

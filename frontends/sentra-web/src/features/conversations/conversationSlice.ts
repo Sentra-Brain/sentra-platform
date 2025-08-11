@@ -102,13 +102,11 @@ const conversationSlice = createSlice({
         state.error = action.error.message ?? 'Error loading conversation'
       })
 
-
-
       .addCase(createConversation.fulfilled, (state, action) => {
         const newConv: ConversationListItem = {
           id: action.payload.id,
-          title: 'Untitled',
-          created_at: new Date().toISOString(), // temporary; ideally return full object
+          title: action.payload.title,
+          created_at: action.payload.created_at,
         }
         state.conversations.unshift(newConv)
         state.currentConversationId = newConv.id

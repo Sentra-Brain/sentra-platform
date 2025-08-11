@@ -20,7 +20,7 @@ logger = logging.getLogger("sentra_brain_engine")
 
 
 class ConversationEngine:
-    def __init__(self, mongo_repo=None, vllm_client=None, rag_client: RagClient=None):
+    def __init__(self, mongo_repo=None, vllm_client=None, rag_client=None):
         from sentra_core.core.settings import settings
         self.mongo_repo = mongo_repo or get_conversation_mongo_repository()
         self.vllm_client = vllm_client or VLLMClient(base_url=settings.vllm_server_url)
@@ -38,7 +38,7 @@ class ConversationEngine:
         task_run_id = None
 
         # Emit RAG step events if context is requested
-        if request.context_source_ids or request.context_document_ids:
+        if request.context_source_ids  or request.context_document_ids:
             task_run_id = uuid4().hex
             
             # Start RAG search step
@@ -55,8 +55,8 @@ class ConversationEngine:
 
         rag_chunks = await self.rag_client.retrieve_relevant_chunks(
             query=request.content,
-            source_ids=request.context_source_ids or [],
-            document_ids=request.context_document_ids or []
+            source_ids=request.context_source_ids,
+            document_ids=request.context_document_ids
         )
 
         # Emit RAG step end if we started a RAG search

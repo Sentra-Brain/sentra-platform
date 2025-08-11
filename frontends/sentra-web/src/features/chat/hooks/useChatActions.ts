@@ -22,9 +22,6 @@ export function useChatActions() {
   const userId = useAppSelector(s => s.auth.user?.id)
   const { selectedContext } = useAppSelector(s => s.chat)
 
-  // Use selected context or empty arrays if RAG is disabled
-  const context_source_ids = selectedContext.useRag ? selectedContext.sourceIds : []
-  const context_document_ids = selectedContext.useRag ? selectedContext.documentIds : []
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim()
@@ -34,18 +31,18 @@ export function useChatActions() {
     const userMessageId = uuidv4()
     const assistantMessageId = uuidv4()
 
+    const wasNewConversation = !conversationId
+
     if (!conversationId) {
       const newConv = await dispatch(createConversation({ initial_prompt: trimmed })).unwrap()
       conversationId = newConv.id
       dispatch(selectConversation(conversationId))
-      await dispatch(fetchConversationById(conversationId)) 
-    } 
+      await dispatch(fetchConversationById(conversationId))
+    }
 
     dispatch(setStreaming(true))
     dispatch(setWaitingForAnswer(true))
 
-
-    // ➕ Add user message immediately for existing conversation
     dispatch(addMessage({
       id: userMessageId,
       role: 'user',
@@ -54,8 +51,8 @@ export function useChatActions() {
     }))
     
 
-    // 📡 Start streaming the assistant response
     let assistantStarted = false
+    let titleTriggered = false 
 
     chatService.sendMessageStream(
       {
@@ -64,8 +61,8 @@ export function useChatActions() {
         message_id: userMessageId,
         response_message_id: assistantMessageId,
         content: trimmed,
-        context_source_ids: context_source_ids,
-        context_document_ids: context_document_ids,
+        context_source_ids: selectedContext.useRag ? selectedContext.sourceIds : [],
+        context_document_ids: selectedContext.useRag ? selectedContext.documentIds : [],
       },
       (chunk) => {
         if (chunk.role === 'assistant') {
@@ -80,42 +77,36 @@ export function useChatActions() {
           } else {
             dispatch(updateLastAssistantMessage(chunk.content))
           }
+        }
 
-          if (chunk.final) {
-            dispatch(setWaitingForAnswer(false))
+        if (chunk.final) {
+          dispatch(setWaitingForAnswer(false))
+          dispatch(setStreaming(false))
+
+          if (wasNewConversation && !titleTriggered) {
+            titleTriggered = true
+            ;(async () => {
+              try {
+                const resp = await conversationService.generateLlmTitle(conversationId!)
+                if (resp.title) {
+                  dispatch(updateConversationTitle({
+                    id: resp.conversation_id,
+                    title: resp.title,
+                  }))
+                }
+              } catch (err) {
+                console.warn('Failed to generate/fetch title', err)
+              }
+            })()
           }
         }
       },
       (err) => {
         console.error('Streaming error:', err)
         dispatch(setWaitingForAnswer(false))
+        dispatch(setStreaming(false))
       }
-    )
-
-    // 🧹 Cleanup flags (in case stream doesn’t do it)
-    dispatch(setStreaming(false))
-
-    // 🧠 Trigger title generation in background
-    if (!currentConversationId) {
-      conversationService.generateLlmTitle(conversationId)
-        .then(() => {
-          // Fetch the updated conversation to get the new title
-          conversationService.get(conversationId)
-            .then((updatedConv) => {
-              // Update the conversation title in the Redux store
-              dispatch(updateConversationTitle({ 
-                id: conversationId, 
-                title: updatedConv.title 
-              }))
-            })
-            .catch(err => {
-              console.warn('Failed to fetch updated conversation', err)
-            })
-        })
-        .catch(err => {
-          console.warn('Failed to trigger title generation', err)
-        })
-    }
+    )    
   }
 
   return { sendMessage }

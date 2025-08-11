@@ -41,7 +41,9 @@ export type UpdateConversationRequest = {
 };
 
 export type UpdateConversationResponse = {
-  success: boolean;
+  conversation_id: string;
+  title?: string | null;
+  description?: string | null;
 };
 
 export type DeleteConversationResponse = {
