@@ -24,7 +24,7 @@ class AdminController:
             logger.info("an admin user is retrieving all users")
             try:
                 self.admin_service = AdminService(UserRepository(db))
-                users = self.admin_service.get_all_users(db)
+                users = self.admin_service.get_all_users()
                 return [to_user_model(user) for user in users]
             except ValueError as e:
                 raise SentraHTTPException(
@@ -40,7 +40,7 @@ class AdminController:
             logger.info(f"an admin user is enabling user {user_id}")
             try:
                 self.admin_service = AdminService(UserRepository(db))
-                enabled_user = self.admin_service.enable_user(user_id, db)
+                enabled_user = self.admin_service.enable_user(user_id)
                 return to_user_model(enabled_user)
             except ValueError as e:
                 raise SentraHTTPException(
@@ -56,7 +56,7 @@ class AdminController:
             logger.info(f"An admin user is deleting user with id {user_id}")
             try:
                 self.admin_service = AdminService(UserRepository(db))
-                self.admin_service.delete_user(user_id, db)
+                self.admin_service.delete_user(user_id)
             except ValueError as e:
                 raise SentraHTTPException(
                     status_code=400,

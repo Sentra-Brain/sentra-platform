@@ -10,9 +10,8 @@ class AdminService:
     def __init__(self, user_repository: UserRepository):
         self.user_repository = user_repository
 
-    def delete_user(self, user_id: UUID, db: Session) -> None:
+    def delete_user(self, user_id: UUID) -> None:
         logger.info(f"Deleting user with id: {user_id}")
-        self.user_repository = UserRepository(db)
         try:
             self.user_repository.delete(user_id)
         except Exception as e:
@@ -26,8 +25,7 @@ class AdminService:
                 suggestion="Ensure the user exists and is not referenced elsewhere"
             )       
             
-    def enable_user(self, user_id: UUID, db: Session):
-        self.user_repository = UserRepository(db)
+    def enable_user(self, user_id: UUID):
         user = self.user_repository.get(user_id)
         if not user:
             raise SentraHTTPException(
@@ -50,8 +48,7 @@ class AdminService:
         logger.info(f"User {user.username} has been enabled.")
         return user
 
-    def get_all_users(self, db: Session):
-        self.user_repository = UserRepository(db)
+    def get_all_users(self):
         users = self.user_repository.get_all()
         if not users:
             raise SentraHTTPException(
