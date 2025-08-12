@@ -48,7 +48,6 @@ class ConversationApiService:
         conversation = ConversationEntity(
             created_by_id=user.id,
             title=title,
-            initial_prompt=request.initial_prompt,
             created_at=datetime.now(timezone.utc),
             updated_at=datetime.now(timezone.utc)
         )
@@ -63,20 +62,26 @@ class ConversationApiService:
     async def generate_llm_title_for_conversation(self, user: UserEntity, conversation_id: UUID) -> UpdateConversationResponse:
         doc = self.service.get_conversation(conversation_id, user.id)
         if not doc:
-            raise SentraHTTPException.not_found("Conversation not found")
+            raise SentraHTTPException(
+                status_code=404,
+                details="Conversation not found"
+            )
 
         conversation = mongo_doc_to_response(doc)
 
-        if not conversation.initial_prompt:
-            raise ValueError("Cannot generate LLM title: missing initial prompt")
 
-        title = await self.title_service.generate_llm_title(conversation.initial_prompt)
+        # Find the first user message to use as the prompt
+        first_user_message = next((m for m in conversation.messages if m.role == "user"), None)
+        if not first_user_message:
+            raise ValueError("Cannot generate LLM title: missing user message")
+
+        title = await self.title_service.generate_llm_title(first_user_message.content)
         if title:
             self.service.update_title(conversation_id, user.id, title)
             conversation.title = title
 
         return UpdateConversationResponse(
-            conversation_id=str(conversation_id),
+            conversation_id=conversation_id,
             title=conversation.title,
             description=conversation.description
         )
@@ -91,7 +96,10 @@ class ConversationApiService:
     def get_conversation(self, user: UserEntity, conversation_id: UUID) -> ConversationResponse:
         doc = self.service.get_conversation(conversation_id, user.id)
         if not doc:
-            raise SentraHTTPException.not_found("Conversation not found")
+            raise SentraHTTPException(
+                status_code=404,
+                details="Conversation not found"
+                )
         return mongo_doc_to_response(doc)
 
     def update_conversation(self, user: UserEntity, conversation_id: UUID, req: UpdateConversationRequest) -> UpdateConversationResponse:
@@ -103,10 +111,13 @@ class ConversationApiService:
         )
 
         if not updated:
-            raise SentraHTTPException.not_found("Conversation not found")
+            raise SentraHTTPException(
+                status_code=404,
+                details="Conversation not found"
+            )
 
         return UpdateConversationResponse(
-            conversation_id=str(conversation_id),
+            conversation_id=conversation_id,
             title=updated.title,
             description=updated.description
         )
@@ -115,7 +126,10 @@ class ConversationApiService:
         deleted = self.service.delete_conversation(conversation_id, user.id)
 
         if not deleted:
-            raise SentraHTTPException.not_found("Conversation not found")
+            raise SentraHTTPException(
+                status_code=404,
+                details="Conversation not found"
+            )
 
         return DeleteConversationResponse(
             success=True,

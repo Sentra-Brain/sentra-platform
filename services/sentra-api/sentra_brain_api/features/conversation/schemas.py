@@ -10,12 +10,6 @@ from sentra_core.model.base_mongo_model import BaseMongoModel
 class CreateConversationRequest(BaseModel):
     initial_prompt: str = Field(..., description="Initial User Prompt for the conversation")
 
-
-    id: UUID = Field(..., description="Unique identifier of the conversation")
-    title: str = Field(..., description="Title of the conversation")
-    # initial_prompt: str = Field(..., description="Initial prompt for the conversation")
-    created_at: datetime = Field(..., description="Creation timestamp")
-
     model_config = {
         "from_attributes": True,
         "populate_by_name": True
@@ -42,9 +36,11 @@ class ConversationListItemResponse(BaseModel):
     }
 
 class MessageResponse(BaseModel):
+    id: UUID = Field(..., description="Unique identifier of the message")
     role: Literal["user", "assistant", "system"] = Field(..., description="Role of the message sender")
     content: str = Field(..., description="Content of the message")
     timestamp: datetime = Field(..., description="Timestamp of the message")
+    is_system_prompt: Optional[bool] = Field(None, description="Indicates if the message is a system prompt")
 
 class ConversationResponse(BaseMongoModel):
     title: Optional[str] = None    

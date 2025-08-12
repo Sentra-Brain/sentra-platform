@@ -13,20 +13,20 @@ class TitleGenerationService:
     def __init__(self, vllm_client: Optional[VLLMServerClient] = None):
         self.vllm_client = vllm_client or VLLMServerClient()
 
-    def generate_initial_title(self, user_message: str) -> str:
+    def generate_initial_title(self, initial_prompt: str) -> str:
         """
         Heuristic fallback title generator used immediately when creating a conversation.
 
         Args:
-            user_message: First user message content
+            initial_prompt: First user message content
         Returns:
             A cleaned, short title
         """
-        if not user_message or not user_message.strip():
+        if not initial_prompt or not initial_prompt.strip():
             return "New Conversation"
 
-        logger.debug(f"Generating initial heuristic title for: {user_message[:100]}")
-        return self._generate_title_heuristic(user_message)
+        logger.debug(f"Generating initial heuristic title for: {initial_prompt[:100]}")
+        return self._generate_title_heuristic(initial_prompt)
 
     async def generate_llm_title(self, user_message: str) -> Optional[str]:
         """
@@ -74,8 +74,10 @@ class TitleGenerationService:
                 ChatMessage(role="system", content=system_prompt),
                 ChatMessage(role="user", content=user_prompt),
             ],
+            model="gpt-4",
             max_tokens=20,
             temperature=0.3,
+            top_p=1.0,
             stream=False,
         )
 
@@ -100,7 +102,7 @@ class TitleGenerationService:
                 break
 
         words = cleaned.split()
-        title_words = words[:8] if len(words) > 6 else words[:6]
+        title_words = words[:6] if len(words) > 4 else words[:4]
 
         if not title_words:
             return "New Conversation"
@@ -112,7 +114,7 @@ class TitleGenerationService:
 
         return self._clean_title(title)
 
-    def _clean_title(self, title: str) -> str:
+    def _clean_title(self, title: Optional[str]) -> str:
         if not title:
             return "New Conversation"
 

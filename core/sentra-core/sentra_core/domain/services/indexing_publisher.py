@@ -8,7 +8,8 @@ indexing jobs, abstracting away the low-level AMQP transport details.
 import json
 from uuid import UUID
 import pika
-from typing import Dict, Any, List
+from pika.adapters.blocking_connection import BlockingChannel
+from typing import Dict, Any, List, Optional
 from sentra_core.core.logging import get_logger
 from sentra_core.infra.amqp.rabbitmq_settings import settings
 
@@ -24,10 +25,10 @@ class IndexingJobPublisher:
     """
     
     def __init__(self):
-        self.connection = None
-        self.channel = None
+        self.connection: pika.BlockingConnection
+        self.channel: BlockingChannel  
         self.queue = settings.rabbitmq_queue
-    
+
     def connect(self):
         """Establish connection to RabbitMQ server."""
         try:
@@ -65,8 +66,8 @@ class IndexingJobPublisher:
         document_id: UUID, 
         document_path: str, 
         knowledge_source_id: UUID,
-        filename: str = None,
-        uploaded_by: str = None
+        filename: Optional[str] = None,
+        uploaded_by: Optional[UUID] = None,
     ) -> bool:
         """
         Publish a single document indexing job.
@@ -96,8 +97,8 @@ class IndexingJobPublisher:
         if filename:
             job["filename"] = filename
         if uploaded_by:
-            job["uploaded_by"] = uploaded_by
-        
+            job["uploaded_by"] = str(uploaded_by)
+
         try:
             self.channel.basic_publish(
                 exchange='',
@@ -174,8 +175,8 @@ def create_indexing_job(
     document_id: UUID,
     document_path: str, 
     knowledge_source_id: UUID,
-    filename: str = None,
-    uploaded_by: str = None
+    filename: Optional[str] = None,
+    uploaded_by: Optional[str] = None
 ) -> Dict[str, Any]:
     """
     Create a standardized indexing job dictionary.
@@ -193,6 +194,6 @@ def create_indexing_job(
     if filename:
         job["filename"] = filename
     if uploaded_by:
-        job["uploaded_by"] = uploaded_by
-        
+        job["uploaded_by"] = str(uploaded_by)
+    logger.info(f"Created indexing job for document {document_id}")
     return job

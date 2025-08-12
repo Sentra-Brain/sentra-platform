@@ -4,7 +4,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 class ConversationRequest(BaseModel):
-    user_id: Optional[UUID] = Field(default=None, description="ID of the user sending the message") 
+    user_id: UUID = Field(..., description="ID of the user sending the message") 
     conversation_id: UUID = Field(..., description="ID of the conversation")
     message_id: Optional[UUID] = Field(default=None, description="ID of the message being sent")
     response_message_id: Optional[UUID] = Field(default=None, description="Pre-assigned ID for the assistant response message") 

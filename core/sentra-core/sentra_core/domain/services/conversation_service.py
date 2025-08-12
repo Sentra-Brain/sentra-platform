@@ -1,6 +1,5 @@
 # sentra_core/domain/services/conversation_service.py
 
-from datetime import datetime, timezone, timedelta
 from typing import Optional
 from uuid import UUID
 
@@ -15,23 +14,13 @@ class ConversationService:
         self.sql_repo = sql_repo
         self.mongo_repo = mongo_repo
 
-    def create_conversation(self, user: UserEntity, conversation: ConversationEntity) -> ConversationEntity:
+    def create_conversation(self, user: UserEntity, conversation: ConversationEntity, initial_user_prompt: str | None = None) -> ConversationEntity:
         conversation = self.sql_repo.create(conversation)
-
-        messages = []
-        if conversation.initial_prompt:
-            messages.append({
-                "role": "system",
-                "content": conversation.initial_prompt,
-                "timestamp": datetime.now(timezone.utc).isoformat()
-            })
 
         self.mongo_repo.create_conversation(
             conversation_id=conversation.id,
             user_id=user.id,
-            messages=messages,
             title=conversation.title,
-            initial_prompt=conversation.initial_prompt,
             created_at=conversation.created_at.isoformat()
         )
 

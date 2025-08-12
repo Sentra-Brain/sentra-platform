@@ -13,6 +13,7 @@ export type ChatMessage = {
   role: MessageRole;
   content: string;
   timestamp: number;
+  is_system_prompt?: boolean; // Optional flag for system prompt messages
 };
 
 export type ConversationDetails = {
@@ -40,7 +41,9 @@ export type UpdateConversationRequest = {
 };
 
 export type UpdateConversationResponse = {
-  success: boolean;
+  conversation_id: string;
+  title?: string | null;
+  description?: string | null;
 };
 
 export type DeleteConversationResponse = {

@@ -9,6 +9,7 @@ LICENSE_INFO = {"name": "AGPLv3", "url": "https://www.gnu.org/licenses/agpl-3.0.
 SWAGGER_UI_PARAMETERS = {"defaultModelsExpandDepth": -1}
 SWAGGER_FAVICON_URL = "https://sentrabrain.com/favicon.svg"
 
+
 SYSTEM_PROMPT = """
 You are Sentra, a private AI assistant deployed securely in a business environment (@sentra).
 
@@ -39,6 +40,7 @@ Do not mix different types in one list. All items must be represented, no matter
 Respond in a professional tone, adapted to a business setting.
 
 """
+
 
 # vLLM server and conversation engine constants
 VLLM_SERVER_URL = "http://vllm:8000"  # Default, override via settings if needed

@@ -1,5 +1,5 @@
 # main.py
-import asyncio
+
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,7 +13,6 @@ from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
 from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
-from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.controller import ConversationController
@@ -21,12 +20,13 @@ from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.organization.controller import router as organization_router
 from sentra_brain_api.features.public.controller import PublicSettingsController
+from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
+from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra_core.core import logging
 from sentra_core.infra.sql import postgres_service
+import asyncio
 import os
-
-from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 
 logger = logging.get_logger("sentra_brain_api")
 
@@ -53,14 +53,14 @@ async def lifespan(app: FastAPI):
 
 
 async def keep_vllm_alive(app: FastAPI):
-    vllm_client = app.state._sentra.conversation_engine.vllm_client
+    llm_client = app.state._sentra.conversation_engine.llm_client
     while True:
-        healthy = await vllm_client.healthcheck()
+        healthy = await llm_client.healthcheck()
         if not healthy:
-            logger.warning("⚠️ vLLM backend not responding to healthcheck")
+            logger.warning("⚠️ LLM backend not responding to healthcheck")
         else:
-            logger.debug("✅ vLLM healthcheck passed")
-        await asyncio.sleep(300)  # every 5 minutes
+            logger.debug("✅ LLM healthcheck passed")
+        await asyncio.sleep(30)  # every 30 seconds
 
 def create_app(
         mediator=None,

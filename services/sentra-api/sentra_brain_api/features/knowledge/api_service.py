@@ -16,7 +16,6 @@ from sentra_core.domain.services.document_service import DocumentService
 from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 from sentra_core.domain.repository.document_repository import DocumentRepository
 from sentra_core.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
-from sentra_core.domain.enums.document import DocumentFileType
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
 from sentra_core.core.settings import settings

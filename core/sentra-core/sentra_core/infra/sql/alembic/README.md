@@ -43,10 +43,18 @@ You can also use `os.getenv("DATABASE_URL")` if you prefer full control from Pyt
 
 ---
 
-## 3. Generate a Migration from PowerShell
+## 3. Generate a Migration 
 
+### From PowerShell
 ```powershell
 $env:DATABASE_URL = "postgresql+psycopg2://sentra_admin:changeit@127.0.0.1:5432/sentra_brain"
+alembic revision --autogenerate -m "Initial schema"
+```
+
+### From Shell
+
+```shell
+export DATABASE_URL="postgresql+psycopg2://sentra_admin:changeit@127.0.0.1:5432/sentra_brain"
 alembic revision --autogenerate -m "Initial schema"
 ```
 

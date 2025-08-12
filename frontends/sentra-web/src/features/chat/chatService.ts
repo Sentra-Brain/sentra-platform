@@ -1,5 +1,6 @@
 // sentra-web/src/features/chat/chatService.ts
 import { tokenStorage } from "@shared/utils/tokenStorage";
+import type { ConversationEvent } from "@features/chat/types/events";
 
 type ChatSendPayload = {
   user_id?: string;
@@ -11,19 +12,14 @@ type ChatSendPayload = {
   context_document_ids?: string[];
 };
 
-type StreamedMessage = {
-  role: "assistant";
-  content: string;
-  final: boolean;
-};
-
-type OnMessageCallback = (chunk: StreamedMessage) => void;
+// NEW: event callback uses ConversationEvent
+type OnEventCallback = (event: ConversationEvent) => void;
 type OnErrorCallback = (error: Error) => void;
 
 export const chatService = {
   sendMessageStream(
     payload: ChatSendPayload,
-    onMessage: OnMessageCallback,
+    onEvent: OnEventCallback,
     onError?: OnErrorCallback
   ): () => void {
     const token = tokenStorage.getAccessToken();
@@ -54,6 +50,7 @@ export const chatService = {
         while (true) {
           const { value, done } = await reader.read();
           if (done) break;
+
           buffer += decoder.decode(value, { stream: true });
 
           const lines = buffer.split("\n");
@@ -67,21 +64,16 @@ export const chatService = {
             if (!json) continue;
 
             try {
-              const parsed: StreamedMessage = JSON.parse(json);
-              onMessage(parsed);
-              if (parsed.final) {
-                // Stream can close naturally
-              }
+              const evt: ConversationEvent = JSON.parse(json);
+              onEvent(evt);
             } catch (err) {
-              console.error("Failed to parse JSON chunk:", json, err);
+              console.error("Failed to parse ConversationEvent:", json, err);
             }
           }
         }
       })
       .catch((err) => {
-        if (onError && !controller.signal.aborted) {
-          onError(err);
-        }
+        if (onError && !controller.signal.aborted) onError(err);
       });
 
     return () => controller.abort();

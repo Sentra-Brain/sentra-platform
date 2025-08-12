@@ -3,27 +3,34 @@ import json
 import logging
 from typing import AsyncGenerator
 from datetime import datetime, timezone
-import uuid
+from uuid import UUID, uuid4
 
 from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
-from sentra_brain_api.core.conversation_engine.models.output_model import ConversationDelta
+from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
 from sentra_brain_api.core.conversation_engine.prompt_factory import PromptFactory
-from sentra_brain_api.core.conversation_engine.rag.rag_formatting import format_chunks_grouped
-from sentra_brain_api.core.conversation_engine.vllm_client import VLLMClient
 from sentra_brain_api.core.conversation_engine.conversations_cache import ConversationsCache
 from sentra_brain_api.core.conversation_engine.rag.rag_client import RagClient
 from sentra_brain_api.core.constants import CONTEXT_WINDOW_SIZE, USER_CONVERSATION_CACHE_SIZE
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_core.infra.nosql.mongo_conversation_repository import get_conversation_mongo_repository
+from sentra_core.core.settings import settings
+from sentra_brain_api.core.conversation_engine.llm.factory import build_llm_client
+from sentra_brain_api.crosscutting.json_sanitize import json_safe
+
 
 logger = logging.getLogger("sentra_brain_engine")
 
 
 class ConversationEngine:
-    def __init__(self, mongo_repo=None, vllm_client=None, rag_client: RagClient=None):
-        from sentra_core.core.settings import settings
+    def __init__(self, mongo_repo=None, llm_client=None, rag_client=None):
+
         self.mongo_repo = mongo_repo or get_conversation_mongo_repository()
-        self.vllm_client = vllm_client or VLLMClient(base_url=settings.vllm_server_url)
+        self.llm_client = llm_client or build_llm_client(
+            engine=settings.llm_engine,
+            vllm_url=settings.vllm_server_url,
+            llama_url=settings.llama_server_url,
+            request_timeout=None,
+        )
         self.rag_client = rag_client or RagClient()
         self.prompt_factory = PromptFactory()
         self.cache = ConversationsCache(
@@ -31,25 +38,56 @@ class ConversationEngine:
             on_evict=self._on_cache_evict
         )
 
-    async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationDelta, None]:
+    async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationEvent, None]:
         logger.info(f"[Engine] Starting run: user={request.user_id}, conversation={request.conversation_id}")
 
         now = datetime.now(timezone.utc).isoformat()
+        task_run_id = None
 
-        if request.context_source_ids or request.context_document_ids:
-            yield ConversationDelta(content="💡 Searching in the Knowledge Base... \\r\\n", final=False)
+        # Emit RAG step events if context is requested
+        if request.context_source_ids  or request.context_document_ids:
+            task_run_id = uuid4().hex
+            
+            # Start RAG search step
+            step_start_event = ConversationEvent(
+                type="step_start",
+                task_type="rag_search",
+                task_run_id=task_run_id,
+                label="Searching Knowledge Base",
+                status="searching",
+                content="💡 Searching in the Knowledge Base..."
+            )
+            yield step_start_event
+            await self._persist_step_event(request, step_start_event)
 
         rag_chunks = await self.rag_client.retrieve_relevant_chunks(
             query=request.content,
             source_ids=request.context_source_ids,
             document_ids=request.context_document_ids
         )
+
+        # Emit RAG step end if we started a RAG search
+        if task_run_id:
+            step_end_event = ConversationEvent(
+                type="step_end",
+                task_type="rag_search",
+                task_run_id=task_run_id,
+                label="Knowledge Base Search Complete",
+                status="completed",
+                content=f"Found {len(rag_chunks)} relevant chunks",
+                meta={
+                    "chunks_found": len(rag_chunks),
+                    "source_ids": request.context_source_ids,
+                    "document_ids": request.context_document_ids
+                }
+            )
+            yield step_end_event
+            await self._persist_step_event(request, step_end_event)
         
         context = await self._load_context(request.user_id, request.conversation_id)
 
         user_msg = self._make_message("user", request.content, now, message_id=request.message_id)
         await self._persist_user_message(request, user_msg)
-
 
         payload = self.prompt_factory.build_payload(
             context=context,
@@ -58,13 +96,19 @@ class ConversationEngine:
         )
 
         buffer = ""
-        async for delta in self._vllm_stream(payload):
+        async for delta in self._stream_llm(payload):
             buffer += delta
-            yield ConversationDelta(content=delta)
+            yield ConversationEvent(
+                type="message_delta",
+                content=delta
+            )
 
         if not buffer.strip():
             logger.warning(f"No LLM response for user={request.user_id} conv={request.conversation_id}")
-            yield ConversationDelta(content="(No response)", final=True)
+            yield ConversationEvent(
+                type="message_final",
+                content="(No answer provided by the assistant)"
+            )
             return
 
         assistant_msg = self._make_message("assistant", buffer, now, message_id=request.response_message_id)
@@ -73,28 +117,42 @@ class ConversationEngine:
         context.append(assistant_msg)
         self.cache.put(request.user_id, request.conversation_id, context[-CONTEXT_WINDOW_SIZE:])
 
-        yield ConversationDelta(content="", final=True)
+        yield ConversationEvent(
+            type="message_final",
+            content=""
+        )
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
 
-    async def _vllm_stream(self, payload: dict):
-        async for line in self.vllm_client.chat_completion(payload):
-            if not line.strip():
+    async def _stream_llm(self, payload: dict):
+        async for line in self.llm_client.chat_completion(payload):
+            if not line:
                 continue
 
-            if line.startswith("data:"):
-                line = line[len("data:"):].strip()
+            # normalize and remove 'data:' prefix
+            raw = line.strip()
+            if not raw:
+                continue
+            if raw.lower().startswith("data:"):
+                raw = raw[5:].strip()
+                
+            if raw == "[DONE]":
+                break
+
+            if not raw or raw.startswith(":"):
+                continue
 
             try:
-                data = json.loads(line)
+                data = json.loads(raw)
                 delta = data.get("choices", [{}])[0].get("delta", {}).get("content", "")
                 if delta:
                     yield delta
-            except json.JSONDecodeError as e:
-                logger.warning(f"Streaming JSON parse error: {e} | line: {line!r}")
+            except json.JSONDecodeError:
+                logger.debug(f"Streaming non-JSON line ignored: {raw!r}")
             except Exception as e:
                 logger.error(f"Unexpected error in streaming loop: {e}")
 
-    async def _load_context(self, user_id: str, conversation_id: str) -> list[dict]:
+
+    async def _load_context(self, user_id: UUID, conversation_id: UUID) -> list[dict]:
         try:
             cached = self.cache.get(user_id, conversation_id)
             if cached is not None:
@@ -138,13 +196,19 @@ class ConversationEngine:
             )
 
     def _make_message(self, role: str, content: str, timestamp: str, **extra) -> dict:
+        mid = extra.pop("message_id", None)
+        rid = extra.pop("response_message_id", None)
+        final_id = str(mid or rid or uuid4().hex)
+
+        safe_extra = {k: json_safe(v) for k, v in extra.items() if v is not None}
+
         return {
-            "id": extra.get("message_id") or extra.get("response_message_id") or uuid.uuid4().hex,
+            "id": final_id,
             "role": role,
             "content": content,
             "timestamp": timestamp,
-            **extra
-        }
+            **safe_extra
+        }        
 
     async def _persist_user_message(self, request: ConversationRequest, message: dict):
         try:
@@ -179,6 +243,30 @@ class ConversationEngine:
                 details=str(e),
                 path="/chat/send"
             )
+
+    async def _persist_step_event(self, request: ConversationRequest, event: ConversationEvent):
+        try:
+            system_message = {
+                "id": event.event_id,
+                "role": "system",
+                "content": event.content,
+                "timestamp": event.timestamp,
+                "type": event.type,
+                "event_type": event.type,
+                "task_type": event.task_type,
+                "task_run_id": event.task_run_id,
+                "step_id": event.step_id,
+                "label": event.label,
+                "status": event.status,
+                "meta": json_safe(event.meta) if event.meta is not None else None,
+            }
+            self.mongo_repo.append_message(
+                conversation_id=request.conversation_id,
+                user_id=request.user_id,
+                message=system_message
+            )
+        except Exception as e:
+            logger.error(f"Failed to persist step event: {e}")
 
     def _on_cache_evict(self, user_id: str, conversation_id: str, messages: list[dict]):
         logger.info(f"[Cache] Evicted: user_id={user_id}, conversation_id={conversation_id}, messages={len(messages)}")

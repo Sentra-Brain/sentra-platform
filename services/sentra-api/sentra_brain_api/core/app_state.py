@@ -3,5 +3,5 @@ from pydantic import BaseModel
 from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
 
 class AppState:
-    def __init__(self, conversation_engine: ConversationEngine):
-        self.conversation_engine = conversation_engine
+    def __init__(self, conversation_engine: ConversationEngine | None = None):
+        self.conversation_engine: ConversationEngine | None = conversation_engine
