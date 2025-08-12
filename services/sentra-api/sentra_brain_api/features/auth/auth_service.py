@@ -47,7 +47,7 @@ class AuthService:
     def validate_refresh_token(self, refresh_token: str) -> UserEntity | None:
         try:
             payload = jwt.decode(refresh_token, settings.secret_key, algorithms=[settings.algorithm])
-            username: str = payload.get("sub")
+            username: str = payload.get("sub") 
             token_type: str = payload.get("type")
             
             if not username or token_type != "refresh":

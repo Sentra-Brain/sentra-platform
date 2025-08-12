@@ -89,7 +89,6 @@ class ConversationEngine:
         user_msg = self._make_message("user", request.content, now, message_id=request.message_id)
         await self._persist_user_message(request, user_msg)
 
-
         payload = self.prompt_factory.build_payload(
             context=context,
             new_message=user_msg,
@@ -268,7 +267,6 @@ class ConversationEngine:
             )
         except Exception as e:
             logger.error(f"Failed to persist step event: {e}")
-
 
     def _on_cache_evict(self, user_id: str, conversation_id: str, messages: list[dict]):
         logger.info(f"[Cache] Evicted: user_id={user_id}, conversation_id={conversation_id}, messages={len(messages)}")

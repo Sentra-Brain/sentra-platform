@@ -1,194 +1,200 @@
-import pytest
-import uuid
+# tests/features/chat/test_chat_controller_sse.py
+
 import json
-from unittest.mock import Mock, AsyncMock, patch
+import uuid
+import types
+import pytest
+from unittest.mock import patch
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from sentra_brain_api.features.chat.controller import ChatController
-from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
-from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
-from sentra_brain_api.core.conversation_engine.rag.rag_chunk import RagChunk
-from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
+from sentra_core.domain.entities.user_entity import UserEntity
+from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
 
 
-class TestChatControllerSSE:
-    @pytest.fixture
-    def mock_user(self):
-        return UserEntity(id=uuid.uuid4(), username="testuser")
+@pytest.fixture
+def mock_user():
+    # Realistic user entity (SQLAlchemy model); only fields we need here
+    return UserEntity(id=uuid.uuid4(), username="testuser")
 
-    @pytest.fixture
-    def mock_app_state(self):
-        app_state = Mock()
-        
-        # Mock conversation engine
-        engine = Mock()
-        
-        # Create a mock async generator that yields ConversationEvent objects
-        async def mock_engine_run(request):
-            # Emit step events for RAG if context is requested
-            if request.context_source_ids:
-                task_run_id = uuid.uuid4().hex
-                
-                yield ConversationEvent(
-                    type="step_start",
-                    task_type="rag_search",
-                    task_run_id=task_run_id,
-                    label="Searching Knowledge Base",
-                    status="searching",
-                    content="💡 Searching in the Knowledge Base..."
-                )
-                
-                yield ConversationEvent(
-                    type="step_end",
-                    task_type="rag_search",
-                    task_run_id=task_run_id,
-                    label="Knowledge Base Search Complete",
-                    status="completed",
-                    content="Found 2 relevant chunks",
-                    meta={"chunks_found": 2}
-                )
-            
-            # Emit message events
-            yield ConversationEvent(type="message_delta", content="Hello ")
-            yield ConversationEvent(type="message_delta", content="world!")
-            yield ConversationEvent(type="message_final", content="")
-        
-        engine.run = mock_engine_run
-        app_state.conversation_engine = engine
-        
-        return app_state
 
-    @pytest.fixture
-    def client(self, mock_user, mock_app_state):
-        app = FastAPI()
-        controller = ChatController()
-        app.include_router(controller.router, prefix="/chat")
-        
-        # Mock dependencies
-        app.dependency_overrides[get_authenticated_user] = lambda: mock_user
-        
-        # Mock app state
-        app.state._sentra = mock_app_state
-        
-        return TestClient(app)
+@pytest.fixture
+def app(mock_user):
+    app = FastAPI()
+    app.include_router(ChatController().router, prefix="/chat")
+    # Auth override
+    app.dependency_overrides[get_authenticated_user] = lambda: mock_user
+    return app
 
-    def test_sse_streaming_with_step_events(self, client):
-        """Test that SSE streaming works correctly with step events"""
+
+def parse_sse(text: str):
+    events = []
+    for line in text.split("\n"):
+        if line.startswith("data: "):
+            raw = line[6:].strip()
+            if not raw:
+                continue
+            try:
+                events.append(json.loads(raw))
+            except json.JSONDecodeError:
+                # ignore keep-alives or stray lines
+                pass
+    return events
+
+
+def make_evt(**kwargs) -> ConversationEvent:
+    # Helper to ensure every event is a valid ConversationEvent
+    base = {"type": "message_delta", "content": "x"}
+    base.update(kwargs)
+    return ConversationEvent(**base) # type: ignore[call-arg]
+
+
+def test_sse_with_rag_events_and_user_override(app, mock_user):
+    # Capture the user_id that reaches the engine to confirm override works
+    seen_user_ids = []
+
+    async def fake_run(request):
+        # controller must have overwritten request.user_id with mock_user.id
+        seen_user_ids.append(str(request.user_id))
+
+        # Only emit step events if RAG context is present (mirrors real behavior)
+        if request.context_source_ids:
+            run_id = uuid.uuid4().hex
+            yield make_evt(
+                type="step_start",
+                task_type="rag_search",
+                task_run_id=run_id,
+                label="Searching Knowledge Base",
+                status="searching",
+                content="Searching..."
+            )
+            yield make_evt(
+                type="step_end",
+                task_type="rag_search",
+                task_run_id=run_id,
+                label="Knowledge Base Search Complete",
+                status="completed",
+                content="Found 2 chunks",
+                meta={"chunks_found": 2}
+            )
+        yield make_evt(type="message_delta", content="Hello ")
+        yield make_evt(type="message_delta", content="world!")
+        yield make_evt(type="message_final", content="")
+
+    # Patch app.state._sentra to provide a fake engine with our run()
+    with patch.object(
+        app.state,
+        "_sentra",
+        types.SimpleNamespace(conversation_engine=types.SimpleNamespace(run=fake_run)),
+        create=True,
+    ):
+        client = TestClient(app)
+
         payload = {
+            # ConversationRequest schema: user_id is REQUIRED → include it (will be overridden)
+            "user_id": str(uuid.uuid4()),  # intentionally different than mock_user.id
             "conversation_id": str(uuid.uuid4()),
-            "content": "Test message with RAG",
             "message_id": str(uuid.uuid4()),
             "response_message_id": str(uuid.uuid4()),
-            "context_source_ids": [str(uuid.uuid4()), str(uuid.uuid4())]
+            "content": "query using RAG",
+            # RAG UUID arrays → strings accepted; Pydantic converts to UUID
+            "context_source_ids": [str(uuid.uuid4())],
+            "context_document_ids": [str(uuid.uuid4())],
         }
-        
-        response = client.post("/chat/send", json=payload)
-        
-        # Verify response is SSE
-        assert response.status_code == 200
-        assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
-        
-        # Parse SSE events
-        events = []
-        for line in response.text.split("\n"):
-            if line.startswith("data: "):
-                event_data = line[6:]  # Remove "data: " prefix
-                if event_data.strip():  # Skip empty lines
-                    try:
-                        event = json.loads(event_data)
-                        events.append(event)
-                    except json.JSONDecodeError:
-                        pass  # Skip malformed events
-        
-        # Verify we got events
-        assert len(events) > 0
-        
-        # Check event types
-        event_types = [event.get("type") for event in events]
-        assert "step_start" in event_types
-        assert "step_end" in event_types
-        assert "message_delta" in event_types
-        assert "message_final" in event_types
-        
-        # Verify step events structure
-        step_start_events = [e for e in events if e.get("type") == "step_start"]
-        assert len(step_start_events) == 1
-        step_start = step_start_events[0]
-        
-        assert step_start["task_type"] == "rag_search"
-        assert step_start["task_run_id"] is not None
-        assert step_start["label"] == "Searching Knowledge Base"
-        assert step_start["status"] == "searching"
-        assert "event_id" in step_start
-        assert "timestamp" in step_start
-        
-        # Verify step_end event
-        step_end_events = [e for e in events if e.get("type") == "step_end"]
-        assert len(step_end_events) == 1
-        step_end = step_end_events[0]
-        
-        assert step_end["task_type"] == "rag_search"
-        assert step_end["task_run_id"] == step_start["task_run_id"]
-        assert step_end["label"] == "Knowledge Base Search Complete"
-        assert step_end["status"] == "completed"
-        assert step_end["meta"]["chunks_found"] == 2
 
-    def test_sse_streaming_without_step_events(self, client):
-        """Test that SSE streaming works correctly without step events"""
+        resp = client.post("/chat/send", json=payload)
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "text/event-stream; charset=utf-8"
+
+        events = parse_sse(resp.text)
+        assert events, "No SSE events parsed"
+
+        types_ = [e["type"] for e in events]
+        assert "step_start" in types_
+        assert "step_end" in types_
+        assert "message_delta" in types_
+        assert "message_final" in types_
+
+        # Required fields present on all events
+        for e in events:
+            assert e.get("event_id"), "event_id missing"
+            assert e.get("timestamp"), "timestamp missing"
+
+        # step fields
+        start = next(e for e in events if e["type"] == "step_start")
+        end = next(e for e in events if e["type"] == "step_end")
+        assert start["task_type"] == "rag_search"
+        assert start["status"] == "searching"
+        assert end["status"] == "completed"
+        assert end["task_run_id"] == start["task_run_id"]
+        assert end["meta"]["chunks_found"] == 2
+
+        # Confirm the controller overwrote user_id with the authenticated user
+        assert seen_user_ids and seen_user_ids[0] == str(mock_user.id)
+
+
+def test_sse_without_step_events(app, mock_user):
+    async def fake_run(_request):
+        yield make_evt(type="message_delta", content="Only text ")
+        yield make_evt(type="message_delta", content="stream.")
+        yield make_evt(type="message_final", content="")
+
+    with patch.object(
+        app.state,
+        "_sentra",
+        types.SimpleNamespace(conversation_engine=types.SimpleNamespace(run=fake_run)),
+        create=True,
+    ):
+        client = TestClient(app)
         payload = {
+            "user_id": str(mock_user.id),  # required by schema
             "conversation_id": str(uuid.uuid4()),
-            "content": "Test message without RAG",
             "message_id": str(uuid.uuid4()),
             "response_message_id": str(uuid.uuid4()),
-            "context_source_ids": None
+            "content": "plain query",
+            # No RAG context → no step events expected
         }
-        
-        response = client.post("/chat/send", json=payload)
-        
-        # Verify response is SSE
-        assert response.status_code == 200
-        assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
-        
-        # Parse SSE events
-        events = []
-        for line in response.text.split("\n"):
-            if line.startswith("data: "):
-                event_data = line[6:]  # Remove "data: " prefix
-                if event_data.strip():  # Skip empty lines
-                    try:
-                        event = json.loads(event_data)
-                        events.append(event)
-                    except json.JSONDecodeError:
-                        pass  # Skip malformed events
-        
-        # Verify we got events
-        assert len(events) > 0
-        
-        # Check event types - should only have message events
-        event_types = [event.get("type") for event in events]
-        assert "step_start" not in event_types
-        assert "step_end" not in event_types
-        assert "message_delta" in event_types
-        assert "message_final" in event_types
-        
-        # Verify all events have required fields
-        for event in events:
-            assert "event_id" in event
-            assert "timestamp" in event
-            assert "type" in event
+        resp = client.post("/chat/send", json=payload)
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "text/event-stream; charset=utf-8"
 
-    def test_sse_content_type_header(self, client):
-        """Test that the correct content-type header is set"""
+        events = parse_sse(resp.text)
+        types_ = [e["type"] for e in events]
+        assert "step_start" not in types_
+        assert "step_end" not in types_
+        assert "message_delta" in types_
+        assert "message_final" in types_
+        for e in events:
+            assert e.get("event_id")
+            assert e.get("timestamp")
+
+
+def test_sse_error_path_emits_step_error(app, mock_user):
+    async def fake_run(_request):
+        # Make this an async generator, then raise on first iteration
+        if False:
+            # keep type correct; never executed
+            yield ConversationEvent(type="message_delta", content="")
+        raise RuntimeError("boom")
+
+    with patch.object(
+        app.state,
+        "_sentra",
+        types.SimpleNamespace(conversation_engine=types.SimpleNamespace(run=fake_run)),
+        create=True,
+    ):
+        client = TestClient(app)
         payload = {
+            "user_id": str(mock_user.id),
             "conversation_id": str(uuid.uuid4()),
-            "content": "Test message",
             "message_id": str(uuid.uuid4()),
-            "response_message_id": str(uuid.uuid4())
+            "response_message_id": str(uuid.uuid4()),
+            "content": "will fail",
         }
-        
-        response = client.post("/chat/send", json=payload)
-        
-        assert response.status_code == 200
-        assert response.headers["content-type"] == "text/event-stream; charset=utf-8"
+        resp = client.post("/chat/send", json=payload)
+        events = parse_sse(resp.text)
+        err = events[-1]
+        assert err["type"] == "step_error"
+        assert "boom" in err.get("content", "")
