@@ -99,13 +99,7 @@ class DocumentProcessor:
             # --- Step 2: Cast to Markdown ---
             self._set_status(document_id, DocumentStatus.PROCESSING, "Casting to markdown", repo=document_repo)
             try:
-                text_md = cast_to_markdown(
-                    payload.raw_text,
-                    filetype,
-                    pages=payload.pages,
-                    html_blocks=payload.html_blocks,
-                    email_headers=payload.email_headers
-                )
+                text_md = extractor.extract_markdown(str(absolute_filepath))
 
                 if not text_md.strip():
                     return fail("Markdown casting produced no content")

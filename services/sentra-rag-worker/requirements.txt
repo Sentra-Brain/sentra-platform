@@ -24,9 +24,11 @@ prometheus-client
 pydantic
 pydantic_settings
 PyMuPDF==1.26.3
+pymupdf4llm>=0.0.27
 pytest-asyncio==1.1.0
 pytest-cov==6.2.1
 pytest-mock==3.14.1
 pytest==8.4.1
 python-dotenv==1.1.1
 python-jose
+pandoc>=2.4

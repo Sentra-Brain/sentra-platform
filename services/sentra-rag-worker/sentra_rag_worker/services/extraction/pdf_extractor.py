@@ -2,6 +2,7 @@
 
 import os
 import pymupdf
+import pymupdf4llm
 from sentra_core.core.logging import get_logger
 from .base import DocumentExtractorBase, ExtractionPayload
 
@@ -59,6 +60,27 @@ class PdfExtractor(DocumentExtractorBase):
                     }
                 )
                 
+        except Exception as e:
+            logger.error(f"Failed to extract PDF content from {filepath}: {e}")
+            raise ValueError(f"PDF extraction failed: {str(e)}")
+        
+    def extract_markdown(self, filepath: str) -> str:
+        """Extract content as Markdown string.
+        
+        Args:
+            filepath: Path to the PDF file
+        Returns:
+            Markdown representation of the document
+        """
+
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+        try:
+            logger.info(f"Extracting PDF content from {filepath}")
+
+            markdown = pymupdf4llm.to_markdown(filepath)
+            return markdown.strip()
+
         except Exception as e:
             logger.error(f"Failed to extract PDF content from {filepath}: {e}")
             raise ValueError(f"PDF extraction failed: {str(e)}")

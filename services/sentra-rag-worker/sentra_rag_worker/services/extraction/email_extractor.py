@@ -59,6 +59,30 @@ class EmlExtractor(DocumentExtractorBase):
         except Exception as e:
             logger.error(f"Failed to extract EML content from {filepath}: {e}")
             raise ValueError(f"EML extraction failed: {str(e)}")
+        
+    def extract_markdown(self, filepath: str) -> str:
+        """Extract Markdown content from EML file.
+        
+        Args:
+            filepath: Path to the EML file
+            
+        Returns:
+            Markdown string representation of the email body
+        """
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+
+        try:
+            logger.info(f"Extracting Markdown content from {filepath}")
+
+            # Use the same extraction logic, but return raw text as markdown
+            payload = self.extract(filepath)
+
+            return payload.raw_text
+
+        except Exception as e:
+            logger.error(f"Failed to extract Markdown content from {filepath}: {e}")
+            raise ValueError(f"Markdown extraction failed: {str(e)}")
 
 
 class MsgExtractor(DocumentExtractorBase):
@@ -117,3 +141,26 @@ class MsgExtractor(DocumentExtractorBase):
                     msg.close()
             except:
                 pass
+    def extract_markdown(self, filepath: str) -> str:
+        """Extract Markdown content from MSG file.
+        
+        Args:
+            filepath: Path to the MSG file
+            
+        Returns:
+            Markdown string representation of the email body
+        """
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+
+        try:
+            logger.info(f"Extracting Markdown content from {filepath}")
+
+            # Use the same extraction logic, but return raw text as markdown
+            payload = self.extract(filepath)
+
+            return payload.raw_text
+
+        except Exception as e:
+            logger.error(f"Failed to extract Markdown content from {filepath}: {e}")
+            raise ValueError(f"Markdown extraction failed: {str(e)}")

@@ -17,7 +17,7 @@ from sentra_core.domain.repository.knowledge_source_repository import KnowledgeS
 from sentra_core.domain.repository.document_repository import DocumentRepository
 from sentra_core.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
+from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentMarkdownResponse, DocumentUploadRequest
 from sentra_core.core.settings import settings
 from sentra_core.core.logging import get_logger
 
@@ -29,7 +29,7 @@ class KnowledgeApiService:
         self,
         knowledge_repo: KnowledgeSourceRepository,
         document_repo: DocumentRepository,
-        indexing_publisher: IndexingJobPublisher = None
+        indexing_publisher: IndexingJobPublisher
     ):
         self.knowledge_repo = knowledge_repo
         self.document_repo = document_repo
@@ -51,7 +51,8 @@ class KnowledgeApiService:
         try:
             return self.knowledge_svc.create_knowledge_source(entity)
         except ValueError as ve:
-            raise SentraHTTPException(400, "INVALID_KNOWLEDGE_SOURCE", str(ve), suggestion="Revisa el path indicado")
+            raise SentraHTTPException(
+                status_code=400, code="INVALID_KNOWLEDGE_SOURCE", message=str(ve), suggestion="Revisa el path indicado")
         except Exception as e:
             raise SentraHTTPException(
                 status_code=500,
@@ -267,3 +268,26 @@ class KnowledgeApiService:
             doc.description = description
             
         return self.document_repo.update(doc)
+
+    def get_document_markdown(self, document_id: UUID, user: UserEntity) -> DocumentMarkdownResponse:
+        """Get markdown info for a document"""
+        doc = self.get_document(document_id, user)
+        if not doc.has_markdown or not doc.markdown_path:
+            raise SentraHTTPException(
+                status_code=404,
+                code="DOCUMENT_MARKDOWN_NOT_FOUND",
+                message=f"Document with ID {document_id} does not have markdown info",
+                path=f"/knowledge/documents/{document_id}/markdown"
+            )
+        # Get markdown content
+        content_bytes = self._file_storage.get_file_content(doc.markdown_path)
+        if content_bytes is None:
+            raise SentraHTTPException(
+                status_code=404,
+                code="DOCUMENT_MARKDOWN_NOT_FOUND",
+                message=f"Markdown content for document {document_id} not found",
+                path=f"/knowledge/documents/{document_id}/markdown"
+            )
+        # convert bytes to string
+        markdown = content_bytes.decode("utf-8")
+        return DocumentMarkdownResponse(document_id=document_id, markdown=markdown)

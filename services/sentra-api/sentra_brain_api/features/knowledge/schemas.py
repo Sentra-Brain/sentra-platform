@@ -57,12 +57,17 @@ class DocumentResponse(BaseModel):
     error: Optional[str] = None
     chunks_count: Optional[int] = None
     knowledge_source_id: UUID
+    has_markdown: bool = False
 
     model_config = {
         "from_attributes": True,
         "populate_by_name": True
     }
 
+
+class DocumentMarkdownResponse(BaseModel):
+    document_id: UUID
+    markdown: str
 
 # List responses
 class KnowledgeSourceListResponse(BaseModel):

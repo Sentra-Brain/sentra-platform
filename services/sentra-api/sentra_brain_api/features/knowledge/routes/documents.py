@@ -13,6 +13,7 @@ from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
 
 from sentra_brain_api.features.knowledge.api_service import KnowledgeApiService
 from sentra_brain_api.features.knowledge.schemas import (
+    DocumentMarkdownResponse,
     DocumentUploadRequest,
     DocumentResponse, 
     DocumentListResponse
@@ -120,3 +121,13 @@ async def remove_document(
     """Remove a document"""
     doc = service.remove_document(document_id, user)
     return to_document_response(doc)
+
+@router.get("/documents/{document_id}/markdown", response_model=DocumentMarkdownResponse)
+async def get_document_markdown(
+    document_id: UUID,
+    user: UserEntity = Depends(get_authenticated_user),
+    service: KnowledgeApiService = Depends(_get_service)
+):
+    """Get the markdown content of a specific document"""
+    markdown_response = service.get_document_markdown(document_id, user)
+    return markdown_response

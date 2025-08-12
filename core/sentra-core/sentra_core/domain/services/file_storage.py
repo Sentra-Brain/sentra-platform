@@ -226,7 +226,7 @@ class FileStorageService:
         
     def save_markdown(self, document_id: UUID, markdown: str, derived_dir: str = ".derived") -> Tuple[str, int, str]:
         """
-        Save gzipped Markdown content for a document under a derived subdirectory.
+        Save Markdown content (plain UTF-8) for a document under a derived subdirectory.
 
         Args:
             document_id: UUID of the document
@@ -237,16 +237,16 @@ class FileStorageService:
             Tuple of (relative_path_from_mount, size_in_bytes, sha256_digest)
         """
         try:
-            # Resolve path: /mnt/sentra_knowledge/.derived/<uuid>.md.gz
+            # Resolve path: /mnt/sentra_knowledge/.derived/<uuid>.md
             derived_path = self.mount_path / derived_dir
             derived_path.mkdir(parents=True, exist_ok=True)
 
-            safe_filename = f"{str(document_id)}.md.gz"
+            safe_filename = f"{str(document_id)}.md"
             full_path = derived_path / safe_filename
 
             data = markdown.encode("utf-8")
-            with gzip.open(full_path, "wb") as f:  
-                f.write(data) # type: ignore[assignment]
+            with open(full_path, "wb") as f:
+                f.write(data)
 
             relative_path = full_path.relative_to(self.mount_path)
             size = len(data)
@@ -259,3 +259,24 @@ class FileStorageService:
         except Exception as e:
             logger.error(f"Failed to persist markdown for document {document_id}: {e}")
             raise
+
+        
+    def get_file_content(self, relative_path: str) -> Optional[bytes]:
+        """
+        Read file content from a relative path.
+        
+        Args:
+            relative_path: Path relative to mount point
+            
+        Returns:
+            File content as bytes or None if file doesn't exist
+        """
+        try:
+            abs_path = self.resolve_document_path(relative_path)
+            if not abs_path.is_file():
+                return None
+            
+            with open(abs_path, "rb") as f:
+                return f.read()
+        except (ValueError, OSError):
+            return None

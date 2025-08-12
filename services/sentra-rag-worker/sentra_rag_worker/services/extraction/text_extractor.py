@@ -53,3 +53,27 @@ class TextExtractor(DocumentExtractorBase):
         except Exception as e:
             logger.error(f"Failed to extract text content from {filepath}: {e}")
             raise ValueError(f"Text extraction failed: {str(e)}")
+    
+    def extract_markdown(self, filepath: str) -> str:
+        """Extract Markdown content from text file.
+        
+        Args:
+            filepath: Path to the text file
+            
+        Returns:
+            Markdown string representation of the document
+        """
+        if not os.path.exists(filepath):
+            raise FileNotFoundError(f"File not found: {filepath}")
+        
+        try:
+            logger.info(f"Extracting Markdown content from {filepath}")
+            
+            # Use the same extraction logic, but return raw text as markdown
+            payload = self.extract(filepath)
+            
+            return payload.raw_text
+            
+        except Exception as e:
+            logger.error(f"Failed to extract Markdown content from {filepath}: {e}")
+            raise ValueError(f"Markdown extraction failed: {str(e)}")

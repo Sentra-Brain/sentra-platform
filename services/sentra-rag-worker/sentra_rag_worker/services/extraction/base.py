@@ -22,22 +22,11 @@ class ExtractionPayload:
             return 0
         return len(self.raw_text.split())
 
-
 class DocumentExtractorBase(ABC):
-    """Abstract base class for document extractors."""
-    
     @abstractmethod
     def extract(self, filepath: str) -> ExtractionPayload:
-        """Extract content and metadata from a document.
-        
-        Args:
-            filepath: Path to the document file
-            
-        Returns:
-            ExtractionPayload with extracted content and metadata
-            
-        Raises:
-            FileNotFoundError: If file doesn't exist
-            ValueError: If extraction fails
-        """
-        pass
+        """Returns structured payload including raw_text, meta, etc."""
+
+    @abstractmethod
+    def extract_markdown(self, filepath: str) -> str:
+        """Returns Markdown string representation of the document."""
