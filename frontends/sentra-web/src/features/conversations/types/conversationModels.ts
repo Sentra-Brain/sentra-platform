@@ -14,6 +14,15 @@ export type ChatMessage = {
   content: string;
   timestamp: number;
   is_system_prompt?: boolean; // Optional flag for system prompt messages
+  // Step event fields (for system messages that represent step events)
+  event_id?: string;
+  event_type?: string;
+  task_type?: string;
+  task_run_id?: string;
+  step_id?: string;
+  label?: string;
+  status?: string;
+  meta?: Record<string, unknown>;
 };
 
 export type ConversationDetails = {

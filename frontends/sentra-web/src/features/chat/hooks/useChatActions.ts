@@ -13,6 +13,12 @@ import {
   setStreaming,
   setWaitingForAnswer,
 } from '@features/chat/chatSlice'
+import {
+  stepStarted,
+  stepProgress,
+  stepEnded,
+  stepErrored,
+} from '@features/chat/steps/stepsSlice'
 import { chatService } from '@features/chat/chatService'
 import { conversationService } from '@features/conversations/conversationService'
 import type { ConversationEvent } from '@features/chat/types/events'
@@ -121,10 +127,43 @@ export function useChatActions() {
             }
             break
           }
-          case 'step_start':
-          case 'step_progress':
-          case 'step_end':
+          case 'step_start': {
+            // Dispatch to steps slice
+            dispatch(stepStarted({ conversationId: conversationId!, event }))
+            
+            // Inline system message so we can SEE the steps immediately
+            const sysMsg = toSystemMessage(event)
+            if (sysMsg.content && sysMsg.content.trim().length > 0) {
+              dispatch(addMessage(sysMsg))
+            }
+            break
+          }
+          case 'step_progress': {
+            // Dispatch to steps slice
+            dispatch(stepProgress({ conversationId: conversationId!, event }))
+            
+            // Inline system message so we can SEE the steps immediately
+            const sysMsg = toSystemMessage(event)
+            if (sysMsg.content && sysMsg.content.trim().length > 0) {
+              dispatch(addMessage(sysMsg))
+            }
+            break
+          }
+          case 'step_end': {
+            // Dispatch to steps slice
+            dispatch(stepEnded({ conversationId: conversationId!, event }))
+            
+            // Inline system message so we can SEE the steps immediately
+            const sysMsg = toSystemMessage(event)
+            if (sysMsg.content && sysMsg.content.trim().length > 0) {
+              dispatch(addMessage(sysMsg))
+            }
+            break
+          }
           case 'step_error': {
+            // Dispatch to steps slice
+            dispatch(stepErrored({ conversationId: conversationId!, event }))
+            
             // Inline system message so we can SEE the steps immediately
             const sysMsg = toSystemMessage(event)
             if (sysMsg.content && sysMsg.content.trim().length > 0) {

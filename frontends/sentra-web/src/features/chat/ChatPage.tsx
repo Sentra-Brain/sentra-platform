@@ -6,6 +6,7 @@ import ChatFooter from "./components/ChatFooter";
 import ChatInputContainer from "./components/ChatInputContainer";
 
 import { setMessages } from "./chatSlice";
+import { rehydrateFromSystemMessages } from "./steps/stepsSlice";
 import { useEffect } from "react";
 import { useAppDispatch } from "@store/hooks";
 import { fetchConversationById } from "@features/conversations/conversationSlice";
@@ -34,6 +35,12 @@ export default function ChatPage() {
             return true;
           });
           dispatch(setMessages(filteredMessages));
+          
+          // Rehydrate steps from system messages
+          dispatch(rehydrateFromSystemMessages({
+            conversationId: currentConversationId,
+            messages: payload.messages
+          }));
         }
       });
     }

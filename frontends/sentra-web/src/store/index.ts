@@ -5,6 +5,7 @@ import authReducer from '../features/auth/authSlice'
 import chatReducer from '../features/chat/chatSlice'
 import conversationReducer from '../features/conversations/conversationSlice'
 import knowledgeReducer from '../features/knowledge/knowledgeSlice'
+import stepsReducer from '../features/chat/steps/stepsSlice'
 // import settingsReducer from '../features/settings/settingsSlice'
 import uiReducer from './slices/uiSlice'
 
@@ -14,6 +15,7 @@ export const store = configureStore({
     chat: chatReducer,
     conversation: conversationReducer,
     knowledge: knowledgeReducer,
+    steps: stepsReducer,
     // settings: settingsReducer,
     ui: uiReducer
   },
