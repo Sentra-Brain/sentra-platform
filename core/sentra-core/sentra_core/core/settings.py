@@ -18,8 +18,11 @@ class SentraSettings(BaseSettings):
     llama_server_url: str = Field(default="http://llama_server:8080", json_schema_extra={"env": "LLAMA_SERVER_URL"})
     llm_request_timeout: float | None = Field(default=None, json_schema_extra={"env": "LLM_REQUEST_TIMEOUT"})  # seconds, None = unlimited
 
-    # ---- Other settings you already had ----
+    # ---- Knowledge settings ----
     knowledge_mount_path: str = Field(default="/mnt/sentra_knowledge", json_schema_extra={"env": "KNOWLEDGE_MOUNT_PATH"})
+    persist_markdown: bool = Field(default=True, json_schema_extra={"env": "PERSIST_MARKDOWN"})
+    max_markdown_bytes: int = Field(default=5_000_000, json_schema_extra={"env": "MAX_MARKDOWN_BYTES"})
+    derived_dir_name: str = Field(default=".derived", json_schema_extra={"env": "DERIVED_DIR_NAME"})
 
     # Pydantic Settings config
     model_config = SettingsConfigDict(
