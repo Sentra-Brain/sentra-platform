@@ -6,6 +6,8 @@ using original filenames without GUID prefixes, ensuring consistent behavior
 between the API producer and RAG worker consumer.
 """
 
+import gzip
+import hashlib
 import os
 import re
 from pathlib import Path
@@ -221,3 +223,39 @@ class FileStorageService:
             }
         except (ValueError, OSError):
             return None
+        
+    def save_markdown(self, document_id: UUID, markdown: str, derived_dir: str = ".derived") -> Tuple[str, int, str]:
+        """
+        Save gzipped Markdown content for a document under a derived subdirectory.
+
+        Args:
+            document_id: UUID of the document
+            markdown: Markdown string to persist
+            derived_dir: Subdirectory under mount path for derived content
+
+        Returns:
+            Tuple of (relative_path_from_mount, size_in_bytes, sha256_digest)
+        """
+        try:
+            # Resolve path: /mnt/sentra_knowledge/.derived/<uuid>.md.gz
+            derived_path = self.mount_path / derived_dir
+            derived_path.mkdir(parents=True, exist_ok=True)
+
+            safe_filename = f"{str(document_id)}.md.gz"
+            full_path = derived_path / safe_filename
+
+            data = markdown.encode("utf-8")
+            with gzip.open(full_path, "wb") as f:  
+                f.write(data) # type: ignore[assignment]
+
+            relative_path = full_path.relative_to(self.mount_path)
+            size = len(data)
+            sha256 = hashlib.sha256(data).hexdigest()
+
+            logger.info(f"Markdown persisted: {relative_path} ({size} bytes)")
+
+            return str(relative_path), size, sha256
+
+        except Exception as e:
+            logger.error(f"Failed to persist markdown for document {document_id}: {e}")
+            raise

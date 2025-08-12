@@ -70,35 +70,35 @@ class DocumentProcessor:
             document_repo = DocumentRepository(db)
             file_storage = self._get_file_storage()
 
+            def fail(reason: str) -> bool:
+                return self._fail(document_id, reason, repo=document_repo)
+
             self._set_status(document_id, DocumentStatus.PROCESSING, repo=document_repo)
 
             try:
                 absolute_filepath = file_storage.resolve_document_path(filepath)
             except ValueError as e:
-                return self._fail(document_id, str(e), repo=document_repo)
+                return fail(str(e))
 
             if not self._validate_file(str(absolute_filepath)):
-                return self._fail(document_id, f"Invalid file: {absolute_filepath}", repo=document_repo)
+                return fail(f"Invalid file: {absolute_filepath}")
 
+            # --- Step 1: Extract text ---
             self._set_status(document_id, DocumentStatus.EXTRACTING, repo=document_repo)
             try:
-                # Get specialized extractor for this file type
                 extractor = get_extractor(filetype)
-                
-                # Extract content and metadata
                 payload = extractor.extract(str(absolute_filepath))
-                
-                if not payload.raw_text or not payload.raw_text.strip():
-                    return self._fail(document_id, "No content extracted", repo=document_repo)
-                
-                logger.info(f"Extracted {len(payload.raw_text)} characters, {payload.word_count} words")
-                
-            except Exception as e:
-                return self._fail(document_id, f"Extraction failed: {e}", repo=document_repo)
 
+                if not payload.raw_text or not payload.raw_text.strip():
+                    return fail("No content extracted")
+
+                logger.info(f"Extracted {len(payload.raw_text)} characters, {payload.word_count} words")
+            except Exception as e:
+                return fail(f"Extraction failed: {e}")
+
+            # --- Step 2: Cast to Markdown ---
             self._set_status(document_id, DocumentStatus.PROCESSING, "Casting to markdown", repo=document_repo)
             try:
-                # Cast extracted content to markdown
                 text_md = cast_to_markdown(
                     payload.raw_text,
                     filetype,
@@ -106,38 +106,52 @@ class DocumentProcessor:
                     html_blocks=payload.html_blocks,
                     email_headers=payload.email_headers
                 )
-                
-                if not text_md.strip():
-                    return self._fail(document_id, "Markdown casting produced no content", repo=document_repo)
-                
-                # Extract comprehensive metadata
-                metadata = extract_metadata(payload, text_md, filetype, str(absolute_filepath), filename)
-                
-                logger.info(f"Cast to markdown: {len(text_md)} characters, detected title: {metadata.get('extracted_title')}")
-                
-            except Exception as e:
-                return self._fail(document_id, f"Markdown casting failed: {e}", repo=document_repo)
 
+                if not text_md.strip():
+                    return fail("Markdown casting produced no content")
+
+                metadata = extract_metadata(payload, text_md, filetype, str(absolute_filepath), filename)
+
+                logger.info(f"Cast to markdown: {len(text_md)} characters, detected title: {metadata.get('extracted_title')}")
+            except Exception as e:
+                return fail(f"Markdown casting failed: {e}")
+
+            # --- Step 3: Persist Markdown if configured ---
+            try:
+                if self._get_settings().persist_markdown:
+                    path, size, sha256 = file_storage.save_markdown(
+                        document_id=document_id,
+                        markdown=text_md
+                    )
+                    document_repo.update_markdown_info(
+                        document_id=document_id,
+                        path=path,
+                        size=size,
+                        sha256=sha256
+                    )
+            except Exception as e:
+                logger.warning(f"Failed to persist markdown for {document_id}: {e}")
+
+            # --- Step 4: Chunk text ---
             self._set_status(document_id, DocumentStatus.CHUNKING, repo=document_repo)
             try:
-                # Use adaptive chunking based on document type
                 chunks = self.chunker.chunk_text(text_md, filetype)
                 if not chunks:
-                    return self._fail(document_id, "No chunks generated", repo=document_repo)
-                    
+                    return fail("No chunks generated")
                 logger.info(f"Generated {len(chunks)} chunks using adaptive strategy for {filetype.value}")
-                
             except Exception as e:
-                return self._fail(document_id, f"Chunking failed: {e}", repo=document_repo)
+                return fail(f"Chunking failed: {e}")
 
+            # --- Step 5: Generate embeddings ---
             self._set_status(document_id, DocumentStatus.EMBEDDING, repo=document_repo)
             try:
                 embeddings = self.embedding_service.generate_embeddings(chunks)
                 if len(embeddings) != len(chunks):
-                    return self._fail(document_id, "Embedding count mismatch", repo=document_repo)
+                    return fail("Embedding count mismatch")
             except Exception as e:
-                return self._fail(document_id, f"Embedding failed: {e}", repo=document_repo)
+                return fail(f"Embedding failed: {e}")
 
+            # --- Step 6: Index chunks ---
             self._set_status(document_id, DocumentStatus.INDEXING, repo=document_repo)
             try:
                 indexed = await self.vector_store.index_document_chunks(
@@ -149,14 +163,15 @@ class DocumentProcessor:
                     source_type="file"
                 )
                 if indexed != len(chunks):
-                    return self._fail(document_id, f"Indexed only {indexed}/{len(chunks)} chunks", repo=document_repo)
+                    return fail(f"Indexed only {indexed}/{len(chunks)} chunks")
             except Exception as e:
-                return self._fail(document_id, f"Indexing failed: {e}", repo=document_repo)
+                return fail(f"Indexing failed: {e}")
 
+            # --- Done ---
             self._set_status(
-                document_id, 
-                DocumentStatus.INDEXED, 
-                repo=document_repo, 
+                document_id,
+                DocumentStatus.INDEXED,
+                repo=document_repo,
                 chunks_count=len(chunks),
                 metadata=metadata
             )
@@ -168,6 +183,7 @@ class DocumentProcessor:
             return False
         finally:
             db.close()
+
 
     def _set_status(
         self, 

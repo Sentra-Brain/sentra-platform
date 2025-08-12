@@ -75,3 +75,15 @@ class DocumentRepository(BaseRepository[DocumentEntity]):
         if knowledge_source_id:
             query = query.filter(self.model.knowledge_source_id == knowledge_source_id)
         return query.count()
+
+    def update_markdown_info(self, document_id: UUID, path: str, size: int, sha256: str) -> None:
+        document = self.db.query(DocumentEntity).filter(DocumentEntity.id == document_id).first()
+        if not document:
+            raise ValueError(f"Document {document_id} not found")
+
+        document.markdown_path = path
+        document.markdown_bytes = size
+        document.markdown_hash = sha256
+        document.has_markdown = True
+
+        self.db.commit()
