@@ -128,7 +128,7 @@ class ConversationEngine:
             if not line:
                 continue
 
-            # normalizar y quitar prefijo 'data:'
+            # normalize and remove 'data:' prefix
             raw = line.strip()
             if not raw:
                 continue
