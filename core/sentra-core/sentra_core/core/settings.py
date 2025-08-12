@@ -16,7 +16,7 @@ class SentraSettings(BaseSettings):
     llm_engine: LLMEngine = Field(default=LLMEngine.VLLM, json_schema_extra={"env": "LLM_ENGINE"})
     vllm_server_url: str = Field(default="http://vllm:8000", json_schema_extra={"env": "VLLM_SERVER_URL"})
     llama_server_url: str = Field(default="http://llama_server:8080", json_schema_extra={"env": "LLAMA_SERVER_URL"})
-    llm_request_timeout: float | None = Field(default=None, json_schema_extra={"env": "LLM_REQUEST_TIMEOUT"})  # seconds, None = ilimitado
+    llm_request_timeout: float | None = Field(default=None, json_schema_extra={"env": "LLM_REQUEST_TIMEOUT"})  # seconds, None = unlimited
 
     # ---- Other settings you already had ----
     knowledge_mount_path: str = Field(default="/mnt/sentra_knowledge", json_schema_extra={"env": "KNOWLEDGE_MOUNT_PATH"})
