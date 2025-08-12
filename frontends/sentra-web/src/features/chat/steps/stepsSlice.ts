@@ -193,7 +193,7 @@ const stepsSlice = createSlice({
         
         const syntheticEvent: ConversationEvent = {
           event_id: msg.event_id,
-          type: msg.event_type as any,
+          type: msg.event_type as ConversationEvent['type'],
           task_run_id: msg.task_run_id,
           task_type: msg.task_type,
           label: msg.label,

@@ -9,8 +9,7 @@ import stepsReducer, {
   rehydrateFromSystemMessages,
   resetStepsForConversation,
   selectStepsForConversation,
-  selectStepsByOrder,
-  type StepsState
+  selectStepsByOrder
 } from '../src/features/chat/steps/stepsSlice';
 import type { ConversationEvent } from '../src/features/chat/types/events';
 import type { ChatMessage } from '../src/features/conversations/types/conversationModels';

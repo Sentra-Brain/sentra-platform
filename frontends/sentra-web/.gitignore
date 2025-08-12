@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Screenshots and demo files
+*.png
+StepsDemo.tsx
