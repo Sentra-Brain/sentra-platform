@@ -1,0 +1,33 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "pytest Sentra MCP",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "env": {
+        "PYTEST_ADDOPTS": "--no-cov"
+      },
+      "module": "pytest",
+      "cwd": "${workspaceRoot}/tests",
+      "envFile": "${workspaceFolder}/services/sentra-mcp/tests/.env.test",
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Remote Attach",
+      "type": "debugpy",
+      "request": "attach",
+      "connect": {
+        "host": "localhost",
+        "port": 5681
+      },
+      "pathMappings": [
+        {
+          "localRoot": "${workspaceFolder}",
+          "remoteRoot": "/app"
+        }
+      ],
+    },
+  ]
+}

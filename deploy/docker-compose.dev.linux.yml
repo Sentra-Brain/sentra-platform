@@ -40,6 +40,24 @@ services:
       - sentra-vector-db
       - rabbitmq
 
+  sentra-mcp:
+    build:
+      context: ../
+      dockerfile: services/sentra-mcp/Dockerfile
+    image: sentra-mcp:dev
+    container_name: sentra-mcp
+    ports:
+      - "8200:8200"
+      - "5681:5681"   # Python debugpy
+    volumes:
+      - ../services/sentra-mcp:/app
+      - ../core/sentra-core:/core/sentra-core
+      - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - ../services/sentra-mcp/.env
+
   sentra-rag-base:
     build:
       context: ../services/sentra-rag-base
