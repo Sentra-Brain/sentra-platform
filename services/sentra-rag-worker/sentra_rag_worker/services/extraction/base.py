@@ -25,8 +25,32 @@ class ExtractionPayload:
 class DocumentExtractorBase(ABC):
     @abstractmethod
     def extract(self, filepath: str) -> ExtractionPayload:
-        """Returns structured payload including raw_text, meta, etc."""
+        """
+        Extracts the contents of a document from the given file path and returns a structured payload.
+        Args:
+            filepath (str): The path to the document file to be extracted.
+        Returns:
+            ExtractionPayload: An object containing the raw text, metadata, page count, HTML blocks, email headers, and other relevant information extracted from the document.
+        Raises:
+            FileNotFoundError: If the specified file does not exist.
+            ValueError: If the file format is unsupported or extraction fails.
+            Exception: For other unexpected errors during extraction.
+        Implementers should ensure that all relevant metadata is captured and that the extraction process is robust to common file errors.
+        """
 
     @abstractmethod
     def extract_markdown(self, filepath: str) -> str:
-        """Returns Markdown string representation of the document."""
+        """
+        Returns Markdown string representation of the document.
+        
+        Args:
+            filepath (str): The path to the document file to be converted to Markdown.
+        
+        Returns:
+            str: The Markdown representation of the document.
+
+        Raises:
+            FileNotFoundError: If the specified file does not exist.
+            ValueError: If the file format is unsupported or conversion fails.
+            Exception: For other unexpected errors during conversion.
+        """
