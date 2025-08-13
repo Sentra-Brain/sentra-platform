@@ -16,7 +16,9 @@ HEADERS = {
 def register_web_tools(mcp: FastMCP):
     @mcp.tool(
         name="web.search",
-        description="Perform a real-time internet search using DuckDuckGo."
+        description="Perform a real-time internet search using DuckDuckGo.",
+        
+        title="Web Search",
     )
     async def web_search(query: str, top_k: int = 5, recency_days: int = 60) -> list[dict]:
         """Perform search via DuckDuckGo and return top_k results."""

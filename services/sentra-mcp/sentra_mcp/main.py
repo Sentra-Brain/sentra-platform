@@ -20,18 +20,20 @@ mcp_app = mcp.http_app(path="/mcp")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    logger.info("🚀 Starting sentra-mcp...")
+    """Lifespan context manager to initialize MCP and register tools."""
+    # Initialize MCP and register tools
+    async with mcp_app.lifespan(app):
+        logger.info("🚀 Starting sentra-mcp...")
 
-    # Store MCP server in app state so we can access it here
-    app.state.mcp = mcp
+        app.state.mcp = mcp
 
-    try:
-        tools = await mcp.get_tools()
-        logger.info(f"✅ Registered MCP tools: {list(tools.keys())}")
-    except Exception as e:
-        logger.warning(f"⚠️ Could not list tools: {e}")
+        try:
+            tools = await mcp.get_tools()
+            logger.info(f"✅ Registered MCP tools: {list(tools.keys())}")
+        except Exception as e:
+            logger.warning(f"⚠️ Could not list tools: {e}")
 
-    yield
+        yield
 
 
 def create_app() -> FastAPI:
