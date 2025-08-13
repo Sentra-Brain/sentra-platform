@@ -97,6 +97,12 @@ export interface KnowledgeDocument {
   error?: string;
   knowledge_source_id: string;
   chunks_count?: number;
+  has_markdown?: boolean;
+}
+
+export interface DocumentMarkdown {
+  document_id: string;
+  markdown: string;
 }
 
 export interface DocumentUploadRequest {

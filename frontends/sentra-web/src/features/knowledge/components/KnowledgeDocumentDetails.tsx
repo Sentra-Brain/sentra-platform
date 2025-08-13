@@ -1,18 +1,39 @@
-import { useState } from "react";
-import { RefreshCw, Save } from "lucide-react";
+import { useEffect, useState } from "react";
+import {
+  RefreshCw,
+  Save,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import type { KnowledgeDocument } from "../types/knowledgeModels";
 import { useKnowledge } from "../useKnowledge";
 import DocumentStatusBadge from "./DocumentStatusBadge";
+import MarkdownPreviewPanel from "./MarkdownPreviewPanel";
 
 interface Props {
   document: KnowledgeDocument;
 }
 
 export default function KnowledgeDocumentDetails({ document }: Props) {
-  const { updateDocumentMetadata, reindexDocument } = useKnowledge();
+  const {
+    updateDocumentMetadata,
+    reindexDocument,
+    fetchMarkdown,
+    markdownByDocId,
+    loadingMarkdownFor,
+  } = useKnowledge();
+
   const [displayName, setDisplayName] = useState(document.display_name);
   const [description, setDescription] = useState(document.description ?? "");
   const [saving, setSaving] = useState(false);
+  const [showMarkdown, setShowMarkdown] = useState(false);
+
+  useEffect(() => {
+    // Reset panel when switching docs
+    setDisplayName(document.display_name);
+    setDescription(document.description ?? "");
+    setShowMarkdown(false);
+  }, [document.id]);
 
   const handleSave = async () => {
     setSaving(true);
@@ -29,9 +50,16 @@ export default function KnowledgeDocumentDetails({ document }: Props) {
     }
   };
 
+  const toggleMarkdown = async () => {
+    if (!markdownByDocId[document.id]) {
+      await fetchMarkdown(document.id);
+    }
+    setShowMarkdown((prev) => !prev);
+  };
+
   return (
-    <div className="space-y-6 text-sm">
-      {/* Título + estado */}
+    <div className="space-y-6 text-sm relative">
+      {/* Title + status */}
       <div className="flex items-start justify-between">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
@@ -47,7 +75,7 @@ export default function KnowledgeDocumentDetails({ document }: Props) {
         </div>
       </div>
 
-      {/* Campos editables */}
+      {/* Editable fields */}
       <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="text-xs uppercase text-muted font-medium mb-1 block">
@@ -73,40 +101,65 @@ export default function KnowledgeDocumentDetails({ document }: Props) {
         </div>
       </div>
 
-      {/* Errores e info */}
+      {/* Status messages */}
       {document.status_message && (
-        <div className="text-xs text-muted italic">
-          {document.status_message}
-        </div>
+        <div className="text-xs text-muted italic">{document.status_message}</div>
       )}
       {document.error && (
         <div className="text-xs text-red-400">❌ {document.error}</div>
       )}
 
-      {/* Acciones */}
+      {/* Footer actions */}
       <div className="flex justify-between items-center mt-4">
         <div className="text-xs text-muted">
           Created by {document.created_by.full_name} on{" "}
           {new Date(document.created_at).toLocaleString()}
         </div>
         <div className="flex gap-2">
-          {/* {document.status !== "indexed" && ( */}
+
+
+          {document.has_markdown && (
+            <button
+              className="btn border border-green-500 mt-2 text-xs flex items-center gap-1"
+              onClick={toggleMarkdown}
+              disabled={loadingMarkdownFor === document.id}
+            >
+              {showMarkdown ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+              {loadingMarkdownFor === document.id
+                ? "Loading..."
+                : showMarkdown
+                ? "Hide Markdown"
+                : "View Markdown"}
+            </button>
+          )}
           <button
             onClick={() => reindexDocument(document.id)}
-            className="btn btn-outline flex items-center gap-1"
+              className="btn border border-orange-500 mt-2 text-xs flex items-center gap-1"
           >
             <RefreshCw className="w-4 h-4" /> Reindex
           </button>
-          {/* )} */}
           <button
             onClick={handleSave}
-            className="btn btn-primary flex items-center gap-1"
+              className="btn btn-primary mt-2 text-xs flex items-center gap-1"
             disabled={saving}
           >
-            <Save className="w-4 h-4" /> {saving ? "Saving..." : "Save Changes"}
+            <Save className="w-4 h-4" />{" "}
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
+
+      {/* Markdown floating panel */}
+      {showMarkdown && markdownByDocId[document.id] && (
+        <MarkdownPreviewPanel
+          markdown={markdownByDocId[document.id]}
+          onClose={() => setShowMarkdown(false)}
+        />
+      )}
     </div>
   );
 }

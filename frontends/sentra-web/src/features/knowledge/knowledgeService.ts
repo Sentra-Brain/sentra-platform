@@ -6,6 +6,7 @@ import type {
   KnowledgeDocument,
   DocumentListResponse,
   DocumentUploadRequest,
+  DocumentMarkdown,
 } from "./types/knowledgeModels";
 
 export const knowledgeService = {
@@ -115,4 +116,9 @@ export const knowledgeService = {
       .delete(`/knowledge/documents/${documentId}`)
       .then((res) => res.data);
   },
+  getDocumentMarkdown(documentId: string): Promise<DocumentMarkdown> {
+    return apiClient
+      .get(`/knowledge/documents/${documentId}/markdown`)
+      .then((res) => res.data);
+  }
 };

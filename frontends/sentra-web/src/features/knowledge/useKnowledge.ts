@@ -20,7 +20,7 @@ import type {
 import { knowledgeService } from "./knowledgeService";
 import type { KnowledgeDocument } from "./types/knowledgeModels";
 import { useNavigate } from "react-router-dom";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 export function useKnowledge() {
   const dispatch = useAppDispatch();
@@ -32,6 +32,9 @@ export function useKnowledge() {
       dispatch(fetchSourcesWithDocuments());
     }
   };
+
+  const [markdownByDocId, setMarkdownByDocId] = useState<Record<string, string>>({});
+  const [loadingMarkdownFor, setLoadingMarkdownFor] = useState<string | null>(null);
 
   const loadDocuments = useCallback(
     (sourceId: string, force = false) => {
@@ -102,10 +105,25 @@ export function useKnowledge() {
     dispatch(markDocumentAsReindexing(id));
   };
 
+
+  const fetchMarkdown = async (documentId: string) => {
+    setLoadingMarkdownFor(documentId);
+    try {
+      const { markdown } = await knowledgeService.getDocumentMarkdown(documentId);
+      setMarkdownByDocId((prev) => ({ ...prev, [documentId]: markdown }));
+    } catch (e) {
+      console.error("Failed to fetch markdown", e);
+    } finally {
+      setLoadingMarkdownFor(null);
+    }
+  };
+
   return {
     ...state,
     loadSources,
     loadDocuments,
+    markdownByDocId,
+    loadingMarkdownFor,
     changeVisibility,
     selectSourceById,
     selectDocumentById,
@@ -116,5 +134,6 @@ export function useKnowledge() {
     uploadToSource,
     updateSourceMetadata,
     reindexDocument,
+    fetchMarkdown,
   };
 }

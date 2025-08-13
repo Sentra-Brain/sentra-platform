@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     poppler-utils \
     tesseract-ocr \
     libpq-dev \
+    pandoc \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /base

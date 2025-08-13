@@ -6,6 +6,8 @@ using original filenames without GUID prefixes, ensuring consistent behavior
 between the API producer and RAG worker consumer.
 """
 
+import gzip
+import hashlib
 import os
 import re
 from pathlib import Path
@@ -219,5 +221,62 @@ class FileStorageService:
                 "filename": abs_path.name,
                 "absolute_path": str(abs_path)
             }
+        except (ValueError, OSError):
+            return None
+        
+    def save_markdown(self, document_id: UUID, markdown: str, derived_dir: str = ".derived") -> Tuple[str, int, str]:
+        """
+        Save Markdown content (plain UTF-8) for a document under a derived subdirectory.
+
+        Args:
+            document_id: UUID of the document
+            markdown: Markdown string to persist
+            derived_dir: Subdirectory under mount path for derived content
+
+        Returns:
+            Tuple of (relative_path_from_mount, size_in_bytes, sha256_digest)
+        """
+        try:
+            # Resolve path: /mnt/sentra_knowledge/.derived/<uuid>.md
+            derived_path = self.mount_path / derived_dir
+            derived_path.mkdir(parents=True, exist_ok=True)
+
+            safe_filename = f"{str(document_id)}.md"
+            full_path = derived_path / safe_filename
+
+            data = markdown.encode("utf-8")
+            with open(full_path, "wb") as f:
+                f.write(data)
+
+            relative_path = full_path.relative_to(self.mount_path)
+            size = len(data)
+            sha256 = hashlib.sha256(data).hexdigest()
+
+            logger.info(f"Markdown persisted: {relative_path} ({size} bytes)")
+
+            return str(relative_path), size, sha256
+
+        except Exception as e:
+            logger.error(f"Failed to persist markdown for document {document_id}: {e}")
+            raise
+
+        
+    def get_file_content(self, relative_path: str) -> Optional[bytes]:
+        """
+        Read file content from a relative path.
+        
+        Args:
+            relative_path: Path relative to mount point
+            
+        Returns:
+            File content as bytes or None if file doesn't exist
+        """
+        try:
+            abs_path = self.resolve_document_path(relative_path)
+            if not abs_path.is_file():
+                return None
+            
+            with open(abs_path, "rb") as f:
+                return f.read()
         except (ValueError, OSError):
             return None

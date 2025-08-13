@@ -4,6 +4,7 @@ import os
 from ebooklib import epub
 from bs4 import BeautifulSoup
 from sentra_core.core.logging import get_logger
+from sentra_rag_worker.services.extraction.pandoc_utils import convert_with_pandoc_to_markdown
 from .base import DocumentExtractorBase, ExtractionPayload
 
 logger = get_logger(__name__)
@@ -86,3 +87,8 @@ class EpubExtractor(DocumentExtractorBase):
         except Exception as e:
             logger.error(f"Failed to extract EPUB content from {filepath}: {e}")
             raise ValueError(f"EPUB extraction failed: {str(e)}")
+    
+    def extract_markdown(self, filepath: str) -> str:
+        """Extract Markdown content from EPUB file using Pandoc."""
+        logger.info(f"Extracting Markdown from EPUB via Pandoc: {filepath}")
+        return convert_with_pandoc_to_markdown(filepath, input_format="epub")

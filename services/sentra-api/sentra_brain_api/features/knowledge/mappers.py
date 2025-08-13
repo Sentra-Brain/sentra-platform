@@ -20,6 +20,7 @@ def to_document_response(entity: DocumentEntity) -> DocumentResponse:
         error=entity.error,
         chunks_count=entity.chunks_count,
         knowledge_source_id=entity.knowledge_source_id,
+        has_markdown=entity.has_markdown,
     )
 
 def to_knowledge_source_response(entity: KnowledgeSourceEntity) -> KnowledgeSourceResponse:
