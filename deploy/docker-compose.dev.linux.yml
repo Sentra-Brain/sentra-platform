@@ -40,6 +40,24 @@ services:
       - sentra-vector-db
       - rabbitmq
 
+  sentra-mcp:
+    build:
+      context: ../
+      dockerfile: services/sentra-mcp/Dockerfile
+    image: sentra-mcp:dev
+    container_name: sentra-mcp
+    ports:
+      - "8200:8200"
+      - "5681:5681"   # Python debugpy
+    volumes:
+      - ../services/sentra-mcp:/app
+      - ../core/sentra-core:/core/sentra-core
+      - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
+    networks:
+      - sentrabrain-dev-net
+    env_file:
+      - ../services/sentra-mcp/.env
+
   sentra-rag-base:
     build:
       context: ../services/sentra-rag-base
@@ -98,12 +116,11 @@ services:
     ports:
       - "8002:8080"
     volumes:
-      - /home/sysadmin/models:/data/models:ro
+      - /home/sysadmin/models:/models:ro
     environment:
-      - MODEL=llama-3.2-1b-instruct
+      - LLAMA_ARG_JINJA=true
     networks:
       - sentrabrain-dev-net
-
   # vllm:
   #   image: vllm/vllm-openai
   #   container_name: vllm

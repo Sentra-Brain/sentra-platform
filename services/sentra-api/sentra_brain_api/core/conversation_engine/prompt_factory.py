@@ -13,6 +13,8 @@ class PromptFactory:
         context: List[Dict],
         new_message: Dict,
         rag_chunks: Optional[List[RagChunk]] = None,
+        tool_context: Optional[str] = None,
+        tools: Optional[list[dict]] = None,  
         *,
         temperature: float = 0.7,
         top_p: float = 0.95,
@@ -40,6 +42,12 @@ class PromptFactory:
                 "content": "You may use the following internal documents to answer. **Do not copy them verbatim.**\n\n" + format_chunks_grouped(rag_chunks),
             })
 
+        if tool_context:
+            messages.append({
+                "role": "system",
+                "content": "You may use the following tool results if relevant:\n\n" + tool_context
+            })
+
         # 3. Highlight initial user intent (optional)
         first_user = next((m for m in context if m["role"] == "user"), None)
         if first_user:
@@ -56,7 +64,7 @@ class PromptFactory:
         messages.append(new_message)
 
         # Final payload
-        return {
+        payload =  {
             "messages": messages,
             "stream": True,
             "temperature": temperature,
@@ -65,3 +73,7 @@ class PromptFactory:
             "frequency_penalty": frequency_penalty,
             "max_tokens": max_tokens
         }
+        if tools:
+            payload["tools"] = tools
+            payload["tool_choice"] = "auto"
+        return payload

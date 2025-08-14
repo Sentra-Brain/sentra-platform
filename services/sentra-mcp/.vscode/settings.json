@@ -1,0 +1,48 @@
+{
+  "python.testing.unittestEnabled": false,
+  "python.testing.pytestEnabled": true,
+  "python.testing.pytestArgs": [], // now controlled by pytest.ini
+
+  // Optional: if you use coverage gutters
+  "coverage-gutters.coverageFileNames": ["coverage.xml"],
+  "coverage-gutters.showGutterCoverage": true,
+  "coverage-gutters.showLineCoverage": true,
+
+  "files.exclude": {
+    "**/__pycache__": true,
+    "**/.pytest_cache": true
+  },
+  "livePreview.defaultPreviewPath": "/htmlcov/index.html",
+  "peacock.color": "#34d399",
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#5edcae",
+    "activityBar.background": "#5edcae",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#b062dd",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#5edcae",
+    "statusBar.background": "#34d399",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#26ae7c",
+    "statusBarItem.remoteBackground": "#34d399",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#34d399",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#34d39999",
+    "titleBar.inactiveForeground": "#15202b99"
+  },
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "SentraDB",
+      "database": "sentra_brain",
+      "username": "sentra_admin",
+      "password": "changeit"
+    }
+  ]
+}

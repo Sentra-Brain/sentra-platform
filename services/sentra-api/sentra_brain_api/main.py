@@ -30,42 +30,95 @@ import os
 
 logger = logging.get_logger("sentra_brain_api")
 
+# main.py (fragmentos relevantes)
+from sentra_brain_api.core.conversation_engine.mcp.sentra_mcp_client import SentraMCPClient
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("App startup: initializing resources...")
-    
-    # Skip database initialization during testing
-    if os.getenv("TESTING") != "true":
-        postgres_service.init_db()
-        
-        # Only initialize ConversationEngine for non-test environments
-        app.state._sentra = AppState(
-            conversation_engine=ConversationEngine()
-        )
-        
-        # Skip vLLM healthcheck during testing
-        asyncio.create_task(keep_vllm_alive(app))
-    else:
-        # In test mode, create minimal app state without external dependencies
-        app.state._sentra = AppState(conversation_engine=None)
-    
-    yield
+
+    mcp_client = None
+    try:
+        if os.getenv("TESTING") != "true":
+            # DB
+            postgres_service.init_db()
+
+            # MCP persistent client (connect on startup)
+            mcp_client = await SentraMCPClient().__aenter__()
+            # Optional: quick sanity checks
+            healthy = await mcp_client.healthcheck()
+            if not healthy:
+                logger.warning("⚠️ MCP healthcheck failed at startup")
+            else:
+                try:
+                    tools = await mcp_client.list_tools()
+                    logger.info(f"✅ MCP tools registered: {[t['name'] for t in tools]}")
+                except Exception as e:
+                    logger.warning(f"⚠️ Could not list MCP tools at startup: {e}")
+
+            # ConversationEngine with injected MCP client
+            app.state._sentra = AppState(
+                conversation_engine=ConversationEngine(mcp_client=mcp_client)
+            )
+
+            # Background healthchecks (non-blocking)
+            asyncio.create_task(keep_vllm_alive(app))
+            asyncio.create_task(keep_mcp_alive(app))
+        else:
+            # Testing: avoid external deps
+            app.state._sentra = AppState(conversation_engine=None)
+
+        # Hand over control to FastAPI
+        yield
+
+    finally:
+        # Graceful shutdown: close MCP client if open
+        if mcp_client is not None:
+            try:
+                await mcp_client.__aexit__(None, None, None)
+            except Exception as e:
+                logger.warning(f"Error closing MCP client: {e}")
+
 
 
 async def keep_vllm_alive(app: FastAPI):
-    llm_client = app.state._sentra.conversation_engine.llm_client
+    """ Periodically checks VLLM backend liveness.
+        Keeps logs useful for diagnosing connectivity issues.
+    """
+    engine: ConversationEngine | None = getattr(app.state._sentra, "conversation_engine", None)
+    if not engine:
+        return
+    llm_client = engine.llm_client
     while True:
         healthy = await llm_client.healthcheck()
         if not healthy:
             logger.warning("⚠️ LLM backend not responding to healthcheck")
         else:
             logger.debug("✅ LLM healthcheck passed")
-        await asyncio.sleep(30)  # every 30 seconds
+        await asyncio.sleep(30)
 
-def create_app(
-        mediator=None,
-        auth_service=None,
-        notification_service=None):
+async def keep_mcp_alive(app: FastAPI):
+    """
+    Periodically checks MCP liveness by listing tools.
+    Keeps logs useful for diagnosing connectivity issues.
+    """
+    try:
+        engine: ConversationEngine | None = getattr(app.state._sentra, "conversation_engine", None)
+        if not engine or not getattr(engine, "mcp_client", None):
+            return
+        client: SentraMCPClient = engine.mcp_client
+        while True:
+            ok = await client.healthcheck()
+            if not ok:
+                logger.warning("⚠️ MCP backend not responding to healthcheck")
+            else:
+                logger.debug("✅ MCP healthcheck passed")
+            await asyncio.sleep(30)
+    except Exception as e:
+        logger.warning(f"keep_mcp_alive terminated: {e}")
+
+
+def create_app():
     app = FastAPI(
         title=TITLE,
         description=DESCRIPTION,
