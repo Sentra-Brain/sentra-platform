@@ -116,12 +116,11 @@ services:
     ports:
       - "8002:8080"
     volumes:
-      - /home/sysadmin/models:/data/models:ro
+      - /home/sysadmin/models:/models:ro
     environment:
-      - MODEL=llama-3.2-1b-instruct
+      - LLAMA_ARG_JINJA=true
     networks:
       - sentrabrain-dev-net
-
   # vllm:
   #   image: vllm/vllm-openai
   #   container_name: vllm

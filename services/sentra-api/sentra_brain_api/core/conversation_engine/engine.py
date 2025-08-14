@@ -46,19 +46,14 @@ class ConversationEngine:
 
     async def run(self, request: ConversationRequest) -> AsyncGenerator[ConversationEvent, None]:
         """
-        Single-turn execution of the conversation engine with:
-        - Optional RAG context retrieval (emits step_start/step_end events).
-        - Tool-use orchestrated by the LLM (OpenAI-style tools, via MCP).
-        - SSE-style streaming of assistant tokens (message_delta) until finalization (message_final).
-        - Persistence of user/assistant messages and step events in Mongo.
-        - LRU cache update for the conversation window.
+        Single-turn execution with optional RAG + LLM tools (MCP).
+        Streams assistant tokens, detects real tool calls, and also recovers when
+        the model prints a tool-call JSON in content (schema echo with "parameters").
         """
         logger.info(f"[Engine] Starting run: user={request.user_id}, conversation={request.conversation_id}")
         now = datetime.now(timezone.utc).isoformat()
 
-        # --------------------------------------------
-        # 1) RAG step (optional) + step events
-        # --------------------------------------------
+        # ------- 1) Optional RAG step (events) -------
         task_run_id = None
         if request.context_source_ids or request.context_document_ids:
             task_run_id = uuid4().hex
@@ -96,36 +91,115 @@ class ConversationEngine:
             yield step_end_event
             await self._persist_step_event(request, step_end_event)
 
-        # --------------------------------------------
-        # 2) Load/trim context and persist incoming user message
-        # --------------------------------------------
+        # ------- 2) Context + persist user message -------
         context = await self._load_context(request.user_id, request.conversation_id)
         user_msg = self._make_message("user", request.content, now, message_id=request.message_id)
         await self._persist_user_message(request, user_msg)
 
-        # --------------------------------------------
-        # 3) Prepare MCP tools (converted to OpenAI tools schema)
-        # --------------------------------------------
+        # ------- 3) Tools (MCP -> OpenAI schema) -------
         try:
             mcp_tools = await self._ensure_mcp_tools()
+        except RuntimeError:
+            # open a session lazily if needed
+            try:
+                async with self.mcp_client:
+                    mcp_tools = await self._ensure_mcp_tools()
+            except Exception as e:
+                logger.warning(f"[MCP] list_tools failed after open: {e}")
+                mcp_tools = []
         except Exception as e:
             logger.warning(f"[MCP] list_tools failed: {e}")
             mcp_tools = []
+
         openai_tools = mcp_tools_to_openai_tools(mcp_tools)
-        logger.info(f"[Engine] MCP tools available: {[t['function']['name'] for t in openai_tools]}")
+        tool_names = {t["function"]["name"] for t in openai_tools}
+        logger.info(f"[Engine] MCP tools available: {sorted(tool_names)}")
 
-        # Conversation state we actually send to the LLM (we manage it across tool rounds)
+        # ------- helpers (local) -------
+        def _looks_like_tool_schema_chunk(chunk: str) -> bool:
+            """Detect chunks that look like schema/printed tool-call JSON so we don't stream them."""
+            if not chunk:
+                return False
+            s = chunk.strip()
+            if not s:
+                return False
+            # common tell-tales from llama-server jinja template mode
+            # - top-level {"type":"function", "function":{...}}
+            # - {"name":"...", "parameters":{...}}
+            # - large 'properties/required' schema blocks
+            keys = ('"type":"function"', '"parameters"', '"function":{', '"properties"', '"required"')
+            if s.startswith("{") and '"name"' in s and '"parameters"' in s:
+                return True
+            return any(k in s for k in keys)
+
+        def _extract_json_objects(s: str):
+            """Yield JSON objects found in a string by bracket matching."""
+            objs = []
+            stack = 0
+            start = None
+            for i, ch in enumerate(s):
+                if ch == '{':
+                    if stack == 0:
+                        start = i
+                    stack += 1
+                elif ch == '}':
+                    if stack > 0:
+                        stack -= 1
+                        if stack == 0 and start is not None:
+                            candidate = s[start:i+1]
+                            objs.append(candidate)
+                            start = None
+            return objs
+
+        def _salvage_tool_call_from_text(text: str):
+            """
+            Try to parse a tool call that the model printed as content.
+            Accepts shapes:
+            A) {"name":"web.search","parameters":{...}}
+            B) {"type":"function","function":{"name":"...","parameters":{...}}}
+            C) {"type":"function","function":{"name":"...","arguments":{...}}}
+            Returns (name:str, args:dict) or None.
+            """
+            if not text:
+                return None
+            for cand in reversed(_extract_json_objects(text)):
+                try:
+                    obj = json.loads(cand)
+                except Exception:
+                    continue
+
+                # shape A
+                if isinstance(obj, dict) and "name" in obj and isinstance(obj.get("parameters"), dict):
+                    name = obj["name"]
+                    if name in tool_names:
+                        return name, obj["parameters"]
+
+                # shape B / C
+                if isinstance(obj, dict) and obj.get("type") == "function" and isinstance(obj.get("function"), dict):
+                    fn = obj["function"]
+                    name = fn.get("name")
+                    if name in tool_names:
+                        params = fn.get("parameters")
+                        args = fn.get("arguments")
+                        if isinstance(params, dict):
+                            return name, params
+                        if isinstance(args, str):
+                            try:
+                                args = json.loads(args)
+                            except Exception:
+                                args = {"_raw": args}
+                        if isinstance(args, dict):
+                            return name, args
+
+            return None
+
+        # ------- 4) Tool-use loop -------
         conversation_messages = context[-CONTEXT_WINDOW_SIZE:] + [user_msg]
-
-        # Accumulates streamed assistant text between tool calls
         assistant_text_buffer = ""
+        suppressed_tool_json_buffer = ""
         rounds = 0
 
-        # --------------------------------------------
-        # 4) Tool-use loop: stream → (maybe) tool_call → execute MCP → continue
-        # --------------------------------------------
         while True:
-            # Build payload with tools and RAG; overwrite messages with our running conversation state
             payload = self.prompt_factory.build_payload(
                 context=context,
                 new_message=user_msg,
@@ -134,12 +208,10 @@ class ConversationEngine:
                 tools=openai_tools
             )
             payload["messages"] = conversation_messages
-            payload["model"] = request.model or "sentra-brain"  # make sure the backend receives an explicit model
+            payload["model"] = request.model or "sentra-brain"
 
-            # This captures a single pending tool call if the model emits one (arguments may arrive chunked).
             pending_tool = {"id": None, "name": None, "args": ""}
 
-            # Stream assistant deltas until either completion or a tool call appears
             async for line in self.llm_client.chat_completion(payload):
                 raw = (line or "").strip()
                 if not raw:
@@ -154,13 +226,17 @@ class ConversationEngine:
                     if not delta:
                         continue
 
-                    # Regular token content → forward as message_delta and buffer it
+                    # content chunk
                     if delta.get("content"):
                         chunk = delta["content"]
-                        assistant_text_buffer += chunk
-                        yield ConversationEvent(type="message_delta", content=chunk)
+                        if _looks_like_tool_schema_chunk(chunk):
+                            suppressed_tool_json_buffer += chunk
+                            # do NOT stream this to the user
+                        else:
+                            assistant_text_buffer += chunk
+                            yield ConversationEvent(type="message_delta", content=chunk)
 
-                    # Tool call (OpenAI-style tool_calls or legacy function_call) → accumulate name/args
+                    # OpenAI-style tool call (or legacy)
                     tc = self._tool_call_from_delta(delta)
                     if tc and tc.get("name"):
                         if tc.get("id"):
@@ -168,33 +244,46 @@ class ConversationEngine:
                         pending_tool["name"] = tc["name"]
                         pending_tool["args"] += tc.get("arguments_chunk") or ""
 
-                    # End-of-turn conditions; if a tool has been requested, break to execute it
+                    # End-of-turn?
                     if delta.get("finish_reason") in ("stop", "length", "tool_calls", "tool_call"):
                         if pending_tool["name"]:
                             break
                 except Exception as e:
                     logger.error(f"Stream parse error: {e}")
 
-            # If the model requested a tool, execute it and feed the result back before looping again
+            # If stream ended without a formal tool call, try to salvage from printed JSON
+            if not pending_tool["name"]:
+                salvaged = _salvage_tool_call_from_text(suppressed_tool_json_buffer)
+                if not salvaged:
+                    salvaged = _salvage_tool_call_from_text(assistant_text_buffer)  # last resort
+                    if salvaged:
+                        # remove the printed JSON from what the user sees
+                        assistant_text_buffer = ""
+                if salvaged:
+                    pending_tool["name"], args_obj = salvaged
+                    pending_tool["args"] = json.dumps(args_obj, ensure_ascii=False)
+
+            # Execute tool if requested / salvaged
             if pending_tool["name"]:
                 if rounds >= MAX_TOOL_ROUNDS:
                     logger.warning("Max tool rounds reached; skipping further tool calls.")
-                    # We stop calling more tools; the partially built answer (if any) will be finalized below.
                     break
 
                 rounds += 1
-                # Parse tool arguments as JSON (fall back to raw string if needed)
+
+                # Parse args
                 try:
                     args = json.loads(pending_tool["args"] or "{}")
                 except json.JSONDecodeError:
                     args = {"_raw": pending_tool["args"]}
 
-                # If we streamed some assistant text already, seal it into the transcript
+                # Seal any assistant text produced so far into transcript (not the suppressed JSON)
                 if assistant_text_buffer:
                     conversation_messages.append({"role": "assistant", "content": assistant_text_buffer})
                     assistant_text_buffer = ""
+                suppressed_tool_json_buffer = ""
 
-                # The assistant must record the tool call (no content), so the model can link the subsequent tool result
+                # Record tool call (OpenAI-style)
                 tool_call_id = pending_tool.get("id") or uuid4().hex
                 assistant_toolcall_msg = {
                     "role": "assistant",
@@ -210,7 +299,7 @@ class ConversationEngine:
                 }
                 conversation_messages.append(assistant_toolcall_msg)
 
-                # Emit/persist step events around MCP execution
+                # Step events around MCP execution
                 t_run_id = uuid4().hex
                 step_start = ConversationEvent(
                     type="step_start",
@@ -223,7 +312,7 @@ class ConversationEngine:
                 yield step_start
                 await self._persist_step_event(request, step_start)
 
-                # Execute tool via MCP
+                # Execute MCP tool
                 try:
                     tool_output = await self._call_mcp_tool(pending_tool["name"], args)
                     step_end = ConversationEvent(
@@ -249,7 +338,7 @@ class ConversationEngine:
                     yield step_end
                     await self._persist_step_event(request, step_end)
 
-                # (Optional) Persist the tool call summary as a system message for auditability
+                # Optional audit system message
                 try:
                     self.mongo_repo.append_message(
                         conversation_id=request.conversation_id,
@@ -257,7 +346,7 @@ class ConversationEngine:
                         message={
                             "id": uuid4().hex,
                             "role": "system",
-                            "content": f"[tool_call] {pending_tool['name']} args={args}",
+                            "content": f"[tool_call] {pending_tool['name']} args={json_safe(args)}",
                             "timestamp": datetime.now(timezone.utc).isoformat(),
                             "type": "tool_call",
                             "tool_name": pending_tool["name"],
@@ -267,23 +356,21 @@ class ConversationEngine:
                 except Exception:
                     pass
 
-                # Provide the tool result back to the model, linked by tool_call_id
+                # Feed tool result back
                 conversation_messages.append({
                     "role": "tool",
                     "tool_call_id": tool_call_id,
                     "content": tool_output
                 })
 
-                # Reset and continue another LLM round (the while loop restarts with updated transcript)
+                # Next LLM round
                 pending_tool = {"id": None, "name": None, "args": ""}
-                continue
+                continue  # restart while-loop with updated transcript
 
-            # No pending tool: the model considered the turn complete → exit the tool loop
+            # No tool to execute -> end tool loop
             break
 
-        # --------------------------------------------
-        # 5) Finalize assistant message, persist, cache, and signal completion
-        # --------------------------------------------
+        # ------- 5) Finalize, persist, cache, complete -------
         final_text = assistant_text_buffer.strip()
         if not final_text:
             logger.warning(f"No LLM response for user={request.user_id} conv={request.conversation_id}")
@@ -298,6 +385,9 @@ class ConversationEngine:
 
         yield ConversationEvent(type="message_final", content="")
         logger.info(f"[Engine] Completed run: user={request.user_id}, conversation={request.conversation_id}")
+
+
+
 
     async def _stream_llm(self, payload: dict):
         async for line in self.llm_client.chat_completion(payload):
