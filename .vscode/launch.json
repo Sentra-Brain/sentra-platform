@@ -45,6 +45,20 @@
       "envFile": "${workspaceFolder}/services/sentra-core/tests/.env.test",
       "console": "integratedTerminal",
     },
+
+    {
+      "name": "Test: sentra-engine",
+      "type": "debugpy",
+      "request": "launch",
+      "purpose": ["debug-test"],
+      "env": {
+        "PYTEST_ADDOPTS": "--no-cov"
+      },
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/core/sentra-engine/tests",
+      "envFile": "${workspaceFolder}/core/sentra-engine/tests/.env.test",
+      "console": "integratedTerminal",
+    },
     
     {
       "name": "Test: sentra-api",
