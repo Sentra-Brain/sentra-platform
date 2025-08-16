@@ -5,10 +5,16 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Copy and install shared library
-COPY services/sentra-api/requirements.txt /app/requirements.txt
+# Copy and install core library
 COPY core/sentra-core /core/sentra-core
 RUN pip install -e /core/sentra-core
+
+# Copy and install engine library
+COPY core/sentra-engine /core/sentra-engine
+RUN pip install -e /core/sentra-engine
+
+# Copy and install API requirements
+COPY services/sentra-api/requirements.txt /app/requirements.txt
 
 # Install requirements (editable install)
 RUN pip install --no-cache-dir -r /app/requirements.txt

@@ -15,6 +15,7 @@ from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.chat.controller import ChatController
+from sentra_brain_api.features.chat.controller_v2 import ChatControllerV2
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
@@ -33,46 +34,47 @@ logger = logging.get_logger("sentra_brain_api")
 # main.py (fragmentos relevantes)
 from sentra_brain_api.core.conversation_engine.mcp.sentra_mcp_client import SentraMCPClient
 
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("App startup: initializing resources...")
-
     mcp_client = None
     try:
         if os.getenv("TESTING") != "true":
             # DB
             postgres_service.init_db()
 
-            # MCP persistent client (connect on startup)
-            mcp_client = await SentraMCPClient().__aenter__()
-            # Optional: quick sanity checks
-            healthy = await mcp_client.healthcheck()
-            if not healthy:
-                logger.warning("⚠️ MCP healthcheck failed at startup")
-            else:
-                try:
-                    tools = await mcp_client.list_tools()
-                    logger.info(f"✅ MCP tools registered: {[t['name'] for t in tools]}")
-                except Exception as e:
-                    logger.warning(f"⚠️ Could not list MCP tools at startup: {e}")
+            # Try to open MCP, but DO NOT fail the app if it’s unreachable
+            try:
+                mcp_client = await SentraMCPClient().__aenter__()
+                healthy = await mcp_client.healthcheck()
+                if not healthy:
+                    logger.warning("⚠️ MCP healthcheck failed at startup")
+                else:
+                    try:
+                        tools = await mcp_client.list_tools()
+                        logger.info(f"✅ MCP tools registered: {[t['name'] for t in tools]}")
+                    except Exception as e:
+                        logger.warning(f"⚠️ Could not list MCP tools at startup: {e}")
+            except Exception as e:
+                logger.warning(f"⚠️ Skipping MCP connection at startup: {e}")
+                mcp_client = None
 
-            # ConversationEngine with injected MCP client
+            # Keep the old engine in AppState if you still need it elsewhere.
             app.state._sentra = AppState(
                 conversation_engine=ConversationEngine(mcp_client=mcp_client)
             )
 
-            # Background healthchecks (non-blocking)
+            # Background healthchecks only if the corresponding backends exist
             asyncio.create_task(keep_vllm_alive(app))
-            asyncio.create_task(keep_mcp_alive(app))
+            if mcp_client is not None:
+                asyncio.create_task(keep_mcp_alive(app))
         else:
-            # Testing: avoid external deps
             app.state._sentra = AppState(conversation_engine=None)
 
-        # Hand over control to FastAPI
         yield
 
     finally:
-        # Graceful shutdown: close MCP client if open
         if mcp_client is not None:
             try:
                 await mcp_client.__aexit__(None, None, None)
@@ -149,6 +151,7 @@ def create_app():
     conversation_controller = ConversationController()
     llm_proxy_controller = LLMProxyController()
     chat_controller = ChatController()
+    chat_controller_v2 = ChatControllerV2()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
@@ -161,6 +164,7 @@ def create_app():
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
+    app.include_router(chat_controller_v2.router, prefix="/chat", tags=["chat"])
     app.include_router(organization_router, prefix="", tags=["organization"])
 
     # Setup observability (only if not in test mode)

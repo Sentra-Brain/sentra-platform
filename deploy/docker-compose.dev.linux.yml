@@ -29,6 +29,7 @@ services:
     volumes:
       - ../services/sentra-api:/app
       - ../core/sentra-core:/core/sentra-core
+      - ../core/sentra-engine:/core/sentra-engine
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
