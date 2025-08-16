@@ -1,0 +1,22 @@
+# .coveragerc
+[run]
+branch = True
+parallel = True
+relative_files = True
+# write the data file at repo root even when CWD changes (set via env below)
+# data_file is controlled by COVERAGE_FILE env in launch/tasks
+omit =
+    */tests/*
+    */.venv/*
+    */__pycache__/*
+
+# IMPORTANT: list source roots so gutters map correctly
+source =
+    core/sentra-engine/sentra_engine
+    services/sentra-api/sentra_brain_api
+    services/sentra-core/sentra_core
+
+[report]
+show_missing = True
+skip_covered = True
+precision = 1

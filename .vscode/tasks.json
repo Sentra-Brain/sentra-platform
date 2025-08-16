@@ -1,0 +1,32 @@
+// .vscode/tasks.json
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "pytest: all (coverage)",
+      "type": "shell",
+      "command": "python -m pytest -q core/sentra-engine/tests services/sentra-core/tests services/sentra-api/tests --maxfail=1 --disable-warnings --cov=core/sentra-engine/sentra_engine --cov=services/sentra-core/sentra_core --cov=services/sentra-api/sentra_brain_api --cov-branch --cov-report=term-missing:skip-covered --cov-report=xml:coverage.xml",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "COVERAGE_FILE": "${workspaceFolder}/.coverage",
+          "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
+        }
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "coverage: combine+xml",
+      "type": "shell",
+      "command": "coverage combine && coverage xml -o coverage.xml",
+      "options": {
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "COVERAGE_FILE": "${workspaceFolder}/.coverage",
+          "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
+        }
+      },
+      "problemMatcher": []
+    }
+  ]
+}
