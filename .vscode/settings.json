@@ -12,6 +12,10 @@
     "**/__pycache__": true,
     "**/.pytest_cache": true
   },
+  "coverage-gutters.coverageFileNames": ["coverage.xml"],
+  "coverage-gutters.showGutterCoverage": true,
+  "coverage-gutters.showLineCoverage": true,
+  "coverage-gutters.highlightPartialLines": true,
   "sqltools.connections": [
     {
       "previewLimit": 50,

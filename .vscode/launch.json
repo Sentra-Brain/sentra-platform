@@ -73,5 +73,106 @@
       "envFile": "${workspaceFolder}/services/sentra-api/tests/.env.test",
       "console": "integratedTerminal",
     },
+     {
+      "name": "Pytest: ALL (coverage)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}",
+      "args": [
+        "-q",
+        "core/sentra-engine/tests",
+        "services/sentra-core/tests",
+        "services/sentra-api/tests",
+        "--maxfail=1",
+        "--disable-warnings",
+        "--cov=core/sentra-engine/sentra_engine",
+        "--cov=services/sentra-core/sentra_core",
+        "--cov=services/sentra-api/sentra_brain_api",
+        "--cov-branch",
+        "--cov-report=term-missing:skip-covered",
+        "--cov-report=xml:coverage.xml"
+      ],
+      "env": {
+        "COVERAGE_FILE": "${workspaceFolder}/.coverage",
+        "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+      {
+      "name": "Test: sentra-engine (coverage)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/core/sentra-engine",
+      "args": [
+        "-q",
+        "tests",
+        "--maxfail=1",
+        "--disable-warnings",
+        "--cov=sentra_engine",
+        "--cov-branch",
+        "--cov-report=term-missing:skip-covered",
+        "--cov-report=xml:${workspaceFolder}/coverage.xml"
+      ],
+      "envFile": "${workspaceFolder}/core/sentra-engine/tests/.env.test",
+      "env": {
+        "COVERAGE_FILE": "${workspaceFolder}/.coverage",
+        "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+
+    {
+      "name": "Test: sentra-core (coverage)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/services/sentra-core",
+      "args": [
+        "-q",
+        "tests",
+        "--maxfail=1",
+        "--disable-warnings",
+        "--cov=sentra_core",
+        "--cov-branch",
+        "--cov-report=term-missing:skip-covered",
+        "--cov-report=xml:${workspaceFolder}/coverage.xml"
+      ],
+      "envFile": "${workspaceFolder}/services/sentra-core/tests/.env.test",
+      "env": {
+        "COVERAGE_FILE": "${workspaceFolder}/.coverage",
+        "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    },
+
+    {
+      "name": "Test: sentra-api (coverage)",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "pytest",
+      "cwd": "${workspaceFolder}/services/sentra-api",
+      "args": [
+        "-q",
+        "tests",
+        "--maxfail=1",
+        "--disable-warnings",
+        "--cov=sentra_brain_api",
+        "--cov-branch",
+        "--cov-report=term-missing:skip-covered",
+        "--cov-report=xml:${workspaceFolder}/coverage.xml"
+      ],
+      "envFile": "${workspaceFolder}/services/sentra-api/tests/.env.test",
+      "env": {
+        "COVERAGE_FILE": "${workspaceFolder}/.coverage",
+        "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
+      },
+      "console": "integratedTerminal",
+      "justMyCode": false
+    }
   ]
 }
