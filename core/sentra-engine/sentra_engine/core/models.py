@@ -30,8 +30,11 @@ class RAGContext:
 
 @dataclass
 class Message:
+    id: str
     role: str
     content: str
+    timestamp: Optional[str] = None
+    meta: Optional[dict] = None
 
 @dataclass
 class StepEvent:
