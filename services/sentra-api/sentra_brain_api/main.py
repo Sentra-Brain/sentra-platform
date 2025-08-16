@@ -194,4 +194,4 @@ if __name__ == "__main__":
         debugpy.listen(("0.0.0.0", 5678))
         debugpy.wait_for_client()
 
-    uvicorn.run(app, host="0.0.0.0", port=8100, log_level="debug" if debug_mode else "info")
+    uvicorn.run(app, host="0.0.0.0", port=8100, ws="wsproto", log_level="debug" if debug_mode else "info")
