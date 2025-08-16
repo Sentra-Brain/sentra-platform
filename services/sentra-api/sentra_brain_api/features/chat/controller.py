@@ -20,7 +20,7 @@ class ChatController:
 
     def _add_routes(self):
         @self.router.post(
-            "/send",
+            "/send_old",
             response_class=StreamingResponse,
             description="Sends a message to the assistant and streams the response"
         )

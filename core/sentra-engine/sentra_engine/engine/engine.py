@@ -5,6 +5,8 @@ from sentra_engine.ports.context import ContextPort
 from sentra_engine.ports.llm import LLMPort
 from sentra_engine.engine.id_utils import normalize_message_id
 from sentra_engine.ports.persistence import PersistencePort
+from dataclasses import is_dataclass, asdict
+import inspect
 
 class ConversationEngine:
     def __init__(
@@ -38,9 +40,12 @@ class ConversationEngine:
         await self.persistence.append_message(conversation_id, user_msg)
 
         ctx = await self.context.build(conversation_id)
-        prompt_ctx = PromptContext(messages=[*ctx.messages, user_msg])
-
+        ctx_msgs = [_as_openai_msg(m) for m in ctx.messages]
+        user_msg_openai = _as_openai_msg(user_msg)
+        prompt_ctx = PromptContext(messages=[*ctx_msgs, user_msg_openai])
+        
         buffer = []
+
         async for ev in self.llm.chat_stream(prompt_ctx):
             if ev.type == "message_delta" and ev.content:
                 buffer.append(ev.content)
@@ -57,3 +62,20 @@ class ConversationEngine:
         await self.persistence.append_message(conversation_id, assistant_msg)
 
         yield DeltaEvent(type="message_final", content="")
+
+
+def _as_openai_msg(m: object) -> dict:
+    """
+    Accepts a Message dataclass instance or a dict-like row and returns
+    {"role": ..., "content": ...} for the LLM wire format.
+    """
+    # dataclass *instance* only (is_dataclass is True for classes too)
+    if is_dataclass(m) and not inspect.isclass(m):
+        d = asdict(m)
+    elif isinstance(m, dict):
+        d = m
+    else:
+        # last-resort attribute access (e.g., ORM objects)
+        d = {"role": getattr(m, "role", None), "content": getattr(m, "content", None)}
+
+    return {"role": d.get("role"), "content": d.get("content")}

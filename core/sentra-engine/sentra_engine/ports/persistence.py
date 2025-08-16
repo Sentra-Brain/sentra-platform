@@ -1,7 +1,7 @@
 # sentra_engine/ports/persistence.py
 from abc import ABC, abstractmethod
 from sentra_engine.core.models import Message, StepEvent
-
+from typing import Any, Mapping, Sequence, Union
 
 class PersistencePort(ABC):
     @abstractmethod
@@ -14,7 +14,6 @@ class PersistencePort(ABC):
         """Persist a step event for a conversation."""
         raise NotImplementedError
 
-    @abstractmethod
-    async def load_conversation(self, conversation_id: str) -> list[Message]:
+    async def load_conversation(self, conversation_id: str) -> Sequence[Union[Message, Mapping[str, Any]]]:
         """Load messages for a given conversation."""
         raise NotImplementedError

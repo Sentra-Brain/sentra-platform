@@ -104,7 +104,7 @@ def test_sse_with_rag_events_and_user_override(app, mock_user):
             "context_document_ids": [str(uuid.uuid4())],
         }
 
-        resp = client.post("/chat/send", json=payload)
+        resp = client.post("/chat/send_old", json=payload)
         assert resp.status_code == 200
         assert resp.headers["content-type"] == "text/event-stream; charset=utf-8"
 
@@ -156,7 +156,7 @@ def test_sse_without_step_events(app, mock_user):
             "content": "plain query",
             # No RAG context → no step events expected
         }
-        resp = client.post("/chat/send", json=payload)
+        resp = client.post("/chat/send_old", json=payload)
         assert resp.status_code == 200
         assert resp.headers["content-type"] == "text/event-stream; charset=utf-8"
 
@@ -193,7 +193,7 @@ def test_sse_error_path_emits_step_error(app, mock_user):
             "response_message_id": str(uuid.uuid4()),
             "content": "will fail",
         }
-        resp = client.post("/chat/send", json=payload)
+        resp = client.post("/chat/send_old", json=payload)
         events = parse_sse(resp.text)
         err = events[-1]
         assert err["type"] == "step_error"
