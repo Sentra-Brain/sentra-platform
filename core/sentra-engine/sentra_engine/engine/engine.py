@@ -114,8 +114,9 @@ def _as_openai_msg(m: object) -> dict:
         elif isinstance(m, dict):
             d = m
         else:
-            # generic fallback
+        # Generic fallback
             d = {"role": getattr(m, "role", None), "content": getattr(m, "content", None)}
+            
         role = d["role"] if isinstance(d, dict) else None
         content = d["content"] if isinstance(d, dict) else None
         if role is None and content is None:

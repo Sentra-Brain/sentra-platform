@@ -107,9 +107,10 @@ const chatSlice = createSlice({
     },
     setMode(state, action: PayloadAction<ConversationMode>) {
       state.mode = action.payload;
-      try { localStorage.setItem("sentra.chat.mode", action.payload); } catch {
+
+      try { localStorage.setItem("sentra.chat.mode", action.payload); } catch (error) {
         // Handle error
-        console.error("Failed to save chat mode to localStorage");
+        console.error("Failed to save chat mode to localStorage:", error);
       }
     },
   },
