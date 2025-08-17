@@ -1,6 +1,7 @@
 // ✅ 1. New chatSlice.ts — add message support
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { ChatMessage } from "@features/conversations/types/conversationModels";
+import type { ConversationMode } from "@features/chat/types/mode";
 
 export interface SelectedContext {
   sourceIds: string[];
@@ -14,7 +15,11 @@ interface ChatState {
   inputDisabled: boolean;
   messages: ChatMessage[];
   selectedContext: SelectedContext;
+  mode: ConversationMode;
 }
+const storedMode = (typeof window !== "undefined"
+  ? (localStorage.getItem("sentra.chat.mode") as ConversationMode | null)
+  : null) || "fast";
 
 const initialState: ChatState = {
   waitingForAnswer: false,
@@ -26,6 +31,7 @@ const initialState: ChatState = {
     documentIds: [],
     useRag: true,
   },
+  mode: storedMode,
 };
 
 const chatSlice = createSlice({
@@ -99,6 +105,13 @@ const chatSlice = createSlice({
         useRag: true,
       };
     },
+    setMode(state, action: PayloadAction<ConversationMode>) {
+      state.mode = action.payload;
+      try { localStorage.setItem("sentra.chat.mode", action.payload); } catch {
+        // Handle error
+        console.error("Failed to save chat mode to localStorage");
+      }
+    },
   },
 });
 
@@ -117,6 +130,7 @@ export const {
   addContextDocument,
   removeContextDocument,
   clearSelectedContext,
+  setMode, 
 } = chatSlice.actions;
 
 export default chatSlice.reducer;
