@@ -80,7 +80,8 @@ class MongoPersistenceAdapter(PersistencePort):
         key = _cache_key(self.user_id, conversation_id)
         cached = await _CONV_CACHE.get(key)
         if cached is None:
-            cached = []        
+            # lazy load then update (avoids desync on first write)
+            cached = await self.load_conversation(conversation_id)
         # append & trim window
         cached = [*cached, message][-CONTEXT_WINDOW_SIZE:]
         await _CONV_CACHE.put(key, cached)
