@@ -23,6 +23,13 @@ class LlamaServerAdapter(LLMPort):
             "stream": True,
         }
 
+        if guidance:
+            # Prepend a system message for deterministic control
+            payload["messages"] = [
+                {"role": "system", "content": f"Planner guidance:\n{guidance}"},
+                *payload["messages"],
+            ]
+
         async with httpx.AsyncClient(timeout=self.request_timeout) as client:
             async with client.stream("POST", url, json=payload) as response:
                 if response.status_code >= 400:

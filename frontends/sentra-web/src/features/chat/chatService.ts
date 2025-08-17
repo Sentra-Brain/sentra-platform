@@ -1,6 +1,7 @@
 // sentra-web/src/features/chat/chatService.ts
 import { tokenStorage } from "@shared/utils/tokenStorage";
 import type { ConversationEvent } from "@features/chat/types/events";
+import type { ConversationMode } from "@features/chat/types/mode";
 
 type ChatSendPayload = {
   user_id?: string;
@@ -10,6 +11,7 @@ type ChatSendPayload = {
   content: string;
   context_source_ids?: string[];
   context_document_ids?: string[];
+  mode?: ConversationMode; 
 };
 
 // NEW: event callback uses ConversationEvent

@@ -99,7 +99,14 @@ class MongoPersistenceAdapter(PersistencePort):
         doc = await asyncio.to_thread(
             self.repo.get_conversation_by_id, conversation_id, self.user_id
         )
-        raw: Sequence[Any] = (doc.get("messages") if doc else []) or []
+
+        raw: Sequence[Any]
+        if isinstance(doc, Mapping):
+            raw = (doc.get("messages") or [])  # type: ignore[assignment]
+        elif isinstance(doc, (list, tuple)):
+            raw = doc  # repo returned the message list directly
+        else:
+            raw = [] 
         out: list[Message] = []
 
         for m in raw:

@@ -1,7 +1,12 @@
 
+from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
+
+class ConversationMode(str, Enum):
+    FAST = "fast"
+    PLAN = "plan"
 
 class ConversationRequest(BaseModel):
     user_id: UUID = Field(..., description="ID of the user sending the message") 
@@ -13,6 +18,11 @@ class ConversationRequest(BaseModel):
     parent_message_id: Optional[UUID] = Field(default=None, description="ID of the parent message")
     intent_override: Optional[str] = Field(default=None, description="Intent to override")
     stream: Optional[bool] = Field(default=True, description="Whether to stream the response")
+
+    mode: ConversationMode = Field(
+        default=ConversationMode.FAST,
+        description="Engine mode: 'fast' (bypass planner) or 'plan' mode (use planner)"
+    )
 
     context_source_ids: Optional[List[UUID]] = Field(
         default=None,

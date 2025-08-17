@@ -22,7 +22,7 @@ export function useChatActions() {
   const dispatch = useAppDispatch()
   const currentConversationId = useAppSelector(s => s.conversation.currentConversationId)
   const userId = useAppSelector(s => s.auth.user?.id)
-  const { selectedContext } = useAppSelector(s => s.chat)
+  const { selectedContext, mode } = useAppSelector(s => s.chat);
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim()
@@ -78,6 +78,7 @@ export function useChatActions() {
         content: trimmed,
         context_source_ids: selectedContext.useRag ? selectedContext.sourceIds : [],
         context_document_ids: selectedContext.useRag ? selectedContext.documentIds : [],
+        mode,
       },
       // onEvent
       (event: ConversationEvent) => {
