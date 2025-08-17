@@ -2,23 +2,20 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_core.core.logging import get_logger
+from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_core.infra.nosql.mongo_conversation_repository import (
     MongoConversationRepository,
     get_conversation_mongo_repository,
 )
-from sentra_core.core.settings import settings, LLMEngine
-
-from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest
-from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
-
-from sentra_engine.engine import ConversationEngine as NewConversationEngine
-from sentra_engine.adapters.context_service import SimpleContextService
-from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter
-
-# Adapter that binds user_id to repo calls (you created this in step 2)
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
+from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest, ConversationMode
+from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
+from sentra_core.core.settings import settings, LLMEngine
+from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter
+from sentra_engine.adapters.context_service import SimpleContextService
+from sentra_engine.engine import ConversationEngine
+
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
@@ -54,7 +51,7 @@ class ChatControllerV2:
         @self.router.post(
             "/send",
             response_class=StreamingResponse,
-            description="Sends a message (fast mode) and streams the assistant response",
+            description="Sends a message using the selected engine mode and streams the assistant response",
         )
         async def send_message_v2(
             body: ConversationRequest,
@@ -70,11 +67,22 @@ class ChatControllerV2:
             context = SimpleContextService(persistence=persistence)
             llm = self._build_llm_adapter(model=body.model or "sentra-brain")
 
-            engine = NewConversationEngine(context=context, llm=llm, persistence=persistence)
+            # Choose engine path from body.mode
+            if body.mode == ConversationMode.FAST:
+                engine = ConversationEngine(context=context, llm=llm, persistence=persistence)
+                runner = engine.run_fast
+            elif body.mode == ConversationMode.PLAN:
+                planner = self._build_planner_adapter(model=body.model or "sentra-brain")
+                engine = ConversationEngine(context=context, llm=llm, persistence=persistence, planner=planner)
+                runner = engine.run_planner
+            else:
+                # Fallback: default to FAST
+                engine = ConversationEngine(context=context, llm=llm, persistence=persistence)
+                runner = engine.run_fast
 
             async def stream():
                 try:
-                    async for ev in engine.run_fast(
+                    async for ev in runner(
                         user_id=str(current_user.id),
                         conversation_id=str(body.conversation_id),
                         message_id=str(body.message_id) if body.message_id else None,
@@ -107,3 +115,11 @@ class ChatControllerV2:
                     "Connection": "keep-alive",
                 },
             )
+
+    def _build_planner_adapter(self, model: str):
+        if settings.llm_engine == LLMEngine.LLAMA:
+            return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model)
+        elif settings.llm_engine == LLMEngine.VLLM:
+            return LLMPlannerAdapter(base_url=settings.vllm_server_url, model=model)
+        # default
+        return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model)
