@@ -108,17 +108,19 @@ class ConversationEngine:
         yield DeltaEvent(type="message_final", content="")
 
 def _as_openai_msg(m: object) -> dict:
-    """
-    Accepts a Message dataclass instance or a dict-like row and returns
-    {"role": ..., "content": ...} for the LLM wire format.
-    """
-    # dataclass *instance* only (is_dataclass is True for classes too)
-    if is_dataclass(m) and not inspect.isclass(m):
-        d = asdict(m)
-    elif isinstance(m, dict):
-        d = m
-    else:
-        # last-resort attribute access (e.g., ORM objects)
-        d = {"role": getattr(m, "role", None), "content": getattr(m, "content", None)}
-
-    return {"role": d.get("role"), "content": d.get("content")}
+    try:
+        if is_dataclass(m) and not inspect.isclass(m):
+            d = asdict(m)
+        elif isinstance(m, dict):
+            d = m
+        else:
+            # generic fallback
+            d = {"role": getattr(m, "role", None), "content": getattr(m, "content", None)}
+        role = d["role"] if isinstance(d, dict) else None
+        content = d["content"] if isinstance(d, dict) else None
+        if role is None and content is None:
+            return {"role": "system", "content": str(m)}
+        return {"role": role or "system", "content": content or ""}
+    except Exception:
+        # last resort
+        return {"role": "system", "content": str(m)}

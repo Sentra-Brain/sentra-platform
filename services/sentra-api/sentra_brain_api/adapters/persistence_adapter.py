@@ -80,8 +80,7 @@ class MongoPersistenceAdapter(PersistencePort):
         key = _cache_key(self.user_id, conversation_id)
         cached = await _CONV_CACHE.get(key)
         if cached is None:
-            # lazy load then update (avoids desync on first write)
-            cached = await self.load_conversation(conversation_id)
+            cached = []        
         # append & trim window
         cached = [*cached, message][-CONTEXT_WINDOW_SIZE:]
         await _CONV_CACHE.put(key, cached)
@@ -99,7 +98,14 @@ class MongoPersistenceAdapter(PersistencePort):
         doc = await asyncio.to_thread(
             self.repo.get_conversation_by_id, conversation_id, self.user_id
         )
-        raw: Sequence[Any] = (doc.get("messages") if doc else []) or []
+
+        raw: Sequence[Any]
+        if isinstance(doc, Mapping):
+            raw = (doc.get("messages") or [])  # type: ignore[assignment]
+        elif isinstance(doc, (list, tuple)):
+            raw = doc  # repo returned the message list directly
+        else:
+            raw = [] 
         out: list[Message] = []
 
         for m in raw:
