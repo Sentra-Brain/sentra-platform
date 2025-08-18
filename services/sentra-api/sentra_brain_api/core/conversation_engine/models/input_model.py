@@ -3,6 +3,9 @@ from enum import Enum
 from typing import List, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
+from warnings import warn
+warn("Deprecated: import ConversationRequest/Mode from features.chat.schemas", DeprecationWarning, stacklevel=2)
+__all__ = ["ConversationRequest", "ConversationMode"]
 
 class ConversationMode(str, Enum):
     FAST = "fast"

@@ -3,6 +3,10 @@ from typing import Optional, Literal, Dict, Any
 from datetime import datetime, timezone
 import uuid
 
+from warnings import warn
+warn("Deprecated: import ConversationEvent from features.chat.schemas", DeprecationWarning, stacklevel=2)
+__all__ = ["ConversationEvent", "ConversationDelta", "ConversationResponse"]
+
 class ConversationEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     type: Literal[

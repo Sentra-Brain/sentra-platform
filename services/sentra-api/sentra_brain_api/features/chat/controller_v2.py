@@ -9,12 +9,15 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
     get_conversation_mongo_repository,
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
-from sentra_brain_api.core.conversation_engine.models.input_model import ConversationRequest, ConversationMode
-from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
 from sentra_core.core.settings import settings, LLMEngine
 from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter
 from sentra_engine.adapters.context_service import SimpleContextService
 from sentra_engine.engine import ConversationEngine
+
+from sentra_brain_api.features.chat.schemas import (
+    ConversationRequest, ConversationMode, ConversationEvent
+)
+from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 
 logger = get_logger("sentra_brain_api.chat.v2")
@@ -89,11 +92,8 @@ class ChatControllerV2:
                         response_message_id=str(body.response_message_id) if body.response_message_id else None,
                         content=body.content,
                     ):
-                        if ev.type == "message_delta":
-                            out = ConversationEvent(type="message_delta", content=ev.content)
-                        else:
-                            out = ConversationEvent(type="message_final", content="")
-                        yield f"data: {out.model_dump_json()}\n\n"
+                       out = engine_event_to_wire(ev)
+                       yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
                     err_evt = ConversationEvent(
