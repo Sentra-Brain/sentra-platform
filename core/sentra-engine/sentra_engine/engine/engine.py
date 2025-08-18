@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-import json
 from typing import AsyncGenerator, Optional, Sequence
 from sentra_engine.core.models import DeltaEvent, PromptContext, Message, ToolSchema
 from sentra_engine.ports.context import ContextPort
@@ -9,6 +8,7 @@ from sentra_engine.engine.id_utils import normalize_message_id
 from sentra_engine.ports.persistence import PersistencePort
 from dataclasses import is_dataclass, asdict
 import inspect
+import json
 from sentra_engine.ports.planner import PlannerPort
 from sentra_engine.core.tool_orchestrator import ToolOrchestrator, normalize_tool_output
 
@@ -50,16 +50,70 @@ class ConversationEngine:
         ctx = await self.context.build(conversation_id)
         ctx_msgs = [_as_openai_msg(m) for m in ctx.messages]
         user_msg_openai = _as_openai_msg(user_msg)
-        prompt_ctx = PromptContext(messages=[*ctx_msgs, user_msg_openai])
+        llm_messages = [*ctx_msgs, user_msg_openai]
 
-        buffer = []
-        async for ev in self.llm.chat_stream(prompt_ctx):
+        # Enable autonomous tool use in FAST if orchestrator exists
+        tools_schema: Optional[Sequence[ToolSchema]] = None
+        if self.tool_orchestrator:
+            try:
+                tools_schema = await self.tool_orchestrator.registry()
+            except Exception:
+                tools_schema = None
+
+        prelude_chunks: list[str] = []
+        tool_requested = False
+        tool_name: Optional[str] = None
+        tool_args_buf: dict[int, list[str]] = {}
+
+        # Phase 1 — let LLM optionally announce/emit tool_calls
+        async for ev in self.llm.chat_stream(PromptContext(messages=llm_messages), tools_schema=tools_schema):
             if ev.type == "message_delta" and ev.content:
-                buffer.append(ev.content)
+                prelude_chunks.append(ev.content)
                 yield ev
+            elif ev.type == "tool_call_delta":
+                tool_requested = True
+                idx = int((ev.metadata or {}).get("index", 0))
+                name = (ev.metadata or {}).get("name")
+                if name:
+                    tool_name = str(name)
+                frag = (ev.metadata or {}).get("arguments_delta")
+                if frag:
+                    tool_args_buf.setdefault(idx, []).append(str(frag))
+            elif ev.type == "tool_calls_done":
+                break
 
-        final_text = "".join(buffer).strip() or "(no content)"
+        post_chunks: list[str] = []
 
+        if tool_requested and self.tool_orchestrator and tool_name:
+            args_json = "".join(tool_args_buf.get(0, [])) or "{}"
+            try:
+                args = json.loads(args_json)
+            except Exception:
+                args = {}
+            step_id = normalize_message_id(None)
+            result = await self.tool_orchestrator.execute_one(
+                conversation_id=conversation_id,
+                plan_step_id=step_id,
+                tool_name=tool_name,
+                args=args,
+            )
+            system_text = normalize_tool_output(tool_name, result.content if result.ok else result.error)
+            system_msg = Message(
+                id=normalize_message_id(None, prefer_hex=True),
+                role="system",
+                content=system_text,
+                timestamp=datetime.now(timezone.utc).isoformat(),
+            )
+            await self.persistence.append_message(conversation_id, system_msg)
+            llm_messages = [*llm_messages, _as_openai_msg(system_msg)]
+
+            # Phase 2 — continue completion after tool result
+            async for ev in self.llm.chat_stream(PromptContext(messages=llm_messages)):
+                if ev.type == "message_delta" and ev.content:
+                    post_chunks.append(ev.content)
+                    yield ev
+
+        final_text = ("".join(prelude_chunks) + "".join(post_chunks)).strip() or "(no content)"
         assistant_msg = Message(
             id=normalize_message_id(response_message_id, prefer_hex=True),
             role="assistant",
@@ -82,7 +136,6 @@ class ConversationEngine:
         ctx_msgs = [_as_openai_msg(m) for m in ctx.messages]
         user_msg_openai = _as_openai_msg(user_msg)
 
-        # plan (kept simple; planner may still return Respond)
         transcript = Transcript(messages=[*(ctx.messages), user_msg])
         if not self.planner:
             plan = PlanStep(action="Respond", params={"guidance": ""})
@@ -92,7 +145,7 @@ class ConversationEngine:
         guidance = (plan.params or {}).get("guidance") if plan else None
         llm_messages = [*ctx_msgs, user_msg_openai]
 
-        # ====== Autonomous tool-use branch (one-tool-per-turn) ======
+        # tool branch (as before)
         tools_schema: Optional[Sequence[ToolSchema]] = None
         if self.tool_orchestrator:
             try:
@@ -105,10 +158,8 @@ class ConversationEngine:
         tool_name: Optional[str] = None
         tool_args_buf: dict[int, list[str]] = {}
 
-        # If planner explicitly asks for a tool, inject after first pass below.
         explicit_tool = (plan and (plan.action or "").lower() == "tool")
 
-        # Phase 1: stream (LLM may announce intent and/or emit tool_calls)
         async for ev in self.llm.chat_stream(PromptContext(messages=llm_messages), tools_schema=tools_schema, guidance=guidance):
             if ev.type == "message_delta" and ev.content:
                 prelude_chunks.append(ev.content)
@@ -123,9 +174,8 @@ class ConversationEngine:
                 if frag:
                     tool_args_buf.setdefault(idx, []).append(str(frag))
             elif ev.type == "tool_calls_done":
-                break  # stop first stream round
+                break
 
-        # Explicit planner tool (no autonomous tool_calls) => run it too
         if explicit_tool and not tool_requested:
             tool_requested = True
             tool_name = str((plan.params or {}).get("name") or "")
@@ -134,7 +184,6 @@ class ConversationEngine:
         post_chunks: list[str] = []
 
         if tool_requested and self.tool_orchestrator and tool_name:
-            # Build args from concatenated deltas
             args_json = "".join(tool_args_buf.get(0, [])) or "{}"
             try:
                 args = json.loads(args_json)
@@ -157,7 +206,6 @@ class ConversationEngine:
             await self.persistence.append_message(conversation_id, system_msg)
             llm_messages = [*llm_messages, _as_openai_msg(system_msg)]
 
-            # Phase 2: continue response after tool result
             async for ev in self.llm.chat_stream(PromptContext(messages=llm_messages), guidance=guidance):
                 if ev.type == "message_delta" and ev.content:
                     post_chunks.append(ev.content)

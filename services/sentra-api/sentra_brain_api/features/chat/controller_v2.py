@@ -82,14 +82,19 @@ class ChatControllerV2:
 
             tool_orch = self._build_tool_orchestrator(persistence)
 
-            # Route: if tools are enabled, always use planner path (enables autonomous tool calls).
-            use_planner = settings.tools_enabled or (body.mode == ConversationMode.PLAN)
-            if use_planner:
+            if body.mode == ConversationMode.PLAN:
                 planner = self._build_planner_adapter(model=body.model or "sentra-brain")
-                engine = ConversationEngine(context=context, llm=llm, persistence=persistence, planner=planner, tool_orchestrator=tool_orch)
+                engine = ConversationEngine(
+                    context=context, llm=llm, persistence=persistence,
+                    planner=planner, tool_orchestrator=tool_orch
+                )
                 runner = engine.run_planner
             else:
-                engine = ConversationEngine(context=context, llm=llm, persistence=persistence)
+                # FAST mode with autonomous tool-use support
+                engine = ConversationEngine(
+                    context=context, llm=llm, persistence=persistence,
+                    planner=None, tool_orchestrator=tool_orch
+                )
                 runner = engine.run_fast
 
             async def stream():
