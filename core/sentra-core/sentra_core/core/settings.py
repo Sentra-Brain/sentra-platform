@@ -16,7 +16,7 @@ class SentraSettings(BaseSettings):
     llm_engine: LLMEngine = Field(default=LLMEngine.VLLM, json_schema_extra={"env": "LLM_ENGINE"})
     vllm_server_url: str = Field(default="http://vllm:8000", json_schema_extra={"env": "VLLM_SERVER_URL"})
     llama_server_url: str = Field(default="http://llama_server:8080", json_schema_extra={"env": "LLAMA_SERVER_URL"})
-    llm_request_timeout: float | None = Field(default=None, json_schema_extra={"env": "LLM_REQUEST_TIMEOUT"})  # seconds, None = unlimited
+    llm_request_timeout: float | None = Field(default=None, json_schema_extra={"env": "LLM_REQUEST_TIMEOUT"})
 
     # ---- Knowledge settings ----
     knowledge_mount_path: str = Field(default="/mnt/sentra_knowledge", json_schema_extra={"env": "KNOWLEDGE_MOUNT_PATH"})
@@ -24,7 +24,11 @@ class SentraSettings(BaseSettings):
     max_markdown_bytes: int = Field(default=5_000_000, json_schema_extra={"env": "MAX_MARKDOWN_BYTES"})
     derived_dir_name: str = Field(default=".derived", json_schema_extra={"env": "DERIVED_DIR_NAME"})
 
-    # Pydantic Settings config
+    # ---- Tools / MCP (NEW) ----
+    tools_enabled: bool = Field(default=False, json_schema_extra={"env": "SENTRA_TOOLS_ENABLED"})
+    mcp_base_url: str = Field(default="http://sentra-mcp:8200", json_schema_extra={"env": "MCP_BASE_URL"})
+    tool_max_output_bytes: int = Field(default=8192, json_schema_extra={"env": "TOOL_MAX_OUTPUT_BYTES"})
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="allow"
@@ -33,7 +37,6 @@ class SentraSettings(BaseSettings):
     @field_validator("llm_engine", mode="before")
     @classmethod
     def _normalize_llm_engine(cls, v: Any) -> Any:
-        # Permite LLM_ENGINE=vLlM / LLAMA / etc. (case-insensitive)
         if isinstance(v, str):
             v = v.strip().lower()
             if v == "vllm":
@@ -42,7 +45,7 @@ class SentraSettings(BaseSettings):
                 return LLMEngine.LLAMA
         return v
 
-try:  # Validate settings on import
+try:
     settings = SentraSettings()
 except ValidationError as e:
     error_details = "; ".join([f"{err['loc'][0]}: {err['msg']}" for err in e.errors()])

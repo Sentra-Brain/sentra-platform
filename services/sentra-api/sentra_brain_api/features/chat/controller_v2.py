@@ -10,8 +10,10 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.core.settings import settings, LLMEngine
-from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter
+
+from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter, MCPFastMCPAdapter
 from sentra_engine.adapters.context_service import SimpleContextService
+from sentra_engine.core.tool_orchestrator import ToolOrchestrator
 from sentra_engine.engine import ConversationEngine
 
 from sentra_brain_api.features.chat.schemas import (
@@ -19,9 +21,7 @@ from sentra_brain_api.features.chat.schemas import (
 )
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
-
 logger = get_logger("sentra_brain_api.chat.v2")
-
 
 class ChatControllerV2:
     def __init__(self):
@@ -33,22 +33,34 @@ class ChatControllerV2:
             return LlamaServerAdapter(
                 base_url=settings.llama_server_url,
                 model=model,
-                request_timeout=None,
+                request_timeout=settings.llm_request_timeout,
             )
         elif settings.llm_engine == LLMEngine.VLLM:
             return VLLMAdapter(
                 base_url=settings.vllm_server_url,
                 model=model,
-                request_timeout=None,
+                request_timeout=settings.llm_request_timeout,
             )
-        else:
-            # Default to LLAMA if engine not recognized
-            logger.warning(f"Unknown LLM engine '{settings.llm_engine}', defaulting to LLAMA")
-            return LlamaServerAdapter(
-                base_url=settings.llama_server_url,
-                model=model,
-                request_timeout=None,
-            )
+        # default
+        logger.warning(f"Unknown LLM engine '{settings.llm_engine}', defaulting to LLAMA")
+        return LlamaServerAdapter(
+            base_url=settings.llama_server_url,
+            model=model,
+            request_timeout=settings.llm_request_timeout,
+        )
+
+    def _build_planner_adapter(self, model: str):
+        if settings.llm_engine == LLMEngine.LLAMA:
+            return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model, request_timeout=settings.llm_request_timeout)
+        elif settings.llm_engine == LLMEngine.VLLM:
+            return LLMPlannerAdapter(base_url=settings.vllm_server_url, model=model, request_timeout=settings.llm_request_timeout)
+        return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model, request_timeout=settings.llm_request_timeout)
+
+    def _build_tool_orchestrator(self, persistence: MongoPersistenceAdapter) -> ToolOrchestrator | None:
+        if not settings.tools_enabled:
+            return None
+        mcp = MCPFastMCPAdapter(settings.mcp_base_url, ttl_secs=60)
+        return ToolOrchestrator(mcp=mcp, persistence=persistence, telemetry=None, enabled=True)
 
     def _add_routes(self):
         @self.router.post(
@@ -62,24 +74,21 @@ class ChatControllerV2:
             mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
             current_user: UserEntity = Depends(get_authenticated_user),
         ):
-            # Ensure user_id in body for consistency with existing model usage
             body.user_id = current_user.id
 
-            # Wire per-request adapters
             persistence = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             context = SimpleContextService(persistence=persistence)
             llm = self._build_llm_adapter(model=body.model or "sentra-brain")
 
-            # Choose engine path from body.mode
-            if body.mode == ConversationMode.FAST:
-                engine = ConversationEngine(context=context, llm=llm, persistence=persistence)
-                runner = engine.run_fast
-            elif body.mode == ConversationMode.PLAN:
+            tool_orch = self._build_tool_orchestrator(persistence)
+
+            # Route: if tools are enabled, always use planner path (enables autonomous tool calls).
+            use_planner = settings.tools_enabled or (body.mode == ConversationMode.PLAN)
+            if use_planner:
                 planner = self._build_planner_adapter(model=body.model or "sentra-brain")
-                engine = ConversationEngine(context=context, llm=llm, persistence=persistence, planner=planner)
+                engine = ConversationEngine(context=context, llm=llm, persistence=persistence, planner=planner, tool_orchestrator=tool_orch)
                 runner = engine.run_planner
             else:
-                # Fallback: default to FAST
                 engine = ConversationEngine(context=context, llm=llm, persistence=persistence)
                 runner = engine.run_fast
 
@@ -92,8 +101,8 @@ class ChatControllerV2:
                         response_message_id=str(body.response_message_id) if body.response_message_id else None,
                         content=body.content,
                     ):
-                       out = engine_event_to_wire(ev)
-                       yield f"data: {out.model_dump_json()}\n\n"
+                        out = engine_event_to_wire(ev)
+                        yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
                     err_evt = ConversationEvent(
@@ -115,11 +124,3 @@ class ChatControllerV2:
                     "Connection": "keep-alive",
                 },
             )
-
-    def _build_planner_adapter(self, model: str):
-        if settings.llm_engine == LLMEngine.LLAMA:
-            return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model)
-        elif settings.llm_engine == LLMEngine.VLLM:
-            return LLMPlannerAdapter(base_url=settings.vllm_server_url, model=model)
-        # default
-        return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model)
