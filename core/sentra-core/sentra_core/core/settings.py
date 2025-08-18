@@ -1,4 +1,4 @@
-# sentra_brain_api/core/settings.py
+# sentra_core/core/settings.py
 from enum import Enum
 from typing import Any
 from pydantic import Field, ValidationError, field_validator
