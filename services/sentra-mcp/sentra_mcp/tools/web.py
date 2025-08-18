@@ -33,14 +33,15 @@ def register_web_tools(mcp: FastMCP):
 
                 for result in soup.select("div.result.results_links_deep")[:top_k]:
                     title_el = result.select_one("a.result__a")
-                    url_el = result.select_one("a.result__url")
                     snippet_el = result.select_one("a.result__snippet") or result.select_one(".result__snippet")
 
-                    if not title_el or not url_el:
+                    if not title_el:
                         continue
 
                     title = title_el.get_text(strip=True)
-                    url = url_el["href"]
+                    url = title_el.get("href") or ""
+                    if not url:
+                        continue
                     snippet = snippet_el.get_text(strip=True) if snippet_el else ""
 
                     results.append({

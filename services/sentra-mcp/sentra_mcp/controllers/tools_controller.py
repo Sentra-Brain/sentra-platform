@@ -79,7 +79,7 @@ async def _registry_payload(request: Request) -> List[Dict[str, Any]]:
                     continue
                 ann = hints.get(name, param.annotation)
                 sch = _json_type_from_py(ann)
-                if param.default is inspect._empty:
+                if param.default is inspect.Parameter.empty:
                     required.append(name)
                 else:
                     if param.default is not None:
