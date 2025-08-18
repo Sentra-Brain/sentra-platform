@@ -35,7 +35,14 @@ class VLLMAdapter(LLMPort):
 
         if tools_schema:
             payload["tools"] = [
-                {"type": "function", "function": {"name": s.name, "parameters": s.parameters}}
+                {
+                    "type": "function",
+                    "function": {
+                        "name": s.name,
+                        "description": (s.description or s.title or s.name),  # NEW
+                        "parameters": s.parameters,
+                    },
+                }
                 for s in tools_schema
             ]
             payload["tool_choice"] = "auto"

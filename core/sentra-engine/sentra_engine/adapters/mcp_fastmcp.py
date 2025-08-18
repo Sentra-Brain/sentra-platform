@@ -1,3 +1,4 @@
+# sentra_engine/adapters/mcp_fastmcp.py
 from __future__ import annotations
 import time
 import httpx
@@ -23,7 +24,15 @@ class MCPFastMCPAdapter(MCPPort):
             r.raise_for_status()
             data = r.json()
             self._stats["registry_fetches"] += 1
-            self._cache = [ToolSchema(name=i["name"], parameters=i.get("parameters", {})) for i in data]
+            self._cache = [
+                ToolSchema(
+                    name=i["name"],
+                    parameters=i.get("parameters", {}),
+                    title=i.get("title"),
+                    description=i.get("description") or "",
+                )
+                for i in data
+            ]
             self._cache_ts = now
             return self._cache
 
@@ -39,7 +48,6 @@ class MCPFastMCPAdapter(MCPPort):
     def _ensure_client(self):
         return self._client if self._client else httpx.AsyncClient(timeout=10)
 
-    # testing helpers
     @property
     def stats(self) -> dict:
         return dict(self._stats)
