@@ -1,11 +1,8 @@
 debugpy
-fastapi
 fastmcp
 httpx
 pydantic-settings
 beautifulsoup4
-
-uvicorn
 
 pytest
 pytest-asyncio

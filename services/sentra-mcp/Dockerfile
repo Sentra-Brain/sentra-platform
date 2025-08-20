@@ -19,4 +19,4 @@ COPY services/sentra-mcp /app
 EXPOSE 8200
 EXPOSE 5681
 
-CMD ["python", "-m", "sentra_mcp.main"]
+CMD ["python", "-m", "sentra_mcp.server"]
