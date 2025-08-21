@@ -11,7 +11,7 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.core.settings import settings, LLMEngine
 
-from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter, MCPFastMCPAdapter
+from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter, MCPProtocolAdapter
 from sentra_engine.adapters.context_service import SimpleContextService
 from sentra_engine.core.tool_orchestrator import ToolOrchestrator
 from sentra_engine.engine import ConversationEngine
@@ -59,7 +59,7 @@ class ChatControllerV2:
     def _build_tool_orchestrator(self, persistence: MongoPersistenceAdapter) -> ToolOrchestrator | None:
         if not settings.tools_enabled:
             return None
-        mcp = MCPFastMCPAdapter(settings.mcp_base_url, ttl_secs=60)
+        mcp = MCPProtocolAdapter(settings.mcp_base_url)
         return ToolOrchestrator(mcp=mcp, persistence=persistence, telemetry=None, enabled=True)
 
     def _add_routes(self):
@@ -97,8 +97,8 @@ class ChatControllerV2:
                 )
                 runner = engine.run_fast
 
-            async def stream():
-                try:
+            async def stream(): 
+                try:  
                     async for ev in runner(
                         user_id=str(current_user.id),
                         conversation_id=str(body.conversation_id),
