@@ -23,9 +23,25 @@ class ToolOrchestrator:
         self.persistence = persistence
         self.telemetry = telemetry
         self.enabled = enabled
+        self._cached_schemas: Optional[Sequence[ToolSchema]] = None
 
-    async def registry(self) -> Sequence[ToolSchema]:
-        return await self.mcp.list_tools()
+    async def _get_schemas(self) -> Sequence[ToolSchema]:
+        """Fetch and cache tool schemas."""
+        if self._cached_schemas is None:
+            self._cached_schemas = await self.mcp.list_tools()
+        return self._cached_schemas
+
+    async def _log_telemetry(self, plan_step_id: str, event_type: str, success: bool, error: Optional[str] = None):
+        """Log telemetry events."""
+        if self.telemetry:
+            if event_type == "start":
+                self.telemetry.step_start(plan_step_id, {"tool": event_type})
+            elif event_type == "end":
+                self.telemetry.step_end(plan_step_id, success, {"error": error} if error else None)
+
+    async def _append_event(self, conversation_id: str, step_event: StepEvent):
+        """Append step events to persistence."""
+        await self.persistence.append_step_event(conversation_id, step_event)
 
     async def execute_one(
         self,
@@ -35,11 +51,8 @@ class ToolOrchestrator:
         tool_name: str,
         args: Dict[str, Any],
     ) -> ToolResult:
-        step_meta = {"tool": tool_name, "plan_step_id": plan_step_id}
-        if self.telemetry:
-            self.telemetry.step_start(plan_step_id, step_meta)
-
-        await self.persistence.append_step_event(conversation_id, StepEvent(
+        await self._log_telemetry(plan_step_id, "start", success=True)
+        await self._append_event(conversation_id, StepEvent(
             type="tool_start",
             detail={"tool": tool_name, "plan_step_id": plan_step_id, "args": args},
         ))
@@ -49,7 +62,7 @@ class ToolOrchestrator:
             await self._finish(conversation_id, plan_step_id, res)
             return res
 
-        schemas = await self.mcp.list_tools()
+        schemas = await self._get_schemas()
         schema = next((s for s in schemas if s.name == tool_name), None)
         if not schema:
             err = ToolResult(ok=False, content=None, error="tool_not_found")
@@ -75,9 +88,8 @@ class ToolOrchestrator:
         return res
 
     async def _finish(self, conversation_id: str, plan_step_id: str, res: ToolResult) -> None:
-        if self.telemetry:
-            self.telemetry.step_end(plan_step_id, res.ok, {"error": res.error} if res.error else None)
-        await self.persistence.append_step_event(conversation_id, StepEvent(
+        await self._log_telemetry(plan_step_id, "end", success=res.ok, error=res.error)
+        await self._append_event(conversation_id, StepEvent(
             type="tool_end" if res.ok else "tool_error",
             detail={"plan_step_id": plan_step_id, "ok": res.ok, "error": res.error},
         ))
