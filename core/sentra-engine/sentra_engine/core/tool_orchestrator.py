@@ -94,6 +94,10 @@ class ToolOrchestrator:
             detail={"plan_step_id": plan_step_id, "ok": res.ok, "error": res.error},
         ))
 
+    async def registry(self) -> Sequence[ToolSchema]:
+        """Return the list of tool schemas, using cache if available."""
+        return await self._get_schemas()
+
 def normalize_tool_output(tool_name: str, content: Any) -> str:
     if isinstance(content, (dict, list)):
         text = json.dumps(content, ensure_ascii=False)

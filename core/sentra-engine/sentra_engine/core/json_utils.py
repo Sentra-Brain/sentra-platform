@@ -1,5 +1,14 @@
 import json
 
+__all__ = [
+    "parse_json_safe",
+    "extract_delta_content",
+    "extract_tool_call_deltas",
+    "extract_finish_reason",
+    "parse_json_line",
+    "strip_data_prefix",
+]
+
 def parse_json_safe(json_string: str) -> dict | None:
     """Safely parse a JSON string into a dictionary."""
     try:
@@ -34,3 +43,23 @@ def extract_tool_call_deltas(obj: dict) -> list[dict]:
     except Exception:
         pass
     return out
+
+def extract_finish_reason(obj: dict) -> str | None:
+    """Extract the finish reason from a JSON object."""
+    try:
+        return obj.get("choices", [{}])[0].get("finish_reason")
+    except Exception:
+        return None
+
+def parse_json_line(stripped: str) -> dict | None:
+    """Safely parse a JSON line into a dictionary."""
+    try:
+        return parse_json_safe(stripped)
+    except Exception:
+        return None
+
+def strip_data_prefix(line: str) -> str:
+    """Remove the 'data:' prefix from a line, if present."""
+    if line.startswith("data:"):
+        return line[len("data:"):].strip()
+    return line.strip()

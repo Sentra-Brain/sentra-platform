@@ -2,12 +2,12 @@ import httpx
 from typing import AsyncGenerator, Optional, Sequence
 from sentra_engine.core.models import PromptContext, DeltaEvent, ToolSchema
 from sentra_engine.ports.llm import LLMPort
-from ._openai_stream import (
-    _strip_data_prefix,
-    _parse_json_line,
-    _extract_delta_content_from_obj,
-    _extract_tool_call_deltas,
-    _extract_finish_reason,
+from sentra_engine.core.json_utils import (
+    parse_json_line,
+    extract_delta_content,
+    extract_tool_call_deltas,
+    extract_finish_reason,
+    strip_data_prefix
 )
 
 class VLLMAdapter(LLMPort):
@@ -56,21 +56,21 @@ class VLLMAdapter(LLMPort):
                 async for line in response.aiter_lines():
                     if not line or line.startswith(":"):
                         continue
-                    stripped = _strip_data_prefix(line)
+                    stripped = strip_data_prefix(line)
                     if stripped == "[DONE]":
                         break
 
-                    obj = _parse_json_line(stripped)
+                    obj = parse_json_line(stripped)
                     if not obj:
                         continue
 
-                    content = _extract_delta_content_from_obj(obj)
+                    content = extract_delta_content(obj)
                     if content:
                         yield DeltaEvent(type="message_delta", content=content)
 
-                    for tdelta in _extract_tool_call_deltas(obj):
+                    for tdelta in extract_tool_call_deltas(obj):
                         yield DeltaEvent(type="tool_call_delta", metadata=tdelta)
 
-                    fr = _extract_finish_reason(obj)
+                    fr = extract_finish_reason(obj)
                     if fr == "tool_calls":
                         yield DeltaEvent(type="tool_calls_done")
