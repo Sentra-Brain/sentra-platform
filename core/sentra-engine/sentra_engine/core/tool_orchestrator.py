@@ -31,13 +31,23 @@ class ToolOrchestrator:
             self._cached_schemas = await self.mcp.list_tools()
         return self._cached_schemas
 
-    async def _log_telemetry(self, plan_step_id: str, event_type: str, success: bool, error: Optional[str] = None):
+    async def _log_telemetry(
+        self,
+        plan_step_id: str,
+        tool_name: str,
+        event_type: str,
+        success: bool,
+        error: Optional[str] = None,
+    ):
         """Log telemetry events."""
         if self.telemetry:
             if event_type == "start":
-                self.telemetry.step_start(plan_step_id, {"tool": event_type})
+                self.telemetry.step_start(plan_step_id, {"tool": tool_name})
             elif event_type == "end":
-                self.telemetry.step_end(plan_step_id, success, {"error": error} if error else None)
+                meta = {"tool": tool_name}
+                if error:
+                    meta["error"] = error
+                self.telemetry.step_end(plan_step_id, success, meta)
 
     async def _append_event(self, conversation_id: str, step_event: StepEvent):
         """Append step events to persistence."""
@@ -51,7 +61,7 @@ class ToolOrchestrator:
         tool_name: str,
         args: Dict[str, Any],
     ) -> ToolResult:
-        await self._log_telemetry(plan_step_id, "start", success=True)
+        await self._log_telemetry(plan_step_id, tool_name, "start", success=True)
         await self._append_event(conversation_id, StepEvent(
             type="tool_start",
             detail={"tool": tool_name, "plan_step_id": plan_step_id, "args": args},
@@ -59,14 +69,14 @@ class ToolOrchestrator:
 
         if not self.enabled:
             res = ToolResult(ok=False, content=None, error="tools_disabled")
-            await self._finish(conversation_id, plan_step_id, res)
+            await self._finish(conversation_id, plan_step_id, tool_name, res)
             return res
 
         schemas = await self._get_schemas()
         schema = next((s for s in schemas if s.name == tool_name), None)
         if not schema:
             err = ToolResult(ok=False, content=None, error="tool_not_found")
-            await self._finish(conversation_id, plan_step_id, err)
+            await self._finish(conversation_id, plan_step_id, tool_name, err)
             return err
 
         # Validate args
@@ -75,7 +85,7 @@ class ToolOrchestrator:
             validate(instance=args or {}, schema=params_schema)
         except ValidationError as ve:
             err = ToolResult(ok=False, content=None, error=f"validation_error: {ve.message}")
-            await self._finish(conversation_id, plan_step_id, err)
+            await self._finish(conversation_id, plan_step_id, tool_name, err)
             return err
 
         # Execute
@@ -84,11 +94,13 @@ class ToolOrchestrator:
         except Exception as e:
             res = ToolResult(ok=False, content=None, error=f"execution_error: {e}")
 
-        await self._finish(conversation_id, plan_step_id, res)
+        await self._finish(conversation_id, plan_step_id, tool_name, res)
         return res
 
-    async def _finish(self, conversation_id: str, plan_step_id: str, res: ToolResult) -> None:
-        await self._log_telemetry(plan_step_id, "end", success=res.ok, error=res.error)
+    async def _finish(
+        self, conversation_id: str, plan_step_id: str, tool_name: str, res: ToolResult
+    ) -> None:
+        await self._log_telemetry(plan_step_id, tool_name, "end", success=res.ok, error=res.error)
         await self._append_event(conversation_id, StepEvent(
             type="tool_end" if res.ok else "tool_error",
             detail={"plan_step_id": plan_step_id, "ok": res.ok, "error": res.error},
