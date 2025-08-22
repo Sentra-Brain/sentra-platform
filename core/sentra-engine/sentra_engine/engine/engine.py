@@ -1,17 +1,27 @@
 from datetime import datetime, timezone
 from typing import AsyncGenerator, Optional, Sequence
-from sentra_engine.core.models import DeltaEvent, PromptContext, Message, ToolSchema
+
+from dataclasses import asdict, is_dataclass
+import inspect
+
+from sentra_engine.core.json_utils import parse_json_safe
+from sentra_engine.core.models import (
+    DeltaEvent,
+    Message,
+    PromptContext,
+    ToolSchema,
+    Transcript,
+)
+from sentra_engine.core.tool_orchestrator import (
+    ToolOrchestrator,
+    normalize_tool_output,
+)
+from sentra_engine.engine.id_utils import normalize_message_id
 from sentra_engine.ports.context import ContextPort
 from sentra_engine.ports.llm import LLMPort
-from sentra_engine.core.models import Transcript, PlanStep
-from sentra_engine.engine.id_utils import normalize_message_id
 from sentra_engine.ports.persistence import PersistencePort
-from dataclasses import is_dataclass, asdict
-import inspect
 from sentra_engine.ports.planner import PlannerPort
-from sentra_engine.core.tool_orchestrator import ToolOrchestrator, normalize_tool_output
-from sentra_engine.core.json_utils import parse_json_safe
-import json  # Retained for json.dumps usage
+from sentra_engine.ports.rag import RAGPort
 
 class ConversationEngine:
     def __init__(
@@ -22,12 +32,14 @@ class ConversationEngine:
         persistence: PersistencePort,
         planner: PlannerPort | None = None,
         tool_orchestrator: ToolOrchestrator | None = None,
+        rag: RAGPort | None = None,
     ):
         self.context = context
         self.llm = llm
         self.persistence = persistence
         self.planner = planner
         self.tool_orchestrator = tool_orchestrator
+        self.rag = rag
 
     async def _run_pipeline(
         self,
@@ -50,9 +62,8 @@ class ConversationEngine:
         await self.persistence.append_message(conversation_id, user_msg)
 
         ctx = await self.context.build(conversation_id)
-        ctx_msgs = [_as_openai_msg(m) for m in ctx.messages]
-        user_msg_openai = _as_openai_msg(user_msg)
-        llm_messages = [*ctx_msgs, user_msg_openai]
+        transcript_msgs: list[Message] = [*ctx.messages, user_msg]
+        llm_messages = [_as_openai_msg(m) for m in transcript_msgs]
 
         tools_schema: Optional[Sequence[ToolSchema]] = None
         if self.tool_orchestrator:
@@ -61,65 +72,135 @@ class ConversationEngine:
             except Exception:
                 tools_schema = None
 
-        if use_planner and self.planner:
-            transcript = Transcript(messages=[*(ctx.messages), user_msg])
-            plan = await self.planner.plan(transcript=transcript, context="")
-            guidance = (plan.params or {}).get("guidance") if plan else None
-        else:
-            guidance = None
+        chunks: list[str] = []
 
-        prelude_chunks: list[str] = []
-        tool_requested = False
-        tool_name: Optional[str] = None
-        tool_args_buf: dict[int, list[str]] = {}
-
-        async for ev in self.llm.chat_stream(PromptContext(messages=llm_messages), tools_schema=tools_schema, guidance=guidance):
-            if ev.type == "message_delta" and ev.content:
-                prelude_chunks.append(ev.content)
-                yield ev
-            elif ev.type == "tool_call_delta":
-                tool_requested = True
-                idx = int((ev.metadata or {}).get("index", 0))
-                name = (ev.metadata or {}).get("name")
-                if name:
-                    tool_name = str(name)
-                frag = (ev.metadata or {}).get("arguments_delta")
-                if frag:
-                    tool_args_buf.setdefault(idx, []).append(str(frag))
-            elif ev.type == "tool_calls_done":
-                break
-
-        post_chunks: list[str] = []
-
-        if tool_requested and self.tool_orchestrator and tool_name:
-            args_json = "".join(tool_args_buf.get(0, [])) or "{}"
-            try:
-                args = parse_json_safe(args_json) or {}
-            except Exception:
-                args = {}
-            step_id = normalize_message_id(None)
-            result = await self.tool_orchestrator.execute_one(
-                conversation_id=conversation_id,
-                plan_step_id=step_id,
-                tool_name=tool_name,
-                args=args,
-            )
-            system_text = normalize_tool_output(tool_name, result.content if result.ok else result.error)
-            system_msg = Message(
-                id=normalize_message_id(None, prefer_hex=True),
-                role="system",
-                content=system_text,
-                timestamp=datetime.now(timezone.utc).isoformat(),
-            )
-            await self.persistence.append_message(conversation_id, system_msg)
-            llm_messages = [*llm_messages, _as_openai_msg(system_msg)]
-
-            async for ev in self.llm.chat_stream(PromptContext(messages=llm_messages), guidance=guidance):
+        async def _call_llm(
+            *,
+            allow_tools: bool,
+            guidance: Optional[str] = None,
+        ) -> tuple[list[str], list[dict]]:
+            prelude: list[str] = []
+            calls: dict[int, dict] = {}
+            async for ev in self.llm.chat_stream(
+                PromptContext(messages=llm_messages),
+                tools_schema=tools_schema if allow_tools else None,
+                guidance=guidance,
+            ):
                 if ev.type == "message_delta" and ev.content:
-                    post_chunks.append(ev.content)
-                    yield ev
+                    prelude.append(ev.content)
+                elif ev.type == "tool_call_delta":
+                    idx = int((ev.metadata or {}).get("index", 0))
+                    name = (ev.metadata or {}).get("name")
+                    if name:
+                        calls.setdefault(idx, {})["name"] = str(name)
+                    frag = (ev.metadata or {}).get("arguments_delta")
+                    if frag:
+                        calls.setdefault(idx, {}).setdefault("args", []).append(str(frag))
+                elif ev.type == "tool_calls_done":
+                    break
+            ordered = []
+            for idx in sorted(calls.keys()):
+                name = calls[idx].get("name")
+                args_json = "".join(calls[idx].get("args", [])) or "{}"
+                try:
+                    args = parse_json_safe(args_json) or {}
+                except Exception:
+                    args = {}
+                if name:
+                    ordered.append({"name": name, "args": args})
+            return prelude, ordered
 
-        final_text = ("".join(prelude_chunks) + "".join(post_chunks)).strip() or "(no content)"
+        if use_planner and self.planner:
+            while True:
+                plan = await self.planner.plan(Transcript(messages=list(transcript_msgs)), context="")
+                action = (plan.action or "Respond") if plan else "Respond"
+                params = plan.params if plan else {}
+                if action in {"Respond", "AskParams"}:
+                    pre, _ = await _call_llm(allow_tools=False, guidance=params.get("guidance"))
+                    for c in pre:
+                        yield DeltaEvent(type="message_delta", content=c)
+                    chunks.extend(pre)
+                    break
+                if action == "RetrieveRAG" and self.rag:
+                    query = params.get("query") or content
+                    filters = params.get("filters")
+                    rag_ctx = await self.rag.retrieve(query, filters)
+                    system_text = normalize_tool_output("rag", rag_ctx)
+                    system_msg = Message(
+                        id=normalize_message_id(None, prefer_hex=True),
+                        role="system",
+                        content=system_text,
+                        timestamp=datetime.now(timezone.utc).isoformat(),
+                    )
+                    await self.persistence.append_message(conversation_id, system_msg)
+                    transcript_msgs.append(system_msg)
+                    llm_messages.append(_as_openai_msg(system_msg))
+                    continue
+                if action == "CallTool" and self.tool_orchestrator:
+                    pre, calls = await _call_llm(allow_tools=True, guidance=params.get("guidance"))
+                    for c in pre:
+                        yield DeltaEvent(type="message_delta", content=c)
+                    chunks.extend(pre)
+                    for call in calls:
+                        step_id = normalize_message_id(None)
+                        result = await self.tool_orchestrator.execute_one(
+                            conversation_id=conversation_id,
+                            plan_step_id=step_id,
+                            tool_name=call["name"],
+                            args=call["args"],
+                        )
+                        system_text = normalize_tool_output(
+                            call["name"],
+                            result.content if result.ok else result.error,
+                        )
+                        system_msg = Message(
+                            id=normalize_message_id(None, prefer_hex=True),
+                            role="system",
+                            content=system_text,
+                            timestamp=datetime.now(timezone.utc).isoformat(),
+                        )
+                        await self.persistence.append_message(conversation_id, system_msg)
+                        transcript_msgs.append(system_msg)
+                        llm_messages.append(_as_openai_msg(system_msg))
+                    continue
+                # Fallback: respond immediately
+                pre, _ = await _call_llm(allow_tools=False, guidance=params.get("guidance"))
+                for c in pre:
+                    yield DeltaEvent(type="message_delta", content=c)
+                chunks.extend(pre)
+                break
+        else:
+            while True:
+                pre, calls = await _call_llm(allow_tools=True)
+                for c in pre:
+                    yield DeltaEvent(type="message_delta", content=c)
+                chunks.extend(pre)
+                if not calls or not self.tool_orchestrator:
+                    break
+                for call in calls:
+                    step_id = normalize_message_id(None)
+                    result = await self.tool_orchestrator.execute_one(
+                        conversation_id=conversation_id,
+                        plan_step_id=step_id,
+                        tool_name=call["name"],
+                        args=call["args"],
+                    )
+                    system_text = normalize_tool_output(
+                        call["name"],
+                        result.content if result.ok else result.error,
+                    )
+                    system_msg = Message(
+                        id=normalize_message_id(None, prefer_hex=True),
+                        role="system",
+                        content=system_text,
+                        timestamp=datetime.now(timezone.utc).isoformat(),
+                    )
+                    await self.persistence.append_message(conversation_id, system_msg)
+                    transcript_msgs.append(system_msg)
+                    llm_messages.append(_as_openai_msg(system_msg))
+                continue
+
+        final_text = ("".join(chunks)).strip() or "(no content)"
         assistant_msg = Message(
             id=normalize_message_id(response_message_id, prefer_hex=True),
             role="assistant",

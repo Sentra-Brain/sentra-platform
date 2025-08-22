@@ -1,26 +1,52 @@
 import asyncio
-import json
 from typing import AsyncGenerator, Optional, Sequence, Union, Mapping, Any
+
+from sentra_engine.core.models import (
+    DeltaEvent,
+    Message,
+    PromptContext,
+    RAGContext,
+    StepEvent,
+    ToolResult,
+    ToolSchema,
+)
 from sentra_engine.engine.engine import ConversationEngine
-from sentra_engine.core.models import PromptContext, DeltaEvent, ToolSchema, ToolResult, Message, StepEvent, RAGContext
-from sentra_engine.ports.llm import LLMPort
 from sentra_engine.ports.context import ContextPort
+from sentra_engine.ports.llm import LLMPort
+from sentra_engine.ports.mcp import MCPPort
 from sentra_engine.ports.persistence import PersistencePort
-from sentra_engine.ports.mcp import MCPPort  # NEW
+from sentra_engine.ports.planner import PlannerPort
 from sentra_engine.core.tool_orchestrator import ToolOrchestrator
 
 class LLMWithTool(LLMPort):
-    def __init__(self): self.round = 0
-    async def chat_stream(self, prompt_context: PromptContext, tools_schema=None, guidance: Optional[str] = None) -> AsyncGenerator[DeltaEvent, None]:
+    def __init__(self):
+        self.round = 0
+
+    async def chat_stream(
+        self,
+        prompt_context: PromptContext,
+        tools_schema=None,
+        guidance: Optional[str] = None,
+    ) -> AsyncGenerator[DeltaEvent, None]:
         self.round += 1
         if self.round == 1:
             yield DeltaEvent(type="message_delta", content="I'll search that. ")
-            yield DeltaEvent(type="tool_call_delta", metadata={"index": 0, "name": "echo", "arguments_delta": '{"text":"ok"}'})
+            yield DeltaEvent(
+                type="tool_call_delta",
+                metadata={"index": 0, "name": "echo", "arguments_delta": '{"text":"one"}'},
+            )
             yield DeltaEvent(type="tool_calls_done")
             return
-        else:
-            yield DeltaEvent(type="message_delta", content="Here are the results.")
+        if self.round == 2:
+            yield DeltaEvent(type="message_delta", content="Searching again. ")
+            yield DeltaEvent(
+                type="tool_call_delta",
+                metadata={"index": 0, "name": "echo", "arguments_delta": '{"text":"two"}'},
+            )
+            yield DeltaEvent(type="tool_calls_done")
             return
+        yield DeltaEvent(type="message_delta", content="Here are the results.")
+        return
 
 class Ctx(ContextPort):
     async def build(self, conversation_id: str, rag_context: Optional[RAGContext] = None) -> PromptContext:
@@ -32,26 +58,48 @@ class Pers(PersistencePort):
     async def append_step_event(self, conversation_id: str, event: StepEvent) -> None: self.events.append(event)
     async def load_conversation(self, conversation_id: str) -> Sequence[Union[Message, Mapping[str, Any]]]: return []
 
-class MCPFake(MCPPort):  # CHANGED: subclass MCPPort
+class MCPFake(MCPPort):
     async def list_tools(self) -> Sequence[ToolSchema]:
         return [ToolSchema(name="echo", parameters={"type":"object","properties":{"text":{"type":"string"}},"required":["text"]})]
     async def call_tool(self, name: str, args: dict) -> ToolResult:
         return ToolResult(ok=True, content=args.get("text"))
 
+class PlannerSeq(PlannerPort):
+    def __init__(self):
+        self.actions = [
+            ("CallTool", {}),
+            ("CallTool", {}),
+            ("Respond", {}),
+        ]
+
+    async def plan(self, transcript, context: str):
+        action, params = self.actions.pop(0)
+        return type("_", (), {"action": action, "params": params})()
+
+
 async def _run():
+    p = Pers()
     engine = ConversationEngine(
         context=Ctx(),
         llm=LLMWithTool(),
-        persistence=Pers(),
-        planner=None,
-        tool_orchestrator=ToolOrchestrator(mcp=MCPFake(), persistence=Pers(), telemetry=None),
+        persistence=p,
+        planner=PlannerSeq(),
+        tool_orchestrator=ToolOrchestrator(mcp=MCPFake(), persistence=p, telemetry=None),
     )
     chunks = []
-    async for ev in engine.run_planner(user_id="u", conversation_id="c", message_id=None, response_message_id=None, content="search X"):
+    async for ev in engine.run_planner(
+        user_id="u",
+        conversation_id="c",
+        message_id=None,
+        response_message_id=None,
+        content="search X",
+    ):
         if ev.type == "message_delta":
             chunks.append(ev.content)
     text = "".join(chunks)
-    assert "I'll search" in text and "Here are the results." in text
+    assert "I'll search" in text and "Searching again." in text and "Here are the results." in text
+    assert sum(1 for m in p.msgs if m.role == "system") == 2
+
 
 def test_autonomous_tool():
     asyncio.run(_run())
