@@ -10,38 +10,37 @@ const lang = Astro.params.lang ?? defaultLocale;
 const locale = lang as Locale;
 ---
 
-<BaseLayout lang={locale} title={t(locale, "verticals.accounting.title")}>
+<BaseLayout lang={locale} title={t(locale, "verticals.accounting.hero.title")}>
   <section class="py-12 text-[var(--sentra-text)]">
     <div class="container mx-auto px-4 max-w-6xl">
+      <!-- Hero Section -->
       <h1 class="text-3xl md:text-5xl font-bold mb-6">
-        {t(locale, "verticals.accounting.title")}
+        {t(locale, "verticals.accounting.hero.title")}
       </h1>
+      <p class="text-xl mb-6">
+        {t(locale, "verticals.accounting.hero.subtitle")}
+      </p>
       <p class="text-lg mb-10">
-        {t(locale, "verticals.accounting.intro")}
+        {t(locale, "verticals.accounting.hero.intro")}
       </p>
 
       <!-- Challenges Section -->
       <h2 class="text-2xl font-bold mb-6">{t(locale, "verticals.accounting.challenges.title")}</h2>
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
         <FeatureBox
-          icon="💰"
-          title="Complex Tax Management"
-          desc={t(locale, "verticals.accounting.challenges.tax")}
+          icon="⏰"
+          title={t(locale, "verticals.accounting.challenges.challenge1.title")}
+          desc={t(locale, "verticals.accounting.challenges.challenge1.body")}
         />
         <FeatureBox
           icon="📋"
-          title="Payroll Processing"
-          desc={t(locale, "verticals.accounting.challenges.payroll")}
+          title={t(locale, "verticals.accounting.challenges.challenge2.title")}
+          desc={t(locale, "verticals.accounting.challenges.challenge2.body")}
         />
         <FeatureBox
-          icon="📄"
-          title="Government Forms"
-          desc={t(locale, "verticals.accounting.challenges.forms")}
-        />
-        <FeatureBox
-          icon="🔒"
-          title="Client Confidentiality"
-          desc={t(locale, "verticals.accounting.challenges.confidential")}
+          icon="⚠️"
+          title={t(locale, "verticals.accounting.challenges.challenge3.title")}
+          desc={t(locale, "verticals.accounting.challenges.challenge3.body")}
         />
       </div>
 
@@ -50,23 +49,33 @@ const locale = lang as Locale;
       <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mb-12">
         <FeatureBox
           icon="📄"
-          title="Document Processing"
-          desc={t(locale, "verticals.accounting.solutions.doc_processing")}
+          title={t(locale, "verticals.accounting.solutions.solution1.title")}
+          desc={t(locale, "verticals.accounting.solutions.solution1.body")}
         />
         <FeatureBox
           icon="✏️"
-          title="Form Pre-filling"
-          desc={t(locale, "verticals.accounting.solutions.form_filling")}
+          title={t(locale, "verticals.accounting.solutions.solution2.title")}
+          desc={t(locale, "verticals.accounting.solutions.solution2.body")}
+        />
+        <FeatureBox
+          icon="💰"
+          title={t(locale, "verticals.accounting.solutions.solution3.title")}
+          desc={t(locale, "verticals.accounting.solutions.solution3.body")}
+        />
+        <FeatureBox
+          icon="📝"
+          title={t(locale, "verticals.accounting.solutions.solution4.title")}
+          desc={t(locale, "verticals.accounting.solutions.solution4.body")}
         />
         <FeatureBox
           icon="📢"
-          title="Regulatory Updates"
-          desc={t(locale, "verticals.accounting.solutions.reg_updates")}
+          title={t(locale, "verticals.accounting.solutions.solution5.title")}
+          desc={t(locale, "verticals.accounting.solutions.solution5.body")}
         />
         <FeatureBox
           icon="📊"
-          title="Audit Documentation"
-          desc={t(locale, "verticals.accounting.solutions.audit_ready")}
+          title={t(locale, "verticals.accounting.solutions.solution6.title")}
+          desc={t(locale, "verticals.accounting.solutions.solution6.body")}
         />
       </div>
 
@@ -76,13 +85,17 @@ const locale = lang as Locale;
         <FeatureBox
           icon="🛡️"
           title={t(locale, "verticals.accounting.security.title")}
-          desc={t(locale, "verticals.accounting.security.text")}
+          desc={t(locale, "verticals.accounting.security.body")}
         />
       </div>
 
+      <!-- CTA Section -->
       <div class="text-center mt-10">
-        <a href={`/${lang}/pilot`} class="inline-block px-8 py-4 rounded-xl font-semibold bg-[var(--sentra-accent)] text-[var(--sentra-primary)] hover:bg-[var(--sentra-accent-light)] transition">
-          {t(locale, "verticals.accounting.cta")}
+        <a href={`/${lang}/pilot`} class="inline-block px-8 py-4 rounded-xl font-semibold bg-[var(--sentra-accent)] text-[var(--sentra-primary)] hover:bg-[var(--sentra-accent-light)] transition mr-4">
+          {t(locale, "verticals.accounting.cta.primary_label")}
+        </a>
+        <a href={`/${lang}/contact`} class="inline-block px-8 py-4 rounded-xl font-semibold border-2 border-[var(--sentra-accent)] text-[var(--sentra-accent)] hover:bg-[var(--sentra-accent)] hover:text-[var(--sentra-primary)] transition">
+          {t(locale, "verticals.accounting.cta.secondary_label")}
         </a>
       </div>
     </div>
