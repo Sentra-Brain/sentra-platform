@@ -337,27 +337,61 @@
   },
   "verticals": {
     "accounting": {
-      "title": "Accounting & Administrative Service Firms",
-      "intro": "Accounting and administrative service firms handle sensitive financial and personal data every day—tax filings, payroll, and compliance paperwork. These tasks are repetitive, highly regulated, and cannot be delegated to cloud-based AI without risking client confidentiality. Sentra runs entirely on your infrastructure, bringing automation and AI directly to your office.",
+      "hero": {
+        "title": "Accounting & Administrative Service Firms",
+        "subtitle": "Automate tax, payroll, and filings without sending data off-prem.",
+        "intro": "Firms run against strict deadlines for AEAT forms, payroll, and multi-agency filings. These tasks are repetitive, regulated, and error-prone when done manually. Sentra runs on-prem in your own infrastructure and automates the mechanical work so your team can focus on professional judgment. If an intern can do it, Sentra can too."
+      },
       "challenges": {
         "title": "Key Challenges",
-        "tax": "Managing and filing complex tax returns for multiple clients under strict deadlines",
-        "payroll": "Processing payroll while complying with evolving labor laws",
-        "forms": "Handling large volumes of government and compliance forms",
-        "confidential": "Protecting sensitive client financial and personal information"
+        "challenge1": {
+          "title": "Deadline spikes & official filings",
+          "body": "Monthly/quarterly closings (e.g., 303, 111, 130, 190) with uneven workload and zero tolerance for delays."
+        },
+        "challenge2": {
+          "title": "Manual, fragmented workflows",
+          "body": "Collecting invoices/receipts, re-keying across Excel, ERP, and portals (AEAT/TGSS), and duplicating information."
+        },
+        "challenge3": {
+          "title": "Errors, rework & confidentiality",
+          "body": "Copy-paste mistakes, late reviews, and strict data protection (GDPR) requirements."
+        }
       },
       "solutions": {
         "title": "Sentra Solutions",
-        "doc_processing": "Automated document ingestion and data extraction from invoices, receipts, and contracts",
-        "form_filling": "Pre-filling tax, compliance, and payroll forms for human review",
-        "reg_updates": "Summarizing and applying regulatory updates to internal processes",
-        "audit_ready": "Maintaining audit-ready logs and compliance documentation automatically"
+        "solution1": {
+          "title": "Document ingestion & data extraction",
+          "body": "Automatic capture of PDFs and e-invoices, OCR, normalization, and basic validation for review."
+        },
+        "solution2": {
+          "title": "AEAT form pre-fill",
+          "body": "Drafts for 303, 111, 130, 190 (and others) from extracted data, ready for review and submission."
+        },
+        "solution3": {
+          "title": "Payroll assistant",
+          "body": "Draft payroll calculations, bases, social security files; support for hires/terminations and exports."
+        },
+        "solution4": {
+          "title": "Filings & letters",
+          "body": "Generate letters and agency communications (AEAT, TGSS, SEPE) from internal templates with pre-filled fields."
+        },
+        "solution5": {
+          "title": "Regulatory updates with impact",
+          "body": "Summaries of relevant changes and client-level checklists to adapt processes without losing focus."
+        },
+        "solution6": {
+          "title": "Traceability & quality control",
+          "body": "Per-user logs, mandatory human review before submission, and granular permissions for audits."
+        }
       },
       "security": {
-        "title": "Security First",
-        "text": "Sentra operates on-premises, ensuring all client data stays within your office network. No information is sent to external servers or third-party AI providers unless explicitly configured."
+        "title": "Security & control",
+        "body": "On-prem in your network: data never leaves your office unless explicitly configured. Encryption in transit and at rest, access control, and audit logs aligned with GDPR."
       },
-      "cta": "Apply for Pilot"
+      "cta": {
+        "primary_label": "Request pilot access",
+        "secondary_label": "Talk to us"
+      }
     }
   }
 }

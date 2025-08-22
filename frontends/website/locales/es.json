@@ -337,27 +337,61 @@
   },
   "verticals": {
     "accounting": {
-      "title": "Asesorías y Gestorías",
-      "intro": "Las firmas de contabilidad y servicios administrativos manejan datos financieros y personales sensibles todos los días: declaraciones de impuestos, nóminas y documentación de cumplimiento. Estas tareas son repetitivas, altamente reguladas y no pueden delegarse a IA basada en la nube sin arriesgar la confidencialidad del cliente. Sentra funciona completamente en tu infraestructura, llevando automatización e IA directamente a tu oficina.",
+      "hero": {
+        "title": "Asesorías y Gestorías",
+        "subtitle": "Automatiza impuestos, nóminas y trámites sin sacar los datos de tu oficina.",
+        "intro": "Las asesorías y gestorías trabajan a contrarreloj con modelos de la AEAT, nóminas y trámites ante múltiples organismos. Son tareas repetitivas, sujetas a normativa y con alto riesgo de error si se hacen a mano. Sentra se ejecuta on-premise en tu propia infraestructura y automatiza el trabajo mecánico para que tu equipo se centre en el criterio profesional. Si lo puede hacer un becario, Sentra también."
+      },
       "challenges": {
-        "title": "Desafíos Clave",
-        "tax": "Gestionar y presentar declaraciones de impuestos complejas para múltiples clientes bajo estrictos plazos",
-        "payroll": "Procesar nóminas mientras cumple con leyes laborales en evolución",
-        "forms": "Manejar grandes volúmenes de formularios gubernamentales y de cumplimiento",
-        "confidential": "Proteger información financiera y personal sensible del cliente"
+        "title": "Principales Desafíos",
+        "challenge1": {
+          "title": "Picos de trabajo y plazos oficiales",
+          "body": "Cierres mensuales y trimestrales (p. ej., 303, 111, 130, 190) con cargas desiguales y cero margen de retraso."
+        },
+        "challenge2": {
+          "title": "Procesos manuales y dispersos",
+          "body": "Recopilar facturas/recibos, copiar datos entre Excel, ERP y portales (AEAT/TGSS) y reintroducir información."
+        },
+        "challenge3": {
+          "title": "Errores, retrabajo y confidencialidad",
+          "body": "Riesgo por copia/pega, revisiones tardías y necesidad de cumplir RGPD protegiendo datos sensibles."
+        }
       },
       "solutions": {
         "title": "Soluciones Sentra",
-        "doc_processing": "Ingesta automatizada de documentos y extracción de datos de facturas, recibos y contratos",
-        "form_filling": "Pre-llenado de formularios de impuestos, cumplimiento y nómina para revisión humana",
-        "reg_updates": "Resumir y aplicar actualizaciones regulatorias a procesos internos",
-        "audit_ready": "Mantener logs listos para auditoría y documentación de cumplimiento automáticamente"
+        "solution1": {
+          "title": "Ingesta y extracción de datos",
+          "body": "Captura automática de PDFs y e-facturas, OCR, normalización y validación básica para revisión."
+        },
+        "solution2": {
+          "title": "Pre-relleno de modelos AEAT",
+          "body": "Borradores de 303, 111, 130, 190 (y otros) a partir de los datos extraídos, listos para revisión y presentación."
+        },
+        "solution3": {
+          "title": "Asistente de nóminas",
+          "body": "Borradores de nómina, bases y seguros sociales; apoyo en altas/bajas y generación de ficheros para tus herramientas."
+        },
+        "solution4": {
+          "title": "Tramitación y escritos",
+          "body": "Generación de escritos y comunicaciones (AEAT, TGSS, SEPE) desde plantillas internas con campos precargados."
+        },
+        "solution5": {
+          "title": "Novedades normativas con impacto",
+          "body": "Resumen de cambios relevantes y checklist por cliente para adaptar procesos sin interrumpir el día a día."
+        },
+        "solution6": {
+          "title": "Trazabilidad y control de calidad",
+          "body": "Logs por usuario, revisión humana obligatoria antes de cualquier envío y permisos granulares para auditorías."
+        }
       },
       "security": {
-        "title": "Seguridad Primero",
-        "text": "Sentra opera en sitio, asegurando que todos los datos del cliente permanezcan dentro de la red de tu oficina. No se envía información a servidores externos o proveedores de IA de terceros a menos que se configure explícitamente."
+        "title": "Seguridad y control",
+        "body": "On-premise en tu red: los datos no salen de tu oficina salvo configuración explícita. Cifrado en tránsito y en reposo, control de acceso y registros de auditoría conforme a RGPD."
       },
-      "cta": "Aplicar para Piloto"
+      "cta": {
+        "primary_label": "Solicitar acceso al piloto",
+        "secondary_label": "Hablar con nosotros"
+      }
     }
   }
 }
