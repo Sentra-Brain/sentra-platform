@@ -208,7 +208,7 @@ class ConversationEngine:
             timestamp=datetime.now(timezone.utc).isoformat(),
         )
         await self.persistence.append_message(conversation_id, assistant_msg)
-        yield DeltaEvent(type="message_final", content="")
+        yield DeltaEvent(type="message_final", content=final_text)
 
     async def run_fast(
         self,

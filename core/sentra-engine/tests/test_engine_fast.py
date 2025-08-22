@@ -47,6 +47,7 @@ async def test_run_fast():
     )]
 
     assert [event.type for event in events] == ["message_delta", "message_delta", "message_final"]
+    assert events[-1].content == "Hello world!"
 
     assert persistence.messages[0].role == "user"
     assert persistence.messages[1].role == "assistant"
