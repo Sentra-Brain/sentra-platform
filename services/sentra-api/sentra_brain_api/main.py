@@ -4,17 +4,14 @@ from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
-from sentra_brain_api.core.app_state import AppState
 from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
-from sentra_brain_api.core.conversation_engine.engine import ConversationEngine
 from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
-from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.chat.controller_v2 import ChatControllerV2
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.knowledge.routes import sources, documents
@@ -29,96 +26,20 @@ from sentra_core.infra.sql import postgres_service
 import asyncio
 import os
 
+from sentra_engine.engine.engine import ConversationEngine
+
 logger = logging.get_logger("sentra_brain_api")
-
-# main.py (fragmentos relevantes)
-from sentra_brain_api.core.conversation_engine.mcp.sentra_mcp_client import SentraMCPClient
-
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     logger.info("App startup: initializing resources...")
     mcp_client = None
-    try:
-        if os.getenv("TESTING") != "true":
-            # DB
-            postgres_service.init_db()
 
-            # Try to open MCP, but DO NOT fail the app if it’s unreachable
-            try:
-                mcp_client = await SentraMCPClient().__aenter__()
-                healthy = await mcp_client.healthcheck()
-                if not healthy:
-                    logger.warning("⚠️ MCP healthcheck failed at startup")
-                else:
-                    try:
-                        tools = await mcp_client.list_tools()
-                        logger.info(f"✅ MCP tools registered: {[t['name'] for t in tools]}")
-                    except Exception as e:
-                        logger.warning(f"⚠️ Could not list MCP tools at startup: {e}")
-            except Exception as e:
-                logger.warning(f"⚠️ Skipping MCP connection at startup: {e}")
-                mcp_client = None
+    if os.getenv("TESTING") != "true":
+        # DB
+        postgres_service.init_db()
 
-            # Keep the old engine in AppState if you still need it elsewhere.
-            app.state._sentra = AppState(
-                conversation_engine=ConversationEngine(mcp_client=mcp_client)
-            )
-
-            # Background healthchecks only if the corresponding backends exist
-            asyncio.create_task(keep_vllm_alive(app))
-            if mcp_client is not None:
-                asyncio.create_task(keep_mcp_alive(app))
-        else:
-            app.state._sentra = AppState(conversation_engine=None)
-
-        yield
-
-    finally:
-        if mcp_client is not None:
-            try:
-                await mcp_client.__aexit__(None, None, None)
-            except Exception as e:
-                logger.warning(f"Error closing MCP client: {e}")
-
-
-
-async def keep_vllm_alive(app: FastAPI):
-    """ Periodically checks VLLM backend liveness.
-        Keeps logs useful for diagnosing connectivity issues.
-    """
-    engine: ConversationEngine | None = getattr(app.state._sentra, "conversation_engine", None)
-    if not engine:
-        return
-    llm_client = engine.llm_client
-    while True:
-        healthy = await llm_client.healthcheck()
-        if not healthy:
-            logger.warning("⚠️ LLM backend not responding to healthcheck")
-        else:
-            logger.debug("✅ LLM healthcheck passed")
-        await asyncio.sleep(30)
-
-async def keep_mcp_alive(app: FastAPI):
-    """
-    Periodically checks MCP liveness by listing tools.
-    Keeps logs useful for diagnosing connectivity issues.
-    """
-    try:
-        engine: ConversationEngine | None = getattr(app.state._sentra, "conversation_engine", None)
-        if not engine or not getattr(engine, "mcp_client", None):
-            return
-        client: SentraMCPClient = engine.mcp_client
-        while True:
-            ok = await client.healthcheck()
-            if not ok:
-                logger.warning("⚠️ MCP backend not responding to healthcheck")
-            else:
-                logger.debug("✅ MCP healthcheck passed")
-            await asyncio.sleep(30)
-    except Exception as e:
-        logger.warning(f"keep_mcp_alive terminated: {e}")
-
+    yield
 
 def create_app():
     app = FastAPI(
@@ -150,7 +71,6 @@ def create_app():
     public_settings_controller = PublicSettingsController()
     conversation_controller = ConversationController()
     llm_proxy_controller = LLMProxyController()
-    chat_controller = ChatController()
     chat_controller_v2 = ChatControllerV2()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
@@ -163,7 +83,6 @@ def create_app():
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
-    app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
     app.include_router(chat_controller_v2.router, prefix="/chat", tags=["chat"])
     app.include_router(organization_router, prefix="", tags=["organization"])
 

@@ -50,10 +50,10 @@ sys.modules["sentra_core.infra.nosql.mongo_conversation_repository"] = fake_mong
 
 # 🚨 Patch ConversationEngine so it never calls real LLM/RAG
 fake_engine = MagicMock()
-sys.modules["sentra_brain_api.core.conversation_engine.engine"] = types.ModuleType(
-    "sentra_brain_api.core.conversation_engine.engine"
+sys.modules["sentra_engine.engine"] = types.ModuleType(
+    "sentra_engine.engine"
 )
-sys.modules["sentra_brain_api.core.conversation_engine.engine"].ConversationEngine = MagicMock(return_value=fake_engine) # type: ignore[attr-defined]
+sys.modules["sentra_engine.engine"].ConversationEngine = MagicMock(return_value=fake_engine) # type: ignore[attr-defined]
 
 # ✅ Now safe to import rest of your dependencies
 from sentra_core.infra.sql.postgres_settings import settings as pg_settings
