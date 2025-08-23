@@ -3,6 +3,8 @@
 from .assembler import ToolCallAssembler
 from .args_coercion import ArgsCoercer
 from .extractors import ToolDeltaExtractor, OpenAIExtractor, PlainJSONExtractor
+from .parser import ToolStreamParser
+from .formatters import normalize_tool_output
 
 __all__ = [
     "ToolCallAssembler",
@@ -10,5 +12,6 @@ __all__ = [
     "ToolDeltaExtractor",
     "OpenAIExtractor",
     "PlainJSONExtractor",
+    "ToolStreamParser",
+    "normalize_tool_output",
 ]
-
