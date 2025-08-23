@@ -126,7 +126,7 @@ class ConversationEngine:
                 action = (plan.action or "Respond") if plan else "Respond"
                 params = plan.params if plan else {}
                 if action in {"Respond", "AskParams"}:
-                    pre, _ = await _call_llm(allow_tools=False, guidance=params.get("guidance"))
+                    pre, _ = await _call_llm(allow_tools=True, guidance=params.get("guidance"))
                     for c in pre:
                         yield DeltaEvent(type="message_delta", content=c)
                     chunks.extend(pre)
