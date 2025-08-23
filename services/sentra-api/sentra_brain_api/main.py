@@ -8,7 +8,7 @@ from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
-from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
+# from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
@@ -23,10 +23,7 @@ from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra_core.core import logging
 from sentra_core.infra.sql import postgres_service
-import asyncio
 import os
-
-from sentra_engine.engine.engine import ConversationEngine
 
 logger = logging.get_logger("sentra_brain_api")
 

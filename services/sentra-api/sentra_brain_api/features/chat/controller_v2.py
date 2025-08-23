@@ -11,10 +11,11 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.core.settings import settings, LLMEngine
 
-from sentra_engine.adapters import LlamaServerAdapter, VLLMAdapter, LLMPlannerAdapter, MCPProtocolAdapter
+from sentra_engine.adapters import LLMPlannerAdapter, MCPProtocolAdapter
 from sentra_engine.adapters.context_service import SimpleContextService
 from sentra_engine.core.tool_orchestrator import ToolOrchestrator
 from sentra_engine.engine import ConversationEngine
+from sentra_engine.adapters.llm_adapter_factory import LlmAdapterFactory
 
 from sentra_brain_api.features.chat.schemas import (
     ConversationRequest, ConversationMode, ConversationEvent
@@ -27,27 +28,6 @@ class ChatControllerV2:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()
-
-    def _build_llm_adapter(self, model: str):
-        if settings.llm_engine == LLMEngine.LLAMA:
-            return LlamaServerAdapter(
-                base_url=settings.llama_server_url,
-                model=model,
-                request_timeout=settings.llm_request_timeout,
-            )
-        elif settings.llm_engine == LLMEngine.VLLM:
-            return VLLMAdapter(
-                base_url=settings.vllm_server_url,
-                model=model,
-                request_timeout=settings.llm_request_timeout,
-            )
-        # default
-        logger.warning(f"Unknown LLM engine '{settings.llm_engine}', defaulting to LLAMA")
-        return LlamaServerAdapter(
-            base_url=settings.llama_server_url,
-            model=model,
-            request_timeout=settings.llm_request_timeout,
-        )
 
     def _build_planner_adapter(self, model: str):
         if settings.llm_engine == LLMEngine.LLAMA:
@@ -78,7 +58,7 @@ class ChatControllerV2:
 
             persistence = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             context = SimpleContextService(persistence=persistence)
-            llm = self._build_llm_adapter(model=body.model or "sentra-brain")
+            llm = LlmAdapterFactory.create_adapter(model=body.model or "sentra-brain")
 
             tool_orch = self._build_tool_orchestrator(persistence)
 

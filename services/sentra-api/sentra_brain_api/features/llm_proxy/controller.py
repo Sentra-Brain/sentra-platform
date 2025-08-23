@@ -3,26 +3,30 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from sentra_core.core import logging
+from sentra_engine.core.models import PromptContext
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,
-    ChatCompletionResponse
+    ChatCompletionResponse,
+    ChatCompletionChoice,
+    ChatCompletionUsage,
+    ChatMessage
 )
-from sentra_brain_api.features.llm_proxy.adapter import VLLMServerClient
+from sentra_engine.adapters.llm_adapter_factory import LlmAdapterFactory
 import json
+from datetime import datetime
+from uuid import uuid4
 
 logger = logging.get_logger("llm_proxy")
-
-
-def get_vllm_client() -> VLLMServerClient:
-    """Dependency function to get VLLMServerClient instance"""
-    return VLLMServerClient()
 
 
 class LLMProxyController:
     def __init__(self):
         self.router = APIRouter()
         self._add_routes()
-    
+
+    def _convert_to_prompt_context(self, request: ChatCompletionRequest) -> PromptContext:
+        return PromptContext(messages=request.messages)
+
     def _add_routes(self):
         @self.router.post(
             "/chat/completions",
@@ -31,31 +35,23 @@ class LLMProxyController:
         )
         async def create_chat_completion(
             request: ChatCompletionRequest,
-            vllm_client: VLLMServerClient = Depends(get_vllm_client)
         ):
             try:
                 logger.info(f"Received chat completion request: model={request.model}, stream={request.stream}, messages={len(request.messages)}")
-                
+
+                if not request.model:
+                    raise HTTPException(status_code=400, detail="Model is required")
+
+                llm_adapter = LlmAdapterFactory.create_adapter(request.model)
+                prompt_context = self._convert_to_prompt_context(request)
+
                 if request.stream:
                     # Return streaming response
                     async def generate_stream():
-                        try:
-                            async for chunk in vllm_client.stream_chat(request):
-                                chunk_json = chunk.model_dump_json()
-                                yield f"data: {chunk_json}\n\n"
-                            yield "data: [DONE]\n\n"
-                        except Exception as e:
-                            logger.error(f"Error during streaming: {e}")
-                            error_data = {
-                                "error": {
-                                    "message": str(e),
-                                    "type": "server_error"
-                                }
-                            }
-                            yield f"data: {json.dumps(error_data)}\n\n"
-                        finally:
-                            await vllm_client.close()
-                    
+                        async for chunk in llm_adapter.chat_stream(prompt_context):
+                            if chunk.type == "message_delta" and chunk.content:
+                                yield chunk.content
+
                     return StreamingResponse(
                         generate_stream(),
                         media_type="text/plain",
@@ -66,14 +62,33 @@ class LLMProxyController:
                         }
                     )
                 else:
-                    # Return regular response
-                    try:
-                        response = await vllm_client.complete_chat(request)
-                        logger.info(f"Chat completion successful: {response.id}")
-                        return response
-                    finally:
-                        await vllm_client.close()
-                        
+                    chunks = []
+                    async for chunk in llm_adapter.chat_stream(prompt_context):
+                        if chunk.type == "message_delta" and chunk.content:
+                            chunks.append(chunk.content)
+
+                    return ChatCompletionResponse(
+                        id=str(uuid4()),
+                        object="chat.completion",
+                        created=int(datetime.utcnow().timestamp()),
+                        model=request.model,
+                        choices=[
+                            ChatCompletionChoice(
+                                index=0,
+                                message=ChatMessage(
+                                    role="assistant",
+                                    content="".join(chunks)
+                                ),
+                                finish_reason="stop"
+                            )
+                        ],
+                        usage=ChatCompletionUsage(
+                            prompt_tokens=0,  # Replace with actual token count if available
+                            completion_tokens=len(chunks),
+                            total_tokens=len(chunks)
+                        )
+                    )
+
             except Exception as e:
                 logger.error(f"Error in chat completion: {e}")
                 raise HTTPException(

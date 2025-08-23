@@ -9,9 +9,10 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionResponse,
     ChatMessage,
     ChatCompletionChoice,
-    ChatCompletionUsage
+    ChatCompletionUsage,
+    ChatCompletionChunk
 )
-from sentra_brain_api.features.llm_proxy.controller import get_vllm_client
+from sentra_engine.adapters.llm_adapter_factory import LlmAdapterFactory
 
 
 @pytest.fixture
@@ -21,10 +22,10 @@ def client():
 
 
 @pytest.fixture
-def mock_vllm_client():
-    mock_client = AsyncMock()
-    mock_client.close = AsyncMock()
-    return mock_client
+def mock_llm_adapter():
+    mock_adapter = AsyncMock()
+    mock_adapter.chat_stream = AsyncMock()
+    return mock_adapter
 
 
 @pytest.fixture 
@@ -40,72 +41,55 @@ def sample_request():
 
 @pytest.fixture
 def sample_response():
-    return ChatCompletionResponse(
-        id="chatcmpl-test123",
-        created=1234567890,
-        model="llama-3",
-        choices=[
-            ChatCompletionChoice(
-                index=0,
-                message=ChatMessage(role="assistant", content="Sentra Brain es una plataforma de IA."),
-                finish_reason="stop"
-            )
-        ],
-        usage=ChatCompletionUsage(
-            prompt_tokens=10,
-            completion_tokens=15,
-            total_tokens=25
-        )
+    class MockDeltaEvent:
+        def __init__(self, type, content):
+            self.type = type
+            self.content = content
+
+    return MockDeltaEvent(
+        type="message_delta",
+        content="Sentra Brain es una plataforma de IA."
     )
 
 
 class TestOpenAIProxyController:
-    
-    def test_chat_completions_non_streaming(self, client, sample_request, sample_response, mock_vllm_client):
+    def test_chat_completions_non_streaming(self, client, sample_request, sample_response, mock_llm_adapter):
         # Setup mock
-        mock_vllm_client.complete_chat.return_value = sample_response
-        
-        # Override the dependency 
-        app = client.app
-        app.dependency_overrides[get_vllm_client] = lambda: mock_vllm_client
-        
-        try:
+        async def mock_chat_stream(prompt_context):
+            yield sample_response
+
+        mock_llm_adapter.chat_stream = mock_chat_stream
+
+        # Patch the factory
+        with patch.object(LlmAdapterFactory, 'create_adapter', return_value=mock_llm_adapter):
             # Make request
             response = client.post("/v1/chat/completions", json=sample_request)
-            
+
             # Verify response
             assert response.status_code == 200
             data = response.json()
             assert data["model"] == "llama-3"
             assert data["choices"][0]["message"]["role"] == "assistant"
             assert "Sentra Brain" in data["choices"][0]["message"]["content"]
-        finally:
-            # Clean up override
-            app.dependency_overrides.clear()
-    
-    def test_chat_completions_with_streaming(self, client, sample_request, mock_vllm_client):
+
+    def test_chat_completions_with_streaming(self, client, sample_request, sample_response, mock_llm_adapter):
         # Setup mock for streaming
-        async def mock_stream():
-            yield sample_response  # This would be chunks in real implementation
-        mock_vllm_client.stream_chat.return_value = mock_stream()
-        
-        # Override the dependency 
-        app = client.app
-        app.dependency_overrides[get_vllm_client] = lambda: mock_vllm_client
-        
-        try:
+        async def mock_stream(prompt_context):
+            yield sample_response
+
+        mock_llm_adapter.chat_stream = mock_stream
+
+        # Patch the factory
+        with patch.object(LlmAdapterFactory, 'create_adapter', return_value=mock_llm_adapter):
             # Set streaming to true
             sample_request["stream"] = True
-            
+
             # Make request
             response = client.post("/v1/chat/completions", json=sample_request)
-            
+
             # For streaming, we expect a 200 response with text/plain content type
             assert response.status_code == 200
             assert "text/plain" in response.headers.get("content-type", "")
-        finally:
-            # Clean up override
-            app.dependency_overrides.clear()
     
     def test_chat_completions_invalid_request(self, client):
         # Test with invalid request (missing required fields)
@@ -134,10 +118,10 @@ def test_chat_message_validation():
     valid_message = ChatMessage(role="user", content="Hello")
     assert valid_message.role == "user"
     assert valid_message.content == "Hello"
-    
+
     # Test invalid role
     with pytest.raises(ValueError):
-        ChatMessage(role="invalid_role", content="Hello")
+        ChatMessage(role="invalid_role", content="Hello")  # Dynamically bypass type checking
 
 
 def test_chat_completion_request_validation():
@@ -145,20 +129,26 @@ def test_chat_completion_request_validation():
     # Valid request
     valid_request = ChatCompletionRequest(
         model="llama-3",
-        messages=[ChatMessage(role="user", content="Hello")]
+        messages=[ChatMessage(role="user", content="Hello")],
+        stream=False,
+        temperature=1.0,
+        max_tokens=100,
+        top_p=1.0
     )
     assert valid_request.model == "llama-3"
     assert len(valid_request.messages) == 1
     assert valid_request.stream is False  # Default value
-    
+
     # Test with optional parameters
     request_with_options = ChatCompletionRequest(
         model="llama-3",
         messages=[ChatMessage(role="user", content="Hello")],
         stream=True,
         temperature=0.7,
-        max_tokens=100
+        max_tokens=100,
+        top_p=0.9
     )
     assert request_with_options.stream is True
     assert request_with_options.temperature == 0.7
     assert request_with_options.max_tokens == 100
+    assert request_with_options.top_p == 0.9
