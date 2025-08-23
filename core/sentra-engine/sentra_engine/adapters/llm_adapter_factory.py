@@ -1,4 +1,4 @@
-from sentra_core.core.settings import settings, LLMEngine  # type: ignore
+from sentra_core.core.settings import settings, LLMEngine
 from sentra_engine.adapters.llama_server import LlamaServerAdapter
 from sentra_engine.adapters.vllm import VLLMAdapter
 
