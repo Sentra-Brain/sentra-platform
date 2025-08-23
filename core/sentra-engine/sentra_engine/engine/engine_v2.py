@@ -1,17 +1,18 @@
 from dataclasses import dataclass
 from typing import AsyncGenerator, Optional, Sequence
 
-from sentra_engine.core.models import DeltaEvent, Message, PromptContext, ToolSchema, Transcript
+from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, Transcript
+from sentra_engine.core.plan import Plan, Step
 from sentra_engine.core.time import utc_now_iso
 from sentra_engine.engine.id_utils import normalize_message_id
+from sentra_engine.engine.step_runner import StepRunner
 from sentra_engine.ports.context import ContextPort
 from sentra_engine.ports.llm import LLMPort
 from sentra_engine.ports.persistence import PersistencePort
 from sentra_engine.ports.planner import PlannerPort
 from sentra_engine.ports.rag import RAGPort
 from sentra_engine.core.tool_orchestrator import ToolOrchestrator
-from sentra_engine.tooling.parser import ToolStreamParser
-from sentra_engine.tooling.formatters import normalize_tool_output
+from sentra_engine.core.models import StepEvent
 
 
 @dataclass
@@ -88,68 +89,49 @@ class ConversationEngineV2:
         ctx = await self.context.build(conversation_id)
         transcript: list[Message] = [*ctx.messages, user_msg]
 
-        # 3) optional planner (guidance only for now)
-        guidance: Optional[str] = None
+        # 3) planner -> structured plan (or synthesize a single Respond)
+        plan: Plan
         if use_planner and self.planner:
             try:
-                plan = await self.planner.plan(Transcript(messages=list(transcript)), context="")
-                guidance = (plan.params or {}).get("guidance")
+                plan = await self.planner.plan_structured(Transcript(messages=list(transcript)), context="")
             except Exception:
-                guidance = None
+                # fallback: single Respond
+                plan = Plan(schema_version=1, steps=[Step(id="respond", kind="LLM.Respond")], entry="respond")
+        else:
+            plan = Plan(schema_version=1, steps=[Step(id="respond", kind="LLM.Respond")], entry="respond")
 
-        # 4) loop: LLM -> tool intents? -> execute -> append system msgs -> repeat
-        text_acc: list[str] = []
-        for _ in range(self.config.max_rounds):
-            tools_schema: Optional[Sequence[ToolSchema]] = None
-            if self.tool_orchestrator:
-                try:
-                    tools_schema = await self.tool_orchestrator.registry()
-                except Exception:
-                    tools_schema = None
-                    # (optional) append a tools_unavailable step event here
-
-            parser = ToolStreamParser(allow_plaintext_fallback=self.config.allow_plaintext_tool_fallback)
-            agen = self.llm.chat_stream(
-                PromptContext(messages=[_as_openai_msg(m) for m in transcript]),
-                tools_schema=tools_schema,
-                guidance=guidance,
-            )
+        # 4) resolve tool registry ONCE (with visible event on failure)
+        tools_schema: Optional[Sequence[ToolSchema]] = None
+        if self.tool_orchestrator:
             try:
-                async for ev in agen:
-                    if ev.type == "message_delta" and ev.content:
-                        text_acc.append(ev.content)
-                        yield DeltaEvent(type="message_delta", content=ev.content)
-                    parser.ingest(ev)
-            finally:
-                if hasattr(agen, "aclose"):
-                    await agen.aclose()
+                tools_schema = await self.tool_orchestrator.registry()
+            except Exception as e:
+                tools_schema = None
+                try:
+                    await self.persistence.append_step_event(
+                        conversation_id,
+                        StepEvent(type="tools_unavailable", detail={"error": str(e)})
+                    )
+                except Exception:
+                    pass  # best-effort
 
-            intents = parser.finalize_intents()
-            if not intents or not self.tool_orchestrator:
-                break
+        # 5) run the plan
+        runner = StepRunner(
+            conversation_id=conversation_id,
+            llm=self.llm,
+            persistence=self.persistence,
+            tool_orchestrator=self.tool_orchestrator,
+            rag=self.rag,
+            tools_schema=tools_schema,
+            max_rounds=self.config.max_rounds,
+            allow_plaintext_fallback=self.config.allow_plaintext_tool_fallback,
+        )
 
-            # Execute tool calls and append system messages
-            for call in intents:
-                res = await self.tool_orchestrator.execute_one(
-                    conversation_id=conversation_id,
-                    plan_step_id=normalize_message_id(None),
-                    tool_name=call.name,
-                    args=call.arguments,
-                    tool_call_id=call.id,
-                )
-                system_msg = Message(
-                    id=normalize_message_id(None, prefer_hex=True),
-                    role="system",
-                    content=normalize_tool_output(call.name, res.content if res.ok else res.error),
-                    timestamp=utc_now_iso(),
-                )
-                await self.persistence.append_message(conversation_id, system_msg)
-                transcript.append(system_msg)
+        async for ev in runner.run(plan, transcript):
+            # stream deltas to caller
+            yield ev
 
-            # use guidance once unless planner says otherwise
-            guidance = None
-
-        final = ("".join(text_acc)).strip() or "(no content)"
+        final = runner.final_text
         asst_msg = Message(
             id=normalize_message_id(response_message_id, prefer_hex=True),
             role="assistant",
@@ -158,7 +140,3 @@ class ConversationEngineV2:
         )
         await self.persistence.append_message(conversation_id, asst_msg)
         yield DeltaEvent(type="message_final", content=final)
-
-
-def _as_openai_msg(m: Message) -> dict:
-    return {"role": (m.role or "system"), "content": (m.content or "")}

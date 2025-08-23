@@ -1,6 +1,7 @@
 # sentra_engine/adapters/planner_llm.py
 import json, httpx
 from typing import Any
+from sentra_engine.core.plan import Plan, Step
 from sentra_engine.ports.planner import PlannerPort
 from sentra_engine.core.models import PlanStep, Transcript
 
@@ -41,6 +42,17 @@ class LLMPlannerAdapter(PlannerPort):
         action = str(obj.get("action") or "Respond")
         guidance = str(obj.get("guidance") or "")
         return PlanStep(action=action, params={"guidance": guidance})
+
+    async def plan_structured(self, transcript: Transcript, context: str) -> Plan:
+        # For Phase 3, wrap legacy output into a Plan
+        ps = await self.plan(transcript, context)
+        guidance = (ps.params or {}).get("guidance") if hasattr(ps, "params") else None
+        return Plan(
+            schema_version=1,
+            steps=[Step(id="respond", kind="LLM.Respond", params={"guidance": guidance} if guidance else {})],
+            entry="respond",
+            guidance=guidance or None,
+        )
 
 def _summarize_for_planner(t: Transcript) -> str:
     # Keep it simple for M2: last user message only (fallback to empty)

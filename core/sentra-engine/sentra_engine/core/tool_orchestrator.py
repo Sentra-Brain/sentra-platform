@@ -108,3 +108,7 @@ class ToolOrchestrator:
 
     async def registry(self) -> Sequence[ToolSchema]:
         return await self._get_schemas()
+
+    def reset_registry_cache(self) -> None:
+        """Clear the cached tool schemas (call before a new registry refresh)."""
+        self._cached_schemas = None
