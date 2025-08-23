@@ -1,6 +1,4 @@
 from __future__ import annotations
-import json
-import time
 from typing import Any, Dict, Optional, Sequence
 from jsonschema import validate, ValidationError
 from sentra_engine.core.models import ToolSchema, ToolResult, StepEvent
@@ -8,7 +6,6 @@ from sentra_engine.ports.mcp import MCPPort
 from sentra_engine.ports.persistence import PersistencePort
 from sentra_engine.ports.telemetry import TelemetryPort
 
-_MAX_BYTES = 8192
 
 class ToolOrchestrator:
     def __init__(
@@ -26,7 +23,6 @@ class ToolOrchestrator:
         self._cached_schemas: Optional[Sequence[ToolSchema]] = None
 
     async def _get_schemas(self) -> Sequence[ToolSchema]:
-        """Fetch and cache tool schemas."""
         if self._cached_schemas is None:
             self._cached_schemas = await self.mcp.list_tools()
         return self._cached_schemas
@@ -39,7 +35,6 @@ class ToolOrchestrator:
         success: bool,
         error: Optional[str] = None,
     ):
-        """Log telemetry events."""
         if self.telemetry:
             if event_type == "start":
                 self.telemetry.step_start(plan_step_id, {"tool": tool_name})
@@ -50,7 +45,6 @@ class ToolOrchestrator:
                 self.telemetry.step_end(plan_step_id, success, meta)
 
     async def _append_event(self, conversation_id: str, step_event: StepEvent):
-        """Append step events to persistence."""
         await self.persistence.append_step_event(conversation_id, step_event)
 
     async def execute_one(
@@ -113,16 +107,4 @@ class ToolOrchestrator:
         ))
 
     async def registry(self) -> Sequence[ToolSchema]:
-        """Return the list of tool schemas, using cache if available."""
         return await self._get_schemas()
-
-def normalize_tool_output(tool_name: str, content: Any) -> str:
-    if isinstance(content, (dict, list)):
-        text = json.dumps(content, ensure_ascii=False)
-    else:
-        text = str(content)
-    b = text.encode("utf-8", errors="ignore")
-    if len(b) > _MAX_BYTES:
-        b = b[:_MAX_BYTES]
-        text = b.decode("utf-8", errors="ignore") + "\n…[truncated]"
-    return f"Tool '{tool_name}' output:\n{text}"

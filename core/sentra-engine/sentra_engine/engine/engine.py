@@ -12,10 +12,8 @@ from sentra_engine.core.models import (
     Transcript,
 )
 from sentra_engine.core.tool_intent import ToolCallDelta, ToolIntent
-from sentra_engine.core.tool_orchestrator import (
-    ToolOrchestrator,
-    normalize_tool_output,
-)
+from sentra_engine.core.tool_orchestrator import ToolOrchestrator
+from sentra_engine.tooling.formatters import normalize_tool_output
 from sentra_engine.engine.id_utils import normalize_message_id
 from sentra_engine.tooling.assembler import ToolCallAssembler
 from sentra_engine.tooling.args_coercion import ArgsCoercer
