@@ -1,12 +1,4 @@
-try:
-    from sentra_core.core.settings import settings, LLMEngine  # type: ignore
-except Exception:  # pragma: no cover - sentinel for missing dep
-    settings = None
-
-    class LLMEngine:  # minimal stub for import-time compatibility
-        LLAMA = "llama"
-        VLLM = "vllm"
-
+from sentra_core.core.settings import settings, LLMEngine  # type: ignore
 from sentra_engine.adapters.llama_server import LlamaServerAdapter
 from sentra_engine.adapters.vllm import VLLMAdapter
 
