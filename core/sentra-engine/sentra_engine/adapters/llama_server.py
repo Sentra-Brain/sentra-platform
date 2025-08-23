@@ -7,8 +7,9 @@ from sentra_engine.core.json_utils import (
     extract_delta_content,
     extract_tool_call_deltas,
     extract_finish_reason,
-    strip_data_prefix
+    strip_data_prefix,
 )
+from ._openai_stream import with_guidance, apply_tools
 
 
 class LlamaServerAdapter(LLMPort):
@@ -24,9 +25,7 @@ class LlamaServerAdapter(LLMPort):
         guidance: Optional[str] = None,
     ) -> AsyncGenerator[DeltaEvent, None]:
         url = f"{self.base_url}/v1/chat/completions"
-        messages = prompt_context.messages
-        if guidance:
-            messages = [{"role": "system", "content": f"Planner guidance:\n{guidance}"}] + messages
+        messages = with_guidance(prompt_context.messages, guidance)
 
         payload = {
             "model": self.model,
@@ -34,19 +33,7 @@ class LlamaServerAdapter(LLMPort):
             "stream": True,
         }
 
-        if tools_schema:
-            payload["tools"] = [
-                {
-                    "type": "function",
-                    "function": {
-                        "name": s.name,
-                        "description": (s.description or s.title or s.name),  # NEW
-                        "parameters": s.parameters,
-                    },
-                }
-                for s in tools_schema
-            ]
-            payload["tool_choice"] = "auto"
+        apply_tools(payload, tools_schema)
 
         async with httpx.AsyncClient(timeout=self.request_timeout) as client:
             async with client.stream("POST", url, json=payload) as response:
