@@ -1,3 +1,6 @@
+"""Factory module for LLM adapters."""
+
+# Import settings and engine enum at module scope so tests can monkeypatch them
 from sentra_core.core.settings import settings, LLMEngine
 from sentra_engine.adapters.llama_server import LlamaServerAdapter
 from sentra_engine.adapters.vllm import VLLMAdapter
