@@ -4,7 +4,6 @@ from typing import AsyncGenerator, Optional, Sequence
 from dataclasses import asdict, is_dataclass
 import inspect
 
-from sentra_engine.core.json_utils import parse_json_safe
 from sentra_engine.core.models import (
     DeltaEvent,
     Message,
@@ -12,11 +11,15 @@ from sentra_engine.core.models import (
     ToolSchema,
     Transcript,
 )
+from sentra_engine.core.tool_intent import ToolCallDelta, ToolIntent
 from sentra_engine.core.tool_orchestrator import (
     ToolOrchestrator,
     normalize_tool_output,
 )
 from sentra_engine.engine.id_utils import normalize_message_id
+from sentra_engine.tooling.assembler import ToolCallAssembler
+from sentra_engine.tooling.args_coercion import ArgsCoercer
+from sentra_engine.tooling.extractors import PlainJSONExtractor
 from sentra_engine.ports.context import ContextPort
 from sentra_engine.ports.llm import LLMPort
 from sentra_engine.ports.persistence import PersistencePort
@@ -78,37 +81,44 @@ class ConversationEngine:
             *,
             allow_tools: bool,
             guidance: Optional[str] = None,
-        ) -> tuple[list[str], list[dict]]:
+        ) -> tuple[list[str], list[ToolIntent]]:
             prelude: list[str] = []
-            calls: dict[int, dict] = {}
-            async for ev in self.llm.chat_stream(
+            assembler = ToolCallAssembler()
+            plain_extractor = PlainJSONExtractor()
+            manual_mode = tools_schema is None or not allow_tools
+            agen = self.llm.chat_stream(
                 PromptContext(messages=llm_messages),
                 tools_schema=tools_schema if allow_tools else None,
                 guidance=guidance,
-            ):
-                if ev.type == "message_delta" and ev.content:
-                    prelude.append(ev.content)
-                elif ev.type == "tool_call_delta":
-                    idx = int((ev.metadata or {}).get("index", 0))
-                    name = (ev.metadata or {}).get("name")
-                    if name:
-                        calls.setdefault(idx, {})["name"] = str(name)
-                    frag = (ev.metadata or {}).get("arguments_delta")
-                    if frag:
-                        calls.setdefault(idx, {}).setdefault("args", []).append(str(frag))
-                elif ev.type == "tool_calls_done":
-                    break
-            ordered = []
-            for idx in sorted(calls.keys()):
-                name = calls[idx].get("name")
-                args_json = "".join(calls[idx].get("args", [])) or "{}"
-                try:
-                    args = parse_json_safe(args_json) or {}
-                except Exception:
-                    args = {}
-                if name:
-                    ordered.append({"name": name, "args": args})
-            return prelude, ordered
+            )
+            try:
+                async for ev in agen:
+                    if ev.type == "message_delta" and ev.content:
+                        prelude.append(ev.content)
+                        if manual_mode:
+                            maybe = plain_extractor.extract_from_text(ev.content)
+                            if maybe:
+                                assembler.add(maybe)
+                    elif ev.type == "tool_call_delta" and ev.metadata:
+                        d = ToolCallDelta(
+                            index=ev.metadata.get("index") if isinstance(ev.metadata.get("index"), int) else None,
+                            id=ev.metadata.get("id"),
+                            name=ev.metadata.get("name"),
+                            arguments_fragment=ev.metadata.get("arguments_delta"),
+                        )
+                        assembler.add(d)
+                    elif ev.type == "tool_calls_done":
+                        break
+            finally:
+                if hasattr(agen, "aclose"):
+                    await agen.aclose()
+
+            intents: list[ToolIntent] = []
+            try:
+                intents = assembler.finalize()
+            except ValueError:
+                intents = []
+            return prelude, intents
 
         if use_planner and self.planner:
             while True:
@@ -143,14 +153,22 @@ class ConversationEngine:
                     chunks.extend(pre)
                     for call in calls:
                         step_id = normalize_message_id(None)
+                        schema = next((s for s in tools_schema or [] if s.name == call.name), None)
+                        args = call.arguments
+                        if schema:
+                            try:
+                                args = ArgsCoercer(schema.parameters).coerce(args)
+                            except Exception:
+                                args = call.arguments
                         result = await self.tool_orchestrator.execute_one(
                             conversation_id=conversation_id,
                             plan_step_id=step_id,
-                            tool_name=call["name"],
-                            args=call["args"],
+                            tool_name=call.name,
+                            args=args,
+                            tool_call_id=call.id,
                         )
                         system_text = normalize_tool_output(
-                            call["name"],
+                            call.name,
                             result.content if result.ok else result.error,
                         )
                         system_msg = Message(
@@ -179,14 +197,22 @@ class ConversationEngine:
                     break
                 for call in calls:
                     step_id = normalize_message_id(None)
+                    schema = next((s for s in tools_schema or [] if s.name == call.name), None)
+                    args = call.arguments
+                    if schema:
+                        try:
+                            args = ArgsCoercer(schema.parameters).coerce(args)
+                        except Exception:
+                            args = call.arguments
                     result = await self.tool_orchestrator.execute_one(
                         conversation_id=conversation_id,
                         plan_step_id=step_id,
-                        tool_name=call["name"],
-                        args=call["args"],
+                        tool_name=call.name,
+                        args=args,
+                        tool_call_id=call.id,
                     )
                     system_text = normalize_tool_output(
-                        call["name"],
+                        call.name,
                         result.content if result.ok else result.error,
                     )
                     system_msg = Message(

@@ -60,23 +60,24 @@ class ToolOrchestrator:
         plan_step_id: str,
         tool_name: str,
         args: Dict[str, Any],
+        tool_call_id: str | None = None,
     ) -> ToolResult:
         await self._log_telemetry(plan_step_id, tool_name, "start", success=True)
         await self._append_event(conversation_id, StepEvent(
             type="tool_start",
-            detail={"tool": tool_name, "plan_step_id": plan_step_id, "args": args},
+            detail={"tool": tool_name, "plan_step_id": plan_step_id, "args": args, "tool_call_id": tool_call_id},
         ))
 
         if not self.enabled:
             res = ToolResult(ok=False, content=None, error="tools_disabled")
-            await self._finish(conversation_id, plan_step_id, tool_name, res)
+            await self._finish(conversation_id, plan_step_id, tool_name, res, tool_call_id)
             return res
 
         schemas = await self._get_schemas()
         schema = next((s for s in schemas if s.name == tool_name), None)
         if not schema:
             err = ToolResult(ok=False, content=None, error="tool_not_found")
-            await self._finish(conversation_id, plan_step_id, tool_name, err)
+            await self._finish(conversation_id, plan_step_id, tool_name, err, tool_call_id)
             return err
 
         # Validate args
@@ -85,7 +86,7 @@ class ToolOrchestrator:
             validate(instance=args or {}, schema=params_schema)
         except ValidationError as ve:
             err = ToolResult(ok=False, content=None, error=f"validation_error: {ve.message}")
-            await self._finish(conversation_id, plan_step_id, tool_name, err)
+            await self._finish(conversation_id, plan_step_id, tool_name, err, tool_call_id)
             return err
 
         # Execute
@@ -94,16 +95,21 @@ class ToolOrchestrator:
         except Exception as e:
             res = ToolResult(ok=False, content=None, error=f"execution_error: {e}")
 
-        await self._finish(conversation_id, plan_step_id, tool_name, res)
+        await self._finish(conversation_id, plan_step_id, tool_name, res, tool_call_id)
         return res
 
     async def _finish(
-        self, conversation_id: str, plan_step_id: str, tool_name: str, res: ToolResult
+        self,
+        conversation_id: str,
+        plan_step_id: str,
+        tool_name: str,
+        res: ToolResult,
+        tool_call_id: str | None,
     ) -> None:
         await self._log_telemetry(plan_step_id, tool_name, "end", success=res.ok, error=res.error)
         await self._append_event(conversation_id, StepEvent(
             type="tool_end" if res.ok else "tool_error",
-            detail={"plan_step_id": plan_step_id, "ok": res.ok, "error": res.error},
+            detail={"plan_step_id": plan_step_id, "ok": res.ok, "error": res.error, "tool_call_id": tool_call_id},
         ))
 
     async def registry(self) -> Sequence[ToolSchema]:
