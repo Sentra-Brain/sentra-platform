@@ -12,7 +12,7 @@ from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARA
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
-from sentra_brain_api.features.chat.controller_v2 import ChatControllerV2
+from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
@@ -68,7 +68,7 @@ def create_app():
     public_settings_controller = PublicSettingsController()
     conversation_controller = ConversationController()
     llm_proxy_controller = LLMProxyController()
-    chat_controller_v2 = ChatControllerV2()
+    chat_controller = ChatController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
@@ -80,7 +80,7 @@ def create_app():
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
-    app.include_router(chat_controller_v2.router, prefix="/chat", tags=["chat"])
+    app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
     app.include_router(organization_router, prefix="", tags=["organization"])
 
     # Setup observability (only if not in test mode)

@@ -2,7 +2,7 @@ import asyncio
 from typing import AsyncGenerator, List, Optional, Sequence, Dict, Any
 
 from sentra_engine.core.plan import Plan, Step
-from sentra_engine.core.models import DeltaEvent, Message, ToolSchema
+from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, PromptContext
 from sentra_engine.core.time import utc_now_iso
 from sentra_engine.engine.id_utils import normalize_message_id
 from sentra_engine.tooling.parser import ToolStreamParser
@@ -57,9 +57,10 @@ class StepRunner:
                 guidance = step.params.get("guidance") if isinstance(step.params, dict) else None
                 parser = ToolStreamParser(allow_plaintext_fallback=self.allow_plaintext_fallback)
                 agen = self.llm.chat_stream(
-                    prompt_context={"messages": [as_openai_msg(m) for m in transcript]},
+                    prompt_context=PromptContext(messages=[as_openai_msg(m) for m in transcript]),
                     tools_schema=self.tools_schema,
                     guidance=guidance or plan.guidance,
+
                 )
                 try:
                     async for ev in agen:
