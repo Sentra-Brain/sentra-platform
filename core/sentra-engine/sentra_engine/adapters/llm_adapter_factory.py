@@ -1,19 +1,4 @@
-try:
-    from sentra_core.core.settings import settings, LLMEngine
-except Exception:  # pragma: no cover - optional dependency
-    class _DummySettings:
-        llm_engine = None
-        llama_server_url = ""
-        vllm_server_url = ""
-        llm_request_timeout = None
-
-    class _DummyLLMEngine:
-        LLAMA = "llama"
-        VLLM = "vllm"
-
-    settings = _DummySettings()
-    LLMEngine = _DummyLLMEngine
-
+from sentra_core.core.settings import settings, LLMEngine
 from sentra_engine.adapters.llama_server import LlamaServerAdapter
 from sentra_engine.adapters.vllm import VLLMAdapter
 
