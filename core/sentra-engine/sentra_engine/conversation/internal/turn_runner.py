@@ -1,15 +1,16 @@
 from typing import AsyncGenerator, Optional, Sequence
 from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, Transcript, StepEvent
 from sentra_engine.core.time import utc_now_iso
-from sentra_engine.conversation.id_utils import normalize_message_id
-from sentra_engine.conversation.step_runner import StepRunner
+from sentra_engine.core.id_utils import normalize_message_id
+from sentra_engine.conversation.internal.step_runner import StepRunner
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.planner.ports.planner import PlannerPort
 from sentra_engine.conversation.ports.rag import RAGPort
 from sentra_engine.core.plan import Plan, Step
-from sentra_engine.tools.core.orchestrator import ToolOrchestrator
+from sentra_engine.tools.ports.tool import ToolPort
+
 
 class TurnRunner:
     def __init__(
@@ -18,7 +19,7 @@ class TurnRunner:
         llm: LLMPort,
         persistence: PersistencePort,
         planner: Optional[PlannerPort] = None,
-        tool_orchestrator: Optional[ToolOrchestrator] = None,
+        tool_orchestrator: Optional[ToolPort] = None,
         rag: Optional[RAGPort] = None,
         max_rounds: int = 3,
         allow_plaintext_tool_fallback: bool = False,

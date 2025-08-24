@@ -1,8 +1,8 @@
 import pytest
 
 from sentra_engine.core.tool_intent import ToolCallDelta, ToolIntent
-from sentra_engine.tooling.assembler import ToolCallAssembler
-from sentra_engine.tooling.args_coercion import ArgsCoercer
+from sentra_engine.tools.internal.assembler import ToolCallAssembler
+from sentra_engine.tools.internal.args_coercion import ArgsCoercer
 
 
 def test_assembler_merges_and_preserves_id():

@@ -1,15 +1,15 @@
 from dataclasses import dataclass
 from typing import AsyncGenerator, Optional
 
+from sentra_engine.conversation.ports.conversation import ConversationEnginePort
 from sentra_engine.core.models import DeltaEvent
-from sentra_engine.conversation.turn_runner import TurnRunner
+from sentra_engine.conversation.internal.turn_runner import TurnRunner
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.planner.ports.planner import PlannerPort
 from sentra_engine.conversation.ports.rag import RAGPort
-from sentra_engine.tools.core.orchestrator import ToolOrchestrator
-
+from sentra_engine.tools.ports.tool import ToolPort 
 
 @dataclass
 class EngineConfig:
@@ -17,7 +17,7 @@ class EngineConfig:
     allow_plaintext_tool_fallback: bool = False
 
 
-class ConversationEngine:
+class ConversationEngine(ConversationEnginePort):
     """Conversation Engine for managing user interactions. It handles message processing,
      context management, and tool orchestration."""
 
@@ -28,7 +28,7 @@ class ConversationEngine:
         llm: LLMPort,
         persistence: PersistencePort,
         planner: Optional[PlannerPort] = None,
-        tool_orchestrator: Optional[ToolOrchestrator] = None,
+        tool_orchestrator: Optional[ToolPort] = None,
         rag: Optional[RAGPort] = None,
         config: EngineConfig = EngineConfig(),
     ) -> None:

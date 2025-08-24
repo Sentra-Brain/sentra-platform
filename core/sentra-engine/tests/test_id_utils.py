@@ -1,6 +1,6 @@
 # core/sentra-engine/tests/test_id_utils.py
 import uuid
-from sentra_engine.conversation.id_utils import normalize_message_id
+from sentra_engine.core.id_utils import normalize_message_id
 
 def test_normalize_uuid_variants():
     u = uuid.uuid4()

@@ -8,7 +8,7 @@ from sentra_engine.core.models import (
     RAGContext,
     StepEvent,
 )
-from sentra_engine.conversation.engine import ConversationEngine
+from sentra_engine.conversation.adapters.engine import ConversationEngine
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort

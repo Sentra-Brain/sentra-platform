@@ -1,3 +1,3 @@
-from .core.orchestrator import ToolOrchestrator
+from .adapters.orchestrator import ToolOrchestrator
 
 __all__ = ["ToolOrchestrator"]

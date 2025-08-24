@@ -1,8 +1,8 @@
-from typing import List, Optional
+from typing import List
 from sentra_engine.core.models import DeltaEvent
 from sentra_engine.core.tool_intent import ToolCallDelta, ToolIntent
-from sentra_engine.tooling.assembler import ToolCallAssembler
-from sentra_engine.tooling.extractors import PlainJSONExtractor
+from sentra_engine.tools.internal.assembler import ToolCallAssembler
+from sentra_engine.tools.internal.extractors import PlainJSONExtractor
 
 
 class ToolStreamParser:

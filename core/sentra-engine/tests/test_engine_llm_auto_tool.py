@@ -10,13 +10,13 @@ from sentra_engine.core.models import (
     ToolResult,
     ToolSchema,
 )
-from sentra_engine.conversation.engine import ConversationEngine
+from sentra_engine.conversation.adapters.engine import ConversationEngine
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.planner.ports.planner import PlannerPort
-from sentra_engine.tools.core.orchestrator import ToolOrchestrator
+from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 
 class LLMWithTool(LLMPort):
     def __init__(self):

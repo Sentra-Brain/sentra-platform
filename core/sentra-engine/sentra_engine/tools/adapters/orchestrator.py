@@ -5,9 +5,10 @@ from sentra_engine.core.models import ToolSchema, ToolResult, StepEvent
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.tools.ports.telemetry import TelemetryPort
+from sentra_engine.tools.ports.tool import ToolPort
 
 
-class ToolOrchestrator:
+class ToolOrchestrator(ToolPort):
     def __init__(
         self,
         *,
