@@ -12,7 +12,7 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionUsage,
     ChatCompletionChunk
 )
-from sentra_engine.adapters.llm_adapter_factory import LlmAdapterFactory
+from sentra_engine.adapters.llm.factory  import LlmAdapterFactory
 
 
 @pytest.fixture

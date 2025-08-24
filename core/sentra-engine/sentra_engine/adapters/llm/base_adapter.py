@@ -9,9 +9,10 @@ from sentra_engine.core.json_utils import (
     extract_finish_reason,
     strip_data_prefix,
 )
-from ._openai_stream import with_guidance, apply_tools
+from .openai_stream import with_guidance, apply_tools
 
-class VLLMAdapter(LLMPort):
+
+class BaseLLMAdapter(LLMPort):
     def __init__(self, base_url: str, *, model: str, request_timeout: float | None = None):
         self.base_url = base_url.rstrip("/")
         self.model = model

@@ -1,6 +1,6 @@
 # import pytest
 # from unittest.mock import AsyncMock
-# from sentra_engine.adapters.mcp_fastmcp import MCPProtocolAdapter
+# from sentra_engine.adapters.mcp.mcp_fastmcp import MCPProtocolAdapter
 # from sentra_engine.core.models import ToolSchema, ToolResult
 
 # TODO: adapt these tests to final implementation, once it works!

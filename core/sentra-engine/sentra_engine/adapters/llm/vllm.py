@@ -9,10 +9,10 @@ from sentra_engine.core.json_utils import (
     extract_finish_reason,
     strip_data_prefix,
 )
-from ._openai_stream import with_guidance, apply_tools
+from .openai_stream import with_guidance, apply_tools
+from .base_adapter import BaseLLMAdapter
 
-
-class LlamaServerAdapter(LLMPort):
+class VLLMAdapter(BaseLLMAdapter):
     def __init__(self, base_url: str, *, model: str, request_timeout: float | None = None):
         self.base_url = base_url.rstrip("/")
         self.model = model
@@ -52,16 +52,13 @@ class LlamaServerAdapter(LLMPort):
                     if not obj:
                         continue
 
-                    # 1) normal text
                     content = extract_delta_content(obj)
                     if content:
                         yield DeltaEvent(type="message_delta", content=content)
 
-                    # 2) tool call deltas
                     for tdelta in extract_tool_call_deltas(obj):
                         yield DeltaEvent(type="tool_call_delta", metadata=tdelta)
 
-                    # 3) finish reason
                     fr = extract_finish_reason(obj)
                     if fr == "tool_calls":
                         yield DeltaEvent(type="tool_calls_done")

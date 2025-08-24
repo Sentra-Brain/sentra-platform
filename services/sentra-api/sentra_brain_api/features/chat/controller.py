@@ -15,7 +15,7 @@ from sentra_engine.adapters import LLMPlannerAdapter, MCPProtocolAdapter
 from sentra_engine.adapters.context_service import SimpleContextService
 from sentra_engine.core.tool_orchestrator import ToolOrchestrator
 from sentra_engine.engine import ConversationEngine
-from sentra_engine.adapters.llm_adapter_factory import LlmAdapterFactory
+from sentra_engine.adapters.llm.factory import LlmAdapterFactory
 
 from sentra_brain_api.features.chat.schemas import (
     ConversationRequest, ConversationMode, ConversationEvent

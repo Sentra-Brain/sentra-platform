@@ -1,6 +1,6 @@
 from functools import lru_cache
 from sentra_core.core.settings import settings
-from sentra_engine.adapters.mcp_fastmcp import MCPProtocolAdapter
+from sentra_engine.adapters.mcp.mcp_fastmcp import MCPProtocolAdapter
 
 @lru_cache(maxsize=1)
 def get_mcp() -> MCPProtocolAdapter:

@@ -99,7 +99,7 @@ class TurnRunner:
         transcript: list[Message],
         tools_schema: Optional[Sequence[ToolSchema]],
     ) -> AsyncGenerator[DeltaEvent, None]:
-        runner = StepRunner(
+        self._runner = StepRunner(
             conversation_id=conversation_id,
             llm=self.llm,
             persistence=self.persistence,
@@ -109,13 +109,14 @@ class TurnRunner:
             max_rounds=self.max_rounds,
             allow_plaintext_fallback=self.allow_plaintext_tool_fallback,
         )
-        async for ev in runner.run(plan, transcript):
+        async for ev in self._runner.run(plan, transcript):
             yield ev
+
 
     async def _finalize_turn(
         self, conversation_id: str, response_message_id: Optional[str], transcript: list[Message]
     ) -> str:
-        final = transcript[-1].content if transcript else ""
+        final = self._runner.final_text or "(no content)"
         asst_msg = Message(
             id=normalize_message_id(response_message_id, prefer_hex=True),
             role="assistant",

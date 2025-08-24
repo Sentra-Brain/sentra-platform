@@ -1,6 +1,6 @@
 from sentra_core.core.settings import settings, LLMEngine
-from sentra_engine.adapters.llama_server import LlamaServerAdapter
-from sentra_engine.adapters.vllm import VLLMAdapter
+from sentra_engine.adapters.llm.llama_server import LlamaServerAdapter
+from sentra_engine.adapters.llm.vllm import VLLMAdapter
 
 class LlmAdapterFactory:
     """Factory for creating LLM adapter instances."""
