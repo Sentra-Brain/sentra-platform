@@ -8,11 +8,11 @@ from sentra_engine.core.models import (
     RAGContext,
     StepEvent,
 )
-from sentra_engine.engine.engine import ConversationEngine
-from sentra_engine.ports.context import ContextPort
-from sentra_engine.ports.llm import LLMPort
-from sentra_engine.ports.persistence import PersistencePort
-from sentra_engine.ports.planner import PlannerPort
+from sentra_engine.conversation.engine import ConversationEngine
+from sentra_engine.context.ports.context import ContextPort
+from sentra_engine.llm.ports.llm import LLMPort
+from sentra_engine.persistence.ports.persistence import PersistencePort
+from sentra_engine.planner.ports.planner import PlannerPort
 
 
 class AskingLLM(LLMPort):

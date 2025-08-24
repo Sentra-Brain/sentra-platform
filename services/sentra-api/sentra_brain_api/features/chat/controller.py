@@ -11,11 +11,12 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.core.settings import settings, LLMEngine
 
-from sentra_engine.adapters import LLMPlannerAdapter, MCPProtocolAdapter
-from sentra_engine.adapters.context_service import SimpleContextService
-from sentra_engine.core.tool_orchestrator import ToolOrchestrator
-from sentra_engine.engine import ConversationEngine
-from sentra_engine.adapters.llm.factory import LlmAdapterFactory
+from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
+from sentra_engine.mcp.adapters.fastmcp import MCPProtocolAdapter
+from sentra_engine.context.adapters.simple_context import SimpleContextService
+from sentra_engine.tools.core.orchestrator import ToolOrchestrator
+from sentra_engine.conversation.engine import ConversationEngine
+from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 
 from sentra_brain_api.features.chat.schemas import (
     ConversationRequest, ConversationMode, ConversationEvent

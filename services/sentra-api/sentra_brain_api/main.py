@@ -24,8 +24,9 @@ from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra_core.core import logging
 from sentra_core.infra.sql import postgres_service
-from sentra_engine.di.providers import get_mcp  # ADD
 import os
+
+from sentra_engine.mcp.adapters.fastmcp import get_mcp
 
 logger = logging.get_logger("sentra_brain_api")
 

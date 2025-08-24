@@ -2,10 +2,10 @@ import asyncio
 from typing import Optional, Sequence, Mapping, Any
 
 from sentra_engine.core.models import ToolSchema, ToolResult, Message, StepEvent
-from sentra_engine.core.tool_orchestrator import ToolOrchestrator
-from sentra_engine.ports.mcp import MCPPort
-from sentra_engine.ports.persistence import PersistencePort
-from sentra_engine.ports.telemetry import TelemetryPort
+from sentra_engine.tools.core.orchestrator import ToolOrchestrator
+from sentra_engine.mcp.ports.mcp import MCPPort
+from sentra_engine.persistence.ports.persistence import PersistencePort
+from sentra_engine.tools.ports.telemetry import TelemetryPort
 
 
 class MCPDummy(MCPPort):

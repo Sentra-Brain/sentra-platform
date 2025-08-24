@@ -11,7 +11,7 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionUsage,
     ChatMessage
 )
-from sentra_engine.adapters.llm.factory  import LlmAdapterFactory
+from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 import json
 from datetime import datetime, timezone
 from uuid import uuid4
