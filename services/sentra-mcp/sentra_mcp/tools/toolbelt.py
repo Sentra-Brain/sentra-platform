@@ -9,7 +9,7 @@ import os
 import re
 import time
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List
 from zoneinfo import ZoneInfo
@@ -103,9 +103,9 @@ def register_toolbelt(mcp: FastMCP) -> None:
     @mcp.tool("sleep")
     def sleep_ms(ms: int) -> Dict[str, Any]:
         ms = max(0, min(ms, 5000))
-        start = datetime.utcnow().isoformat() + "Z"
+        start = datetime.now(timezone.utc).isoformat() + "Z"
         time.sleep(ms / 1000)
-        end = datetime.utcnow().isoformat() + "Z"
+        end = datetime.now(timezone.utc).isoformat() + "Z"
         return {"slept_ms": ms, "started": start, "ended": end}
 
 

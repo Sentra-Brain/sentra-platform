@@ -22,7 +22,7 @@ class FakePersistence(PersistencePort):
 class FakeContext(ContextPort):
     async def build(self, conversation_id, rag_context=None):
         return PromptContext(messages=[
-            {"role": "system", "content": "You are Sentra."}
+            Message(id="msg0", role="system", content="You are Sentra."),
         ])
 
 class FakeLLM(LLMPort):

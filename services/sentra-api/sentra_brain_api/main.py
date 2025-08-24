@@ -1,5 +1,6 @@
 # main.py
 
+# from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from fastapi import FastAPI
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,7 +9,7 @@ from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
-# from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
+from sentra_brain_api.core.lifecycle_config import AppLifecycleConfig
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
@@ -23,22 +24,33 @@ from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra_core.core import logging
 from sentra_core.infra.sql import postgres_service
+from sentra_engine.di.providers import get_mcp  # ADD
 import os
 
 logger = logging.get_logger("sentra_brain_api")
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    logger.info("App startup: initializing resources...")
-    mcp_client = None
+def get_lifespan(config: AppLifecycleConfig):
+    @asynccontextmanager
+    async def lifespan(app: FastAPI):
+        logger.info("App startup: initializing resources...")
 
-    if os.getenv("TESTING") != "true":
-        # DB
-        postgres_service.init_db()
+        if config.init_mcp:
+            mcp_client = get_mcp()
+            await mcp_client.startup()
+            app.state.mcp_client = mcp_client
 
-    yield
+        if config.init_db:
+            postgres_service.init_db()
 
-def create_app():
+        yield
+
+        if config.init_mcp:
+            await app.state.mcp_client.shutdown()
+
+    return lifespan
+
+
+def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     app = FastAPI(
         title=TITLE,
         description=DESCRIPTION,
@@ -47,7 +59,7 @@ def create_app():
         license_info=LICENSE_INFO,
         swagger_ui_parameters=SWAGGER_UI_PARAMETERS,
         swagger_favicon_url=SWAGGER_FAVICON_URL,
-        lifespan=lifespan
+        lifespan=get_lifespan(config)
     )
 
     app.add_middleware(ErrorHandlerMiddleware)

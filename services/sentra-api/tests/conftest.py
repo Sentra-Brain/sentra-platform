@@ -85,7 +85,10 @@ def mock_db_session():
 
 @pytest.fixture
 def client(mock_db_session):
-    from sentra_brain_api.main import app
+    from sentra_brain_api.main import create_app
+    from sentra_brain_api.core.lifecycle_config import AppLifecycleConfig
+
+    app = create_app(AppLifecycleConfig(init_mcp=False, init_db=False))
     app.dependency_overrides[get_db] = lambda: mock_db_session
     yield TestClient(app)
     app.dependency_overrides.clear()

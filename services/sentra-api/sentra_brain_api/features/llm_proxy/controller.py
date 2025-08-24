@@ -13,7 +13,7 @@ from sentra_brain_api.features.llm_proxy.models import (
 )
 from sentra_engine.adapters.llm_adapter_factory import LlmAdapterFactory
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from uuid import uuid4
 
 logger = logging.get_logger("llm_proxy")
@@ -70,7 +70,7 @@ class LLMProxyController:
                     return ChatCompletionResponse(
                         id=str(uuid4()),
                         object="chat.completion",
-                        created=int(datetime.utcnow().timestamp()),
+                        created=int(datetime.now(timezone.utc).timestamp()),
                         model=request.model,
                         choices=[
                             ChatCompletionChoice(

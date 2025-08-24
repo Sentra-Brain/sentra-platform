@@ -28,6 +28,7 @@ class SentraSettings(BaseSettings):
     tools_enabled: bool = Field(default=False, json_schema_extra={"env": "SENTRA_TOOLS_ENABLED"})
     mcp_base_url: str = Field(default="http://sentra-mcp:8200", json_schema_extra={"env": "MCP_BASE_URL"})
     tool_max_output_bytes: int = Field(default=8192, json_schema_extra={"env": "TOOL_MAX_OUTPUT_BYTES"})
+    mcp_timeout: float | None = Field(default=None, json_schema_extra={"env": "MCP_TIMEOUT"})  # ADD
 
     model_config = SettingsConfigDict(
         env_file=".env",
