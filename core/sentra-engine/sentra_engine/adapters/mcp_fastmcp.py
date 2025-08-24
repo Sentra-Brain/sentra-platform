@@ -1,6 +1,7 @@
 import json
 import uuid
 from typing import Any, Dict, Optional, Sequence, cast
+import asyncio  # ADD
 
 import httpx
 
@@ -24,6 +25,27 @@ class MCPProtocolAdapter(MCPPort):
         self.request_timeout = request_timeout
         self._session_id: Optional[str] = None
         self._initialized: bool = False
+        self._lock = asyncio.Lock()  # ADD: guard init races
+        self._client: httpx.AsyncClient | None = None  # ADD: reuse one client
+
+    async def startup(self) -> None:
+        """Create HTTP client and initialize a session once (idempotent)."""
+        await self._ensure_client()
+        assert self._client is not None  # Ensure _client is not None
+        async with self._lock:
+            await self._ensure_initialized(self._client)  # will no-op if done
+
+    async def shutdown(self) -> None:
+        """Close HTTP client and drop session state."""
+        if self._client:
+            await self._client.aclose()
+            self._client = None
+        self._initialized = False
+        self._session_id = None
+
+    async def _ensure_client(self) -> None:
+        if not self._client:
+            self._client = httpx.AsyncClient(timeout=self.request_timeout)
 
     # ─────────────────────────── utils ───────────────────────────
     async def _headers(self) -> Dict[str, str]:
@@ -77,45 +99,63 @@ class MCPProtocolAdapter(MCPPort):
     async def _ensure_initialized(self, client: httpx.AsyncClient) -> None:
         if self._initialized:
             return
+        async with self._lock:
+            if self._initialized:  # double-check inside lock
+                return
 
-        # 1) initialize (request con id y params)
-        init_body: Dict[str, Any] = {
-            "jsonrpc": "2.0",
-            "id": str(uuid.uuid4()),
-            "method": "initialize",
-            "params": {
-                "protocolVersion": _PROTOCOL_VERSION,
-                "capabilities": {},
-                "clientInfo": {"name": "sentra-engine", "version": "0.1.0"},
-            },
-        }
-        resp = await client.post(self.base_url, json=init_body, headers=await self._headers())
-        resp.raise_for_status()
+            # 1) initialize (request con id y params)
+            init_body: Dict[str, Any] = {
+                "jsonrpc": "2.0",
+                "id": str(uuid.uuid4()),
+                "method": "initialize",
+                "params": {
+                    "protocolVersion": _PROTOCOL_VERSION,
+                    "capabilities": {},
+                    "clientInfo": {"name": "sentra-engine", "version": "0.1.0"},
+                },
+            }
+            resp = await client.post(self.base_url, json=init_body, headers=await self._headers())
+            resp.raise_for_status()
 
-        # Extrae session id del header (case-insensitive)
-        self._session_id = (
-            resp.headers.get("Mcp-Session-Id")
-            or resp.headers.get("MCP-Session-Id")
-            or resp.headers.get("mcp-session-id")
-        )
-        if not self._session_id:
-            # Forzamos lectura del body para diagnósticos útiles
-            _ = resp.text
-            raise RuntimeError("No Mcp-Session-Id en la respuesta a 'initialize'")
+            # Extrae session id del header (case-insensitive)
+            self._session_id = (
+                resp.headers.get("Mcp-Session-Id")
+                or resp.headers.get("MCP-Session-Id")
+                or resp.headers.get("mcp-session-id")
+            )
+            if not self._session_id:
+                # Forzamos lectura del body para diagnósticos útiles
+                _ = resp.text
+                raise RuntimeError("No Mcp-Session-Id en la respuesta a 'initialize'")
 
-        # 2) notifications/initialized (NOTIFICACIÓN: sin id, sin params)
-        notify = {"jsonrpc": "2.0", "method": "notifications/initialized"}
-        resp2 = await client.post(self.base_url, json=notify, headers=await self._headers())
-        resp2.raise_for_status()
-        self._initialized = True
+            # 2) notifications/initialized (NOTIFICACIÓN: sin id, sin params)
+            notify = {"jsonrpc": "2.0", "method": "notifications/initialized"}
+            resp2 = await client.post(self.base_url, json=notify, headers=await self._headers())
+            resp2.raise_for_status()
+            self._initialized = True
+
+    async def _rpc_with_reinit(self, body: Dict[str, Any]) -> Dict[str, Any]:
+        await self._ensure_client()
+        assert self._client is not None  # Ensure _client is not None
+        client = self._client
+        try:
+            await self._ensure_initialized(client)
+            return await self._post_rpc(client, body)
+        except Exception as e:
+            s = str(e)
+            if ("Missing session ID" in s) or ("session" in s and "missing" in s) or ("401" in s) or ("440" in s):
+                # force re-init and retry once
+                self._initialized = False
+                self._session_id = None
+                await self._ensure_initialized(client)
+                return await self._post_rpc(client, body)
+            raise
 
     # ──────────────────────── MCPPort impl ────────────────────────
 
     async def list_tools(self) -> Sequence[ToolSchema]:
-        async with httpx.AsyncClient(timeout=self.request_timeout) as client:
-            await self._ensure_initialized(client)
-            body = {"jsonrpc": "2.0", "id": str(uuid.uuid4()), "method": "tools/list", "params": {}}
-            result = await self._post_rpc(client, body)
+        body = {"jsonrpc": "2.0", "id": str(uuid.uuid4()), "method": "tools/list", "params": {}}
+        result = await self._rpc_with_reinit(body)  # CHANGED
 
         out: list[ToolSchema] = []
         for t in (result.get("tools") or []):
@@ -130,29 +170,20 @@ class MCPProtocolAdapter(MCPPort):
         return out
 
     async def call_tool(self, name: str, args: Dict[str, Any]) -> ToolResult:
-        async with httpx.AsyncClient(timeout=self.request_timeout) as client:
-            await self._ensure_initialized(client)
-            body = {
-                "jsonrpc": "2.0",
-                "id": str(uuid.uuid4()),
-                "method": "tools/call",
-                "params": {"name": name, "arguments": args or {}},
-            }
-            result = await self._post_rpc(client, body)
+        body = {
+            "jsonrpc": "2.0",
+            "id": str(uuid.uuid4()),
+            "method": "tools/call",
+            "params": {"name": name, "arguments": args or {}},
+        }
+        result = await self._rpc_with_reinit(body)  # CHANGED
 
-        # FastMCP puede devolver varias formas:
-        #  - {"data": ...}                    (datos nativos)
-        #  - {"structuredContent": [...]}     (bloques MCP)
-        #  - {"content": [...]}               (bloques)
-        #  - {"result": {.../[/...]}          (cuando x-fastmcp-wrap-result = true)
         content: Any = (
             result.get("data")
             or result.get("structuredContent")
             or result.get("content")
             or result.get("result")
         )
-
-        # Si es un vector de bloques MCP y solo hay uno de texto, desenvuelve a str
         if (
             isinstance(content, list)
             and len(content) == 1
@@ -161,7 +192,6 @@ class MCPProtocolAdapter(MCPPort):
         ):
             content = content[0].get("text")
 
-        # Error “suave” (campo 'error' en result) y bandera 'isError'
         err_val = result.get("error")
         if isinstance(err_val, dict) and "message" in err_val:
             err_val = err_val.get("message")

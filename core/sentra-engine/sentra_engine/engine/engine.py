@@ -1,238 +1,48 @@
-from datetime import datetime, timezone
+from dataclasses import dataclass
 from typing import AsyncGenerator, Optional, Sequence
 
-from dataclasses import asdict, is_dataclass
-import inspect
-
-from sentra_engine.core.models import (
-    DeltaEvent,
-    Message,
-    PromptContext,
-    ToolSchema,
-    Transcript,
-)
-from sentra_engine.core.tool_intent import ToolCallDelta, ToolIntent
-from sentra_engine.core.tool_orchestrator import ToolOrchestrator
-from sentra_engine.tooling.formatters import normalize_tool_output
+from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, Transcript
+from sentra_engine.core.plan import Plan, Step
+from sentra_engine.core.time import utc_now_iso
 from sentra_engine.engine.id_utils import normalize_message_id
-from sentra_engine.tooling.assembler import ToolCallAssembler
-from sentra_engine.tooling.args_coercion import ArgsCoercer
-from sentra_engine.tooling.extractors import PlainJSONExtractor
+from sentra_engine.engine.step_runner import StepRunner
 from sentra_engine.ports.context import ContextPort
 from sentra_engine.ports.llm import LLMPort
 from sentra_engine.ports.persistence import PersistencePort
 from sentra_engine.ports.planner import PlannerPort
 from sentra_engine.ports.rag import RAGPort
+from sentra_engine.core.tool_orchestrator import ToolOrchestrator
+from sentra_engine.core.models import StepEvent
+
+
+@dataclass
+class EngineConfig:
+    max_rounds: int = 3
+    allow_plaintext_tool_fallback: bool = False
+
 
 class ConversationEngine:
+    """Conversation Engine for managing user interactions. It handles message processing,
+     context management, and tool orchestration."""
+
     def __init__(
         self,
         *,
         context: ContextPort,
         llm: LLMPort,
         persistence: PersistencePort,
-        planner: PlannerPort | None = None,
-        tool_orchestrator: ToolOrchestrator | None = None,
-        rag: RAGPort | None = None,
-    ):
+        planner: Optional[PlannerPort] = None,
+        tool_orchestrator: Optional[ToolOrchestrator] = None,
+        rag: Optional[RAGPort] = None,
+        config: EngineConfig = EngineConfig(),
+    ) -> None:
         self.context = context
         self.llm = llm
         self.persistence = persistence
         self.planner = planner
         self.tool_orchestrator = tool_orchestrator
         self.rag = rag
-
-    async def _run_pipeline(
-        self,
-        *,
-        user_id: str,
-        conversation_id: str,
-        message_id: Optional[str],
-        response_message_id: Optional[str],
-        content: str,
-        use_planner: bool = False,
-    ) -> AsyncGenerator[DeltaEvent, None]:
-        """Common pipeline for handling conversation logic."""
-        now = datetime.now(timezone.utc).isoformat()
-        user_msg = Message(
-            id=normalize_message_id(message_id, prefer_hex=True),
-            role="user",
-            content=content,
-            timestamp=now,
-        )
-        await self.persistence.append_message(conversation_id, user_msg)
-
-        ctx = await self.context.build(conversation_id)
-        transcript_msgs: list[Message] = [*ctx.messages, user_msg]
-        llm_messages = [_as_openai_msg(m) for m in transcript_msgs]
-
-        tools_schema: Optional[Sequence[ToolSchema]] = None
-        if self.tool_orchestrator:
-            try:
-                tools_schema = await self.tool_orchestrator.registry()
-            except Exception:
-                tools_schema = None
-
-        chunks: list[str] = []
-
-        async def _call_llm(
-            *,
-            allow_tools: bool,
-            guidance: Optional[str] = None,
-        ) -> tuple[list[str], list[ToolIntent]]:
-            prelude: list[str] = []
-            assembler = ToolCallAssembler()
-            plain_extractor = PlainJSONExtractor()
-            manual_mode = tools_schema is None or not allow_tools
-            agen = self.llm.chat_stream(
-                PromptContext(messages=llm_messages),
-                tools_schema=tools_schema if allow_tools else None,
-                guidance=guidance,
-            )
-            try:
-                async for ev in agen:
-                    if ev.type == "message_delta" and ev.content:
-                        prelude.append(ev.content)
-                        if manual_mode:
-                            maybe = plain_extractor.extract_from_text(ev.content)
-                            if maybe:
-                                assembler.add(maybe)
-                    elif ev.type == "tool_call_delta" and ev.metadata:
-                        d = ToolCallDelta(
-                            index=ev.metadata.get("index") if isinstance(ev.metadata.get("index"), int) else None,
-                            id=ev.metadata.get("id"),
-                            name=ev.metadata.get("name"),
-                            arguments_fragment=ev.metadata.get("arguments_delta"),
-                        )
-                        assembler.add(d)
-                    elif ev.type == "tool_calls_done":
-                        break
-            finally:
-                if hasattr(agen, "aclose"):
-                    await agen.aclose()
-
-            intents: list[ToolIntent] = []
-            try:
-                intents = assembler.finalize()
-            except ValueError:
-                intents = []
-            return prelude, intents
-
-        if use_planner and self.planner:
-            while True:
-                plan = await self.planner.plan(Transcript(messages=list(transcript_msgs)), context="")
-                action = (plan.action or "Respond") if plan else "Respond"
-                params = plan.params if plan else {}
-                if action in {"Respond", "AskParams"}:
-                    pre, _ = await _call_llm(allow_tools=True, guidance=params.get("guidance"))
-                    for c in pre:
-                        yield DeltaEvent(type="message_delta", content=c)
-                    chunks.extend(pre)
-                    break
-                if action == "RetrieveRAG" and self.rag:
-                    query = params.get("query") or content
-                    filters = params.get("filters")
-                    rag_ctx = await self.rag.retrieve(query, filters)
-                    system_text = normalize_tool_output("rag", rag_ctx)
-                    system_msg = Message(
-                        id=normalize_message_id(None, prefer_hex=True),
-                        role="system",
-                        content=system_text,
-                        timestamp=datetime.now(timezone.utc).isoformat(),
-                    )
-                    await self.persistence.append_message(conversation_id, system_msg)
-                    transcript_msgs.append(system_msg)
-                    llm_messages.append(_as_openai_msg(system_msg))
-                    continue
-                if action == "CallTool" and self.tool_orchestrator:
-                    pre, calls = await _call_llm(allow_tools=True, guidance=params.get("guidance"))
-                    for c in pre:
-                        yield DeltaEvent(type="message_delta", content=c)
-                    chunks.extend(pre)
-                    for call in calls:
-                        step_id = normalize_message_id(None)
-                        schema = next((s for s in tools_schema or [] if s.name == call.name), None)
-                        args = call.arguments
-                        if schema:
-                            try:
-                                args = ArgsCoercer(schema.parameters).coerce(args)
-                            except Exception:
-                                args = call.arguments
-                        result = await self.tool_orchestrator.execute_one(
-                            conversation_id=conversation_id,
-                            plan_step_id=step_id,
-                            tool_name=call.name,
-                            args=args,
-                            tool_call_id=call.id,
-                        )
-                        system_text = normalize_tool_output(
-                            call.name,
-                            result.content if result.ok else result.error,
-                        )
-                        system_msg = Message(
-                            id=normalize_message_id(None, prefer_hex=True),
-                            role="system",
-                            content=system_text,
-                            timestamp=datetime.now(timezone.utc).isoformat(),
-                        )
-                        await self.persistence.append_message(conversation_id, system_msg)
-                        transcript_msgs.append(system_msg)
-                        llm_messages.append(_as_openai_msg(system_msg))
-                    continue
-                # Fallback: respond immediately
-                pre, _ = await _call_llm(allow_tools=False, guidance=params.get("guidance"))
-                for c in pre:
-                    yield DeltaEvent(type="message_delta", content=c)
-                chunks.extend(pre)
-                break
-        else:
-            while True:
-                pre, calls = await _call_llm(allow_tools=True)
-                for c in pre:
-                    yield DeltaEvent(type="message_delta", content=c)
-                chunks.extend(pre)
-                if not calls or not self.tool_orchestrator:
-                    break
-                for call in calls:
-                    step_id = normalize_message_id(None)
-                    schema = next((s for s in tools_schema or [] if s.name == call.name), None)
-                    args = call.arguments
-                    if schema:
-                        try:
-                            args = ArgsCoercer(schema.parameters).coerce(args)
-                        except Exception:
-                            args = call.arguments
-                    result = await self.tool_orchestrator.execute_one(
-                        conversation_id=conversation_id,
-                        plan_step_id=step_id,
-                        tool_name=call.name,
-                        args=args,
-                        tool_call_id=call.id,
-                    )
-                    system_text = normalize_tool_output(
-                        call.name,
-                        result.content if result.ok else result.error,
-                    )
-                    system_msg = Message(
-                        id=normalize_message_id(None, prefer_hex=True),
-                        role="system",
-                        content=system_text,
-                        timestamp=datetime.now(timezone.utc).isoformat(),
-                    )
-                    await self.persistence.append_message(conversation_id, system_msg)
-                    transcript_msgs.append(system_msg)
-                    llm_messages.append(_as_openai_msg(system_msg))
-                continue
-
-        final_text = ("".join(chunks)).strip() or "(no content)"
-        assistant_msg = Message(
-            id=normalize_message_id(response_message_id, prefer_hex=True),
-            role="assistant",
-            content=final_text,
-            timestamp=datetime.now(timezone.utc).isoformat(),
-        )
-        await self.persistence.append_message(conversation_id, assistant_msg)
-        yield DeltaEvent(type="message_final", content=final_text)
+        self.config = config
 
     async def run_fast(
         self,
@@ -243,16 +53,8 @@ class ConversationEngine:
         response_message_id: Optional[str],
         content: str,
     ) -> AsyncGenerator[DeltaEvent, None]:
-        """Run the conversation engine in fast mode."""
-        async for event in self._run_pipeline(
-            user_id=user_id,
-            conversation_id=conversation_id,
-            message_id=message_id,
-            response_message_id=response_message_id,
-            content=content,
-            use_planner=False,
-        ):
-            yield event
+        async for ev in self._run_turn(conversation_id, message_id, response_message_id, content, use_planner=False):
+            yield ev
 
     async def run_planner(
         self,
@@ -263,28 +65,79 @@ class ConversationEngine:
         response_message_id: Optional[str],
         content: str,
     ) -> AsyncGenerator[DeltaEvent, None]:
-        """Run the conversation engine with planner integration."""
-        async for event in self._run_pipeline(
-            user_id=user_id,
-            conversation_id=conversation_id,
-            message_id=message_id,
-            response_message_id=response_message_id,
+        async for ev in self._run_turn(conversation_id, message_id, response_message_id, content, use_planner=True):
+            yield ev
+
+    async def _run_turn(
+        self,
+        conversation_id: str,
+        message_id: Optional[str],
+        response_message_id: Optional[str],
+        content: str,
+        *,
+        use_planner: bool,
+    ) -> AsyncGenerator[DeltaEvent, None]:
+        # 1) append user message
+        user_msg = Message(
+            id=normalize_message_id(message_id, prefer_hex=True),
+            role="user",
             content=content,
-            use_planner=True,
-        ):
-            yield event
-def _as_openai_msg(m: object) -> dict:
-    try:
-        if is_dataclass(m) and not inspect.isclass(m):
-            d = asdict(m)
-        elif isinstance(m, dict):
-            d = m
+            timestamp=utc_now_iso(),
+        )
+        await self.persistence.append_message(conversation_id, user_msg)
+
+        # 2) build transcript
+        ctx = await self.context.build(conversation_id)
+        transcript: list[Message] = [*ctx.messages, user_msg]
+
+        # 3) planner -> structured plan (or synthesize a single Respond)
+        plan: Plan
+        if use_planner and self.planner:
+            try:
+                plan = await self.planner.plan_structured(Transcript(messages=list(transcript)), context="")
+            except Exception:
+                # fallback: single Respond
+                plan = Plan(schema_version=1, steps=[Step(id="respond", kind="LLM.Respond")], entry="respond")
         else:
-            d = {"role": getattr(m, "role", None), "content": getattr(m, "content", None)}
-        role = d["role"] if isinstance(d, dict) else None
-        content = d["content"] if isinstance(d, dict) else None
-        if role is None and content is None:
-            return {"role": "system", "content": str(m)}
-        return {"role": role or "system", "content": content or ""}
-    except Exception:
-        return {"role": "system", "content": str(m)}
+            plan = Plan(schema_version=1, steps=[Step(id="respond", kind="LLM.Respond")], entry="respond")
+
+        # 4) resolve tool registry ONCE (with visible event on failure)
+        tools_schema: Optional[Sequence[ToolSchema]] = None
+        if self.tool_orchestrator:
+            try:
+                tools_schema = await self.tool_orchestrator.registry()
+            except Exception as e:
+                tools_schema = None
+                try:
+                    await self.persistence.append_step_event(
+                        conversation_id,
+                        StepEvent(type="tools_unavailable", detail={"error": str(e)})
+                    )
+                except Exception:
+                    pass  # best-effort
+
+        # 5) run the plan
+        runner = StepRunner(
+            conversation_id=conversation_id,
+            llm=self.llm,
+            persistence=self.persistence,
+            tool_orchestrator=self.tool_orchestrator,
+            rag=self.rag,
+            tools_schema=tools_schema,
+            max_rounds=self.config.max_rounds,
+            allow_plaintext_fallback=self.config.allow_plaintext_tool_fallback,
+        )
+
+        async for ev in runner.run(plan, transcript):
+            # stream deltas to caller
+            yield ev
+
+        final = runner.final_text
+        asst_msg = Message(
+            id=normalize_message_id(response_message_id, prefer_hex=True),
+            role="assistant",
+            content=final,
+            timestamp=utc_now_iso(),
+        )
+        await self.persistence.append_message(conversation_id, asst_msg)
+        yield DeltaEvent(type="message_final", content=final)
