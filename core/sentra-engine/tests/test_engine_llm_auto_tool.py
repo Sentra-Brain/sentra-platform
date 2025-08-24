@@ -10,7 +10,7 @@ from sentra_engine.core.models import (
     ToolResult,
     ToolSchema,
 )
-from sentra_engine.conversation.adapters.engine import ConversationEngine
+from sentra_engine.conversation.adapters.conversation_engine import ConversationEngine
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.mcp.ports.mcp import MCPPort

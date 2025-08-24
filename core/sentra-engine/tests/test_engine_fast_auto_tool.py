@@ -1,6 +1,6 @@
 import asyncio
 from typing import AsyncGenerator, Optional, Sequence, Union, Mapping, Any
-from sentra_engine.conversation.adapters.engine import ConversationEngine
+from sentra_engine.conversation.adapters.conversation_engine import ConversationEngine
 from sentra_engine.core.models import PromptContext, DeltaEvent, ToolSchema, ToolResult, Message, StepEvent, RAGContext
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.context.ports.context import ContextPort

@@ -3,12 +3,12 @@ from typing import AsyncGenerator, Optional
 
 from sentra_engine.conversation.ports.conversation import ConversationEnginePort
 from sentra_engine.core.models import DeltaEvent
-from sentra_engine.conversation.internal.turn_runner import TurnRunner
+from sentra_engine.conversation.runtime.turn_runner import TurnRunner
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.planner.ports.planner import PlannerPort
-from sentra_engine.conversation.ports.rag import RAGPort
+from sentra_engine.rag.ports.rag import RAGPort
 from sentra_engine.tools.ports.tool import ToolPort 
 
 @dataclass
