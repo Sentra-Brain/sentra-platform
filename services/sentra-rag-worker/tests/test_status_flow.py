@@ -71,7 +71,7 @@ def test_simple_logging():
     print("\nTesting simple logging...")
     
     try:
-        from sentra_core.core.logging import get_logger, set_request_id, get_request_id, configure_logging
+        from sentra_core.logging import get_logger, set_request_id, get_request_id, configure_logging
         
         # Configure logging for testing
         configure_logging(debug=True)

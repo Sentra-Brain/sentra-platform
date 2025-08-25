@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Any
 from pydantic import Field, ValidationError, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 
 logger = get_logger(__name__)
 

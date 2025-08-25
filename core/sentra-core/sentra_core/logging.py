@@ -3,7 +3,7 @@ import sys
 import uuid
 from typing import Optional
 from contextvars import ContextVar
-from sentra_core.core import constants
+from sentra_core import constants
 
 # Context variable to store request_id across async calls
 from typing import Union

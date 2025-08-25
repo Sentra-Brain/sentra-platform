@@ -4,7 +4,7 @@ from pathlib import Path
 from typing import List, Dict, Any, Optional
 from uuid import UUID, uuid4
 
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
 from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
 from sentra_core.domain.repository.document_repository import DocumentRepository

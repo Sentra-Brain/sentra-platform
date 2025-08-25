@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
-from sentra_core.core import logging
+from sentra_core import logging
 from sentra_engine.core.models import PromptContext
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,

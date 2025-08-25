@@ -2,7 +2,7 @@
 
 import os
 import docx2txt
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_rag_worker.services.extraction.pandoc_utils import convert_with_pandoc_to_markdown
 from .base import DocumentExtractorBase, ExtractionPayload
 

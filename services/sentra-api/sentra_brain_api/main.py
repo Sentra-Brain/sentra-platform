@@ -22,7 +22,7 @@ from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
-from sentra_core.core import logging
+from sentra_core import logging
 from sentra_core.infra.sql import postgres_service
 import os
 

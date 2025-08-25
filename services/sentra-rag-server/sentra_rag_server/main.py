@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import RedirectResponse
-from sentra_core.core import logging
+from sentra_core import logging
 from sentra_rag.vector_store.chroma_http import ChromaHttpVectorStore
 from sentra_rag_server.rag_engine import RAGEngine
 from sentra_rag_server.schemas import SearchRequest, SearchResponse, SearchResult, ContextRequest, ContextResponse

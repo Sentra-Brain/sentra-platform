@@ -2,7 +2,7 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_core.infra.nosql.mongo_conversation_repository import (
     MongoConversationRepository,

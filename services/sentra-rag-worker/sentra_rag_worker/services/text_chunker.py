@@ -4,7 +4,7 @@ import json
 import os
 from dataclasses import dataclass
 from sentra_rag_worker.core.config import settings
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.domain.entities.document_entity import DocumentFileType
 
 logger = get_logger(__name__)

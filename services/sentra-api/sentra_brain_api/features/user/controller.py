@@ -15,7 +15,7 @@ from sentra_brain_api.features.user.constants import (
     VALIDATE_USER_DESCRIPTION
 )
 from sentra_brain_api.features.user.api_service import UserApiService
-from sentra_core.core import logging
+from sentra_core import logging
 
 logger = logging.get_logger("sentra_brain_api")
 

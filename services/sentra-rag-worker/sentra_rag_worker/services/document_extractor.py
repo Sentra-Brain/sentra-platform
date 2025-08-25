@@ -7,7 +7,7 @@ while internally using the new extraction strategy pattern.
 """
 
 from sentra_core.domain.entities.document_entity import DocumentFileType
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_rag_worker.services.extraction import get_extractor
 from sentra_rag_worker.services.sanitizer import cast_to_markdown
 import os

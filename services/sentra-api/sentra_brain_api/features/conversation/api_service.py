@@ -3,7 +3,7 @@
 from datetime import datetime, timezone
 from uuid import UUID
 from sqlalchemy.orm import Session
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.domain.entities.conversation_entity import ConversationEntity
 from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_core.domain.repository.conversation_repository import ConversationRepository

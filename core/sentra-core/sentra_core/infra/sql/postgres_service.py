@@ -6,7 +6,7 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.exc import OperationalError
 
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.infra.sql.postgres_settings import settings
 from sentra_core.infra.sql.security import pwd_context
 from sentra_core.infra.sql.migrations_check import check_schema_consistency

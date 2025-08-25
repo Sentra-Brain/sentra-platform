@@ -19,7 +19,7 @@ from sentra_core.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSou
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentMarkdownResponse, DocumentUploadRequest
 from sentra_core.core.settings import settings
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 
 logger = get_logger(__name__)
 

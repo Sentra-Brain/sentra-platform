@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Optional
 from uuid import UUID
 from sentra_rag.embeddings.provider import get_embedding_provider
 from sentra_rag.vector_store.service import get_vector_store_service
-from sentra_rag.core.settings import rag_settings
+from sentra_rag.settings import rag_settings
 
 
 class RAGQueryService:
