@@ -1,7 +1,7 @@
 import pytest
 import pytest_asyncio
 from sentra_engine.core.models import DeltaEvent, PromptContext, Message
-from sentra_engine.conversation.adapters.conversation_engine import ConversationEngine
+from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort

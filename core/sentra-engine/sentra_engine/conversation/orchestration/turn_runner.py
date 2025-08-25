@@ -2,7 +2,7 @@ from typing import AsyncGenerator, Optional, Sequence
 from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, Transcript, StepEvent
 from sentra_engine.core.time import utc_now_iso
 from sentra_engine.core.id_utils import normalize_message_id
-from sentra_engine.conversation.runtime.step_runner import StepRunner
+from sentra_engine.conversation.domain.step_runner import StepRunner
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
