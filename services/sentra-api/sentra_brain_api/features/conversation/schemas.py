@@ -4,7 +4,7 @@ from datetime import datetime
 from typing import List, Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, Field
-from sentra_core.model.base_mongo_model import BaseMongoModel
+from sentra_core.infra.nosql.base_mongo_model import BaseMongoModel
 
 
 class CreateConversationRequest(BaseModel):

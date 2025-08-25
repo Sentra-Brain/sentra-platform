@@ -8,8 +8,7 @@ class BaseMongoModel(BaseModel):
     model_config = ConfigDict(
         populate_by_name=True,
         from_attributes=True,
-        ser_json_typed=False,
-        ser_json_by_alias=False  # No aliases by default
+        arbitrary_types_allowed=True
     )
 
     @classmethod

@@ -106,15 +106,12 @@ class TestEndToEndWorkflow:
     def test_indexing_job_publisher_message_format(self):
         """Test that the IndexingJobPublisher creates correctly formatted messages."""
         publisher = IndexingJobPublisher()
-        
-        # Test job creation without connection (just message formatting)
-        with patch.object(publisher, 'connect'), \
-             patch.object(publisher, 'channel') as mock_channel:
-            
-            mock_channel.basic_publish = Mock()
-            publisher.channel = mock_channel
-            
-            # Publish a job
+
+        # Manually mock connect() and assign mock channel
+        with patch.object(publisher, 'connect'):
+            mock_channel = Mock()
+            publisher.channel = mock_channel  # This line fixes the test
+
             success = publisher.publish_indexing_job(
                 document_id="test-doc-id",
                 document_path="uploads/user123/doc.pdf",
@@ -122,17 +119,17 @@ class TestEndToEndWorkflow:
                 filename="doc.pdf",
                 uploaded_by="user123"
             )
-            
-            # Verify the message was published
+
+            # Assertions
             assert success is True
             mock_channel.basic_publish.assert_called_once()
-            
-            # Check the message content
+
+            # Check message body
             call_args = mock_channel.basic_publish.call_args
-            message_body = call_args[1]['body']
+            message_body = call_args.kwargs["body"]
             message_dict = json.loads(message_body)
-            
-            expected_message = {
+
+            assert message_dict == {
                 "document_id": "test-doc-id",
                 "document_path": "uploads/user123/doc.pdf",
                 "knowledge_source_id": "source-id",
@@ -140,8 +137,7 @@ class TestEndToEndWorkflow:
                 "filename": "doc.pdf",
                 "uploaded_by": "user123"
             }
-            
-            assert message_dict == expected_message
+
     
     def test_path_security_validation(self, temp_mount_path):
         """Test that path traversal attempts are prevented."""

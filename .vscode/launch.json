@@ -41,8 +41,8 @@
         "PYTEST_ADDOPTS": "--no-cov"
       },
       "module": "pytest",
-      "cwd": "${workspaceFolder}/services/sentra-core/tests",
-      "envFile": "${workspaceFolder}/services/sentra-core/tests/.env.test",
+      "cwd": "${workspaceFolder}/core/sentra-core/tests",
+      "envFile": "${workspaceFolder}/core/sentra-core/tests/.env.test",
       "console": "integratedTerminal",
     },
 
