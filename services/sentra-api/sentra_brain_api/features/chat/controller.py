@@ -1,4 +1,4 @@
-# sentra_brain_api/features/chat/controller_v2.py
+# sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
@@ -12,7 +12,7 @@ from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapte
 from sentra_core.settings import settings, LLMEngine
 
 from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
-from sentra_engine.mcp.adapters.fastmcp import MCPProtocolAdapter
+from sentra_engine.mcp.adapters.fastmcp import get_mcp, MCPProtocolAdapter
 from sentra_engine.context.adapters.simple_context import SimpleContextService
 from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
@@ -26,9 +26,10 @@ from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 logger = get_logger("sentra_brain_api.chat.v2")
 
 class ChatController:
-    def __init__(self):
+    def __init__(self):        
         self.router = APIRouter()
         self._add_routes()
+        self._mcp = get_mcp()
 
     def _build_planner_adapter(self, model: str):
         if settings.llm_engine == LLMEngine.LLAMA:
@@ -40,8 +41,7 @@ class ChatController:
     def _build_tool_orchestrator(self, persistence: MongoPersistenceAdapter) -> ToolOrchestrator | None:
         if not settings.tools_enabled:
             return None
-        mcp = MCPProtocolAdapter(settings.mcp_base_url)
-        return ToolOrchestrator(mcp=mcp, persistence=persistence, telemetry=None, enabled=True)
+        return ToolOrchestrator(mcp=self._mcp, persistence=persistence, telemetry=None, enabled=True)
 
     def _add_routes(self):
         @self.router.post(

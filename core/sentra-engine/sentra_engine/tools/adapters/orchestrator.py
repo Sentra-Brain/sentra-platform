@@ -1,6 +1,9 @@
+# sentra_engine/tools/adapters/orchestrator.py
 from __future__ import annotations
 from typing import Any, Dict, Optional, Sequence
+
 from jsonschema import validate, ValidationError
+
 from sentra_engine.core.models import ToolSchema, ToolResult, StepEvent
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
@@ -21,12 +24,9 @@ class ToolOrchestrator(ToolPort):
         self.persistence = persistence
         self.telemetry = telemetry
         self.enabled = enabled
-        self._cached_schemas: Optional[Sequence[ToolSchema]] = None
 
     async def _get_schemas(self) -> Sequence[ToolSchema]:
-        if self._cached_schemas is None:
-            self._cached_schemas = await self.mcp.list_tools()
-        return self._cached_schemas
+        return await self.mcp.list_tools()
 
     async def _log_telemetry(
         self,
@@ -75,16 +75,13 @@ class ToolOrchestrator(ToolPort):
             await self._finish(conversation_id, plan_step_id, tool_name, err, tool_call_id)
             return err
 
-        # Validate args
         try:
-            params_schema = schema.parameters or {"type": "object"}
-            validate(instance=args or {}, schema=params_schema)
+            validate(instance=args or {}, schema=schema.parameters or {"type": "object"})
         except ValidationError as ve:
             err = ToolResult(ok=False, content=None, error=f"validation_error: {ve.message}")
             await self._finish(conversation_id, plan_step_id, tool_name, err, tool_call_id)
             return err
 
-        # Execute
         try:
             res = await self.mcp.call_tool(tool_name, args or {})
         except Exception as e:
@@ -111,5 +108,5 @@ class ToolOrchestrator(ToolPort):
         return await self._get_schemas()
 
     def reset_registry_cache(self) -> None:
-        """Clear the cached tool schemas (call before a new registry refresh)."""
-        self._cached_schemas = None
+        # Not needed anymore, cache is handled in MCP client
+        pass

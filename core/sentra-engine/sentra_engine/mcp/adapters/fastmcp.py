@@ -1,3 +1,4 @@
+# sentra_engine/mcp/adapters/fastmcp.py
 import json
 import uuid
 import asyncio
@@ -6,22 +7,17 @@ from typing import Any, Dict, Optional, Sequence, cast
 
 import httpx
 
+from sentra_core import logging
 from sentra_core.settings import settings
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.core.models import ToolSchema, ToolResult
 
-_PROTOCOL_VERSION = "2025-06-18"  # Aligns with your FastMCP server
+_PROTOCOL_VERSION = "2025-06-18"
+
+logger = logging.get_logger("sentra_engine.mcp.fastmcp")
 
 
 class MCPProtocolAdapter(MCPPort):
-    """
-    Client for FastMCP using JSON-RPC over HTTP with optional SSE fallback.
-
-    - Endpoint: POST {base_url}/mcp
-    - Session: 'initialize' request → expect 'Mcp-Session-Id' in header
-    - Fallback: Accepts 'application/json' or 'text/event-stream' responses
-    """
-
     def __init__(self, base_url: str, *, request_timeout: Optional[float] = None):
         self.base_url = base_url.rstrip("/")
         self.request_timeout = request_timeout
@@ -29,21 +25,23 @@ class MCPProtocolAdapter(MCPPort):
         self._initialized: bool = False
         self._lock = asyncio.Lock()
         self._client: Optional[httpx.AsyncClient] = None
+        self._cached_tool_schemas: Optional[Sequence[ToolSchema]] = None
 
     async def startup(self) -> None:
-        """Create HTTP client and initialize a session (idempotent)."""
+        logger.info("Starting MCPProtocolAdapter with base_url=%s", self.base_url)
         await self._ensure_client()
         assert self._client is not None
         async with self._lock:
             await self._ensure_initialized_locked(self._client)
+        logger.info("MCPProtocolAdapter started successfully")
 
     async def shutdown(self) -> None:
-        """Shutdown the HTTP client and reset session state."""
         if self._client:
             await self._client.aclose()
             self._client = None
         self._initialized = False
         self._session_id = None
+        self._cached_tool_schemas = None
 
     async def _ensure_client(self) -> None:
         if not self._client:
@@ -65,15 +63,13 @@ class MCPProtocolAdapter(MCPPort):
         if t.startswith("{"):
             return cast(Dict[str, Any], json.loads(t))
 
-        data_json: Optional[str] = None
         for line in t.splitlines():
             if line.strip().startswith("data:"):
                 payload = line[5:].strip()
                 if payload:
-                    data_json = payload
-        if not data_json:
-            raise RuntimeError("Response is not JSON or SSE with 'data:' field")
-        return cast(Dict[str, Any], json.loads(data_json))
+                    return cast(Dict[str, Any], json.loads(payload))
+
+        raise RuntimeError("Response is not JSON or SSE with 'data:' field")
 
     async def _post_rpc(self, client: httpx.AsyncClient, body: Dict[str, Any]) -> Dict[str, Any]:
         resp = await client.post(self.base_url, json=body, headers=await self._headers())
@@ -98,7 +94,7 @@ class MCPProtocolAdapter(MCPPort):
             await self._ensure_initialized_locked(client)
 
     async def _ensure_initialized_locked(self, client: httpx.AsyncClient) -> None:
-        init_body: Dict[str, Any] = {
+        init_body = {
             "jsonrpc": "2.0",
             "id": str(uuid.uuid4()),
             "method": "initialize",
@@ -118,7 +114,6 @@ class MCPProtocolAdapter(MCPPort):
             or resp.headers.get("mcp-session-id")
         )
         if not self._session_id:
-            _ = resp.text
             raise RuntimeError("Missing Mcp-Session-Id in 'initialize' response")
 
         notify = {"jsonrpc": "2.0", "method": "notifications/initialized"}
@@ -135,17 +130,20 @@ class MCPProtocolAdapter(MCPPort):
             await self._ensure_initialized(client)
             return await self._post_rpc(client, body)
         except Exception as e:
-            s = str(e)
-            if ("Missing session ID" in s) or ("session" in s and "missing" in s) or ("401" in s) or ("440" in s):
+            if any(s in str(e) for s in ("Missing session ID", "401", "440", "session", "missing")):
                 self._initialized = False
                 self._session_id = None
                 await self._ensure_initialized(client)
                 return await self._post_rpc(client, body)
             raise
 
-    # ────────────────────────── MCPPort Methods ──────────────────────────
+    # ──────── MCPPort Methods ────────
 
     async def list_tools(self) -> Sequence[ToolSchema]:
+        if self._cached_tool_schemas is not None:
+            return self._cached_tool_schemas
+
+        logger.info("Listing tools from MCP server")
         body = {
             "jsonrpc": "2.0",
             "id": str(uuid.uuid4()),
@@ -164,9 +162,11 @@ class MCPProtocolAdapter(MCPPort):
                     description=cast(Optional[str], t.get("description")),
                 )
             )
+        self._cached_tool_schemas = tools
         return tools
 
     async def call_tool(self, name: str, args: Dict[str, Any]) -> ToolResult:
+        logger.info("Calling tool '%s' with args: %s", name, args)
         body = {
             "jsonrpc": "2.0",
             "id": str(uuid.uuid4()),
@@ -201,7 +201,6 @@ class MCPProtocolAdapter(MCPPort):
 
 @lru_cache(maxsize=1)
 def get_mcp() -> MCPProtocolAdapter:
-    """Singleton instance of MCP client."""
     return MCPProtocolAdapter(
         base_url=settings.mcp_base_url,
         request_timeout=settings.mcp_timeout,
