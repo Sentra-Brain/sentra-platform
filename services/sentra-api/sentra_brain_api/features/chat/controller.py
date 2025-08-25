@@ -9,7 +9,7 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
     get_conversation_mongo_repository,
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
-from sentra_core.core.settings import settings, LLMEngine
+from sentra_core.settings import settings, LLMEngine
 
 from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
 from sentra_engine.mcp.adapters.fastmcp import MCPProtocolAdapter

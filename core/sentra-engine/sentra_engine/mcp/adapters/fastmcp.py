@@ -6,7 +6,7 @@ import asyncio
 import httpx
 from functools import lru_cache
 
-from sentra_core.core.settings import settings
+from sentra_core.settings import settings
 
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.core.models import ToolSchema, ToolResult

@@ -29,7 +29,7 @@ class DocumentProcessor:
     
     def _get_settings(self):
         """Lazy import of settings to avoid circular imports"""
-        from sentra_core.core.settings import settings
+        from sentra_core.settings import settings
         return settings
     
     def _get_file_storage(self) -> FileStorageService:
