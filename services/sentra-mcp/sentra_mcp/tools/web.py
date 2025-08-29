@@ -24,7 +24,7 @@ logger = get_logger(__name__)
 
 def register_web_tools(mcp: FastMCP) -> None:
     @mcp.tool(
-        name="web.search.v1",
+        name="web_search_duckduckgo",
         title="Web Search",
         description="Search the web with DuckDuckGo HTML endpoint and return top results.",
     )

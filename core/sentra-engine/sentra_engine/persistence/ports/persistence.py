@@ -14,6 +14,6 @@ class PersistencePort(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load_conversation(self, conversation_id: str) -> Sequence[Union[Message, Mapping[str, Any]]]:
+    async def load_conversation(self, conversation_id: str) -> Sequence[Message]:
         """Load messages for a given conversation."""
         raise NotImplementedError

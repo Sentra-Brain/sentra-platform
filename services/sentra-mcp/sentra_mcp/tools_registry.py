@@ -8,6 +8,6 @@ from sentra_mcp.tools.toolbelt import register_toolbelt
 def register_all_tools(mcp: FastMCP) -> None:
     """Register all Sentra MCP tools with the provided FastMCP instance."""
     register_web_tools(mcp)
-    register_toolbelt(mcp)
+    # register_toolbelt(mcp)
     # register_kb_tools(mcp)
     # register_fs_tools(mcp)

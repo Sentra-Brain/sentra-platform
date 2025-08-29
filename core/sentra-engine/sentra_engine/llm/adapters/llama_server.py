@@ -1,7 +1,7 @@
 import httpx
 from typing import AsyncGenerator, Optional, Sequence
+from sentra_core import logging
 from sentra_engine.core.models import PromptContext, DeltaEvent, ToolSchema
-from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.core.json_utils import (
     parse_json_line,
     extract_delta_content,
@@ -11,6 +11,8 @@ from sentra_engine.core.json_utils import (
 )
 from .openai_stream import with_guidance, apply_tools
 from .base_adapter import BaseLLMAdapter
+
+logger = logging.get_logger(__name__)
 
 
 class LlamaServerAdapter(BaseLLMAdapter):
@@ -35,6 +37,8 @@ class LlamaServerAdapter(BaseLLMAdapter):
         }
 
         apply_tools(payload, tools_schema)
+
+        logger.debug(f"Sending request to LLM: {payload}")
 
         async with httpx.AsyncClient(timeout=self.request_timeout) as client:
             async with client.stream("POST", url, json=payload) as response:
