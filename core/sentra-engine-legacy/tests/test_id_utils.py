@@ -1,4 +1,4 @@
-# core/sentra-engine/tests/test_id_utils.py
+# core/sentra-engine-legacy/tests/test_id_utils.py
 import uuid
 from sentra_engine.core.id_utils import normalize_message_id
 

@@ -59,6 +59,12 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 
 ---
 
-For enterprise licensing, support or integration services:  
-📩 [Contact JGCarmona Consulting](mailto:juan@jgcarmona.com)  
+For enterprise licensing, support or integration services:
+📩 [Contact JGCarmona Consulting](mailto:juan@jgcarmona.com)
 🌐 [https://sentrabrain.com](https://sentrabrain.com)
+
+---
+
+## Development
+
+The API can switch between the legacy and upcoming ADK engines. Set `ENGINE_MODE` in your `.env` file (`legacy` by default) or override per request using the `engine_mode` query parameter on `/chat/send`.

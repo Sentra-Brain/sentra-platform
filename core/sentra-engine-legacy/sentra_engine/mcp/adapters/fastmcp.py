@@ -101,7 +101,7 @@ class MCPProtocolAdapter(MCPPort):
             "params": {
                 "protocolVersion": _PROTOCOL_VERSION,
                 "capabilities": {},
-                "clientInfo": {"name": "sentra-engine", "version": "0.1.0"},
+                "clientInfo": {"name": "sentra-engine-legacy", "version": "0.1.0"},
             },
         }
 
