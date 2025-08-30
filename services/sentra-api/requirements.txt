@@ -38,4 +38,4 @@ pytest-mock
 python-jose
 
 -e ../../core/sentra-core
--e ../../core/sentra-engine
+-e ../../core/sentra-engine-legacy

@@ -1,5 +1,5 @@
 # sentra_brain_api/features/chat/controller.py
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Request, Query
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_core.logging import get_logger
@@ -9,7 +9,9 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
     get_conversation_mongo_repository,
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
-from sentra_core.settings import settings, LLMEngine
+from sentra_core.settings import settings as core_settings, LLMEngine
+from sentra_brain_api import settings as api_settings
+from typing import Literal
 
 from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
 from sentra_engine.mcp.adapters.fastmcp import get_mcp, MCPProtocolAdapter
@@ -32,14 +34,14 @@ class ChatController:
         self._mcp = get_mcp()
 
     def _build_planner_adapter(self, model: str):
-        if settings.llm_engine == LLMEngine.LLAMA:
-            return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model, request_timeout=settings.llm_request_timeout)
-        elif settings.llm_engine == LLMEngine.VLLM:
-            return LLMPlannerAdapter(base_url=settings.vllm_server_url, model=model, request_timeout=settings.llm_request_timeout)
-        return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model, request_timeout=settings.llm_request_timeout)
+        if core_settings.llm_engine == LLMEngine.LLAMA:
+            return LLMPlannerAdapter(base_url=core_settings.llama_server_url, model=model, request_timeout=core_settings.llm_request_timeout)
+        elif core_settings.llm_engine == LLMEngine.VLLM:
+            return LLMPlannerAdapter(base_url=core_settings.vllm_server_url, model=model, request_timeout=core_settings.llm_request_timeout)
+        return LLMPlannerAdapter(base_url=core_settings.llama_server_url, model=model, request_timeout=core_settings.llm_request_timeout)
 
     def _build_tool_orchestrator(self, persistence: MongoPersistenceAdapter) -> ToolOrchestrator | None:
-        if not settings.tools_enabled:
+        if not core_settings.tools_enabled:
             return None
         return ToolOrchestrator(mcp=self._mcp, persistence=persistence, telemetry=None, enabled=True)
 
@@ -54,8 +56,13 @@ class ChatController:
             request: Request,
             mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
             current_user: UserEntity = Depends(get_authenticated_user),
+            engine_mode: Literal["legacy", "adk"] | None = Query(None),
         ):
             body.user_id = current_user.id
+
+            mode = engine_mode or api_settings.ENGINE_MODE
+            if mode == "adk":
+                raise NotImplementedError("ADK engine not wired yet")
 
             persistence = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             context = SimpleContextService(persistence=persistence)

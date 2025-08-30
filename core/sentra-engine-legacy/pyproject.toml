@@ -1,5 +1,5 @@
 [project]
-name = "sentra-engine"
+name = "sentra-engine-legacy"
 version = "0.1.0"
 description = "Streaming Conversation Engine for Sentra Brain (Fast/Planner modes, RAG-ready, multi-tool via MCP)"
 authors = [{ name = "Juan G Carmona" }]

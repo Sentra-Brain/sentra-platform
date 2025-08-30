@@ -1,4 +1,4 @@
-# `sentra-engine`
+# `sentra-engine-legacy`
 
 A **modular, streaming Conversation Engine** for Sentra Brain — supporting **Fast** and **Planner** modes, optional **RAG** integration, and **multi-tool orchestration via MCP**.
 
