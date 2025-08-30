@@ -1,4 +1,4 @@
-from sentra_rag.core.settings import rag_settings
+from sentra_rag.settings import rag_settings
 from sentra_rag.vector_store.base import BaseVectorStore
 from sentra_rag.vector_store.chroma_http import ChromaHttpVectorStore
 from sentra_rag.vector_store.chroma_sdk import ChromaSdkVectorStore

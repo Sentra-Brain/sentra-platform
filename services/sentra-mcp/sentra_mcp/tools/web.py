@@ -1,56 +1,73 @@
-import httpx
-from fastmcp import FastMCP
-from bs4 import BeautifulSoup
-import logging
+# services/sentra-mcp/sentra_mcp/tools/web.py
+from __future__ import annotations
 
-logger = logging.getLogger("web_tool")
+from sentra_core.logging import get_logger
+from typing import Annotated, List, TypedDict
+from pydantic import Field
+import httpx
+from bs4 import BeautifulSoup
+from fastmcp import FastMCP
 
 DDG_SEARCH_URL = "https://html.duckduckgo.com/html"
-
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; SentraBot/1.0; +https://sentrabrain.com)",
-    "Accept-Language": "en-US,en;q=0.9"
+    "Accept-Language": "en-US,en;q=0.9",
 }
 
+class SearchItem(TypedDict):
+    title: str
+    url: str
+    snippet: str
 
-def register_web_tools(mcp: FastMCP):
+logger = get_logger(__name__)
+
+
+def register_web_tools(mcp: FastMCP) -> None:
     @mcp.tool(
-        name="web.search",
-        description="Perform a real-time internet search using DuckDuckGo.",
-        
+        name="web_search_duckduckgo",
         title="Web Search",
+        description="Search the web with DuckDuckGo HTML endpoint and return top results.",
     )
-    async def web_search(query: str, top_k: int = 5, recency_days: int = 60) -> list[dict]:
-        """Perform search via DuckDuckGo and return top_k results."""
+    async def web_search(
+        query: Annotated[str, "Search query string"],
+        top_k: Annotated[int, Field(description="Number of results", ge=1, le=8)] = 5,
+    ) -> list[dict]:
+        """
+        Returns MCP content blocks:
+        - text summary
+        - json with {"results": [ {title, url, snippet}, ... ]}
+        """
+        logger.info("Web search for query: %s", query)
+        results: List[SearchItem] = []
         try:
             async with httpx.AsyncClient(timeout=10.0, headers=HEADERS) as client:
                 resp = await client.post(DDG_SEARCH_URL, data={"q": query})
                 if resp.status_code != 200:
-                    return [{"error": f"Search failed with status {resp.status_code}"}]
+                    return [{"type": "text", "text": f"Search failed: HTTP {resp.status_code}"}]
 
                 soup = BeautifulSoup(resp.text, "html.parser")
-                results = []
+                cards = soup.select("div.result")  # tolerant selector
 
-                for result in soup.select("div.result.results_links_deep")[:top_k]:
-                    title_el = result.select_one("a.result__a")
-                    url_el = result.select_one("a.result__url")
-                    snippet_el = result.select_one("a.result__snippet") or result.select_one(".result__snippet")
-
-                    if not title_el or not url_el:
+                for el in cards[:top_k]:
+                    a = el.select_one("a.result__a")
+                    if not a or not a.text:
                         continue
-
-                    title = title_el.get_text(strip=True)
-                    url = url_el["href"]
-                    snippet = snippet_el.get_text(strip=True) if snippet_el else ""
+                    href = a.get("href") or ""
+                    if not isinstance(href, str) or not href.startswith("http"):
+                        continue
+                    snippet_el = el.select_one(".result__snippet, a.result__snippet")
+                    snippet = (snippet_el.get_text(" ", strip=True) if snippet_el else "")[:500]
 
                     results.append({
-                        "title": title,
-                        "url": url,
-                        "snippet": snippet
+                        "title": a.get_text(" ", strip=True)[:300],
+                        "url": href,
+                        "snippet": snippet,
                     })
 
-                return results
-
         except Exception as e:
-            logger.warning(f"Search error: {e}")
-            return [{"error": "Search failed"}]
+            return [{"type": "text", "text": f"Search error: {e}"}]
+
+        return [
+            {"type": "text", "text": f"{len(results)} results for “{query}”"},
+            {"type": "json", "json": {"results": results}},
+        ]

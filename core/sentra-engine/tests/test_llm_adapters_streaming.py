@@ -2,8 +2,8 @@ import pytest
 import pytest_asyncio
 import respx
 from httpx import Response
-from sentra_engine.adapters.llama_server import LlamaServerAdapter
-from sentra_engine.adapters.vllm import VLLMAdapter
+from sentra_engine.llm.adapters.llama_server import LlamaServerAdapter
+from sentra_engine.llm.adapters.vllm import VLLMAdapter
 from sentra_engine.core.models import PromptContext, DeltaEvent
 
 @pytest_asyncio.fixture

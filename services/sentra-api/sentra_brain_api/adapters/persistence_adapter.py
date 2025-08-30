@@ -5,7 +5,7 @@ from collections.abc import Mapping
 from typing import Any, Sequence
 from uuid import uuid4
 
-from sentra_engine.ports.persistence import PersistencePort
+from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.core.models import Message, StepEvent
 from sentra_engine.core.constants import CONTEXT_WINDOW_SIZE
 

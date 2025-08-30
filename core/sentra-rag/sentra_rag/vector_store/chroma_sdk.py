@@ -1,7 +1,7 @@
 import chromadb
 from typing import List, Dict, Any, Optional
 from uuid import UUID
-from sentra_rag.core.settings import rag_settings
+from sentra_rag.settings import rag_settings
 from sentra_rag.vector_store.base import BaseVectorStore
 from asyncio import to_thread
 

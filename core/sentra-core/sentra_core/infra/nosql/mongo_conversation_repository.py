@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 from uuid import UUID
 from pymongo import MongoClient
 from sentra_core.infra.nosql.mongo_settings import settings
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 
 logger = get_logger("sentra_brain_api.mongo_repository")
 

@@ -1,9 +1,9 @@
 import httpx
 from typing import List, Dict, Any, Optional
 from uuid import UUID
-from sentra_rag.core.settings import rag_settings
+from sentra_rag.settings import rag_settings
 from sentra_rag.vector_store.base import BaseVectorStore
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 
 logger = get_logger(__name__)
 

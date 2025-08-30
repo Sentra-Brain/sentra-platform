@@ -1,13 +1,15 @@
 import pytest
 import asyncio
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 from sentra_brain_api.features.conversation.title.title_generation_service import TitleGenerationService
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionResponse, 
     ChatCompletionChoice, 
     ChatMessage, 
-    ChatCompletionUsage
+    ChatCompletionUsage,
+    ChatCompletionChunk
 )
+from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 
 
 class TestTitleGenerationService:
@@ -20,14 +22,15 @@ class TestTitleGenerationService:
         return client
 
     @pytest.fixture
-    def title_service(self, mock_vllm_client):
+    def title_service(self):
         """TitleGenerationService instance with mocked LLM client."""
-        return TitleGenerationService(vllm_client=mock_vllm_client)
+        return TitleGenerationService()
 
     @pytest.mark.asyncio
-    async def test_generate_title_with_llm_success(self, title_service, mock_vllm_client):
+    async def test_generate_title_with_llm_success(self):
         """Test successful title generation using LLM."""
-        # Mock LLM response
+        # Arrange
+        title_service = TitleGenerationService()
         mock_response = ChatCompletionResponse(
             id="test-id",
             object="chat.completion",
@@ -46,12 +49,19 @@ class TestTitleGenerationService:
                 total_tokens=15
             )
         )
-        mock_vllm_client.complete_chat.return_value = mock_response
 
-        result = await title_service.generate_llm_title("How do I register a patent in Europe?")
-        
+        async def mock_chat_stream(prompt_context):
+            yield mock_response
+
+        mock_adapter = AsyncMock()
+        mock_adapter.chat_stream = mock_chat_stream
+
+        with patch.object(LlmAdapterFactory, 'create_adapter', return_value=mock_adapter):
+            # Act
+            result = await title_service.generate_llm_title("How do I register a patent in Europe?")
+
+        # Assert
         assert result == "Patent Registration Europe"
-        mock_vllm_client.complete_chat.assert_called_once()
 
     # @pytest.mark.asyncio
     # async def test_generate_title_llm_failure_uses_heuristic(self, title_service, mock_vllm_client):

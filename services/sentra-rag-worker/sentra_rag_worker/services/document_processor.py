@@ -7,7 +7,7 @@ from sentra_rag_worker.services.sanitizer import cast_to_markdown
 from sentra_rag_worker.services.metadata import extract_metadata
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra_rag.vector_store.service import get_vector_store_service
-from sentra_core.core.logging import get_logger, set_request_id
+from sentra_core.logging import get_logger, set_request_id
 from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 from sentra_core.domain.repository.document_repository import DocumentRepository
 from sentra_core.infra.sql.postgres_service import create_db_session
@@ -29,7 +29,7 @@ class DocumentProcessor:
     
     def _get_settings(self):
         """Lazy import of settings to avoid circular imports"""
-        from sentra_core.core.settings import settings
+        from sentra_core.settings import settings
         return settings
     
     def _get_file_storage(self) -> FileStorageService:

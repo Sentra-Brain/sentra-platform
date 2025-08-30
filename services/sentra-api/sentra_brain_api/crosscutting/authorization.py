@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from sentra_core.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.models import TokenData
 from sentra_core.domain.repository.user_repository import UserRepository

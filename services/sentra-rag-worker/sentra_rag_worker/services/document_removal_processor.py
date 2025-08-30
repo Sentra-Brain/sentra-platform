@@ -12,7 +12,7 @@ import os
 from typing import Dict, Any
 from uuid import UUID
 from sentra_rag.vector_store.service import get_vector_store_service
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.domain.entities.document_entity import DocumentEntity
 from sentra_core.domain.enums.document import DocumentStatus
 from sentra_core.infra.sql.postgres_service import create_db_session

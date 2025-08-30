@@ -1,13 +1,13 @@
 import pytest
 from abc import ABCMeta
 
-import sentra_engine.ports.llm as llm
-import sentra_engine.ports.mcp as mcp
-import sentra_engine.ports.rag as rag
-import sentra_engine.ports.persistence as persistence
-import sentra_engine.ports.context as context
-import sentra_engine.ports.planner as planner
-import sentra_engine.ports.telemetry as telemetry
+import sentra_engine.llm.ports.llm as llm
+import sentra_engine.mcp.ports.mcp as mcp
+import sentra_engine.rag.ports.rag as rag
+import sentra_engine.persistence.ports.persistence as persistence
+import sentra_engine.context.ports.context as context
+import sentra_engine.planner.ports.planner as planner
+import sentra_engine.tools.ports.telemetry as telemetry
 
 
 @pytest.mark.parametrize("cls", [

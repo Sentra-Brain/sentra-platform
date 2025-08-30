@@ -2,7 +2,7 @@
 
 import os
 import chardet
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from .base import DocumentExtractorBase, ExtractionPayload
 
 logger = get_logger(__name__)

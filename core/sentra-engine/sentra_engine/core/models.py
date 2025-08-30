@@ -10,6 +10,8 @@ class PromptContext:
 class ToolSchema:
     name: str
     parameters: dict
+    title: Optional[str] = None
+    description: Optional[str] = None  
 
 @dataclass
 class DeltaEvent:

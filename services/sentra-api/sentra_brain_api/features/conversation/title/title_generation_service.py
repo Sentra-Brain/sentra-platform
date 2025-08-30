@@ -1,8 +1,9 @@
 import re
 from typing import Optional
-from sentra_core.core.logging import get_logger
-from sentra_brain_api.features.llm_proxy.adapter import VLLMServerClient
+from sentra_core.logging import get_logger
+from sentra_engine.llm.adapters.factory  import LlmAdapterFactory
 from sentra_brain_api.features.llm_proxy.models import ChatCompletionRequest, ChatMessage
+from sentra_engine.core.models import PromptContext
 
 logger = get_logger("title_generation_service")
 
@@ -10,8 +11,8 @@ logger = get_logger("title_generation_service")
 class TitleGenerationService:
     """Service for generating conversation titles."""
 
-    def __init__(self, vllm_client: Optional[VLLMServerClient] = None):
-        self.vllm_client = vllm_client or VLLMServerClient()
+    def __init__(self):
+        pass
 
     def generate_initial_title(self, initial_prompt: str) -> str:
         """
@@ -50,6 +51,9 @@ class TitleGenerationService:
             logger.warning(f"LLM title generation failed: {e}")
             return None
 
+    def _convert_to_prompt_context(self, request: ChatCompletionRequest) -> PromptContext:
+        return PromptContext(messages=request.messages)
+
     async def _generate_title_with_llm(self, user_message: str) -> Optional[str]:
         system_prompt = """Suggest a short, human-readable title for the following message. Be concise and properly capitalized.
 
@@ -81,9 +85,20 @@ class TitleGenerationService:
             stream=False,
         )
 
-        response = await self.vllm_client.complete_chat(request)
-        if response.choices and response.choices[0].message.content:
-            return response.choices[0].message.content.strip()
+        if not request.model:
+            raise ValueError("Model is required for LLM title generation")
+
+        llm_adapter = LlmAdapterFactory.create_adapter(request.model)
+        prompt_context = self._convert_to_prompt_context(request)
+
+        chunks = []
+        async for chunk in llm_adapter.chat_stream(prompt_context):
+            for choice in chunk.choices:
+                if choice.message and choice.message.content:
+                    chunks.append(choice.message.content)
+
+        if chunks:
+            return "".join(chunks).strip()
 
         return None
 

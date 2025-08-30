@@ -12,7 +12,7 @@ from sentra_core.domain.repository.document_repository import DocumentRepository
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
-from sentra_core.core.logging import get_logger, configure_logging
+from sentra_core.logging import get_logger, configure_logging
 from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
 from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
 # from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message

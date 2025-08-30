@@ -3,7 +3,7 @@ import asyncio
 import json
 from typing import Callable, Dict, Any, Awaitable
 
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.infra.amqp.rabbitmq_settings import settings
 
 logger = get_logger(__name__)

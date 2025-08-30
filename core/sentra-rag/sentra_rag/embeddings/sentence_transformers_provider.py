@@ -3,8 +3,8 @@
 from typing import List
 from sentence_transformers import SentenceTransformer
 from sentra_rag.embeddings.base import EmbeddingProvider
-from sentra_rag.core.settings import rag_settings
-from sentra_core.core.logging import get_logger
+from sentra_rag.settings import rag_settings
+from sentra_core.logging import get_logger
 
 logger = get_logger(__name__)
 

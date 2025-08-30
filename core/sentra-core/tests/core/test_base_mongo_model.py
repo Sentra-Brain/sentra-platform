@@ -1,4 +1,4 @@
-from sentra_core.model.base_mongo_model import BaseMongoModel
+from sentra_core.infra.nosql.base_mongo_model import BaseMongoModel
 
 
 def test_string_id():

@@ -8,7 +8,7 @@ removal jobs, following the same pattern as IndexingJobPublisher.
 import json
 import pika
 from typing import Dict, Any, List
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 from sentra_core.infra.amqp.rabbitmq_settings import settings
 from sentra_core.model.remove_document_job import RemoveDocumentJob
 

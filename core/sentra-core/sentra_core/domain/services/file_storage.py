@@ -14,7 +14,7 @@ from pathlib import Path
 from uuid import UUID
 from typing import Optional, Tuple, BinaryIO
 
-from sentra_core.core.logging import get_logger
+from sentra_core.logging import get_logger
 
 logger = get_logger(__name__)
 
