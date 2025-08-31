@@ -30,6 +30,11 @@ class SentraSettings(BaseSettings):
     tool_max_output_bytes: int = Field(default=8192, json_schema_extra={"env": "TOOL_MAX_OUTPUT_BYTES"})
     mcp_timeout: float | None = Field(default=None, json_schema_extra={"env": "MCP_TIMEOUT"})  # ADD
 
+    # ---- Vertical defaults ----
+    default_vertical: str = Field(
+        default="legal", json_schema_extra={"env": "DEFAULT_VERTICAL"}
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="allow"
