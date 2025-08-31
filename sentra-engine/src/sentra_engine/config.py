@@ -1,9 +1,15 @@
 """Configuration settings for the Sentra engine."""
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import Field
 
 
 class Settings(BaseSettings):
-    """Application configuration placeholder."""
+    """Minimal configuration used by the engine."""
 
-    # TODO: add configuration fields
-    pass
+    use_dummy: bool = Field(
+        default=False,
+        json_schema_extra={"env": "USE_DUMMY"},
+    )
+
+
+settings = Settings()

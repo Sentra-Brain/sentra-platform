@@ -62,7 +62,37 @@ class ChatController:
 
             mode = engine_mode or api_settings.ENGINE_MODE
             if mode == "adk":
-                raise NotImplementedError("ADK engine not wired yet")
+                from sentra_engine.app import run_conversation
+                from sentra_engine.models import ConversationRequest as EngineRequest
+
+                engine_request = EngineRequest(messages=[body.content])
+
+                async def stream():
+                    try:
+                        async for ev in run_conversation(engine_request):
+                            out = engine_event_to_wire(ev)
+                            yield f"data: {out.model_dump_json()}\n\n"
+                    except Exception as e:
+                        logger.exception("Streaming failed")
+                        err_evt = ConversationEvent(
+                            type="step_error",
+                            task_type="chat_pipeline",
+                            label="Streaming failed",
+                            status="error",
+                            content=str(e),
+                            meta={"path": "/chat/send"},
+                        )
+                        yield f"data: {err_evt.model_dump_json()}\n\n"
+
+                return StreamingResponse(
+                    stream(),
+                    media_type="text/event-stream; charset=utf-8",
+                    headers={
+                        "Cache-Control": "no-cache, no-transform",
+                        "X-Accel-Buffering": "no",
+                        "Connection": "keep-alive",
+                    },
+                )
 
             persistence = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             context = SimpleContextService(persistence=persistence)
