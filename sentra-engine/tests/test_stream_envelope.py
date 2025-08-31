@@ -1,10 +1,35 @@
 import anyio
-
-from sentra_engine.app import run_conversation
-from sentra_engine.models import ConversationEvent, ConversationRequest
+import importlib
 
 
-def test_run_conversation_returns_event() -> None:
-    request = ConversationRequest(messages=["hello"])
-    event = anyio.run(run_conversation, request)
-    assert isinstance(event, ConversationEvent)
+def test_run_conversation_streams_dummy_events(monkeypatch):
+    monkeypatch.setenv("USE_DUMMY", "true")
+
+    # Reload modules so that configuration picks up the env var
+    import sentra_engine.config as cfg
+    importlib.reload(cfg)
+    import sentra_engine.models as models
+    importlib.reload(models)
+    import sentra_engine.agents.coordinator as coord
+    importlib.reload(coord)
+    import sentra_engine.app as app
+    importlib.reload(app)
+
+    request = models.ConversationRequest(messages=["hello"])
+
+    async def _inner():
+        events = []
+        async for ev in app.run_conversation(request):
+            events.append(ev)
+        return events
+
+    events = anyio.run(_inner)
+
+    assert [e.type for e in events] == [
+        "step_start",
+        "message_delta",
+        "message_final",
+        "step_end",
+    ]
+    assert events[1].content == "Hello from ADK engine"
+    assert events[2].content == "Done."
