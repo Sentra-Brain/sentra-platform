@@ -1,9 +1,26 @@
+import json
+import pytest
+
 from sentra_engine.context import build_context
 from sentra_engine.models import ConversationRequest
 
 
-def test_build_context_returns_last_three_messages() -> None:
+@pytest.mark.anyio("asyncio")
+async def test_build_context_returns_last_three_messages() -> None:
     request = ConversationRequest(messages=["a", "b", "c", "d"])
-    context = build_context(request)
+    context = await build_context(request)
     assert context["history"] == "b\nc\nd"
     assert context["knowledge"] == "TODO: injected from RAGTool"
+    assert "summary" not in context
+    assert "entities" not in context
+
+
+@pytest.mark.anyio("asyncio")
+async def test_build_context_adds_summary_and_entities_over_threshold() -> None:
+    msgs = [f"m{i}" for i in range(6)]
+    request = ConversationRequest(messages=msgs)
+    context = await build_context(request)
+    assert "summary" in context
+    assert "entities" in context
+    entities = json.loads(context["entities"])
+    assert isinstance(entities, dict)

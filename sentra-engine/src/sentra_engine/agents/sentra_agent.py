@@ -1,4 +1,3 @@
-"""General-purpose LLM agent using built context."""
 from __future__ import annotations
 
 from typing import AsyncGenerator
@@ -22,7 +21,7 @@ class SentraAgent:
 
         yield ConversationEvent(type="step_start", task_type="agent_execution")
 
-        context = build_context(request)
+        context = await build_context(request)
         prompt = f"{context.get('history', '')}\n{request.messages[-1]}"
 
         if config.settings.use_dummy:
