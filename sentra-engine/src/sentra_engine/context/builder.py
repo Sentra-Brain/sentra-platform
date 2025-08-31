@@ -7,13 +7,19 @@ from sentra_engine.models.conversation import ConversationRequest
 
 
 def build_context(request: ConversationRequest) -> Dict[str, str]:
-    """Build a placeholder prompt context for a conversation.
+    """Build prompt context for a conversation.
+
+    For now the context is extremely small and only includes a short slice of
+    conversation history along with a placeholder for knowledge retrieved via
+    RAG.
 
     Args:
         request: Incoming conversation request data.
 
     Returns:
-        A dictionary representing prompt context. Currently empty.
+        A dictionary with ``history`` and ``knowledge`` keys.
     """
-    # TODO: implement real context construction logic
-    return {}
+
+    history = "\n".join(request.messages[-3:])
+    knowledge = "TODO: injected from RAGTool"
+    return {"history": history, "knowledge": knowledge}
