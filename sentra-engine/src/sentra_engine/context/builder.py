@@ -6,6 +6,7 @@ import json
 
 from sentra_engine.models.conversation import ConversationRequest
 from sentra_engine.agents.summarizer import update_summary_and_entities
+from sentra_engine.tools.rag_tool import RagTool
 
 SUMMARY_THRESHOLD = 5
 
@@ -28,6 +29,22 @@ async def build_context(request: ConversationRequest) -> Dict[str, str]:
 
     history = "\n".join(request.messages[-3:])
     knowledge = "TODO: injected from RAGTool"
+
+    if request.context_source_ids or request.context_document_ids:
+        rag_tool = RagTool()
+        chunks = await rag_tool.retrieve(
+            request.messages[-1] if request.messages else "",
+            source_ids=request.context_source_ids,
+            document_ids=request.context_document_ids,
+        )
+        seen: set[str] = set()
+        deduped = []
+        for chunk in chunks:
+            if chunk.content not in seen:
+                seen.add(chunk.content)
+                deduped.append(chunk.content)
+        knowledge = "\n".join(deduped)
+
     context: Dict[str, str] = {"history": history, "knowledge": knowledge}
 
     if len(request.messages) > SUMMARY_THRESHOLD:
