@@ -10,6 +10,8 @@ class ConversationRequest(BaseModel):
     """Incoming conversation payload."""
 
     messages: List[str] = []
+    context_source_ids: Optional[List[str]] = None
+    context_document_ids: Optional[List[str]] = None
 
 
 class ConversationEvent(BaseModel):
