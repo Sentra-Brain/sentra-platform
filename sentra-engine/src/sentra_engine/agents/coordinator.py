@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import AsyncGenerator
 
 from ..context import build_context
+from ..errors import BudgetExhaustedError, TimeoutError, ToolError
 from ..models import ConversationEvent, ConversationRequest
 from ..telemetry import emit_event_log
 from .sentra_agent import SentraAgent
@@ -14,30 +15,54 @@ from .real_estate.use_case_listings_search import run_listings_search_agent
 
 
 class CoordinatorAgent:
-    """Thin wrapper that forwards requests to :class:`SentraAgent`."""
+    """Thin wrapper that forwards requests to :class:`SentraAgent`.
+
+    The agent attempts to route the request to more specialised agents and
+    falls back to a simplified flow if tools fail, time out or budgets are
+    exhausted.
+    """
 
     async def run(
-        self, request: ConversationRequest
+        self, request: ConversationRequest, fallback: bool = False
     ) -> AsyncGenerator[ConversationEvent, None]:
-        msg = request.messages[-1]
+        try:
+            if fallback:
+                # Fallback mode: no tools or planners, short context
+                yield ConversationEvent(type="step_start", task_type="fallback")
+                yield ConversationEvent(
+                    type="message_delta",
+                    content="I'm here to help, but cannot access external tools right now.",
+                )
+                yield ConversationEvent(type="step_end", task_type="fallback")
+                return
 
-        if route_legal_intent(msg):
-            emit_event_log(ConversationEvent(type="agent_dispatched", label="legal"))
-            context = await build_context(request)
-            async for event in run_contract_drafting_agent(request, context):
+            msg = request.messages[-1]
+
+            if route_legal_intent(msg):
+                emit_event_log(
+                    ConversationEvent(type="agent_dispatched", label="legal")
+                )
+                context = await build_context(request)
+                async for event in run_contract_drafting_agent(request, context):
+                    yield event
+                return
+
+            if route_real_estate_intent(msg):
+                emit_event_log(
+                    ConversationEvent(type="agent_dispatched", label="real_estate")
+                )
+                context = await build_context(request)
+                async for event in run_listings_search_agent(request, context):
+                    yield event
+                return
+
+            emit_event_log(ConversationEvent(type="fallback_triggered"))
+            agent = SentraAgent()
+            async for event in agent.run(request):
                 yield event
-            return
 
-        if route_real_estate_intent(msg):
-            emit_event_log(
-                ConversationEvent(type="agent_dispatched", label="real_estate")
-            )
-            context = await build_context(request)
-            async for event in run_listings_search_agent(request, context):
+        except (ToolError, TimeoutError, BudgetExhaustedError):
+            if fallback:
+                raise
+            async for event in self.run(request, fallback=True):
                 yield event
-            return
-
-        emit_event_log(ConversationEvent(type="fallback_triggered"))
-        agent = SentraAgent()
-        async for event in agent.run(request):
-            yield event
