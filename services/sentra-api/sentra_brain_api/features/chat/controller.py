@@ -10,8 +10,7 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.settings import settings as core_settings, LLMEngine
-from sentra_brain_api import settings as api_settings
-from typing import Literal
+from sentra_brain_api.settings import settings as api_settings, EngineMode
 
 from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
 from sentra_engine.mcp.adapters.fastmcp import get_mcp, MCPProtocolAdapter
@@ -56,16 +55,27 @@ class ChatController:
             request: Request,
             mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
             current_user: UserEntity = Depends(get_authenticated_user),
-            engine_mode: Literal["legacy", "adk"] | None = Query(None),
+            engine_mode: EngineMode | None = Query(None),
         ):
             body.user_id = current_user.id
+            mode = engine_mode or api_settings.engine_mode
+            if mode == EngineMode.ADK:
+                from sentra_engine import run_conversation
+                from sentra_engine.models import (
+                    ConversationRequest as EngineRequest,
+                )
 
-            mode = engine_mode or api_settings.ENGINE_MODE
-            if mode == "adk":
-                from sentra_engine.app import run_conversation
-                from sentra_engine.models import ConversationRequest as EngineRequest
-
-                engine_request = EngineRequest(messages=[body.content])
+                engine_request = EngineRequest(
+                    messages=[body.content],
+                    context_source_ids=
+                        [str(cid) for cid in body.context_source_ids]
+                        if body.context_source_ids
+                        else None,
+                    context_document_ids=
+                        [str(cid) for cid in body.context_document_ids]
+                        if body.context_document_ids
+                        else None,
+                )
 
                 async def stream():
                     try:
