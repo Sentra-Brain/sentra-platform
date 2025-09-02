@@ -11,5 +11,23 @@ class Settings(BaseSettings):
         json_schema_extra={"env": "USE_DUMMY"},
     )
 
+    tool_allowlist: dict[str, list[str]] = Field(
+        default_factory=lambda: {
+            "SentraAgent": ["RagTool", "DbQueryTool"],
+            "LegalDraftingAgent": ["RagTool"],
+            "ListingsSearchAgent": ["DbQueryTool"],
+        },
+        json_schema_extra={"env": "AGENT_TOOL_ALLOWLIST"},
+    )
+
+    rag_source_allowlist: dict[str, list[str]] = Field(
+        default_factory=lambda: {
+            "SentraAgent": ["*"],
+            "LegalDraftingAgent": ["legal-templates", "clauses"],
+            "ListingsSearchAgent": ["re-listings"],
+        },
+        json_schema_extra={"env": "AGENT_SOURCE_ALLOWLIST"},
+    )
+
 
 settings = Settings()
