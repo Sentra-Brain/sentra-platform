@@ -11,6 +11,7 @@ from .. import config
 from ..context import build_context
 from ..models import ConversationEvent, ConversationRequest
 from ..telemetry import emit_event_log
+from sentra_engine.policies.guardrails import check_tool_allowed
 
 
 class SentraAgent:
@@ -28,6 +29,8 @@ class SentraAgent:
             type="step_start", task_type="agent_execution", task_run_id=task_run_id
         )
 
+        if request.context_source_ids or request.context_document_ids:
+            check_tool_allowed("SentraAgent", "RagTool")
         context = await build_context(request)
         emit_event_log(
             ConversationEvent(type="context_built", task_run_id=task_run_id)

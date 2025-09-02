@@ -7,6 +7,7 @@ from typing import List, Optional
 import httpx
 
 from sentra_engine.config import settings
+from sentra_engine.policies.guardrails import get_allowed_sources
 
 
 @dataclass
@@ -25,6 +26,7 @@ class RagTool:
         self,
         query: str,
         *,
+        agent_name: str = "SentraAgent",
         source_ids: List[str] | None = None,
         document_ids: List[str] | None = None,
         top_k: int = 6,
@@ -36,6 +38,10 @@ class RagTool:
         ``sentra-rag-server`` endpoint. Any network failure results in an empty
         list so that the engine degrades gracefully.
         """
+
+        allowed_sources = get_allowed_sources(agent_name)
+        if source_ids and "*" not in allowed_sources:
+            source_ids = [s for s in source_ids if s in allowed_sources]
 
         if settings.use_dummy:
             seeds = source_ids or document_ids or ["mock"]
