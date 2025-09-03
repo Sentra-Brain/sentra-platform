@@ -4,14 +4,24 @@ import pytest
 from sentra_engine.context import build_context
 from sentra_engine.models import ConversationRequest
 from sentra_engine.tools.rag_tool import RagChunk, RagTool
+from sentra_core.settings import settings as core_settings
 
 
 @pytest.mark.anyio("asyncio")
-async def test_build_context_returns_last_three_messages() -> None:
+@pytest.mark.parametrize(
+    "token_budget,expected",
+    [
+        (1, "d"),
+        (2, "c\nd"),
+        (3, "b\nc\nd"),
+    ],
+)
+async def test_build_context_respects_token_budget(token_budget, expected, monkeypatch) -> None:
+    monkeypatch.setattr(core_settings, "adk_token_budget", token_budget)
     request = ConversationRequest(messages=["a", "b", "c", "d"])
     context = await build_context(request)
-    assert context["history"] == "b\nc\nd"
-    assert context["knowledge"] == "TODO: injected from RAGTool"
+    assert context["history"] == expected
+    assert context["knowledge"] == ""
     assert "summary" not in context
     assert "entities" not in context
 
@@ -38,3 +48,16 @@ async def test_build_context_injects_rag_knowledge(monkeypatch) -> None:
     )
     context = await build_context(request)
     assert context["knowledge"] == "x\ny"
+
+
+@pytest.mark.anyio("asyncio")
+async def test_build_context_skips_rag_when_disabled(monkeypatch) -> None:
+    monkeypatch.setattr(core_settings, "enable_rag", False)
+
+    async def fake_retrieve(self, *args, **kwargs):  # pragma: no cover - should not be called
+        raise AssertionError("RAG should be disabled")
+
+    monkeypatch.setattr(RagTool, "retrieve", fake_retrieve)
+    request = ConversationRequest(messages=["hello"], context_source_ids=["1"])
+    context = await build_context(request)
+    assert context["knowledge"] == ""
