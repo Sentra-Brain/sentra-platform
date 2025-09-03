@@ -1,0 +1,5 @@
+[
+  {"type": "step_start", "task_type": "listings_search"},
+  {"type": "message_delta", "content": "Here are some listings:\nFlat in Madrid, 85 m², €950/mo\nLoft in Salamanca, 60 m², €890/mo\nStudio in Seville, 45 m², €700/mo"},
+  {"type": "step_end", "task_type": "listings_search"}
+]
