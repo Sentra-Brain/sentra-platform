@@ -5,9 +5,11 @@ from dataclasses import dataclass
 from typing import List, Optional
 
 import httpx
+import logging
 
 from sentra_engine.config import settings
 from sentra_engine.policies.guardrails import get_allowed_sources
+from sentra_engine.policies import retry_with_backoff
 
 
 @dataclass
@@ -61,14 +63,20 @@ class RagTool:
             "top_k": top_k,
         }
 
-        try:
+        async def _call() -> dict:
             async with httpx.AsyncClient() as client:
                 resp = await client.post(
                     "http://sentra-rag-server/retrieve", json=payload, timeout=30
                 )
                 resp.raise_for_status()
-                data = resp.json()
-        except Exception:
+                return resp.json()
+
+        data = await retry_with_backoff(
+            _call,
+            logger=logging.getLogger(__name__),
+            label="rag.retrieve",
+        )
+        if data is None:
             return []
 
         items = data.get("chunks", data)

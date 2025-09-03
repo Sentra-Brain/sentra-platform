@@ -1,7 +1,9 @@
-"""Routing and fallback policies."""
+"""Routing and helper policies."""
 from __future__ import annotations
 
 from typing import Any
+
+from .retries import retry_with_backoff
 
 
 def route_event(event: Any) -> str:
@@ -17,4 +19,4 @@ def route_event(event: Any) -> str:
     return "default"
 
 
-__all__ = ["route_event"]
+__all__ = ["route_event", "retry_with_backoff"]
