@@ -12,6 +12,7 @@ from .sentra_agent import SentraAgent
 from ..orchestrators import route_legal_intent, route_real_estate_intent
 from .legal.use_case_contract_drafting import run_contract_drafting_agent
 from .real_estate.use_case_listings_search import run_listings_search_agent
+from ..adapters.persistence_adapter import ConversationPersistenceAdapter
 
 
 class CoordinatorAgent:
@@ -22,18 +23,31 @@ class CoordinatorAgent:
     exhausted.
     """
 
+    def __init__(self, persistence: ConversationPersistenceAdapter | None = None):
+        self.persistence = persistence
+
+    async def _persist(self, event: ConversationEvent) -> None:
+        if self.persistence:
+            await self.persistence.persist_event(event)
+
     async def run(
         self, request: ConversationRequest, fallback: bool = False
     ) -> AsyncGenerator[ConversationEvent, None]:
         try:
             if fallback:
                 # Fallback mode: no tools or planners, short context
-                yield ConversationEvent(type="step_start", task_type="fallback")
-                yield ConversationEvent(
+                event = ConversationEvent(type="step_start", task_type="fallback")
+                await self._persist(event)
+                yield event
+                event = ConversationEvent(
                     type="message_delta",
                     content="I'm here to help, but cannot access external tools right now.",
                 )
-                yield ConversationEvent(type="step_end", task_type="fallback")
+                await self._persist(event)
+                yield event
+                event = ConversationEvent(type="step_end", task_type="fallback")
+                await self._persist(event)
+                yield event
                 return
 
             msg = request.messages[-1]
@@ -44,6 +58,7 @@ class CoordinatorAgent:
                 )
                 context = await build_context(request)
                 async for event in run_contract_drafting_agent(request, context):
+                    await self._persist(event)
                     yield event
                 return
 
@@ -53,16 +68,19 @@ class CoordinatorAgent:
                 )
                 context = await build_context(request)
                 async for event in run_listings_search_agent(request, context):
+                    await self._persist(event)
                     yield event
                 return
 
             emit_event_log(ConversationEvent(type="fallback_triggered"))
             agent = SentraAgent()
             async for event in agent.run(request):
+                await self._persist(event)
                 yield event
 
         except (ToolError, TimeoutError, BudgetExhaustedError):
             if fallback:
                 raise
             async for event in self.run(request, fallback=True):
+                await self._persist(event)
                 yield event
