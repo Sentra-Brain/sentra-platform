@@ -12,6 +12,8 @@ class ConversationRequest(BaseModel):
     messages: List[str] = []
     context_source_ids: Optional[List[str]] = None
     context_document_ids: Optional[List[str]] = None
+    user_id: Optional[str] = None
+    conversation_id: Optional[str] = None
 
 
 class ConversationEvent(BaseModel):

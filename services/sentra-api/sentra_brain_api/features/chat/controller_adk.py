@@ -46,6 +46,8 @@ class ChatControllerADK:
                     [str(cid) for cid in body.context_document_ids]
                     if body.context_document_ids
                     else None,
+                user_id=str(body.user_id),
+                conversation_id=str(body.conversation_id),
             )
 
             async def stream():
