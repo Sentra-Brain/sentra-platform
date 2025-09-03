@@ -173,6 +173,15 @@
       },
       "console": "integratedTerminal",
       "justMyCode": false
+    },
+    {
+      "name": "Stream Demo",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/sentra-engine/examples/stream_demo.py",
+      "cwd": "${workspaceFolder}/sentra-engine",
+      "env": { "USE_DUMMY": "true" },
+      "console": "integratedTerminal"
     }
   ]
 }
