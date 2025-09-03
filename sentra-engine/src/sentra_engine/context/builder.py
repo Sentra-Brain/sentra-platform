@@ -7,6 +7,7 @@ import json
 from sentra_engine.models.conversation import ConversationRequest
 from sentra_engine.agents.summarizer import update_summary_and_entities
 from sentra_engine.tools.rag_tool import RagTool
+from sentra_core.settings import settings
 
 SUMMARY_THRESHOLD = 5
 
@@ -27,10 +28,11 @@ async def build_context(request: ConversationRequest) -> Dict[str, str]:
         ``summary`` and ``entities`` when the threshold is met.
     """
 
-    history = "\n".join(request.messages[-3:])
-    knowledge = "TODO: injected from RAGTool"
+    max_messages = max(1, settings.adk_token_budget)
+    history = "\n".join(request.messages[-max_messages:])
+    knowledge = ""
 
-    if request.context_source_ids or request.context_document_ids:
+    if settings.enable_rag and (request.context_source_ids or request.context_document_ids):
         rag_tool = RagTool()
         chunks = await rag_tool.retrieve(
             request.messages[-1] if request.messages else "",
