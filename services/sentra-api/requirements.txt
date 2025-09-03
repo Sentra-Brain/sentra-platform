@@ -4,7 +4,8 @@ debugpy
 email-validator
 fastapi
 fastmcp
-httpx
+httpcore>=1.0.9
+httpx>=0.28.1
 passlib 
 passlib[bcrypt]
 pika
@@ -38,5 +39,5 @@ pytest-mock
 python-jose
 
 -e ../../core/sentra-core
--e ../../core/sentra-engine-legacy
+# -e ../../core/sentra-engine-legacy
 -e ../../sentra-engine

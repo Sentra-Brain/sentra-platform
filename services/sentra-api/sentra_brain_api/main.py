@@ -13,7 +13,7 @@ from sentra_brain_api.core.lifecycle_config import AppLifecycleConfig
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
-from sentra_brain_api.features.chat.controller import ChatController
+from sentra_brain_api.features.chat.controller_adk import ChatControllerADK
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
@@ -24,6 +24,7 @@ from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra_core import logging
 from sentra_core.infra.sql import postgres_service
+from sentra_core.settings import settings, EngineMode
 import os
 
 from sentra_engine.mcp.adapters.fastmcp import get_mcp
@@ -64,7 +65,6 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     )
 
     app.add_middleware(ErrorHandlerMiddleware)
-
     app.add_middleware(
         CORSMiddleware,
         allow_origin_regex=r"https?://(127\.0\.0\.1|localhost)(:\d{1,5})?",
@@ -81,7 +81,14 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     public_settings_controller = PublicSettingsController()
     conversation_controller = ConversationController()
     llm_proxy_controller = LLMProxyController()
-    chat_controller = ChatController()
+
+    # Select chat controller based on settings.engine_mode
+    mode = settings.engine_mode
+    if mode == EngineMode.ADK:
+        chat_controller = ChatControllerADK()
+    else:
+        from sentra_brain_api.features.chat.controller_legacy import ChatControllerLegacy
+        chat_controller = ChatControllerLegacy()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])

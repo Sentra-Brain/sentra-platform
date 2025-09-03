@@ -9,9 +9,13 @@ WORKDIR /app
 COPY core/sentra-core /core/sentra-core
 RUN pip install -e /core/sentra-core
 
-# Copy and install engine library
+# Copy and install engine legacy library
 COPY core/sentra-engine-legacy /core/sentra-engine-legacy
 RUN pip install -e /core/sentra-engine-legacy
+
+# Copy and install engine library
+COPY sentra-engine /sentra-engine
+RUN pip install -e /sentra-engine
 
 # Copy and install API requirements
 COPY services/sentra-api/requirements.txt /app/requirements.txt

@@ -5,6 +5,7 @@
 !frontends/
 !services/
 !core/
+!sentra-engine/
 
 # Ignore specific files and directories
 **/__pycache__/

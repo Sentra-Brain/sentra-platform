@@ -11,9 +11,16 @@ class LLMEngine(str, Enum):
     VLLM = "vllm"
     LLAMA = "llama"  # llama-server
 
+class EngineMode(str, Enum):
+    """Selectable conversation engine backends."""
+    LEGACY = "legacy"
+    ADK = "adk"
+
 class SentraSettings(BaseSettings):
     # ---- LLM backend selection ----
     llm_engine: LLMEngine = Field(default=LLMEngine.VLLM, json_schema_extra={"env": "LLM_ENGINE"})
+    # ---- Conversation engine selection ----
+    engine_mode: EngineMode = Field(default=EngineMode.LEGACY, json_schema_extra={"env": "ENGINE_MODE"})
     vllm_server_url: str = Field(default="http://vllm:8000", json_schema_extra={"env": "VLLM_SERVER_URL"})
     llama_server_url: str = Field(default="http://llama_server:8080", json_schema_extra={"env": "LLAMA_SERVER_URL"})
     llm_request_timeout: float | None = Field(default=None, json_schema_extra={"env": "LLM_REQUEST_TIMEOUT"})

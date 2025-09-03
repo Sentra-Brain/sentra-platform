@@ -1,4 +1,4 @@
-# sentra_brain_api/features/chat/controller.py
+# sentra_brain_api/features/chat/controller_legacy.py
 from fastapi import APIRouter, Depends, Request, Query
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
@@ -10,14 +10,12 @@ from sentra_core.infra.nosql.mongo_conversation_repository import (
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.settings import settings, LLMEngine, EngineMode
-
 from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
 from sentra_engine.mcp.adapters.fastmcp import get_mcp, MCPProtocolAdapter
 from sentra_engine.context.adapters.simple_context import SimpleContextService
 from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
 from sentra_engine.llm.adapters.factory import LlmAdapterFactory
-
 from sentra_brain_api.features.chat.schemas import (
     ConversationRequest, ConversationMode, ConversationEvent
 )
@@ -25,7 +23,7 @@ from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
-class ChatController:
+class ChatControllerLegacy:
     def __init__(self):        
         self.router = APIRouter()
         self._add_routes()
@@ -47,7 +45,7 @@ class ChatController:
         @self.router.post(
             "/send",
             response_class=StreamingResponse,
-            description="Sends a message using the selected engine mode and streams the assistant response",
+            description="Sends a message using the legacy engine and streams the assistant response",
         )
         async def send_message_v2(
             body: ConversationRequest,
@@ -57,56 +55,9 @@ class ChatController:
             engine_mode: EngineMode | None = Query(None),
         ):
             body.user_id = current_user.id
-            mode = engine_mode or settings.engine_mode
-            if mode == EngineMode.ADK:
-                from sentra_engine.app import run_conversation
-                from sentra_engine.models import (
-                    ConversationRequest as EngineRequest,
-                )
-
-                engine_request = EngineRequest(
-                    messages=[body.content],
-                    context_source_ids=
-                        [str(cid) for cid in body.context_source_ids]
-                        if body.context_source_ids
-                        else None,
-                    context_document_ids=
-                        [str(cid) for cid in body.context_document_ids]
-                        if body.context_document_ids
-                        else None,
-                )
-
-                async def stream():
-                    try:
-                        async for ev in run_conversation(engine_request):
-                            out = engine_event_to_wire(ev)
-                            yield f"data: {out.model_dump_json()}\n\n"
-                    except Exception as e:
-                        logger.exception("Streaming failed")
-                        err_evt = ConversationEvent(
-                            type="step_error",
-                            task_type="chat_pipeline",
-                            label="Streaming failed",
-                            status="error",
-                            content=str(e),
-                            meta={"path": "/chat/send"},
-                        )
-                        yield f"data: {err_evt.model_dump_json()}\n\n"
-
-                return StreamingResponse(
-                    stream(),
-                    media_type="text/event-stream; charset=utf-8",
-                    headers={
-                        "Cache-Control": "no-cache, no-transform",
-                        "X-Accel-Buffering": "no",
-                        "Connection": "keep-alive",
-                    },
-                )
-
             persistence = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             context = SimpleContextService(persistence=persistence)
             llm = LlmAdapterFactory.create_adapter(model=body.model or "sentra-brain")
-
             tool_orch = self._build_tool_orchestrator(persistence)
 
             if body.mode == ConversationMode.PLAN:
@@ -117,7 +68,6 @@ class ChatController:
                 )
                 runner = engine.run_planner
             else:
-                # FAST mode with autonomous tool-use support
                 engine = ConversationEngine(
                     context=context, llm=llm, persistence=persistence,
                     planner=None, tool_orchestrator=tool_orch

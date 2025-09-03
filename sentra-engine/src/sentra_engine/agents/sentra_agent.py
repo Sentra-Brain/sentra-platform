@@ -86,7 +86,7 @@ class SentraAgent:
             base_url = f"{core_settings.llama_server_url}/completion"
             payload = {"prompt": prompt}
         else:  # default to vLLM style API
-            base_url = f"{core_settings.vllm_server_url}/generate"
+            base_url = f"{core_settings.vllm_server_url}/v1/chat/completions"
             payload = {"prompt": prompt}
 
         try:
