@@ -13,7 +13,8 @@ dependencies = [
     "pydantic",
     "anyio",
     "pytest",
-    "ddgs"
+    "ddgs",
+    "litellm"
 ]
 
 [tool.pytest.ini_options]
