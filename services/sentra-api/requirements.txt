@@ -39,3 +39,4 @@ python-jose
 
 -e ../../core/sentra-core
 -e ../../core/sentra-engine-legacy
+-e ../../sentra-engine
