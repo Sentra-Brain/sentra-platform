@@ -12,7 +12,7 @@ from .sentra_agent import SentraAgent
 from ..orchestrators import route_legal_intent, route_real_estate_intent
 from .legal.use_case_contract_drafting import run_contract_drafting_agent
 from .real_estate.use_case_listings_search import run_listings_search_agent
-from ..adapters.persistence_adapter import ConversationPersistenceAdapter
+from ..adapters.persistence_adapter import SessionPersistenceAdapter
 
 
 class CoordinatorAgent:
@@ -23,7 +23,7 @@ class CoordinatorAgent:
     exhausted.
     """
 
-    def __init__(self, persistence: ConversationPersistenceAdapter | None = None):
+    def __init__(self, persistence: SessionPersistenceAdapter | None = None):
         self.persistence = persistence
 
     async def _persist(self, event: ConversationEvent) -> None:
