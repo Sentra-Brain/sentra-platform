@@ -1,4 +1,7 @@
 from typing import AsyncGenerator, Optional, Sequence
+from uuid import uuid4
+from datetime import datetime, timezone
+
 from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, Transcript, StepEvent
 from sentra_engine.core.time import utc_now_iso
 from sentra_engine.core.id_utils import normalize_message_id
@@ -10,6 +13,8 @@ from sentra_engine.planner.ports.planner import PlannerPort
 from sentra_engine.rag.ports.rag import RAGPort
 from sentra_engine.core.plan import Plan, Step
 from sentra_engine.tools.ports.tool import ToolPort
+from sentra_core.schemas.engine_event import EngineEvent
+from sentra_core.domain.event_entity import EventMessage
 
 
 class TurnRunner:
@@ -42,7 +47,17 @@ class TurnRunner:
         use_planner: bool,
     ) -> AsyncGenerator[DeltaEvent, None]:
         user_msg = self._build_user_message(message_id, content)
-        await self.persistence.append_message(conversation_id, user_msg)
+        await self.persistence.append_event(
+            conversation_id,
+            EngineEvent(
+                event_id=uuid4(),
+                timestamp=datetime.now(timezone.utc),
+                type="message_final",
+                author="user",
+                content=user_msg.content,
+                message=EventMessage(id=user_msg.id, role="user"),
+            ),
+        )
 
         transcript = await self._build_transcript(conversation_id, user_msg)
 
@@ -53,7 +68,9 @@ class TurnRunner:
         async for ev in self._execute_plan(conversation_id, plan, transcript, tools_schema):
             yield ev
 
-        final = await self._finalize_turn(conversation_id, response_message_id, transcript)
+        final = await self._finalize_turn(
+            conversation_id, response_message_id, transcript, user_msg
+        )
         yield DeltaEvent(type="message_final", content=final)
 
     def _build_user_message(self, message_id: Optional[str], content: str) -> Message:
@@ -115,7 +132,11 @@ class TurnRunner:
 
 
     async def _finalize_turn(
-        self, conversation_id: str, response_message_id: Optional[str], transcript: list[Message]
+        self,
+        conversation_id: str,
+        response_message_id: Optional[str],
+        transcript: list[Message],
+        user_msg: Message,
     ) -> str:
         final = self._runner.final_text or "(no content)"
         asst_msg = Message(
@@ -124,5 +145,17 @@ class TurnRunner:
             content=final,
             timestamp=utc_now_iso(),
         )
-        await self.persistence.append_message(conversation_id, asst_msg)
+        await self.persistence.append_event(
+            conversation_id,
+            EngineEvent(
+                event_id=uuid4(),
+                timestamp=datetime.now(timezone.utc),
+                type="message_final",
+                author="assistant",
+                content=asst_msg.content,
+                message=EventMessage(
+                    id=asst_msg.id, role="assistant", response_to=user_msg.id
+                ),
+            ),
+        )
         return final

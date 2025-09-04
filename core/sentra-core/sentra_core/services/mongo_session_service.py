@@ -6,7 +6,8 @@ from typing import Any
 from pymongo import MongoClient
 
 from sentra_core.infra.nosql.mongo_settings import settings
-from sentra_core.domain.event_entity import EventEntity
+from sentra_core.domain.event_entity import EventEntity, EventMessage
+from sentra_core.schemas.engine_event import EngineEvent
 from sentra_core.domain.session_entity import SessionEntity
 
 from .session_service import SessionService
@@ -94,12 +95,29 @@ class MongoSessionService(SessionService):
             last_update_time=doc.get("last_update_time", datetime.now(timezone.utc)),
         )
 
-    async def append_event(self, session: SessionEntity, event: EventEntity) -> EventEntity:
+    async def append_event(
+        self, session: SessionEntity, event: EventEntity | EngineEvent
+    ) -> EventEntity | EngineEvent:
+        """Persist an ``event`` and merge any state delta."""
+        # Ensure backward compatibility for legacy message lookups
+        if (
+            event.type in {"message_delta", "message_final"}
+            and event.author in {"user", "assistant"}
+            and event.message is None
+        ):
+            event.message = EventMessage(
+                id=str(event.event_id),
+                role=event.author,
+                response_to=event.meta.get("response_to") if event.meta else None,
+            )
+
         event_doc = event.model_dump()
         event_doc["event_id"] = str(event.event_id)
+
         state_delta = event.actions.state_delta if event.actions else None
         if state_delta:
             self._apply_state_delta(session, state_delta)
+
         now = datetime.now(timezone.utc)
         self.sessions.update_one(
             {"_id": session.session_id},

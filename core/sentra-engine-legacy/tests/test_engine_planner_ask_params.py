@@ -12,6 +12,7 @@ from sentra_engine.conversation.entrypoint.conversation_engine import Conversati
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
+from sentra_core.schemas.engine_event import EngineEvent
 from sentra_engine.planner.ports.planner import PlannerPort
 
 
@@ -37,14 +38,14 @@ class Ctx(ContextPort):
 
 class Pers(PersistencePort):
     def __init__(self):
-        self.msgs: list[Message] = []
-        self.events: list[StepEvent] = []
+        self.events_store: list[EngineEvent] = []
+        self.step_events: list[StepEvent] = []
 
-    async def append_message(self, conversation_id: str, message: Message) -> None:
-        self.msgs.append(message)
+    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
+        self.events_store.append(event)
 
     async def append_step_event(self, conversation_id: str, event: StepEvent) -> None:
-        self.events.append(event)
+        self.step_events.append(event)
 
     async def load_conversation(
         self, conversation_id: str

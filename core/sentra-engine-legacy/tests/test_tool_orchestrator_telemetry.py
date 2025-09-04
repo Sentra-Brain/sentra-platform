@@ -2,6 +2,7 @@ import asyncio
 from typing import Optional, Sequence, Mapping, Any
 
 from sentra_engine.core.models import ToolSchema, ToolResult, Message, StepEvent
+from sentra_core.schemas.engine_event import EngineEvent
 from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
@@ -26,7 +27,7 @@ class MCPDummy(MCPPort):
 
 
 class PersDummy(PersistencePort):
-    async def append_message(self, conversation_id: str, message: Message) -> None:
+    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
         pass
 
     async def append_step_event(self, conversation_id: str, event: StepEvent) -> None:

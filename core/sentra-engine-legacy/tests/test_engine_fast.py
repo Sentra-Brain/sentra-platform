@@ -1,6 +1,7 @@
 import pytest
 import pytest_asyncio
 from sentra_engine.core.models import DeltaEvent, PromptContext, Message
+from sentra_core.schemas.engine_event import EngineEvent
 from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
 from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
@@ -8,13 +9,24 @@ from sentra_engine.persistence.ports.persistence import PersistencePort
 
 class FakePersistence(PersistencePort):
     def __init__(self):
-        self.messages = []
+        self.events = []
 
-    async def append_message(self, conversation_id, message):
-        self.messages.append(message)
+    async def append_event(self, conversation_id, event: EngineEvent):
+        self.events.append(event)
 
     async def load_conversation(self, conversation_id):
-        return self.messages
+        out = []
+        for e in self.events:
+            if e.type == "message_final" and e.message:
+                out.append(
+                    Message(
+                        id=e.message.id or e.event_id.hex,
+                        role=e.message.role or e.author,
+                        content=e.content,
+                        timestamp=e.timestamp.isoformat(),
+                    )
+                )
+        return out
 
     async def append_step_event(self, conversation_id, event):
         pass  # Not needed for this test
@@ -49,6 +61,6 @@ async def test_run_fast():
     assert [event.type for event in events] == ["message_delta", "message_delta", "message_final"]
     assert events[-1].content == "Hello world!"
 
-    assert persistence.messages[0].role == "user"
-    assert persistence.messages[1].role == "assistant"
-    assert persistence.messages[1].content == "Hello world!"
+    assert persistence.events[0].author == "user"
+    assert persistence.events[1].author == "assistant"
+    assert persistence.events[1].content == "Hello world!"

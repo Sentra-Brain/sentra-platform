@@ -6,10 +6,10 @@ from sentra_engine.models import ConversationEvent
 
 class DummyRepo:
     def __init__(self):
-        self.messages = []
+        self.events = []
 
-    def append_message(self, conversation_id, user_id, message):
-        self.messages.append(message)
+    def append_event(self, session_id, user_id, event):
+        self.events.append(event)
 
 
 @pytest.mark.asyncio
@@ -23,5 +23,5 @@ async def test_persist_event_idempotent():
     await adapter.persist_event(event)
     await adapter.persist_event(event)  # duplicate
 
-    assert len(repo.messages) == 1
-    assert repo.messages[0]["content"] == "hi"
+    assert len(repo.events) == 1
+    assert repo.events[0]["content"] == "hi"

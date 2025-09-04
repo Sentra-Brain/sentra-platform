@@ -83,7 +83,7 @@ async def call_tool(name: str, args: dict) -> ToolResult: ...
 async def retrieve(query: str, filters=None) -> RAGContext: ...
 
 # PersistencePort
-async def append_message(...): ...
+async def append_event(...): ...
 async def append_step_event(...): ...
 async def load_conversation(...): ...
 
@@ -183,7 +183,7 @@ sequenceDiagram
   participant PERS as Persistence
 
   UI->>ENG: User message
-  ENG->>PERS: append_message(user)
+  ENG->>PERS: append_event(user)
   ENG->>CTX: build minimal context
   CTX-->>ENG: PromptContext
   ENG->>LLM: chat_stream(context)
@@ -191,7 +191,7 @@ sequenceDiagram
   ENG-->>UI: message_delta...
   LLM-->>ENG: finish
   ENG-->>UI: message_final
-  ENG->>PERS: append_message(assistant)
+  ENG->>PERS: append_event(assistant)
 ```
 
 ---
@@ -210,7 +210,7 @@ sequenceDiagram
   participant PERS as Persistence
 
   UI->>ENG: User message
-  ENG->>PERS: append_message(user)
+  ENG->>PERS: append_event(user)
   ENG->>CTX: build context
   CTX-->>ENG: PromptContext
   ENG->>PLAN: plan(context)
@@ -224,7 +224,7 @@ sequenceDiagram
   LLM-->>ENG: message_delta...
   ENG-->>UI: message_delta...
   ENG-->>UI: message_final
-  ENG->>PERS: append_message(assistant)
+  ENG->>PERS: append_event(assistant)
 ```
 
 ---
