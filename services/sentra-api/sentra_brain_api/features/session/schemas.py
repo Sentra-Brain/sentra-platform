@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -80,3 +80,12 @@ class DeleteSessionResponse(BaseModel):
     )
 
     model_config = {"from_attributes": True}
+
+
+class UpdateSessionStateRequest(BaseModel):
+    state: Dict[str, Any] = Field(..., description="Arbitrary session state")
+
+
+class UpdateSessionStateResponse(BaseModel):
+    session_id: UUID = Field(..., description="Unique identifier of the session")
+    state: Dict[str, Any] = Field(..., description="Updated session state")

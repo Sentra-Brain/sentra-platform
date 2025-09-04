@@ -20,10 +20,13 @@ from sentra_brain_api.features.session.schemas import (
     CreateSessionRequest,
     CreateSessionResponse,
     DeleteSessionResponse,
+    EventResponse,
     SessionListItemResponse,
     SessionResponse,
     UpdateSessionRequest,
     UpdateSessionResponse,
+    UpdateSessionStateRequest,
+    UpdateSessionStateResponse,
 )
 from sentra_brain_api.features.session.title.title_generation_service import (
     TitleGenerationService,
@@ -136,3 +139,29 @@ class SessionApiService:
         return DeleteSessionResponse(
             success=True, message="Session deleted successfully"
         )
+
+    def get_events(
+        self, user: UserEntity, session_id: UUID, since: datetime | None
+    ) -> list[EventResponse]:
+        doc = self.service.get_session(session_id, user.id)
+        if not doc:
+            raise SentraHTTPException(
+                status_code=404,
+                details="Session not found",
+            )
+        session = mongo_doc_to_response(doc)
+        events = session.events
+        if since:
+            events = [e for e in events if e.timestamp > since]
+        return events
+
+    def update_state(
+        self, user: UserEntity, session_id: UUID, req: UpdateSessionStateRequest
+    ) -> UpdateSessionStateResponse:
+        updated = self.service.update_state(session_id, user.id, req.state)
+        if not updated:
+            raise SentraHTTPException(
+                status_code=404,
+                details="Session not found",
+            )
+        return UpdateSessionStateResponse(session_id=session_id, state=req.state)

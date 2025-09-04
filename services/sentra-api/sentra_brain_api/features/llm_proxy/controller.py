@@ -3,15 +3,13 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from sentra_core import logging
-from sentra_engine.core.models import PromptContext
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
     ChatCompletionChoice,
     ChatCompletionUsage,
-    ChatMessage
+    ChatMessage,
 )
-from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 import json
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -24,29 +22,34 @@ class LLMProxyController:
         self.router = APIRouter()
         self._add_routes()
 
-    def _convert_to_prompt_context(self, request: ChatCompletionRequest) -> PromptContext:
+    def _convert_to_prompt_context(self, request: ChatCompletionRequest):
+        from sentra_engine.core.models import PromptContext
+
         return PromptContext(messages=request.messages)
 
     def _add_routes(self):
         @self.router.post(
             "/chat/completions",
             response_model=ChatCompletionResponse,
-            description="Create a chat completion, optionally streamed"
+            description="Create a chat completion, optionally streamed",
         )
         async def create_chat_completion(
             request: ChatCompletionRequest,
         ):
             try:
-                logger.info(f"Received chat completion request: model={request.model}, stream={request.stream}, messages={len(request.messages)}")
+                logger.info(
+                    f"Received chat completion request: model={request.model}, stream={request.stream}, messages={len(request.messages)}"
+                )
 
                 if not request.model:
                     raise HTTPException(status_code=400, detail="Model is required")
+
+                from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 
                 llm_adapter = LlmAdapterFactory.create_adapter(request.model)
                 prompt_context = self._convert_to_prompt_context(request)
 
                 if request.stream:
-                    # Return streaming response
                     async def generate_stream():
                         async for chunk in llm_adapter.chat_stream(prompt_context):
                             if chunk.type == "message_delta" and chunk.content:
@@ -58,8 +61,8 @@ class LLMProxyController:
                         headers={
                             "Cache-Control": "no-cache",
                             "Connection": "keep-alive",
-                            "Content-Type": "text/plain; charset=utf-8"
-                        }
+                            "Content-Type": "text/plain; charset=utf-8",
+                        },
                     )
                 else:
                     chunks = []
@@ -77,21 +80,21 @@ class LLMProxyController:
                                 index=0,
                                 message=ChatMessage(
                                     role="assistant",
-                                    content="".join(chunks)
+                                    content="".join(chunks),
                                 ),
-                                finish_reason="stop"
+                                finish_reason="stop",
                             )
                         ],
                         usage=ChatCompletionUsage(
-                            prompt_tokens=0,  # Replace with actual token count if available
+                            prompt_tokens=0,
                             completion_tokens=len(chunks),
-                            total_tokens=len(chunks)
-                        )
+                            total_tokens=len(chunks),
+                        ),
                     )
 
             except Exception as e:
                 logger.error(f"Error in chat completion: {e}")
                 raise HTTPException(
                     status_code=500,
-                    detail=f"Failed to complete chat: {str(e)}"
+                    detail=f"Failed to complete chat: {str(e)}",
                 )

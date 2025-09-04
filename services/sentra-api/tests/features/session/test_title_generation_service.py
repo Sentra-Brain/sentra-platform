@@ -9,7 +9,24 @@ from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionUsage,
     ChatCompletionChunk
 )
-from sentra_engine.llm.adapters.factory import LlmAdapterFactory
+class LlmAdapterFactory:
+    @staticmethod
+    def create_adapter(_model):
+        raise NotImplementedError
+
+import sys, types
+sys.modules["sentra_engine.llm.adapters.factory"] = types.SimpleNamespace(
+    LlmAdapterFactory=LlmAdapterFactory
+)
+
+class PromptContext:
+    def __init__(self, messages):
+        self.messages = messages
+
+sys.modules["sentra_engine.core"] = types.ModuleType("sentra_engine.core")
+sys.modules["sentra_engine.core.models"] = types.SimpleNamespace(
+    PromptContext=PromptContext
+)
 
 
 class TestTitleGenerationService:
