@@ -13,21 +13,20 @@ from sentra_brain_api.core.lifecycle_config import AppLifecycleConfig
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
-from sentra_brain_api.features.chat.controller_adk import ChatControllerADK
-from sentra_brain_api.features.session.controller import SessionController
+from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.organization.controller import router as organization_router
 from sentra_brain_api.features.public.controller import PublicSettingsController
+from sentra_brain_api.features.session.controller import SessionController
 from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra_core import logging
 from sentra_core.infra.sql import postgres_service
-from sentra_core.settings import settings, EngineMode
+from sentra_engine.mcp.adapters.fastmcp import get_mcp
 import os
 
-from sentra_engine.mcp.adapters.fastmcp import get_mcp
 
 logger = logging.get_logger("sentra_brain_api")
 
@@ -74,6 +73,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     )
 
     auth_controller = AuthController()
+    chat_controller = ChatController()
     user_controller = UserController()
     admin_controller = AdminController()
     admin_settings_controller = AdminSettingsController()
@@ -82,15 +82,8 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     session_controller = SessionController()
     llm_proxy_controller = LLMProxyController()
 
-    # Select chat controller based on settings.engine_mode
-    mode = settings.engine_mode
-    if mode == EngineMode.ADK:
-        chat_controller = ChatControllerADK()
-    else:
-        from sentra_brain_api.features.chat.controller_legacy import ChatControllerLegacy
-        chat_controller = ChatControllerLegacy()
-
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
+    app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(admin_settings_controller.router, prefix="/admin", tags=["admin"])
@@ -100,7 +93,6 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
-    app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
     app.include_router(organization_router, prefix="", tags=["organization"])
 
     # Setup observability (only if not in test mode)

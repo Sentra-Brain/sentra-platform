@@ -70,3 +70,7 @@ class SessionService:
     def update_title(self, session_id: UUID, user_id: UUID, title: str):
         self.sql_repo.update_title(session_id, title)
         self.mongo_repo.update_session(session_id, {"title": title})
+
+    def update_state(self, session_id: UUID, user_id: UUID, state: dict) -> bool:
+        updated = self.mongo_repo.update_session(session_id, {"state": state})
+        return updated > 0

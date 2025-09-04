@@ -10,7 +10,7 @@ import httpx
 from sentra_core import logging
 from sentra_core.settings import settings
 from sentra_engine.mcp.ports.mcp import MCPPort
-from sentra_engine.core.models import ToolSchema, ToolResult
+from sentra_engine.mcp.models import ToolResult, ToolSchema
 
 _PROTOCOL_VERSION = "2025-06-18"
 

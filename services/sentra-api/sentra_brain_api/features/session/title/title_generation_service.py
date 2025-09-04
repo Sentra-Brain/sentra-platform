@@ -1,9 +1,8 @@
 import re
 from typing import Optional
+
 from sentra_core.logging import get_logger
-from sentra_engine.llm.adapters.factory  import LlmAdapterFactory
 from sentra_brain_api.features.llm_proxy.models import ChatCompletionRequest, ChatMessage
-from sentra_engine.core.models import PromptContext
 
 logger = get_logger("title_generation_service")
 
@@ -51,7 +50,9 @@ class TitleGenerationService:
             logger.warning(f"LLM title generation failed: {e}")
             return None
 
-    def _convert_to_prompt_context(self, request: ChatCompletionRequest) -> PromptContext:
+    def _convert_to_prompt_context(self, request: ChatCompletionRequest):
+        from sentra_engine.core.models import PromptContext
+
         return PromptContext(messages=request.messages)
 
     async def _generate_title_with_llm(self, user_message: str) -> Optional[str]:
@@ -87,6 +88,8 @@ class TitleGenerationService:
 
         if not request.model:
             raise ValueError("Model is required for LLM title generation")
+
+        from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 
         llm_adapter = LlmAdapterFactory.create_adapter(request.model)
         prompt_context = self._convert_to_prompt_context(request)

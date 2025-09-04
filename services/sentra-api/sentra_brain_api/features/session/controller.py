@@ -1,6 +1,9 @@
+from __future__ import annotations
+
+from datetime import datetime
 from uuid import UUID
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
@@ -9,10 +12,13 @@ from sentra_brain_api.features.session.schemas import (
     CreateSessionRequest,
     CreateSessionResponse,
     DeleteSessionResponse,
+    EventResponse,
     SessionListItemResponse,
     SessionResponse,
     UpdateSessionRequest,
     UpdateSessionResponse,
+    UpdateSessionStateRequest,
+    UpdateSessionStateResponse,
 )
 from sentra_core.domain.entities.user_entity import UserEntity
 from sentra_core.infra.nosql.mongo_session_repository import (
@@ -20,6 +26,9 @@ from sentra_core.infra.nosql.mongo_session_repository import (
     get_session_mongo_repository,
 )
 from sentra_core.infra.sql.postgres_service import get_db
+from sentra_core.logging import get_logger
+
+logger = get_logger("sentra_brain_api.session")
 
 
 class SessionController:
@@ -106,3 +115,30 @@ class SessionController:
             service: SessionApiService = Depends(self._get_service),
         ):
             return service.delete_session(current_user, session_id)
+
+        @self.router.get(
+            "/{session_id}/events",
+            response_model=list[EventResponse],
+            description="Retrieve events for the session",
+        )
+        def get_events(
+            session_id: UUID,
+            since: datetime | None = Query(None),
+            current_user: UserEntity = Depends(get_authenticated_user),
+            service: SessionApiService = Depends(self._get_service),
+        ):
+            return service.get_events(current_user, session_id, since)
+
+        @self.router.post(
+            "/{session_id}/state",
+            response_model=UpdateSessionStateResponse,
+            description="Update session state",
+        )
+        def update_state(
+            session_id: UUID,
+            body: UpdateSessionStateRequest,
+            current_user: UserEntity = Depends(get_authenticated_user),
+            service: SessionApiService = Depends(self._get_service),
+        ):
+            return service.update_state(current_user, session_id, body)
+    
