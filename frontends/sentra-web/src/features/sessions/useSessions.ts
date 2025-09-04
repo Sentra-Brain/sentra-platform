@@ -5,6 +5,7 @@ import {
   selectSession,
   clearSession,
   createSession,
+  regenerateTitle,
 } from './sessionsSlice'
 
 export function useSessions() {
@@ -31,5 +32,6 @@ export function useSessions() {
     clear: () => dispatch(clearSession()),
     create: (initial_prompt?: string) =>
       dispatch(createSession({ initial_prompt: initial_prompt ?? '' })),
+    regenerateTitle: (id: string) => dispatch(regenerateTitle(id)),
   }
 }

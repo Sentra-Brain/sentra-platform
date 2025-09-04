@@ -13,7 +13,6 @@ from sentra_brain_api.features.chat.schemas import (
     SessionEvent,
 )
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
-from sentra_engine.app import run_conversation
 from sentra_engine.models import ConversationRequest as EngineRequest
 from datetime import datetime, timezone
 from uuid import uuid4
@@ -39,7 +38,6 @@ class ChatController:
             current_user: UserEntity = Depends(get_authenticated_user),
         ):
             body.user_id = current_user.id
-
             engine_request = EngineRequest(
                 messages=[body.content],
                 context_source_ids=[
@@ -58,6 +56,8 @@ class ChatController:
 
             async def stream():
                 try:
+                    from sentra_engine.app import run_conversation
+
                     async for ev in run_conversation(engine_request):
                         out = engine_event_to_wire(ev)
                         yield f"data: {out.model_dump_json()}\n\n"

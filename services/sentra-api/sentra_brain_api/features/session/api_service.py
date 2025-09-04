@@ -28,9 +28,7 @@ from sentra_brain_api.features.session.schemas import (
     UpdateSessionStateRequest,
     UpdateSessionStateResponse,
 )
-from sentra_brain_api.features.session.title.title_generation_service import (
-    TitleGenerationService,
-)
+from sentra_engine.agents.title_agent import TitleAgent
 
 logger = get_logger("session_api_service")
 
@@ -40,13 +38,13 @@ class SessionApiService:
         self.service = SessionService(
             sql_repo=SessionRepository(db), mongo_repo=mongo_repo
         )
-        self.title_service = TitleGenerationService()
+        self.title_agent = TitleAgent()
 
     async def create_session(
         self, user: UserEntity, request: CreateSessionRequest
     ) -> CreateSessionResponse:
         try:
-            title = self.title_service.generate_initial_title(request.initial_prompt)
+            title = self.title_agent.generate_initial(request.initial_prompt)
         except Exception as e:
             logger.warning(f"Failed to generate initial title: {e}")
             title = None
@@ -62,7 +60,7 @@ class SessionApiService:
 
         return entity_to_creation_response(session)
 
-    async def generate_llm_title_for_session(
+    async def generate_title_for_session(
         self, user: UserEntity, session_id: UUID
     ) -> UpdateSessionResponse:
         doc = self.service.get_session(session_id, user.id)
@@ -74,12 +72,19 @@ class SessionApiService:
 
         session = mongo_doc_to_response(doc)
 
-        # Find the first user event to use as the prompt
+        # Use first user and assistant messages as context
         first_user_event = next((e for e in session.events if e.role == "user"), None)
+        first_assistant_event = next(
+            (e for e in session.events if e.role == "assistant"), None
+        )
         if not first_user_event:
-            raise ValueError("Cannot generate LLM title: missing user event")
+            raise ValueError("Cannot generate title: missing user event")
 
-        title = await self.title_service.generate_llm_title(first_user_event.content)
+        messages = [first_user_event.content]
+        if first_assistant_event and first_assistant_event.content:
+            messages.append(first_assistant_event.content)
+
+        title = await self.title_agent.generate(messages)
         if title:
             self.service.update_title(session_id, user.id, title)
             session.title = title

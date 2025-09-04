@@ -5,7 +5,7 @@ import {
   createSession,
   selectSession,
   fetchSessionById,
-  updateSessionTitle,
+  regenerateTitle,
 } from '@features/sessions/sessionsSlice'
 import {
   addEvent,
@@ -14,7 +14,6 @@ import {
   setWaitingForAnswer,
 } from '@features/chat/eventsSlice'
 import { chatService } from '@features/chat/chatService'
-import { sessionService } from '@features/sessions/sessionService'
 import type { EngineEvent } from '@features/chat/types/events'
 
 export function useChatActions() {
@@ -87,19 +86,9 @@ export function useChatActions() {
 
             if (wasNewSession && !titleTriggered) {
               titleTriggered = true
-              ;(async () => {
-                try {
-                  const resp = await sessionService.generateLlmTitle(sessionId!)
-                  if (resp.title) {
-                    dispatch(updateSessionTitle({
-                      id: resp.session_id,
-                      title: resp.title,
-                    }))
-                  }
-                } catch (err) {
-                  console.warn('Failed to generate/fetch title', err)
-                }
-              })()
+              dispatch(regenerateTitle(sessionId!)).catch(err => {
+                console.warn('Failed to regenerate title', err)
+              })
             }
             break
           }

@@ -6,7 +6,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { SessionItem } from "@features/sessions/SessionItem";
 
 export default function ChatSidebar() {
-  const { sessions, currentSessionId, select, clear, loadingList } =
+  const { sessions, currentSessionId, select, clear, loadingList, regenerateTitle } =
     useSessions();
 
   const navigate = useNavigate();
@@ -50,6 +50,7 @@ export default function ChatSidebar() {
               onSelect={handleSelect}
               onRename={(id) => console.log("Rename", id)}
               onDelete={(id) => console.log("Delete", id)}
+              onRegenerate={(id) => regenerateTitle(id)}
             />
           ))}
         </ul>

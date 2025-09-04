@@ -47,6 +47,13 @@ export const createSession = createAsyncThunk(
   }
 )
 
+export const regenerateTitle = createAsyncThunk(
+  'sessions/regenerateTitle',
+  async (id: string) => {
+    return await sessionService.generateTitle(id)
+  }
+)
+
 // 🔍 Fetch single session by ID
 export const fetchSessionById = createAsyncThunk(
   'sessions/fetchById',
@@ -110,6 +117,12 @@ const sessionSlice = createSlice({
         }
         state.sessions.unshift(newConv)
         state.currentSessionId = newConv.id
+      })
+      .addCase(regenerateTitle.fulfilled, (state, action) => {
+        if (action.payload.title) {
+          const session = state.sessions.find(c => c.id === action.payload.session_id)
+          if (session) session.title = action.payload.title
+        }
       })
   },
 })

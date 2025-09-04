@@ -10,6 +10,7 @@ interface Props {
   onSelect: (id: string) => void;
   onRename: (id: string) => void;
   onDelete: (id: string) => void;
+  onRegenerate: (id: string) => void;
 }
 
 export function SessionItem({
@@ -19,6 +20,7 @@ export function SessionItem({
   onSelect,
   onRename,
   onDelete,
+  onRegenerate,
 }: Props) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -72,6 +74,10 @@ export function SessionItem({
           position={menuPosition}
           onRename={() => {
             onRename(id);
+            setMenuOpen(false);
+          }}
+          onRegenerate={() => {
+            onRegenerate(id);
             setMenuOpen(false);
           }}
           onDelete={() => {
