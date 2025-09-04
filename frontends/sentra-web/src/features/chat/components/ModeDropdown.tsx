@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@store/hooks";
-import { setMode } from "@features/chat/chatSlice";
-import type { ConversationMode } from "@features/chat/types/mode";
+import { setMode } from "@features.events/eventsSlice";
+import type { ConversationMode } from "@features.events/types/mode";
 
 const MODE_LABEL: Record<ConversationMode, string> = {
   fast: "Fast",
@@ -11,7 +11,7 @@ const MODE_LABEL: Record<ConversationMode, string> = {
 
 export default function ModeDropdown({ className = "" }: { className?: string }) {
   const dispatch = useAppDispatch();
-  const mode = useAppSelector(s => s.chat.mode);
+  const mode = useAppSelector(s => s.events.mode);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 

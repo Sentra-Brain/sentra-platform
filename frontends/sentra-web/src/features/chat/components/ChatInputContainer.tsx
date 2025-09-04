@@ -8,7 +8,7 @@ import {
   removeContextSource, 
   removeContextDocument, 
   clearSelectedContext 
-} from '../chatSlice'
+} from '../eventsSlice'
 import ContextSelectorPanel from './ContextSelectorPanel'
 import ContextChip from './ContextChip'
 
@@ -20,8 +20,8 @@ export default function ChatInputContainer() {
 
   const dispatch = useAppDispatch()
   const { sendMessage } = useChatActions()
-  const isStreaming = useAppSelector(s => s.chat.isStreaming)
-  const { selectedContext } = useAppSelector(s => s.chat)
+  const isStreaming = useAppSelector(s => s.events.isStreaming)
+  const { selectedContext } = useAppSelector(s => s.events)
   const sources = useAppSelector(s => s.knowledge.sources)
   const documentsBySource = useAppSelector(s => s.knowledge.documentsBySource)
 

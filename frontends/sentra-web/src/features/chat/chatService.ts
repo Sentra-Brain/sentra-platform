@@ -1,21 +1,21 @@
 // sentra-web/src/features/chat/chatService.ts
 import { tokenStorage } from "@shared/utils/tokenStorage";
-import type { ConversationEvent } from "@features/chat/types/events";
+import type { EngineEvent } from "@features/chat/types/events";
 import type { ConversationMode } from "@features/chat/types/mode";
 
-type ChatSendPayload = {
-  user_id?: string;
-  conversation_id: string;
-  message_id: string;
-  response_message_id: string;
-  content: string;
-  context_source_ids?: string[];
-  context_document_ids?: string[];
-  mode?: ConversationMode; 
-};
+  type ChatSendPayload = {
+    user_id?: string;
+    session_id: string;
+    message_id: string;
+    response_message_id: string;
+    content: string;
+    context_source_ids?: string[];
+    context_document_ids?: string[];
+    mode?: ConversationMode;
+  };
 
-// NEW: event callback uses ConversationEvent
-type OnEventCallback = (event: ConversationEvent) => void;
+  // NEW: event callback uses EngineEvent
+  type OnEventCallback = (event: EngineEvent) => void;
 type OnErrorCallback = (error: Error) => void;
 
 export const chatService = {
@@ -66,7 +66,7 @@ export const chatService = {
             if (!json) continue;
 
             try {
-              const evt: ConversationEvent = JSON.parse(json);
+                const evt: EngineEvent = JSON.parse(json);
               onEvent(evt);
             } catch (err) {
               console.error("Failed to parse ConversationEvent:", json, err);

@@ -1,7 +1,7 @@
 import { MoreHorizontal } from "lucide-react";
 import { useRef, useState, type MouseEvent } from "react";
 import clsx from "clsx";
-import { ConversationMenu } from "./ConversationMenu";
+import { SessionMenu } from "./SessionMenu";
 
 interface Props {
   id: string;
@@ -12,7 +12,7 @@ interface Props {
   onDelete: (id: string) => void;
 }
 
-export function ConversationItem({
+export function SessionItem({
   id,
   title,
   active,
@@ -68,7 +68,7 @@ export function ConversationItem({
       </button>
 
       {menuOpen && (
-        <ConversationMenu
+        <SessionMenu
           position={menuPosition}
           onRename={() => {
             onRename(id);
