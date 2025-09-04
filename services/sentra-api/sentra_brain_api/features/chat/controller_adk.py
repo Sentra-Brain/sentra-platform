@@ -1,5 +1,5 @@
 # sentra_brain_api/features/chat/controller_adk.py
-from fastapi import APIRouter, Depends, Request, Query
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_core.logging import get_logger
@@ -15,6 +15,8 @@ from sentra_brain_api.features.chat.schemas import (
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra_engine.app import run_conversation
 from sentra_engine.models import ConversationRequest as EngineRequest
+from datetime import datetime, timezone
+from uuid import uuid4
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
@@ -62,6 +64,8 @@ class ChatControllerADK:
                 except Exception as e:
                     logger.exception("Streaming failed")
                     err_evt = SessionEvent(
+                        event_id=uuid4().hex,
+                        timestamp=datetime.now(timezone.utc).isoformat(),
                         type="step_error",
                         task_type="chat_pipeline",
                         label="Streaming failed",

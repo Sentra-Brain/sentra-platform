@@ -2,13 +2,12 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from typing import Any
-from uuid import uuid4
 
-from google.adk.events.event import Event
-from google.adk.sessions.session import Session
 from pymongo import MongoClient
 
 from sentra_core.infra.nosql.mongo_settings import settings
+from sentra_core.domain.event_entity import EventEntity
+from sentra_core.domain.session_entity import SessionEntity
 
 from .session_service import SessionService
 
@@ -30,8 +29,8 @@ class MongoSessionService(SessionService):
         user_id: str,
         session_id: str,
         state: dict[str, Any] | None = None,
-    ) -> Session:
-        """Create a new session document and return an ADK :class:`Session`."""
+    ) -> SessionEntity:
+        """Create a new session document and return a :class:`SessionEntity`."""
         now = datetime.now(timezone.utc)
         state = state or {}
         user_doc = self.user_states.find_one({"_id": user_id})
@@ -57,15 +56,16 @@ class MongoSessionService(SessionService):
             "events": [],
         }
         self.sessions.insert_one(doc)
-        return Session(
+        return SessionEntity(
             app_name=app_name,
             user_id=user_id,
             session_id=session_id,
             state=session_state,
             events=[],
+            last_update_time=now,
         )
 
-    async def get_session(self, app_name: str, user_id: str, session_id: str) -> Session:
+    async def get_session(self, app_name: str, user_id: str, session_id: str) -> SessionEntity:
         doc = self.sessions.find_one(
             {"_id": session_id, "app_name": app_name, "user_id": user_id}
         )
@@ -77,41 +77,29 @@ class MongoSessionService(SessionService):
                 "user": user_doc.get("state", {}),
                 "app": app_doc.get("state", {}),
             }
-            return Session(
+            return SessionEntity(
                 app_name=app_name,
                 user_id=user_id,
                 session_id=session_id,
                 state=state,
                 events=[],
+                last_update_time=datetime.now(timezone.utc),
             )
-        return Session(
+        return SessionEntity(
             app_name=doc["app_name"],
             user_id=doc["user_id"],
             session_id=doc["session_id"],
             state=doc.get("state", {}),
-            events=doc.get("events", []),
+            events=[EventEntity(**e) for e in doc.get("events", [])],
+            last_update_time=doc.get("last_update_time", datetime.now(timezone.utc)),
         )
 
-    async def append_event(self, session: Session, event: Event) -> Event:
-        event_doc = {
-            "event_id": str(getattr(event, "event_id", uuid4())),
-            "timestamp": getattr(event, "timestamp", datetime.now(timezone.utc)),
-            "type": getattr(event, "type", None),
-            "author": getattr(event, "author", None),
-            "content": getattr(event, "content", None),
-        }
-        actions = getattr(event, "actions", None)
-        state_delta = getattr(actions, "state_delta", None) if actions else None
+    async def append_event(self, session: SessionEntity, event: EventEntity) -> EventEntity:
+        event_doc = event.model_dump()
+        event_doc["event_id"] = str(event.event_id)
+        state_delta = event.actions.state_delta if event.actions else None
         if state_delta:
-            event_doc["actions"] = {"state_delta": state_delta}
             self._apply_state_delta(session, state_delta)
-        message = getattr(event, "message", None)
-        if message:
-            event_doc["message"] = {
-                "id": getattr(message, "id", None),
-                "role": getattr(message, "role", None),
-                "response_to": getattr(message, "response_to", None),
-            }
         now = datetime.now(timezone.utc)
         self.sessions.update_one(
             {"_id": session.session_id},
@@ -123,7 +111,7 @@ class MongoSessionService(SessionService):
         )
         return event
 
-    def _apply_state_delta(self, session: Session, delta: dict[str, Any]) -> None:
+    def _apply_state_delta(self, session: SessionEntity, delta: dict[str, Any]) -> None:
         for key, value in delta.items():
             if key.startswith("user:"):
                 bare = key.split("user:", 1)[1]
