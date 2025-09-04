@@ -31,11 +31,9 @@ export const sessionService = {
     return apiClient.put(`/sessions/${id}`, data).then((res) => res.data);
   },
 
-  generateLlmTitle(
-    sessionId: string
-  ): Promise<UpdateSessionResponse> {
+  generateTitle(sessionId: string): Promise<UpdateSessionResponse> {
     return apiClient
-      .post(`/sessions/${sessionId}/generate-title`)
+      .patch(`/sessions/${sessionId}/title`)
       .then((res) => res.data);
   },
 

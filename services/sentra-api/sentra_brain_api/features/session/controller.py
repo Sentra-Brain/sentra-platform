@@ -56,17 +56,30 @@ class SessionController:
         ):
             return await service.create_session(current_user, body)
 
-        @self.router.post(
-            "/{session_id}/generate-title",
+        @self.router.patch(
+            "/{session_id}/title",
             response_model=UpdateSessionResponse,
-            description="Generate a better session title using LLM",
+            description="Generate or update session title using TitleAgent",
         )
-        async def generate_llm_title_for_session(
+        async def generate_title_for_session(
             session_id: UUID,
             current_user: UserEntity = Depends(get_authenticated_user),
             service: SessionApiService = Depends(self._get_service),
         ):
-            return await service.generate_llm_title_for_session(current_user, session_id)
+            return await service.generate_title_for_session(current_user, session_id)
+
+        # Backwards-compatible alias
+        @self.router.post(
+            "/{session_id}/generate-title",
+            response_model=UpdateSessionResponse,
+            include_in_schema=False,
+        )
+        async def legacy_generate_title(
+            session_id: UUID,
+            current_user: UserEntity = Depends(get_authenticated_user),
+            service: SessionApiService = Depends(self._get_service),
+        ):
+            return await service.generate_title_for_session(current_user, session_id)
 
         @self.router.get(
             "/",

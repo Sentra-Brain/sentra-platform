@@ -4,6 +4,7 @@ interface SessionMenuProps {
   position: { top: number; left: number };
   onRename: () => void;
   onDelete: () => void;
+  onRegenerate: () => void;
   onClose: () => void;
 }
 
@@ -11,6 +12,7 @@ export function SessionMenu({
   position,
   onRename,
   onDelete,
+  onRegenerate,
   onClose,
 }: SessionMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -44,6 +46,12 @@ export function SessionMenu({
         onClick={onRename}
       >
         Rename
+      </button>
+      <button
+        className="w-full px-3 py-1 text-left text-sm hover:bg-[var(--sentra-accent-light)]"
+        onClick={onRegenerate}
+      >
+        Regenerate title
       </button>
       <button
         className="w-full px-3 py-1 text-left text-sm text-red-500 hover:bg-red-100 hover:text-red-700"
