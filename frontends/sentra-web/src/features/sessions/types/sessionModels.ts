@@ -1,6 +1,6 @@
 // src/models/conversationModels.ts
 // This file defines the models for conversation-related data structures
-export type ConversationListItem = {
+export type SessionListItem = {
   id: string;
   title: string;
   created_at: string;
@@ -16,7 +16,7 @@ export type ChatMessage = {
   is_system_prompt?: boolean; // Optional flag for system prompt messages
 };
 
-export type ConversationDetails = {
+export type SessionDetails = {
   id: string;
   title: string;
   description?: string;
@@ -24,28 +24,28 @@ export type ConversationDetails = {
   messages: Array<ChatMessage>;
 };
 
-export type CreateConversationRequest = {
+export type CreateSessionRequest = {
   initial_prompt: string;
 };
 
-export type CreateConversationResponse = {
+export type CreateSessionResponse = {
   id: string;
   title: string;
   created_at: string;
 };
 
-export type UpdateConversationRequest = {
+export type UpdateSessionRequest = {
   title?: string;
   description?: string;
   initial_prompt?: string;
 };
 
-export type UpdateConversationResponse = {
-  conversation_id: string;
+export type UpdateSessionResponse = {
+  session_id: string;
   title?: string | null;
   description?: string | null;
 };
 
-export type DeleteConversationResponse = {
+export type DeleteSessionResponse = {
   success: boolean;
 };

@@ -1,21 +1,21 @@
 import { useEffect, useRef } from "react";
 
-interface ConversationMenuProps {
+interface SessionMenuProps {
   position: { top: number; left: number };
   onRename: () => void;
   onDelete: () => void;
   onClose: () => void;
 }
 
-export function ConversationMenu({
+export function SessionMenu({
   position,
   onRename,
   onDelete,
   onClose,
-}: ConversationMenuProps) {
+}: SessionMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    console.log("[ConversationMenu] position:", position);
+    console.log("[SessionMenu] position:", position);
   }, [position]);
 
   useEffect(() => {

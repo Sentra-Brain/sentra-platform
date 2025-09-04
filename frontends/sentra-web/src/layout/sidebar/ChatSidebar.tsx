@@ -1,13 +1,13 @@
 import SidebarSection from "./Shared/SidebarSection";
 import SidebarItem from "./Shared/SidebarItem";
 import { PlusCircle } from "lucide-react";
-import { useConversations } from "@features/conversations/useConversations";
+import { useSessions } from "@features/sessions/useSessions";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ConversationItem } from "@features/conversations/ConversationItem";
+import { SessionItem } from "@features/sessions/SessionItem";
 
 export default function ChatSidebar() {
-  const { conversations, currentConversationId, select, clear, loadingList } =
-    useConversations();
+  const { sessions, currentSessionId, select, clear, loadingList } =
+    useSessions();
 
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -29,7 +29,7 @@ export default function ChatSidebar() {
   };
 
   return (
-    <SidebarSection title="Conversations">
+    <SidebarSection title="Sessions">
       <SidebarItem icon={PlusCircle} label="New chat" onClick={handleNewChat} />
 
       {loadingList && (
@@ -41,12 +41,12 @@ export default function ChatSidebar() {
       {/* 🎯 Scrollable container */}
       <div className="overflow-y-auto max-h-[calc(100vh-350px)] pr-1">
         <ul className="conversation-list space-y-1">
-          {conversations.map((conv) => (
-            <ConversationItem
+          {sessions.map((conv) => (
+            <SessionItem
               key={conv.id}
               id={conv.id}
               title={conv.title || "Untitled"}
-              active={conv.id === currentConversationId}
+              active={conv.id === currentSessionId}
               onSelect={handleSelect}
               onRename={(id) => console.log("Rename", id)}
               onDelete={(id) => console.log("Delete", id)}

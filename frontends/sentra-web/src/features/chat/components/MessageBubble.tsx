@@ -1,5 +1,5 @@
 // features/chat/components/MessageBubble.tsx
-import type { MessageRole } from '@features/conversations/types/conversationModels'
+import type { MessageRole } from '@features/sessions/types/sessionModels'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 

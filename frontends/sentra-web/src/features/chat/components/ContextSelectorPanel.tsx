@@ -4,7 +4,7 @@ import { useAppSelector, useAppDispatch } from '@store/hooks';
 import { 
   setSelectedContext, 
   type SelectedContext 
-} from '../chatSlice';
+} from '../eventsSlice';
 import { 
   fetchSourcesWithDocuments, 
   setVisibility 
@@ -20,7 +20,7 @@ interface Props {
 export default function ContextSelectorPanel({ isOpen, onClose, onApply }: Props) {
   const dispatch = useAppDispatch();
   
-  const { selectedContext } = useAppSelector(s => s.chat);
+  const { selectedContext } = useAppSelector(s => s.events);
   const { 
     sources, 
     documentsBySource, 

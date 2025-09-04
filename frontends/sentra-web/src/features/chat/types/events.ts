@@ -32,6 +32,21 @@ export type StepErrorMeta = {
   [key: string]: unknown;
 };
 
+export type ToolCallEvent = {
+  event_id: string;
+  type: "tool_call";
+  label?: string;
+  content?: string;
+  timestamp: string;
+};
+
+export type UserMessageEvent = {
+  event_id: string;
+  type: "user_message";
+  content: string;
+  timestamp: string;
+};
+
 // Chat event types
 
 export type MessageFinalEvent = {
@@ -94,11 +109,13 @@ export type StepErrorEvent = {
   timestamp: string;
 };
 
-export type ConversationEvent =
+export type EngineEvent =
   | MessageDeltaEvent
   | MessageFinalEvent
   | StepStartEvent
   | StepEndEvent
   | StepProgressEvent
-  | StepErrorEvent;
+  | StepErrorEvent
+  | ToolCallEvent
+  | UserMessageEvent;
 

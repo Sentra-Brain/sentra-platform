@@ -5,41 +5,38 @@ import ChatContent from "./components/ChatContent";
 import ChatFooter from "./components/ChatFooter";
 import ChatInputContainer from "./components/ChatInputContainer";
 
-import { setMessages } from "./chatSlice";
 import { useEffect } from "react";
 import { useAppDispatch } from "@store/hooks";
-import { fetchConversationById } from "@features/conversations/conversationSlice";
-import type { ConversationDetails } from "@features/conversations/types/conversationModels";
+import { fetchSessionById } from "@features/sessions/sessionsSlice";
+import type { SessionDetails } from "@features/sessions/types/sessionModels";
+import { addEvent, resetEvents } from "./eventsSlice";
 
 export default function ChatPage() {
   const dispatch = useAppDispatch();
-  const currentConversationId = useAppSelector(
-    (state) => state.conversation.currentConversationId
-  );
+  const currentSessionId = useAppSelector(
+      (state) => state.session.currentSessionId
+    );
 
   useEffect(() => {
-    if (currentConversationId) {
-      dispatch(fetchConversationById(currentConversationId)).then((res) => {
-        const payload = res.payload as ConversationDetails;
-        if (payload?.messages) {
-          // Filter out system messages that match user messages (to avoid duplication)
-          const filteredMessages = payload.messages.filter((message, _, array) => {
-            if (message.role === 'system') {
-              // Check if there's a user message with the same content
-              const hasMatchingUserMessage = array.some(
-                (msg) => msg.role === 'user' && msg.content.trim() === message.content.trim()
-              );
-              return !hasMatchingUserMessage;
-            }
-            return true;
-          });
-          dispatch(setMessages(filteredMessages));
-        }
-      });
-    }
-  }, [currentConversationId, dispatch]);
+    if (currentSessionId) {
+        dispatch(fetchSessionById(currentSessionId)).then((res) => {
+          const payload = res.payload as SessionDetails;
+          if (payload?.messages) {
+            dispatch(resetEvents());
+            payload.messages.forEach(m => {
+              dispatch(addEvent({
+                event_id: m.id,
+                type: 'message_final',
+                content: m.content,
+                timestamp: new Date(m.timestamp).toISOString(),
+              }))
+            });
+          }
+        });
+      }
+    }, [currentSessionId, dispatch]);
 
-  const isConversationActive = !!currentConversationId;
+    const isConversationActive = !!currentSessionId;
 
   return (
     <div className="flex flex-col h-full w-full min-h-0">
