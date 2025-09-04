@@ -3,8 +3,6 @@ from enum import Enum
 from typing import List, Optional, Literal, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, Field
-from datetime import datetime, timezone
-import uuid
 
 # ---------- Input ----------
 
@@ -51,8 +49,6 @@ class SessionRequest(BaseModel):
 
 # ---------- Output (wire/SSE) ----------
 
-def _ts() -> str:
-    return datetime.now(timezone.utc).isoformat()
 
 
 class PlanOutlineStep(BaseModel):
@@ -64,8 +60,8 @@ class PlanOutlineStep(BaseModel):
 
 
 class SessionEvent(BaseModel):
-    event_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
-    timestamp: str = Field(default_factory=_ts)
+    event_id: str
+    timestamp: str
     type: Literal[
         "plan_outline",
         "step_start",
@@ -75,17 +71,17 @@ class SessionEvent(BaseModel):
         "message_delta",
         "message_final",
     ]
-    # legacy/common
+    author: Optional[str] = None
     task_type: Optional[str] = None
     task_run_id: Optional[str] = None
     step_id: Optional[str] = None
     label: Optional[str] = None
     status: Optional[str] = None
-    content: Optional[str] = None
+    content: Optional[Any] = None
     meta: Optional[Dict[str, Any]] = None
-    # correlation with planner
+    actions: Optional[Dict[str, Any]] = None
+    message: Optional[Dict[str, Any]] = None
     plan_step_id: Optional[str] = None
-    # outline payload
     steps: Optional[List[PlanOutlineStep]] = None
 
 

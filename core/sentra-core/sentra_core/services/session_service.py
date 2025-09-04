@@ -3,8 +3,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from google.adk.events.event import Event
-from google.adk.sessions.session import Session
+from sentra_core.domain.event_entity import EventEntity
+from sentra_core.domain.session_entity import SessionEntity
 
 
 class SessionService(ABC):
@@ -17,17 +17,17 @@ class SessionService(ABC):
         user_id: str,
         session_id: str,
         state: dict[str, Any] | None = None,
-    ) -> Session:
+    ) -> SessionEntity:
         """Create a new session scratchpad."""
 
     @abstractmethod
     async def get_session(
         self, app_name: str, user_id: str, session_id: str
-    ) -> Session:
+    ) -> SessionEntity:
         """Retrieve an existing session."""
 
     @abstractmethod
-    async def append_event(self, session: Session, event: Event) -> Event:
+    async def append_event(self, session: SessionEntity, event: EventEntity) -> EventEntity:
         """Persist an event and update session state."""
 
     @abstractmethod

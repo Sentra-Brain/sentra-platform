@@ -12,7 +12,7 @@ from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapte
 from sentra_core.settings import settings, LLMEngine, EngineMode
 
 from sentra_engine.planner.adapters.llm_planner import LLMPlannerAdapter
-from sentra_engine.mcp.adapters.fastmcp import get_mcp, MCPProtocolAdapter
+from sentra_engine.mcp.adapters.fastmcp import get_mcp
 from sentra_engine.context.adapters.simple_context import SimpleContextService
 from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
@@ -24,6 +24,8 @@ from sentra_brain_api.features.chat.schemas import (
     SessionEvent,
 )
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
+from datetime import datetime, timezone
+from uuid import uuid4
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
@@ -107,6 +109,8 @@ class ChatController:
                     except Exception as e:
                         logger.exception("Streaming failed")
                         err_evt = SessionEvent(
+                            event_id=uuid4().hex,
+                            timestamp=datetime.now(timezone.utc).isoformat(),
                             type="step_error",
                             task_type="chat_pipeline",
                             label="Streaming failed",
@@ -171,6 +175,8 @@ class ChatController:
                 except Exception as e:
                     logger.exception("Streaming failed")
                     err_evt = SessionEvent(
+                        event_id=uuid4().hex,
+                        timestamp=datetime.now(timezone.utc).isoformat(),
                         type="step_error",
                         task_type="chat_pipeline",
                         label="Streaming failed",
