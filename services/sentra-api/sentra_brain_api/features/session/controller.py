@@ -21,16 +21,21 @@ from sentra_brain_api.features.session.schemas import (
     UpdateSessionStateRequest,
     UpdateSessionStateResponse,
 )
-from sentra_brain_api.features.chat.schemas import SessionRequest, SessionMode, SessionEvent
+from sentra_brain_api.features.chat.schemas import SessionRequest, SessionEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra_core.domain.entities.user_entity import UserEntity
+from sentra_core.domain.event_entity import EventEntity
 from sentra_core.infra.nosql.mongo_session_repository import (
     MongoSessionRepository,
     get_session_mongo_repository,
 )
 from sentra_core.infra.sql.postgres_service import get_db
 from sentra_core.logging import get_logger
-from sentra_core.settings import settings, LLMEngine, EngineMode
+from sentra_core.settings import settings
+
+from sentra_core.services.mongo_session_service import get_session_service
+from sentra_engine import run_conversation
+from sentra_engine.models import ConversationRequest as EngineRequest
 
 logger = get_logger("sentra_brain_api.session")
 
@@ -46,7 +51,6 @@ class SessionController:
         mongo_repo: MongoSessionRepository = Depends(get_session_mongo_repository),
     ) -> SessionApiService:
         return SessionApiService(db=db, mongo_repo=mongo_repo)
-
 
     def _add_routes(self):
         @self.router.post(
@@ -146,7 +150,6 @@ class SessionController:
             service: SessionApiService = Depends(self._get_service),
         ):
             return service.update_state(current_user, session_id, body)
-
         @self.router.post(
             "/{session_id}/messages",
             response_class=StreamingResponse,
@@ -157,74 +160,33 @@ class SessionController:
             session_id: UUID,
             body: SessionRequest,
             current_user: UserEntity = Depends(get_authenticated_user),
-            engine_mode: EngineMode | None = Query(None),
         ):
-            body.user_id = current_user.id
-            body.session_id = session_id
-            mode = engine_mode or settings.engine_mode
-            if mode == EngineMode.ADK:
-                from sentra_engine import run_conversation  # type: ignore
-                from sentra_engine.models import ConversationRequest as EngineRequest
+            session_service = get_session_service()
 
-                engine_request = EngineRequest(
-                    messages=[body.content],
-                    context_source_ids=[
-                        str(cid) for cid in body.context_source_ids
-                    ]
-                    if body.context_source_ids
-                    else None,
-                    context_document_ids=[
-                        str(cid) for cid in body.context_document_ids
-                    ]
-                    if body.context_document_ids
-                    else None,
-                )
+            # 1. Persist the user message as an event
+            user_event = EventEntity(
+                event_id=uuid4().hex,
+                timestamp=datetime.now(timezone.utc),
+                type="message_final",
+                author="user",
+                content=body.content,
+                message={"id": str(body.message_id or uuid4()), "role": "user"},
+            )
+            await session_service.append_event(str(session_id), user_event)
 
-                async def stream():
-                    try:
-                        async for ev in run_conversation(engine_request):
-                            out = engine_event_to_wire(ev)
-                            yield f"data: {out.model_dump_json()}\n\n"
-                    except Exception as e:
-                        logger.exception("Streaming failed")
-                        err_evt = SessionEvent(
-                            event_id=uuid4().hex,
-                            timestamp=datetime.now(timezone.utc).isoformat(),
-                            type="step_error",
-                            task_type="chat_pipeline",
-                            label="Streaming failed",
-                            status="error",
-                            content=str(e),
-                            meta={"path": f"/sessions/{session_id}/messages"},
-                        )
-                        yield f"data: {err_evt.model_dump_json()}\n\n"
+            # 2. Build the engine request
+            engine_request = EngineRequest(
+                user_id=str(current_user.id),
+                conversation_id=str(session_id),  # TODO: rename to session_id in models
+                messages=[body.content],
+                context_source_ids=[str(cid) for cid in body.context_source_ids] if body.context_source_ids else None,
+                context_document_ids=[str(cid) for cid in body.context_document_ids] if body.context_document_ids else None,
+            )
 
-                return StreamingResponse(
-                    stream(),
-                    media_type="text/event-stream; charset=utf-8",
-                    headers={
-                        "Cache-Control": "no-cache, no-transform",
-                        "X-Accel-Buffering": "no",
-                        "Connection": "keep-alive",
-                    },
-                )
-
-            from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
-
-            engine = ConversationEngine()
-            runner = engine.run_planner if body.mode == SessionMode.PLAN else engine.run_fast
-
+            # 3. Stream assistant events back
             async def stream():
                 try:
-                    async for ev in runner(
-                        user_id=str(current_user.id),
-                        conversation_id=str(session_id),
-                        message_id=str(body.message_id) if body.message_id else None,
-                        response_message_id=str(body.response_message_id)
-                        if body.response_message_id
-                        else None,
-                        content=body.content,
-                    ):
+                    async for ev in run_conversation(engine_request):
                         out = engine_event_to_wire(ev)
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
