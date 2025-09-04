@@ -17,7 +17,8 @@ from ..context import build_context
 from ..models import ConversationEvent, ConversationRequest
 from ..telemetry import emit_event_log
 from sentra_engine.policies.guardrails import check_tool_allowed
-from ..adapters.mongo_session_service import MongoSessionService
+from sentra_core.services.mongo_session_service import MongoSessionService
+from sentra_core.services.session_service import SessionService
 
 
 class SentraAgent:
@@ -50,14 +51,7 @@ class SentraAgent:
         )
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
-        from sentra_core.infra.nosql.mongo_session_repository import (
-            get_session_mongo_repository,
-        )
-        session_service = MongoSessionService(
-            repo=get_session_mongo_repository(),
-            user_id=user_id,
-            session_id=conversation_id,
-        )
+        session_service: SessionService = MongoSessionService()
         await session_service.create_session(
             app_name="sentra", user_id=user_id, session_id=conversation_id
         )
