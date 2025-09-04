@@ -1,10 +1,18 @@
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.responses import RedirectResponse
 from sentra_core import logging
-from sentra_rag.vector_store.chroma_http import ChromaHttpVectorStore
 from sentra_rag_server.rag_engine import RAGEngine
-from sentra_rag_server.schemas import SearchRequest, SearchResponse, SearchResult, ContextRequest, ContextResponse
-from typing import AsyncGenerator, Optional
+from sentra_rag_server.schemas import (
+    SearchRequest,
+    SearchResponse,
+    SearchResult,
+    ContextRequest,
+    ContextResponse,
+    MemorizeRequest,
+    MemorizeResponse,
+    SearchMemoriesRequest,
+)
+from typing import Optional
 import os
 import uvicorn
 
@@ -100,6 +108,39 @@ async def get_rag_context(request: ContextRequest):
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Context generation failed: {str(e)}")
+
+
+@app.post("/memorize", response_model=MemorizeResponse)
+async def memorize(request: MemorizeRequest):
+    """Store a user memory in the dedicated collection."""
+    try:
+        memory_id = await rag_engine.memorize(
+            user_id=request.user_id,
+            session_id=request.session_id,
+            text=request.text,
+        )
+        return MemorizeResponse(status="ok", memory_id=memory_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Memorize failed: {str(e)}")
+
+
+@app.post("/search_memories", response_model=SearchResponse)
+async def search_memories(request: SearchMemoriesRequest):
+    """Search user-scoped memories."""
+    try:
+        results = await rag_engine.search_memories(
+            user_id=request.user_id,
+            query=request.query,
+            limit=request.limit,
+        )
+        search_results = [SearchResult(**r) for r in results]
+        return SearchResponse(
+            query=request.query,
+            results=search_results,
+            total_results=len(search_results),
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Search memories failed: {str(e)}")
 
 
 @app.get("/", include_in_schema=False, response_class=RedirectResponse)

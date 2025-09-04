@@ -82,6 +82,12 @@ class SentraSettings(BaseSettings):
         default=2, json_schema_extra={"env": "MAX_TOOL_ROUNDS"}
     )
 
+    # ---- RAG server ----
+    rag_server_url: str = Field(
+        default="http://sentra-rag-server:9100",
+        json_schema_extra={"env": "RAG_SERVER_URL"},
+    )
+
     # ---- Vertical defaults ----
     default_vertical: str = Field(
         default="legal", json_schema_extra={"env": "DEFAULT_VERTICAL"}

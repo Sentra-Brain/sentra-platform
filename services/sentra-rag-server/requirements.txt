@@ -10,3 +10,4 @@ pytest-mock
 python-dotenv
 python-jose
 uvicorn
+chromadb
