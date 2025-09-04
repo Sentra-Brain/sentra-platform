@@ -1,5 +1,7 @@
 import asyncio
 from typing import AsyncGenerator, List, Optional, Sequence, Dict, Any
+from uuid import uuid4
+from datetime import datetime, timezone
 
 from sentra_engine.core.plan import Plan, Step
 from sentra_engine.core.models import DeltaEvent, Message, ToolSchema, PromptContext
@@ -7,6 +9,8 @@ from sentra_engine.core.time import utc_now_iso
 from sentra_engine.core.id_utils import normalize_message_id
 from sentra_engine.tools.internal.parser import ToolStreamParser
 from sentra_engine.tools.internal.formatters import normalize_tool_output
+from sentra_core.schemas.engine_event import EngineEvent
+from sentra_core.domain.event_entity import EventMessage
 
 
 class StepRunner:
@@ -87,10 +91,22 @@ class StepRunner:
                         sys_msg = Message(
                             id=normalize_message_id(None, prefer_hex=True),
                             role="system",
-                            content=normalize_tool_output(call.name, res.content if res.ok else res.error),
+                            content=normalize_tool_output(
+                                call.name, res.content if res.ok else res.error
+                            ),
                             timestamp=utc_now_iso(),
                         )
-                        await self.persistence.append_message(self.conversation_id, sys_msg)
+                        await self.persistence.append_event(
+                            self.conversation_id,
+                            EngineEvent(
+                                event_id=uuid4(),
+                                timestamp=datetime.now(timezone.utc),
+                                type="message_final",
+                                author="system",
+                                content=sys_msg.content,
+                                message=EventMessage(id=sys_msg.id, role="system"),
+                            ),
+                        )
                         transcript.append(sys_msg)
 
                     # Repeat this LLM.Respond step to allow the model to use tool results
@@ -116,10 +132,22 @@ class StepRunner:
                     sys_msg = Message(
                         id=normalize_message_id(None, prefer_hex=True),
                         role="system",
-                        content=normalize_tool_output(name, res.content if res.ok else res.error),
+                        content=normalize_tool_output(
+                            name, res.content if res.ok else res.error
+                        ),
                         timestamp=utc_now_iso(),
                     )
-                    await self.persistence.append_message(self.conversation_id, sys_msg)
+                    await self.persistence.append_event(
+                        self.conversation_id,
+                        EngineEvent(
+                            event_id=uuid4(),
+                            timestamp=datetime.now(timezone.utc),
+                            type="message_final",
+                            author="system",
+                            content=sys_msg.content,
+                            message=EventMessage(id=sys_msg.id, role="system"),
+                        ),
+                    )
                     transcript.append(sys_msg)
                     if step.assign:
                         # Store content or error into plan vars
@@ -136,7 +164,17 @@ class StepRunner:
                     content=str(text),
                     timestamp=utc_now_iso(),
                 )
-                await self.persistence.append_message(self.conversation_id, sys_msg)
+                await self.persistence.append_event(
+                    self.conversation_id,
+                    EngineEvent(
+                        event_id=uuid4(),
+                        timestamp=datetime.now(timezone.utc),
+                        type="message_final",
+                        author="system",
+                        content=sys_msg.content,
+                        message=EventMessage(id=sys_msg.id, role="system"),
+                    ),
+                )
                 transcript.append(sys_msg)
                 current_id = step.next
                 continue

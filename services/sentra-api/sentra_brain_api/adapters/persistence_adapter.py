@@ -8,6 +8,7 @@ from uuid import uuid4
 from sentra_engine.persistence.ports.persistence import PersistencePort
 from sentra_engine.core.models import Message, StepEvent
 from sentra_engine.core.constants import CONTEXT_WINDOW_SIZE
+from sentra_core.schemas.engine_event import EngineEvent
 
 # ---- LRU cache (conversations) ---------------------------------------------
 
@@ -42,19 +43,27 @@ def _cache_key(user_id: str, conversation_id: str) -> str:
 
 # ---- helpers ----------------------------------------------------------------
 
-def _message_to_store(m: Message) -> dict[str, Any]:
-    return {
-        "id": m.id,
-        "role": m.role,
-        "content": m.content,
-        "timestamp": m.timestamp,
-        "meta": m.meta,
-    }
+def _event_to_payload(e: EngineEvent) -> dict[str, Any]:
+    data = e.model_dump(exclude_none=True)
+    data["event_id"] = str(e.event_id)
+    data["timestamp"] = e.timestamp.isoformat()
+    return data
+
+def _event_to_message(e: EngineEvent) -> Message:
+    msg = e.message
+    return Message(
+        id=str(msg.id if msg and msg.id else e.event_id.hex),
+        role=str(msg.role if msg and msg.role else e.author),
+        content=str(e.content or ""),
+        timestamp=e.timestamp.isoformat(),
+        meta=e.meta,
+    )
 
 def _dict_to_message(d: Mapping[str, Any]) -> Message:
+    msg = d.get("message") or {}
     return Message(
-        id=str(d.get("id") or uuid4().hex),
-        role=str(d.get("role") or "system"),
+        id=str(msg.get("id") or d.get("event_id") or uuid4().hex),
+        role=str(msg.get("role") or d.get("author") or "system"),
         content=str(d.get("content") or ""),
         timestamp=d.get("timestamp"),
         meta=d.get("meta"),
@@ -67,24 +76,23 @@ class MongoPersistenceAdapter(PersistencePort):
         self.repo = repo
         self.user_id = user_id
 
-    async def append_message(self, conversation_id: str, message: Message) -> None:
-        payload = _message_to_store(message)
-        # persist
+    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
+        payload = _event_to_payload(event)
         await asyncio.to_thread(
-            self.repo.append_message,
-            conversation_id=conversation_id,
+            self.repo.append_event,
+            session_id=conversation_id,
             user_id=self.user_id,
-            message=payload,
+            event=payload,
         )
-        # update cache (append + trim)
-        key = _cache_key(self.user_id, conversation_id)
-        cached = await _CONV_CACHE.get(key)
-        if cached is None:
-            # lazy load then update (avoids desync on first write)
-            cached = await self.load_conversation(conversation_id)
-        # append & trim window
-        cached = [*cached, message][-CONTEXT_WINDOW_SIZE:]
-        await _CONV_CACHE.put(key, cached)
+
+        if event.type in {"message_delta", "message_final"}:
+            msg = _event_to_message(event)
+            key = _cache_key(self.user_id, conversation_id)
+            cached = await _CONV_CACHE.get(key)
+            if cached is None:
+                cached = await self.load_conversation(conversation_id)
+            cached = [*cached, msg][-CONTEXT_WINDOW_SIZE:]
+            await _CONV_CACHE.put(key, cached)
 
     async def append_step_event(self, conversation_id: str, event: StepEvent) -> None:
         # Not used in fast mode
@@ -102,33 +110,15 @@ class MongoPersistenceAdapter(PersistencePort):
 
         raw: Sequence[Any]
         if isinstance(doc, Mapping):
-            raw = (doc.get("messages") or [])  # type: ignore[assignment]
-        elif isinstance(doc, (list, tuple)):
-            raw = doc  # repo returned the message list directly
+            raw = doc.get("events") or []  # type: ignore[assignment]
         else:
-            raw = [] 
+            raw = []
+
         out: list[Message] = []
+        for e in raw:
+            if isinstance(e, Mapping) and e.get("type") == "message_final":
+                out.append(_dict_to_message(e))
 
-        for m in raw:
-            if isinstance(m, Message):
-                out.append(m)
-            elif isinstance(m, Mapping):
-                out.append(_dict_to_message(m))
-            elif hasattr(m, "model_dump"):  # pydantic v2
-                out.append(_dict_to_message(m.model_dump()))  # type: ignore[attr-defined]
-            elif hasattr(m, "dict"):        # pydantic v1
-                out.append(_dict_to_message(m.dict()))        # type: ignore[attr-defined]
-            else:
-                try:
-                    d = vars(m)
-                    if isinstance(d, dict):
-                        out.append(_dict_to_message(d))
-                        continue
-                except Exception:
-                    pass
-                out.append(Message(id=uuid4().hex, role="system", content=str(m)))
-
-        # trim to context window and cache
         out = out[-CONTEXT_WINDOW_SIZE:]
         await _CONV_CACHE.put(key, out)
         return out

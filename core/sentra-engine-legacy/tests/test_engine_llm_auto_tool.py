@@ -15,6 +15,7 @@ from sentra_engine.context.ports.context import ContextPort
 from sentra_engine.llm.ports.llm import LLMPort
 from sentra_engine.mcp.ports.mcp import MCPPort
 from sentra_engine.persistence.ports.persistence import PersistencePort
+from sentra_core.schemas.engine_event import EngineEvent
 from sentra_engine.planner.ports.planner import PlannerPort
 from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 
@@ -53,10 +54,20 @@ class Ctx(ContextPort):
         return PromptContext(messages=[])
 
 class Pers(PersistencePort):
-    def __init__(self): self.msgs: list[Message] = []; self.events: list[StepEvent] = []
-    async def append_message(self, conversation_id: str, message: Message) -> None: self.msgs.append(message)
-    async def append_step_event(self, conversation_id: str, event: StepEvent) -> None: self.events.append(event)
-    async def load_conversation(self, conversation_id: str) -> Sequence[Union[Message, Mapping[str, Any]]]: return []
+    def __init__(self):
+        self.events_store: list[EngineEvent] = []
+        self.step_events: list[StepEvent] = []
+
+    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
+        self.events_store.append(event)
+
+    async def append_step_event(self, conversation_id: str, event: StepEvent) -> None:
+        self.step_events.append(event)
+
+    async def load_conversation(
+        self, conversation_id: str
+    ) -> Sequence[Union[Message, Mapping[str, Any]]]:
+        return []
 
 class MCPFake(MCPPort):
     async def list_tools(self) -> Sequence[ToolSchema]:
@@ -98,7 +109,7 @@ async def _run():
             chunks.append(ev.content)
     text = "".join(chunks)
     assert "I'll search" in text and "Searching again." in text and "Here are the results." in text
-    assert sum(1 for m in p.msgs if m.role == "system") == 2
+    assert sum(1 for e in p.events_store if e.author == "system") == 2
 
 
 def test_autonomous_tool():

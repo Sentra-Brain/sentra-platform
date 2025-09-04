@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
 from sentra_engine.core.models import Message, StepEvent
+from sentra_core.schemas.engine_event import EngineEvent
 from typing import Any, Mapping, Sequence, Union
 
 class PersistencePort(ABC):
     @abstractmethod
-    async def append_message(self, conversation_id: str, message: Message) -> None:
-        """Persist a message in a conversation."""
+    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
+        """Persist an event in a conversation."""
         raise NotImplementedError
 
     @abstractmethod
