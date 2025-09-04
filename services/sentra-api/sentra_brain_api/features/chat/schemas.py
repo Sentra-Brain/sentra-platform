@@ -8,47 +8,72 @@ import uuid
 
 # ---------- Input ----------
 
-class ConversationMode(str, Enum):
+class SessionMode(str, Enum):
     FAST = "fast"
     PLAN = "plan"
 
-class ConversationOptions(BaseModel):
+
+class SessionOptions(BaseModel):
     temperature: Optional[float] = Field(default=None, ge=0, le=2)
     max_tokens: Optional[int] = None
 
-class ConversationRequest(BaseModel):
+
+class SessionRequest(BaseModel):
     user_id: UUID = Field(..., description="ID of the user sending the message")
-    conversation_id: UUID = Field(..., description="ID of the conversation")
+    session_id: UUID = Field(..., description="ID of the session")
     message_id: Optional[UUID] = Field(default=None, description="ID of the message being sent")
-    response_message_id: Optional[UUID] = Field(default=None, description="Pre-assigned ID for the assistant response message")
+    response_message_id: Optional[UUID] = Field(
+        default=None, description="Pre-assigned ID for the assistant response message"
+    )
     content: str = Field(..., description="Content of the message")
-    model: Optional[str] = Field(default="sentra-brain", description="Model to use for the conversation")
-    parent_message_id: Optional[UUID] = Field(default=None, description="ID of the parent message")
-    intent_override: Optional[str] = Field(default=None, description="Intent to override")
-    stream: Optional[bool] = Field(default=True, description="Whether to stream the response")
-    mode: ConversationMode = Field(default=ConversationMode.FAST, description="Engine mode")
-    options: Optional[ConversationOptions] = None
-    context_source_ids: Optional[List[UUID]] = Field(default=None, description="RAG sources")
-    context_document_ids: Optional[List[UUID]] = Field(default=None, description="RAG documents")
+    model: Optional[str] = Field(
+        default="sentra-brain", description="Model to use for the session"
+    )
+    parent_message_id: Optional[UUID] = Field(
+        default=None, description="ID of the parent message"
+    )
+    intent_override: Optional[str] = Field(
+        default=None, description="Intent to override"
+    )
+    stream: Optional[bool] = Field(
+        default=True, description="Whether to stream the response"
+    )
+    mode: SessionMode = Field(
+        default=SessionMode.FAST, description="Engine mode"
+    )
+    options: Optional[SessionOptions] = None
+    context_source_ids: Optional[List[UUID]] = Field(
+        default=None, description="RAG sources"
+    )
+    context_document_ids: Optional[List[UUID]] = Field(
+        default=None, description="RAG documents"
+    )
 
 # ---------- Output (wire/SSE) ----------
 
-def _ts() -> str: return datetime.now(timezone.utc).isoformat()
+def _ts() -> str:
+    return datetime.now(timezone.utc).isoformat()
+
 
 class PlanOutlineStep(BaseModel):
     step_id: str
     title: str
     description: str
-    action: Literal["respond","tool","rag","think","ask_params"]
+    action: Literal["respond", "tool", "rag", "think", "ask_params"]
     args_hint: Optional[str] = None
 
-class ConversationEvent(BaseModel):
+
+class SessionEvent(BaseModel):
     event_id: str = Field(default_factory=lambda: uuid.uuid4().hex)
     timestamp: str = Field(default_factory=_ts)
     type: Literal[
         "plan_outline",
-        "step_start", "step_progress", "step_end", "step_error",
-        "message_delta", "message_final",
+        "step_start",
+        "step_progress",
+        "step_end",
+        "step_error",
+        "message_delta",
+        "message_final",
     ]
     # legacy/common
     task_type: Optional[str] = None
@@ -63,11 +88,15 @@ class ConversationEvent(BaseModel):
     # outline payload
     steps: Optional[List[PlanOutlineStep]] = None
 
+
 # ---- Backwards compatibility helpers
-class ConversationDelta(BaseModel):
+class SessionDelta(BaseModel):
     role: str = "assistant"
     content: str
     final: bool = False
 
-class ConversationResponse(BaseModel):
-    content: str = Field(..., description="Final response content from the assistant.")
+
+class SessionResponse(BaseModel):
+    content: str = Field(
+        ..., description="Final response content from the assistant."
+    )

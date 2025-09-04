@@ -4,9 +4,9 @@ from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_core.logging import get_logger
 from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.infra.nosql.mongo_conversation_repository import (
-    MongoConversationRepository,
-    get_conversation_mongo_repository,
+from sentra_core.infra.nosql.mongo_session_repository import (
+    MongoSessionRepository,
+    get_session_mongo_repository,
 )
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_core.settings import settings, LLMEngine, EngineMode
@@ -17,29 +17,48 @@ from sentra_engine.tools.adapters.orchestrator import ToolOrchestrator
 from sentra_engine.conversation.entrypoint.conversation_engine import ConversationEngine
 from sentra_engine.llm.adapters.factory import LlmAdapterFactory
 from sentra_brain_api.features.chat.schemas import (
-    ConversationRequest, ConversationMode, ConversationEvent
+    SessionRequest,
+    SessionMode,
+    SessionEvent,
 )
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
+
 class ChatControllerLegacy:
-    def __init__(self):        
+    def __init__(self):
         self.router = APIRouter()
         self._add_routes()
         self._mcp = get_mcp()
 
     def _build_planner_adapter(self, model: str):
         if settings.llm_engine == LLMEngine.LLAMA:
-            return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model, request_timeout=settings.llm_request_timeout)
+            return LLMPlannerAdapter(
+                base_url=settings.llama_server_url,
+                model=model,
+                request_timeout=settings.llm_request_timeout,
+            )
         elif settings.llm_engine == LLMEngine.VLLM:
-            return LLMPlannerAdapter(base_url=settings.vllm_server_url, model=model, request_timeout=settings.llm_request_timeout)
-        return LLMPlannerAdapter(base_url=settings.llama_server_url, model=model, request_timeout=settings.llm_request_timeout)
+            return LLMPlannerAdapter(
+                base_url=settings.vllm_server_url,
+                model=model,
+                request_timeout=settings.llm_request_timeout,
+            )
+        return LLMPlannerAdapter(
+            base_url=settings.llama_server_url,
+            model=model,
+            request_timeout=settings.llm_request_timeout,
+        )
 
-    def _build_tool_orchestrator(self, persistence: MongoPersistenceAdapter) -> ToolOrchestrator | None:
+    def _build_tool_orchestrator(
+        self, persistence: MongoPersistenceAdapter
+    ) -> ToolOrchestrator | None:
         if not settings.tools_enabled:
             return None
-        return ToolOrchestrator(mcp=self._mcp, persistence=persistence, telemetry=None, enabled=True)
+        return ToolOrchestrator(
+            mcp=self._mcp, persistence=persistence, telemetry=None, enabled=True
+        )
 
     def _add_routes(self):
         @self.router.post(
@@ -48,46 +67,56 @@ class ChatControllerLegacy:
             description="Sends a message using the legacy engine and streams the assistant response",
         )
         async def send_message_v2(
-            body: ConversationRequest,
+            body: SessionRequest,
             request: Request,
-            mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
+            mongo_repo: MongoSessionRepository = Depends(get_session_mongo_repository),
             current_user: UserEntity = Depends(get_authenticated_user),
             engine_mode: EngineMode | None = Query(None),
         ):
             body.user_id = current_user.id
-            persistence = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
+            persistence = MongoPersistenceAdapter(
+                repo=mongo_repo, user_id=str(current_user.id)
+            )
             context = SimpleContextService(persistence=persistence)
             llm = LlmAdapterFactory.create_adapter(model=body.model or "sentra-brain")
             tool_orch = self._build_tool_orchestrator(persistence)
 
-            if body.mode == ConversationMode.PLAN:
+            if body.mode == SessionMode.PLAN:
                 planner = self._build_planner_adapter(model=body.model or "sentra-brain")
                 engine = ConversationEngine(
-                    context=context, llm=llm, persistence=persistence,
-                    planner=planner, tool_orchestrator=tool_orch
+                    context=context,
+                    llm=llm,
+                    persistence=persistence,
+                    planner=planner,
+                    tool_orchestrator=tool_orch,
                 )
                 runner = engine.run_planner
             else:
                 engine = ConversationEngine(
-                    context=context, llm=llm, persistence=persistence,
-                    planner=None, tool_orchestrator=tool_orch
+                    context=context,
+                    llm=llm,
+                    persistence=persistence,
+                    planner=None,
+                    tool_orchestrator=tool_orch,
                 )
                 runner = engine.run_fast
 
-            async def stream(): 
-                try:  
+            async def stream():
+                try:
                     async for ev in runner(
                         user_id=str(current_user.id),
-                        conversation_id=str(body.conversation_id),
+                        conversation_id=str(body.session_id),
                         message_id=str(body.message_id) if body.message_id else None,
-                        response_message_id=str(body.response_message_id) if body.response_message_id else None,
+                        response_message_id=str(body.response_message_id)
+                        if body.response_message_id
+                        else None,
                         content=body.content,
                     ):
                         out = engine_event_to_wire(ev)
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
-                    err_evt = ConversationEvent(
+                    err_evt = SessionEvent(
                         type="step_error",
                         task_type="chat_pipeline",
                         label="Streaming failed",

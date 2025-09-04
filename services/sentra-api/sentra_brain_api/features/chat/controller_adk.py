@@ -4,12 +4,13 @@ from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_core.logging import get_logger
 from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.infra.nosql.mongo_conversation_repository import (
-    MongoConversationRepository,
-    get_conversation_mongo_repository,
+from sentra_core.infra.nosql.mongo_session_repository import (
+    MongoSessionRepository,
+    get_session_mongo_repository,
 )
 from sentra_brain_api.features.chat.schemas import (
-    ConversationRequest, ConversationEvent
+    SessionRequest,
+    SessionEvent,
 )
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra_engine.app import run_conversation
@@ -17,8 +18,9 @@ from sentra_engine.models import ConversationRequest as EngineRequest
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
+
 class ChatControllerADK:
-    def __init__(self):        
+    def __init__(self):
         self.router = APIRouter()
         self._add_routes()
 
@@ -29,25 +31,27 @@ class ChatControllerADK:
             description="Sends a message using the ADK engine and streams the assistant response",
         )
         async def send_message_v2(
-            body: ConversationRequest,
+            body: SessionRequest,
             request: Request,
-            mongo_repo: MongoConversationRepository = Depends(get_conversation_mongo_repository),
+            mongo_repo: MongoSessionRepository = Depends(get_session_mongo_repository),
             current_user: UserEntity = Depends(get_authenticated_user),
         ):
             body.user_id = current_user.id
 
             engine_request = EngineRequest(
                 messages=[body.content],
-                context_source_ids=
-                    [str(cid) for cid in body.context_source_ids]
-                    if body.context_source_ids
-                    else None,
-                context_document_ids=
-                    [str(cid) for cid in body.context_document_ids]
-                    if body.context_document_ids
-                    else None,
+                context_source_ids=[
+                    str(cid) for cid in body.context_source_ids
+                ]
+                if body.context_source_ids
+                else None,
+                context_document_ids=[
+                    str(cid) for cid in body.context_document_ids
+                ]
+                if body.context_document_ids
+                else None,
                 user_id=str(body.user_id),
-                conversation_id=str(body.conversation_id),
+                conversation_id=str(body.session_id),
             )
 
             async def stream():
@@ -57,7 +61,7 @@ class ChatControllerADK:
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
-                    err_evt = ConversationEvent(
+                    err_evt = SessionEvent(
                         type="step_error",
                         task_type="chat_pipeline",
                         label="Streaming failed",
