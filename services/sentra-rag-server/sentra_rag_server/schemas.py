@@ -33,3 +33,26 @@ class ContextResponse(BaseModel):
     query: str
     context: str
     chunk_count: int
+
+
+class MemorizeRequest(BaseModel):
+    """Request payload for storing a user memory."""
+
+    user_id: str = Field(..., description="User identifier")
+    session_id: str = Field(..., description="Session identifier")
+    text: str = Field(..., description="Text to memorize")
+
+
+class MemorizeResponse(BaseModel):
+    """Response returned after storing a memory."""
+
+    status: str
+    memory_id: str
+
+
+class SearchMemoriesRequest(BaseModel):
+    """Request payload for searching user memories."""
+
+    user_id: str = Field(..., description="User identifier")
+    query: str = Field(..., description="Search query")
+    limit: int = Field(5, description="Maximum number of results")

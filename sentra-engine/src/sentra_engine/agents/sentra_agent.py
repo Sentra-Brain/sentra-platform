@@ -11,6 +11,7 @@ from google.adk.runners import Runner
 from google.genai import types
 
 from sentra_core.settings import settings as core_settings
+from sentra_core.services import RagMemoryService
 
 from .. import config
 from ..context import build_context
@@ -34,11 +35,19 @@ class SentraAgent:
             type="step_start", task_type="agent_execution", task_run_id=task_run_id
         )
 
+        memory_service = RagMemoryService()
+
         if request.context_source_ids or request.context_document_ids:
             check_tool_allowed("SentraAgent", "RagTool")
         context = await build_context(request)
         emit_event_log(ConversationEvent(type="context_built", task_run_id=task_run_id))
-        prompt = f"{context.get('history', '')}\n{request.messages[-1]}"
+        prompt_parts = []
+        if context.get("memories"):
+            prompt_parts.append(context["memories"])
+        if context.get("history"):
+            prompt_parts.append(context["history"])
+        prompt_parts.append(request.messages[-1])
+        prompt = "\n".join(prompt_parts)
 
         vllm = LiteLlm(
             model=core_settings.vllm_model,
@@ -91,6 +100,11 @@ class SentraAgent:
         yield ConversationEvent(
             type="message_final", content=response, task_run_id=task_run_id
         )
+
+        session = await session_service.get_session(
+            app_name="sentra", user_id=user_id, session_id=conversation_id
+        )
+        await memory_service.add_session_to_memory(session)
 
         emit_event_log(
             ConversationEvent(

@@ -8,8 +8,11 @@ from sentra_engine.models.conversation import ConversationRequest
 from sentra_engine.agents.summarizer import update_summary_and_entities
 from sentra_engine.tools.rag_tool import RagTool
 from sentra_core.settings import settings
+from sentra_core.services import RagMemoryService
 
 SUMMARY_THRESHOLD = 5
+
+memory_service = RagMemoryService()
 
 
 async def build_context(request: ConversationRequest) -> Dict[str, str]:
@@ -47,7 +50,21 @@ async def build_context(request: ConversationRequest) -> Dict[str, str]:
                 deduped.append(chunk.content)
         knowledge = "\n".join(deduped)
 
-    context: Dict[str, str] = {"history": history, "knowledge": knowledge}
+    memories = ""
+    if request.user_id and request.messages:
+        results = await memory_service.search_memory(
+            request.user_id, request.messages[-1]
+        )
+        seen_mem: set[str] = set()
+        deduped_mem: list[str] = []
+        for res in results:
+            content = res.get("content")
+            if content and content not in seen_mem:
+                seen_mem.add(content)
+                deduped_mem.append(content)
+        memories = "\n".join(deduped_mem)
+
+    context: Dict[str, str] = {"history": history, "knowledge": knowledge, "memories": memories}
 
     if len(request.messages) > SUMMARY_THRESHOLD:
         summary, entities = await update_summary_and_entities(

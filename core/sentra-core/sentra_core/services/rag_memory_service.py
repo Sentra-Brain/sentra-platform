@@ -1,0 +1,57 @@
+from __future__ import annotations
+
+"""Implementation of :class:`MemoryService` backed by sentra-rag-server."""
+
+from typing import List
+
+import httpx
+
+from sentra_core.domain.session_entity import SessionEntity
+from sentra_core.logging import get_logger
+from sentra_core.settings import settings
+
+from .memory_service import MemoryService
+
+
+logger = get_logger(__name__)
+
+
+class RagMemoryService(MemoryService):
+    """Memory service delegating persistence and search to ``rag-server``."""
+
+    def __init__(self) -> None:
+        self.base_url = settings.rag_server_url.rstrip("/")
+
+    async def add_session_to_memory(self, session: SessionEntity) -> None:
+        """Send the latest assistant messages from ``session`` to rag-server."""
+
+        if not session.events:
+            return
+
+        url = f"{self.base_url}/memorize"
+        async with httpx.AsyncClient() as client:
+            for event in session.events:
+                author = getattr(event, "author", None) or (event.meta or {}).get("author")
+                if event.type == "message_final" and author in (None, "assistant"):
+                    text = event.content if isinstance(event.content, str) else str(event.content)
+                    payload = {
+                        "user_id": session.user_id,
+                        "session_id": session.session_id,
+                        "text": text,
+                    }
+                    try:
+                        await client.post(url, json=payload, timeout=10.0)
+                    except Exception as exc:  # pragma: no cover - logging only
+                        logger.warning(f"Failed to memorize event: {exc}")
+
+    async def search_memory(self, user_id: str, query: str, k: int = 5) -> List[dict]:
+        """Search user memories using rag-server."""
+
+        url = f"{self.base_url}/search_memories"
+        payload = {"user_id": user_id, "query": query, "limit": k}
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, timeout=30.0)
+            response.raise_for_status()
+            data = response.json()
+        return data.get("results", [])
+
