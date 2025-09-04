@@ -1,7 +1,8 @@
 # sentra_engine/ports/mcp.py
 from abc import ABC, abstractmethod
 from typing import Sequence
-from sentra_engine.core.models import ToolSchema, ToolResult
+
+from sentra_engine.mcp.models import ToolResult, ToolSchema
 
 
 class MCPPort(ABC):
