@@ -9,12 +9,12 @@ from typing_extensions import override
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover - only for type checkers
-    from sentra_core.infra.nosql.mongo_conversation_repository import (
-        MongoConversationRepository,
+    from sentra_core.infra.nosql.mongo_session_repository import (
+        MongoSessionRepository,
     )
 from sentra_engine.models import ConversationEvent
 
-from .persistence_adapter import ConversationPersistenceAdapter
+from .persistence_adapter import SessionPersistenceAdapter
 
 
 class MongoSessionService(InMemorySessionService):
@@ -23,13 +23,13 @@ class MongoSessionService(InMemorySessionService):
     def __init__(
         self,
         *,
-        repo: MongoConversationRepository,
+        repo: MongoSessionRepository,
         user_id: str,
-        conversation_id: str,
+        session_id: str,
     ) -> None:
         super().__init__()
-        self._persistence = ConversationPersistenceAdapter(
-            repo=repo, user_id=user_id, conversation_id=conversation_id
+        self._persistence = SessionPersistenceAdapter(
+            repo=repo, user_id=user_id, session_id=session_id
         )
 
     async def save_message(

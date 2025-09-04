@@ -40,13 +40,13 @@ os.environ.update({
     "RABBITMQ_QUEUE": "test_queue"
 })
 
-# 🚨 Patch mongo_conversation_repository BEFORE it's imported anywhere
-fake_mongo_module = types.ModuleType("sentra_core.infra.nosql.mongo_conversation_repository")
+# 🚨 Patch mongo_session_repository BEFORE it's imported anywhere
+fake_mongo_module = types.ModuleType("sentra_core.infra.nosql.mongo_session_repository")
 fake_repo = MagicMock()
-fake_mongo_module.MongoConversationRepository = MagicMock(return_value=fake_repo)  # type: ignore[attr-defined]
-fake_mongo_module.get_conversation_mongo_repository = lambda: fake_repo  # type: ignore[attr-defined]
+fake_mongo_module.MongoSessionRepository = MagicMock(return_value=fake_repo)  # type: ignore[attr-defined]
+fake_mongo_module.get_session_mongo_repository = lambda: fake_repo  # type: ignore[attr-defined]
 fake_mongo_module.mongo_service_instance = fake_repo  # type: ignore[attr-defined]
-sys.modules["sentra_core.infra.nosql.mongo_conversation_repository"] = fake_mongo_module
+sys.modules["sentra_core.infra.nosql.mongo_session_repository"] = fake_mongo_module
 
 # 🚨 Patch ConversationEngine so it never calls real LLM/RAG
 fake_engine = MagicMock()

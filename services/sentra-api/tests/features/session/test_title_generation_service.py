@@ -1,7 +1,7 @@
 import pytest
 import asyncio
 from unittest.mock import AsyncMock, MagicMock, patch
-from sentra_brain_api.features.conversation.title.title_generation_service import TitleGenerationService
+from sentra_brain_api.features.session.title.title_generation_service import TitleGenerationService
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionResponse, 
     ChatCompletionChoice, 
@@ -135,10 +135,10 @@ class TestTitleGenerationService:
     def test_generate_title_heuristic_empty_after_cleanup(self, title_service):
         """Test heuristic when message becomes empty after cleanup."""
         result = title_service._generate_title_heuristic("help me")
-        assert result == "New Conversation"
-        
+        assert result == "New Session"
+
         result = title_service._generate_title_heuristic("how do i")
-        assert result == "New Conversation"
+        assert result == "New Session"
 
     def test_clean_title_removes_quotes(self, title_service):
         """Test that title cleaning removes quotes."""
@@ -155,9 +155,9 @@ class TestTitleGenerationService:
 
     def test_clean_title_empty_returns_default(self, title_service):
         """Test that empty titles return default."""
-        assert title_service._clean_title("") == "New Conversation"
-        assert title_service._clean_title("   ") == "New Conversation"
-        assert title_service._clean_title('""') == "New Conversation"
+        assert title_service._clean_title("") == "New Session"
+        assert title_service._clean_title("   ") == "New Session"
+        assert title_service._clean_title('""') == "New Session"
 
     # @pytest.mark.asyncio
     # async def test_generate_title_with_llm_request_format(self, title_service, mock_vllm_client):

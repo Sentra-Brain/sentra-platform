@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 import inspect
 import uuid
 
-from sentra_brain_api.features.chat.schemas import ConversationEvent, PlanOutlineStep
+from sentra_brain_api.features.chat.schemas import PlanOutlineStep, SessionEvent
 
 def _ts() -> str:
     return datetime.now(timezone.utc).isoformat()
@@ -40,7 +40,7 @@ def _to_mapping(obj: Any) -> Dict[str, Any]:
             d[k] = getattr(obj, k)
     return d or {"type": "step_error", "content": str(obj)}
 
-def engine_event_to_wire(ev: Any) -> ConversationEvent:
+def engine_event_to_wire(ev: Any) -> SessionEvent:
     d: Dict[str, Any] = _to_mapping(ev)
 
     # Defaults
@@ -73,4 +73,4 @@ def engine_event_to_wire(ev: Any) -> ConversationEvent:
                 )
         d["steps"] = norm
 
-    return ConversationEvent(**d)
+    return SessionEvent(**d)

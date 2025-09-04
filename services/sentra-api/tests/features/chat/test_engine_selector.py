@@ -11,7 +11,7 @@ from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 def _payload() -> dict[str, str]:
     return {
         "user_id": str(uuid.uuid4()),
-        "conversation_id": str(uuid.uuid4()),
+        "session_id": str(uuid.uuid4()),
         "content": "hi",
     }
 

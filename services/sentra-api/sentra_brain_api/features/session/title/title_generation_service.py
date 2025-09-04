@@ -9,14 +9,14 @@ logger = get_logger("title_generation_service")
 
 
 class TitleGenerationService:
-    """Service for generating conversation titles."""
+    """Service for generating session titles."""
 
     def __init__(self):
         pass
 
     def generate_initial_title(self, initial_prompt: str) -> str:
         """
-        Heuristic fallback title generator used immediately when creating a conversation.
+        Heuristic fallback title generator used immediately when creating a session.
 
         Args:
             initial_prompt: First user message content
@@ -24,7 +24,7 @@ class TitleGenerationService:
             A cleaned, short title
         """
         if not initial_prompt or not initial_prompt.strip():
-            return "New Conversation"
+            return "New Session"
 
         logger.debug(f"Generating initial heuristic title for: {initial_prompt[:100]}")
         return self._generate_title_heuristic(initial_prompt)
@@ -120,7 +120,7 @@ class TitleGenerationService:
         title_words = words[:6] if len(words) > 4 else words[:4]
 
         if not title_words:
-            return "New Conversation"
+            return "New Session"
 
         title = " ".join(title_words)
 
@@ -131,10 +131,10 @@ class TitleGenerationService:
 
     def _clean_title(self, title: Optional[str]) -> str:
         if not title:
-            return "New Conversation"
+            return "New Session"
 
         title = re.sub(r'^\"|\"$|^\'|\'$|^`|`$', '', title.strip())
         if len(title) > 50:
             title = title[:47] + "..."
 
-        return title.strip() or "New Conversation"
+        return title.strip() or "New Session"

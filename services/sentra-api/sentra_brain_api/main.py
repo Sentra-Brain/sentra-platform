@@ -14,7 +14,7 @@ from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.auth.controller import AuthController
 from sentra_brain_api.features.chat.controller_adk import ChatControllerADK
-from sentra_brain_api.features.conversation.controller import ConversationController
+from sentra_brain_api.features.session.controller import SessionController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.organization.controller import router as organization_router
@@ -79,7 +79,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     admin_settings_controller = AdminSettingsController()
     settings_controller = SettingsController()
     public_settings_controller = PublicSettingsController()
-    conversation_controller = ConversationController()
+    session_controller = SessionController()
     llm_proxy_controller = LLMProxyController()
 
     # Select chat controller based on settings.engine_mode
@@ -96,7 +96,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     app.include_router(admin_settings_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(settings_controller.router, prefix="", tags=["settings"])
     app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
-    app.include_router(conversation_controller.router, prefix="/conversations", tags=["conversations"])
+    app.include_router(session_controller.router, prefix="/sessions", tags=["sessions"])
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])

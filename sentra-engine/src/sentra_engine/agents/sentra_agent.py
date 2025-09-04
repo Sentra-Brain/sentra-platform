@@ -50,13 +50,13 @@ class SentraAgent:
         )
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
-        from sentra_core.infra.nosql.mongo_conversation_repository import (
-            get_conversation_mongo_repository,
+        from sentra_core.infra.nosql.mongo_session_repository import (
+            get_session_mongo_repository,
         )
         session_service = MongoSessionService(
-            repo=get_conversation_mongo_repository(),
+            repo=get_session_mongo_repository(),
             user_id=user_id,
-            conversation_id=conversation_id,
+            session_id=conversation_id,
         )
         await session_service.create_session(
             app_name="sentra", user_id=user_id, session_id=conversation_id

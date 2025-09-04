@@ -3,30 +3,30 @@ from datetime import datetime
 from typing import Any, Dict, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover - only for type checkers
-    from sentra_core.infra.nosql.mongo_conversation_repository import (
-        MongoConversationRepository,
+    from sentra_core.infra.nosql.mongo_session_repository import (
+        MongoSessionRepository,
     )
 from sentra_engine.models import ConversationEvent
 
 
-class ConversationPersistenceAdapter:
-    """Persist conversation events using ``sentra-core`` repositories.
+class SessionPersistenceAdapter:
+    """Persist session events using ``sentra-core`` repositories.
 
-    Events are written to the Mongo conversations repository and de-duplicated
-    using a per-process in-memory cache.  Each stored event includes a
+    Events are written to the Mongo sessions repository and de-duplicated
+    using a per-process in-memory cache. Each stored event includes a
     timestamp so chronological order can be reconstructed when replaying.
     """
 
     def __init__(
         self,
         *,
-        repo: "MongoConversationRepository",
+        repo: "MongoSessionRepository",
         user_id: str,
-        conversation_id: str,
+        session_id: str,
     ) -> None:
         self.repo = repo
         self.user_id = user_id
-        self.conversation_id = conversation_id
+        self.session_id = session_id
         self._seen: Set[str] = set()
 
     def _event_key(self, event: ConversationEvent) -> str:
@@ -48,9 +48,9 @@ class ConversationPersistenceAdapter:
         payload.setdefault("timestamp", datetime.utcnow().isoformat())
 
         await asyncio.to_thread(
-            self.repo.append_message,
-            conversation_id=self.conversation_id,
+            self.repo.append_event,
+            session_id=self.session_id,
             user_id=self.user_id,
-            message=payload,
+            event=payload,
         )
         self._seen.add(key)
