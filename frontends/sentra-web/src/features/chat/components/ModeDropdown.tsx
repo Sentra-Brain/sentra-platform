@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { useAppDispatch, useAppSelector } from "@store/hooks";
-import { setMode } from "@features.events/eventsSlice";
-import type { ConversationMode } from "@features.events/types/mode";
+import { setMode } from "@features/chat/eventsSlice";
+import type { ConversationMode } from "@features/chat/types/mode";
 
 const MODE_LABEL: Record<ConversationMode, string> = {
   fast: "Fast",
