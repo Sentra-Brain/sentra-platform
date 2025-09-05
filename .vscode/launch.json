@@ -134,7 +134,7 @@
       "type": "debugpy",
       "request": "launch",
       "module": "pytest",
-      "cwd": "${workspaceFolder}/services/sentra-core",
+      "cwd": "${workspaceFolder}/packages/sentra-core",
       "args": [
         "-q",
         "tests",
@@ -145,7 +145,7 @@
         "--cov-report=term-missing:skip-covered",
         "--cov-report=xml:${workspaceFolder}/coverage.xml"
       ],
-      "envFile": "${workspaceFolder}/services/sentra-core/tests/.env.test",
+      "envFile": "${workspaceFolder}/packages/sentra-core/tests/.env.test",
       "env": {
         "COVERAGE_FILE": "${workspaceFolder}/.coverage",
         "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
