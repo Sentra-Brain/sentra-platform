@@ -33,3 +33,6 @@ def test_run_conversation_streams_dummy_events(monkeypatch):
     ]
     assert events[1].content == "Hello from ADK engine"
     assert events[2].content == "Done."
+    for ev in events:
+        assert ev.event_id is not None
+        assert ev.timestamp is not None

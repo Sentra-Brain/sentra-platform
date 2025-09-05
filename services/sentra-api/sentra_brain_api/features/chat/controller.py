@@ -1,6 +1,7 @@
 # sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
+from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.shared.logging import get_logger
 from sentra.domain.entities.user_entity import UserEntity
@@ -8,12 +9,10 @@ from sentra.infra.nosql.mongo_session_repository import (
     MongoSessionRepository,
     get_session_mongo_repository,
 )
-from sentra_brain_api.features.chat.schemas import (
-    SessionRequest,
-    SessionEvent,
-)
+from sentra_brain_api.features.chat.schemas import SessionRequest
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra.runtime.models import ConversationRequest as EngineRequest
+from sentra.runtime.adapters.persistence_adapter import SessionPersistenceAdapter
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -38,8 +37,18 @@ class ChatController:
             current_user: UserEntity = Depends(get_authenticated_user),
         ):
             body.user_id = current_user.id
+            adapter = SessionPersistenceAdapter(
+                repo=mongo_repo, user_id=str(current_user.id)
+            )
+            conversation_id = str(body.session_id)
+            await adapter.persist_user_message(
+                conversation_id,
+                text=body.content,
+                meta={"message_id": str(body.message_id)} if body.message_id else None,
+            )
+            recent = await adapter.get_recent_context(conversation_id, limit=50)
             engine_request = EngineRequest(
-                messages=[body.content],
+                messages=[*recent, body.content],
                 context_source_ids=[
                     str(cid) for cid in body.context_source_ids
                 ]
@@ -51,7 +60,7 @@ class ChatController:
                 if body.context_document_ids
                 else None,
                 user_id=str(body.user_id),
-                conversation_id=str(body.session_id),
+                conversation_id=conversation_id,
             )
 
             async def stream():
@@ -59,13 +68,14 @@ class ChatController:
                     from sentra.runtime.app import run_conversation
 
                     async for ev in run_conversation(engine_request):
+                        await adapter.append_event(conversation_id, ev)
                         out = engine_event_to_wire(ev)
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
-                    err_evt = SessionEvent(
+                    err_evt = EngineEvent(
                         event_id=uuid4().hex,
-                        timestamp=datetime.now(timezone.utc).isoformat(),
+                        timestamp=datetime.now(timezone.utc),
                         type="step_error",
                         task_type="chat_pipeline",
                         label="Streaming failed",
@@ -73,7 +83,9 @@ class ChatController:
                         content=str(e),
                         meta={"path": "/chat/send"},
                     )
-                    yield f"data: {err_evt.model_dump_json()}\n\n"
+                    await adapter.append_event(conversation_id, err_evt)
+                    out = engine_event_to_wire(err_evt)
+                    yield f"data: {out.model_dump_json()}\n\n"
 
             return StreamingResponse(
                 stream(),

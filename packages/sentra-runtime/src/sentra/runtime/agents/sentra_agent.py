@@ -62,6 +62,8 @@ class SentraAgent:
         )
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
+        from sentra.runtime.adapters.mongo_session_service import MongoSessionService
+
         session_service: BaseSessionService = MongoSessionService()
         session = await session_service.get_session(
             app_name="sentra", user_id=user_id, session_id=conversation_id
