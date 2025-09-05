@@ -8,19 +8,19 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.agents import Agent
 from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.runners import Runner
+from google.adk.sessions import BaseSessionService
 from google.genai import types
 
 from sentra_core.domain.services import session_service
 from sentra_core.settings import settings as core_settings
 from sentra_core.services import RagMemoryService
-
+from google.adk.sessions import Session
 from .. import config
 from ..context import build_context
 from ..models import EngineEvent, ConversationRequest
 from ..telemetry import emit_event_log
 from sentra_engine.policies.guardrails import check_tool_allowed
-from sentra_core.services.mongo_session_service import MongoSessionService
-from sentra_core.services.session_service import SessionService
+from sentra_engine.adapters.mongo_session_service import MongoSessionService
 
 
 class SentraAgent:
@@ -62,7 +62,7 @@ class SentraAgent:
         )
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
-        session_service: SessionService = MongoSessionService()
+        session_service: BaseSessionService = MongoSessionService()
         session = await session_service.get_session(
             app_name="sentra", user_id=user_id, session_id=conversation_id
         )
@@ -71,11 +71,14 @@ class SentraAgent:
                 f"Session not found for user_id={user_id}, session_id={conversation_id}. "
                 "Session must exist in both MongoDB and SQL."
             )
+        # Convert SessionEntity to dict, then to ADK Session
+        adk_session = Session.model_validate(session.model_dump())
         run_config = RunConfig(streaming_mode=StreamingMode.SSE)
         runner = Runner(
             agent=adk_agent,
             app_name="sentra",
-            session_service=session_service
+            session_service=session_service,
+            session=adk_session,
         )
         content = types.Content(role="user", parts=[types.Part(text=prompt)])
         chunks: list[str] = []

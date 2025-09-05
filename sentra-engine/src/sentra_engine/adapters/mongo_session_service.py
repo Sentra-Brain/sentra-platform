@@ -10,10 +10,11 @@ from sentra_core.domain.event_entity import EventEntity, EventMessage
 from sentra_core.schemas.engine_event import EngineEvent
 from sentra_core.domain.session_entity import SessionEntity
 
-from .session_service import SessionService
+from google.adk.sessions import BaseSessionService
+from google.adk.sessions.base_session_service import ListSessionsResponse
 
 
-class MongoSessionService(SessionService):
+class MongoSessionService(BaseSessionService):
     """MongoDB-backed implementation of :class:`SessionService`."""
 
     def __init__(self, client: MongoClient | None = None) -> None:
@@ -95,6 +96,25 @@ class MongoSessionService(SessionService):
             last_update_time=doc.get("last_update_time", datetime.now(timezone.utc)),
         )
 
+    async def list_sessions(
+        self, *, app_name: str, user_id: str
+    ) -> ListSessionsResponse:
+        # Query MongoDB for all sessions for this app and user
+        docs = self.sessions.find({"app_name": app_name, "user_id": user_id})
+        sessions = []
+        for doc in docs:
+            # Convert your SessionEntity to ADK's Session model
+            session = SessionEntity.model_validate({
+                "app_name": doc["app_name"],
+                "user_id": doc["user_id"],
+                "session_id": doc["session_id"],
+                "state": doc.get("state", {}),
+                "events": [],  # Per ADK doc, events/states not set in list
+                "last_update_time": doc.get("last_update_time"),
+            })
+            sessions.append(session)
+        return ListSessionsResponse(sessions=sessions)
+    
     async def append_event(
         self, session: SessionEntity, event: EventEntity | EngineEvent
     ) -> EventEntity | EngineEvent:
