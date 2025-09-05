@@ -2,9 +2,9 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_core.logging import get_logger
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.infra.nosql.mongo_session_repository import (
+from sentra.shared.logging import get_logger
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.infra.nosql.mongo_session_repository import (
     MongoSessionRepository,
     get_session_mongo_repository,
 )
@@ -13,7 +13,7 @@ from sentra_brain_api.features.chat.schemas import (
     SessionEvent,
 )
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
-from sentra_engine.models import ConversationRequest as EngineRequest
+from sentra.runtime.models import ConversationRequest as EngineRequest
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -56,7 +56,7 @@ class ChatController:
 
             async def stream():
                 try:
-                    from sentra_engine.app import run_conversation
+                    from sentra.runtime.app import run_conversation
 
                     async for ev in run_conversation(engine_request):
                         out = engine_event_to_wire(ev)

@@ -1,7 +1,7 @@
 # sentra_brain_api/features/settings/api_service.py
 
 from sqlalchemy.orm import Session
-from sentra_core.domain.services.settings_service import SettingsService
+from sentra.domain.services.settings_service import SettingsService
 from sentra_brain_api.features.settings.schemas import (
     SystemSettingsResponse,
     SystemSettingsUpdateRequest,

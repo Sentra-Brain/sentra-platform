@@ -1,9 +1,9 @@
 import pytest
 from unittest.mock import MagicMock, patch
 from fastapi.testclient import TestClient
-from sentra_core.domain.entities.organization_entity import OrganizationEntity
+from sentra.domain.entities.organization_entity import OrganizationEntity
 from sentra_brain_api.main import create_app
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.infra.sql.postgres_service import get_db
 
 
 class TestOrganizationController:

@@ -4,22 +4,22 @@ from pathlib import Path
 from uuid import UUID
 from typing import List, Optional
 from fastapi import UploadFile
-
-from sentra_core.domain.constants.file_types import ALLOWED_FILE_TYPES
-from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-from sentra_core.domain.entities.document_entity import DocumentEntity
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
-from sentra_core.domain.services.file_storage import FileStorageService
-from sentra_core.domain.services.knowledge_source_service import KnowledgeSourceService
-from sentra_core.domain.services.document_service import DocumentService
-from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra_core.domain.repository.document_repository import DocumentRepository
-from sentra_core.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
+ 
+from sentra.domain.constants.file_types import ALLOWED_FILE_TYPES
+from sentra.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
+from sentra.domain.entities.document_entity import DocumentEntity
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra.domain.services.file_storage import FileStorageService
+from sentra.domain.services.knowledge_source_service import KnowledgeSourceService
+from sentra.domain.services.document_service import DocumentService
+from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra.domain.repository.document_repository import DocumentRepository
+from sentra.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentMarkdownResponse, DocumentUploadRequest
-from sentra_core.settings import settings
-from sentra_core.logging import get_logger
+from sentra.shared.settings import settings
+from sentra.shared.logging import get_logger
 
 logger = get_logger(__name__)
 

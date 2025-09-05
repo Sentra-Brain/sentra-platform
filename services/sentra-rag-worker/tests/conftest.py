@@ -27,10 +27,10 @@ os.environ.update({
     "ACCESS_TOKEN_EXPIRE_MINUTES": "30",
     "MONGO_URL": "mongodb://localhost:27017"
 })
-from sentra_core.infra.sql.postgres_settings import settings as pg_settings
-from sentra_core.infra.nosql.mongo_settings import settings as mongo_settings
-from sentra_core.infra.amqp.rabbitmq_settings import settings as rabbitmq_settings
-from sentra_core.infra.sql.postgres_service import get_db, init_db
+from sentra.infra.sql.postgres_settings import settings as pg_settings
+from sentra.infra.nosql.mongo_settings import settings as mongo_settings
+from sentra.infra.amqp.rabbitmq_settings import settings as rabbitmq_settings
+from sentra.infra.sql.postgres_service import get_db, init_db
 
 @pytest.fixture(scope="session", autouse=True)
 def load_settings():

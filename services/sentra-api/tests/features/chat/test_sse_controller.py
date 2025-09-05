@@ -11,7 +11,7 @@
 
 # from sentra_brain_api.features.chat.controller import ChatController
 # from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-# from sentra_core.domain.entities.user_entity import UserEntity
+# from sentra.domain.entities.user_entity import UserEntity
 # from sentra_brain_api.core.conversation_engine.models.output_model import ConversationEvent
 
 

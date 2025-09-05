@@ -3,13 +3,13 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from sentra_core.infra.sql.postgres_settings import settings
+from sentra.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_core.logging import get_logger
-from sentra_core.domain.entities.user_entity import UserEntity
+from sentra.shared.logging import get_logger
+from sentra.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.models import TokenData
-from sentra_core.domain.repository.user_repository import UserRepository
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.domain.repository.user_repository import UserRepository
+from sentra.infra.sql.postgres_service import get_db
 
 logger = get_logger("sentra.auth")
 

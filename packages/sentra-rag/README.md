@@ -16,8 +16,8 @@ pip install -e .
 ## Usage
 
 ```python
-from sentra_rag.embeddings import get_embedding_provider
-from sentra_rag.services import RAGQueryService
+from sentra.rag.embeddings import get_embedding_provider
+from sentra.rag.services import RAGQueryService
 
 # Get embedding provider
 provider = get_embedding_provider()

@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
-from sentra_core.domain.services.organization_service import OrganizationService
+from sentra.domain.services.organization_service import OrganizationService
 
 
 class OrganizationApiService:

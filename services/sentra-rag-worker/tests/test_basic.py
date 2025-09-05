@@ -35,10 +35,10 @@ def test_imports():
         from sentra_rag_worker.core.config import settings
         print("✓ Config import successful")
         
-        from sentra_core.logging import get_logger
+        from sentra.shared.logging import get_logger
         print("✓ Logging import successful")
         
-        from sentra_core.domain.entities.document_entity import DocumentEntity, DocumentFileType
+        from sentra.domain.entities.document_entity import DocumentEntity, DocumentFileType
         print("✓ Document entity import successful")
         
         from sentra_rag_worker.services.text_chunker import TextChunker

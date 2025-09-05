@@ -10,10 +10,10 @@
 # from uuid import UUID
 # from sentra_brain_api.features.knowledge.api_service import KnowledgeApiService
 # from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentUploadRequest
-# from sentra_core.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-# from sentra_core.domain.entities.document_entity import DocumentEntity
-# from sentra_core.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
-# from sentra_core.domain.constants.file_types import ALLOWED_FILE_TYPES
+# from sentra.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
+# from sentra.domain.entities.document_entity import DocumentEntity
+# from sentra.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
+# from sentra.domain.constants.file_types import ALLOWED_FILE_TYPES
 
 # @pytest.fixture
 # def mock_knowledge_repo():

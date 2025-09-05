@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentra-rag"
+version = "0.2.0"
+description = "RAG-specific logic: embeddings, vector store, chunking"
+authors = [{name = "Juan G Carmona"}]
+requires-python = ">=3.10"
+dependencies = [
+  "httpx",
+  "pydantic>=2",
+  "pydantic-settings",
+  "python-dotenv",
+  "sentra-core>=0.2.0",
+]
+
+[project.optional-dependencies]
+ml = [
+  "sentence-transformers==5.0.0",
+  "chromadb==1.0.15",
+]
+dev = [
+  "pytest==8.4.1",
+  "pytest-cov==6.2.1",
+  "pytest-mock==3.14.1",
+  "pytest-asyncio==1.1.0",
+  "debugpy==1.8.15",
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+include = ["sentra.rag*"]

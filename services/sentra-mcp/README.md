@@ -63,7 +63,7 @@ sentra-mcp:
     - "8080:8080"   # metrics
   volumes:
     - ../services/sentra-mcp:/app
-    - ../core/sentra-core:/core/sentra-core
+    - ../packages/sentra-core:/packages/sentra-core
     - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
   networks:
     - sentrabrain-dev-net

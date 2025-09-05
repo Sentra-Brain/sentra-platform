@@ -1,7 +1,7 @@
 """Tests for markdown casting functionality."""
 
 import pytest
-from sentra_core.domain.entities.document_entity import DocumentFileType
+from sentra.domain.entities.document_entity import DocumentFileType
 from sentra_rag_worker.services.sanitizer import (
     html_to_md, 
     pdf_to_md, 

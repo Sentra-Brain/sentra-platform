@@ -2,7 +2,7 @@
 # from httpx import AsyncClient
 # from fastapi import status
 
-# from sentra_core.domain.entities.user_entity import UserEntity
+# from sentra.domain.entities.user_entity import UserEntity
 # from sentra_brain_api.main import app
 
 

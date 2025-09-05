@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
-from sentra_core import logging
+from sentra.shared import logging
 from sentra_brain_api.features.llm_proxy.models import (
     ChatCompletionRequest,
     ChatCompletionResponse,
@@ -23,7 +23,7 @@ class LLMProxyController:
         self._add_routes()
 
     def _convert_to_prompt_context(self, request: ChatCompletionRequest):
-        from sentra_engine.core.models import PromptContext
+        from sentra.runtime.core.models import PromptContext
 
         return PromptContext(messages=request.messages)
 
@@ -44,7 +44,7 @@ class LLMProxyController:
                 if not request.model:
                     raise HTTPException(status_code=400, detail="Model is required")
 
-                from sentra_engine.llm.adapters.factory import LlmAdapterFactory
+                from sentra.runtime.llm.adapters.factory import LlmAdapterFactory
 
                 llm_adapter = LlmAdapterFactory.create_adapter(request.model)
                 prompt_context = self._convert_to_prompt_context(request)

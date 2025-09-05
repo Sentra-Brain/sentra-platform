@@ -12,6 +12,7 @@
     "**/__pycache__": true,
     "**/.pytest_cache": true
   },
+  "python.envFile": "${workspaceFolder}/.env",
   "coverage-gutters.coverageFileNames": ["coverage.xml"],
   "coverage-gutters.showGutterCoverage": true,
   "coverage-gutters.showLineCoverage": true,

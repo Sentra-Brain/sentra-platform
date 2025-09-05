@@ -10,7 +10,7 @@ from sentra_brain_api.features.settings.schemas import (
     ChatSettingsResponse,
     ChatSettingsUpdateRequest
 )
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.infra.sql.postgres_service import get_db
 
 
 class SettingsController:

@@ -32,7 +32,7 @@ services/
 
 A shared **Docker base image** (`Dockerfile`) already exists within `sentra-rag-worker` as `Dockerfile.base` and `requirements.rag.txt`. This base image will be **moved to `services/sentra-rag-base/`** to serve as the foundation for both the server and worker.
 
-The shared Python package `core/sentra-rag/` will include:
+The shared Python package `packages/sentra-rag/` will include:
 
 * Embedding providers (sentence-transformers)
 * VectorStoreService (ChromaDB)
@@ -74,7 +74,7 @@ The API (`sentra-api`) will offload embedding and retrieval to `sentra-rag-serve
 
 ## Implementation Plan
 
-1. Create `core/sentra-rag` as internal shared library.
+1. Create `packages/sentra-rag` as internal shared library.
 2. Move embedding and vector store logic from `sentra-rag-worker` into `sentra-rag`.
 3. Build `sentra-rag-server` as a minimal FastAPI service with `/retrieve` and `/embed` endpoints.
 4. Move `Dockerfile.base` and `requirements.rag.txt` into `services/sentra-rag-base/` and standardize the build.

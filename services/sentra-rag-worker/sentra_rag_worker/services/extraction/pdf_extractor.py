@@ -3,7 +3,7 @@
 import os
 import pymupdf
 import pymupdf4llm
-from sentra_core.logging import get_logger
+from sentra.shared.logging import get_logger
 from .base import DocumentExtractorBase, ExtractionPayload
 
 logger = get_logger(__name__)

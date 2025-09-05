@@ -41,25 +41,25 @@ os.environ.update({
 })
 
 # 🚨 Patch mongo_session_repository BEFORE it's imported anywhere
-fake_mongo_module = types.ModuleType("sentra_core.infra.nosql.mongo_session_repository")
+fake_mongo_module = types.ModuleType("sentra.infra.nosql.mongo_session_repository")
 fake_repo = MagicMock()
 fake_mongo_module.MongoSessionRepository = MagicMock(return_value=fake_repo)  # type: ignore[attr-defined]
 fake_mongo_module.get_session_mongo_repository = lambda: fake_repo  # type: ignore[attr-defined]
 fake_mongo_module.mongo_service_instance = fake_repo  # type: ignore[attr-defined]
-sys.modules["sentra_core.infra.nosql.mongo_session_repository"] = fake_mongo_module
+sys.modules["sentra.infra.nosql.mongo_session_repository"] = fake_mongo_module
 
 # 🚨 Patch ConversationEngine so it never calls real LLM/RAG
 fake_engine = MagicMock()
-sys.modules["sentra_engine.engine"] = types.ModuleType(
-    "sentra_engine.engine"
+sys.modules["sentra.runtime.engine"] = types.ModuleType(
+    "sentra.runtime.engine"
 )
-sys.modules["sentra_engine.engine"].ConversationEngine = MagicMock(return_value=fake_engine) # type: ignore[attr-defined]
+sys.modules["sentra.runtime.engine"].ConversationEngine = MagicMock(return_value=fake_engine) # type: ignore[attr-defined]
 
 # ✅ Now safe to import rest of your dependencies
-from sentra_core.infra.sql.postgres_settings import settings as pg_settings
-from sentra_core.infra.nosql.mongo_settings import settings as mongo_settings
-from sentra_core.infra.amqp.rabbitmq_settings import settings as rabbitmq_settings
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.infra.sql.postgres_settings import settings as pg_settings
+from sentra.infra.nosql.mongo_settings import settings as mongo_settings
+from sentra.infra.amqp.rabbitmq_settings import settings as rabbitmq_settings
+from sentra.infra.sql.postgres_service import get_db
 from fastapi.testclient import TestClient
 
 @pytest.fixture(scope="session", autouse=True)

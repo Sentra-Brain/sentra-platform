@@ -2,9 +2,9 @@
 from fastapi import APIRouter, Depends
 from sentra_brain_api.crosscutting.authorization import get_superadmin_user
 from sentra_brain_api.features.admin.settings.mappers import to_system_settings_response
-from sentra_core.domain.entities.system_settings import SystemSettingsEntity
+from sentra.domain.entities.system_settings import SystemSettingsEntity
 from sentra_brain_api.features.admin.settings.schemas import SystemSettingsResponse
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.infra.sql.postgres_service import get_db
 from sqlalchemy.orm import Session
 
 

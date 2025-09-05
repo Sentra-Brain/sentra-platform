@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime
 
-from sentra_core.schemas.engine_event import EngineEvent
+from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.features.chat.schemas import SessionEvent
 
 

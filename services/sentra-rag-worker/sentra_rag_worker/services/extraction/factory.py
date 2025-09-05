@@ -1,6 +1,6 @@
 """Factory for creating document extractors based on file type."""
 
-from sentra_core.domain.entities.document_entity import DocumentFileType
+from sentra.domain.entities.document_entity import DocumentFileType
 from .base import DocumentExtractorBase
 from .pdf_extractor import PdfExtractor
 from .docx_extractor import DocxExtractor

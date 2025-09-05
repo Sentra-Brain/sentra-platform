@@ -18,7 +18,7 @@ class LlmAdapterFactory:
         raise NotImplementedError
 
 import sys, types
-sys.modules["sentra_engine.llm.adapters.factory"] = types.SimpleNamespace(
+sys.modules["sentra.runtime.llm.adapters.factory"] = types.SimpleNamespace(
     LlmAdapterFactory=LlmAdapterFactory
 )
 
@@ -26,12 +26,12 @@ class PromptContext:
     def __init__(self, messages):
         self.messages = messages
 
-sys.modules["sentra_engine.core"] = types.ModuleType("sentra_engine.core")
-sys.modules["sentra_engine.core.models"] = types.SimpleNamespace(
+sys.modules["sentra.runtime.core"] = types.ModuleType("sentra.runtime.core")
+sys.modules["sentra.runtime.core.models"] = types.SimpleNamespace(
     PromptContext=PromptContext
 )
 
-pytest.skip("sentra_engine dependencies missing", allow_module_level=True)
+pytest.skip("sentra.runtime dependencies missing", allow_module_level=True)
 
 
 @pytest.fixture

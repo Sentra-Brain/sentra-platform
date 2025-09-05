@@ -1,8 +1,8 @@
 # sentra_brain_api/features/settings/mappers.py
 
 from sentra_brain_api.features.settings.schemas import SystemSettingsResponse, ChatSettingsResponse
-from sentra_core.domain.entities.system_settings import SystemSettingsEntity
-from sentra_core.domain.entities.chat_settings import ChatSettingsEntity
+from sentra.domain.entities.system_settings import SystemSettingsEntity
+from sentra.domain.entities.chat_settings import ChatSettingsEntity
 
 
 def to_system_settings_response(settings: SystemSettingsEntity) -> SystemSettingsResponse:

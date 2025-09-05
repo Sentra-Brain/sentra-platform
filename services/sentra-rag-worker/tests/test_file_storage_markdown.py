@@ -1,5 +1,5 @@
 from uuid import uuid4
-from sentra_core.domain.services.file_storage import FileStorageService
+from sentra.domain.services.file_storage import FileStorageService
 
 
 def test_save_markdown(tmp_path):
