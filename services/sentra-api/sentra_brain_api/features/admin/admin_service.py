@@ -1,6 +1,6 @@
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra_core.domain.repository.user_repository import UserRepository
-from sentra_core.logging import get_logger
+from sentra.domain.repository.user_repository import UserRepository
+from sentra.shared.logging import get_logger
 from sqlalchemy.orm import Session
 from uuid import UUID
 

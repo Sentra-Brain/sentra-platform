@@ -4,8 +4,7 @@
 # Include folders that should not be ignored
 !frontends/
 !services/
-!core/
-!sentra-engine/
+!packages/
 
 # Ignore specific files and directories
 **/__pycache__/

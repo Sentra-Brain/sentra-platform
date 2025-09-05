@@ -3,8 +3,8 @@ from uuid import UUID
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.crosscutting.authorization import get_admin_user
 from sentra_brain_api.features.user.schemas import UserModel
-from sentra_core.infra.sql.postgres_service import get_db
-from sentra_core.domain.repository.user_repository  import UserRepository
+from sentra.infra.sql.postgres_service import get_db
+from sentra.domain.repository.user_repository  import UserRepository
 from sentra_brain_api.features.user.mappers import to_user_model
 from sentra_brain_api.features.admin.admin_service import AdminService
 from sqlalchemy.orm import Session

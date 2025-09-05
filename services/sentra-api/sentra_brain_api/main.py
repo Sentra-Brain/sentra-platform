@@ -22,9 +22,9 @@ from sentra_brain_api.features.session.controller import SessionController
 from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
-from sentra_core import logging
-from sentra_core.infra.sql import postgres_service
-from sentra_engine.mcp.adapters.fastmcp import get_mcp
+from sentra.shared import logging
+from sentra.infra.sql import postgres_service
+from sentra.runtime.mcp.adapters.fastmcp import get_mcp
 import os
 
 

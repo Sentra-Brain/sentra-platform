@@ -4,7 +4,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from sentra_core.infra.nosql.base_mongo_model import BaseMongoModel
+from sentra.infra.nosql.base_mongo_model import BaseMongoModel
 
 
 class CreateSessionRequest(BaseModel):

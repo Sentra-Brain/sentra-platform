@@ -1,6 +1,6 @@
 # sentra_brain_api/features/conversation/mappers.py
 
-from sentra_core.domain.entities.session_entity import SessionEntity
+from sentra.domain.entities.session_entity import SessionEntity
 
 from sentra_brain_api.features.session.schemas import (
     CreateSessionResponse,

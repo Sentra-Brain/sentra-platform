@@ -1,7 +1,7 @@
 # services/sentra-mcp/sentra_mcp/tools/web.py
 from __future__ import annotations
 
-from sentra_core.logging import get_logger
+from sentra.shared.logging import get_logger
 from typing import Annotated, List, TypedDict
 from pydantic import Field
 import httpx

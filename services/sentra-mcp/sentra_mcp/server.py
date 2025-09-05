@@ -2,7 +2,7 @@
 import os
 from typing import Literal, cast
 
-from sentra_core.logging import get_logger, configure_logging
+from sentra.shared.logging import get_logger, configure_logging
 from fastmcp import FastMCP
 from sentra_mcp.tools_registry import register_all_tools
 

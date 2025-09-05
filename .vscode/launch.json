@@ -41,13 +41,13 @@
         "PYTEST_ADDOPTS": "--no-cov"
       },
       "module": "pytest",
-      "cwd": "${workspaceFolder}/core/sentra-core/tests",
-      "envFile": "${workspaceFolder}/core/sentra-core/tests/.env.test",
+      "cwd": "${workspaceFolder}/packages/sentra-core/tests",
+      "envFile": "${workspaceFolder}/packages/sentra-core/tests/.env.test",
       "console": "integratedTerminal",
     },
 
     {
-      "name": "Test: sentra-engine",
+      "name": "Test: sentra-runtime",
       "type": "debugpy",
       "request": "launch",
       "purpose": ["debug-test"],
@@ -55,8 +55,8 @@
         "PYTEST_ADDOPTS": "--no-cov"
       },
       "module": "pytest",
-      "cwd": "${workspaceFolder}/core/sentra-engine/tests",
-      "envFile": "${workspaceFolder}/core/sentra-engine/tests/.env.test",
+      "cwd": "${workspaceFolder}/packages/sentra-runtime/tests",
+      "envFile": "${workspaceFolder}/packages/sentra-runtime/tests/.env.test",
       "console": "integratedTerminal",
     },
     
@@ -81,12 +81,16 @@
       "cwd": "${workspaceFolder}",
       "args": [
         "-q",
-        "core/sentra-engine/tests",
+        "packages/sentra-core/tests",
+        "packages/sentra-rag/tests",
+        "packages/sentra-runtime/tests",
         "services/sentra-core/tests",
         "services/sentra-api/tests",
         "--maxfail=1",
         "--disable-warnings",
-        "--cov=core/sentra-engine/sentra_engine",
+        "--cov=packages/sentra-runtime/sentra_core",
+        "--cov=packages/sentra-runtime/sentra_rag",
+        "--cov=packages/sentra-runtime/sentra_runtime",
         "--cov=services/sentra-core/sentra_core",
         "--cov=services/sentra-api/sentra_brain_api",
         "--cov-branch",
@@ -101,17 +105,17 @@
       "justMyCode": false
     },
       {
-      "name": "Test: sentra-engine (coverage)",
+      "name": "Test: sentra-runtime (coverage)",
       "type": "debugpy",
       "request": "launch",
       "module": "pytest",
-      "cwd": "${workspaceFolder}/core/sentra-engine",
+      "cwd": "${workspaceFolder}/core/sentra-runtime",
       "args": [
         "-q",
         "tests",
         "--maxfail=1",
         "--disable-warnings",
-        "--cov=sentra_engine",
+        "--cov=sentra_runtime",
         "--cov-branch",
         "--cov-report=term-missing:skip-covered",
         "--cov-report=xml:${workspaceFolder}/coverage.xml"

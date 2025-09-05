@@ -16,7 +16,7 @@ The system supports both community (up to 3 users/devices, AGPLv3) and commercia
 - **Database:** Postgres (default).
 
 **Folder Layout:**
-- `core/sentra-core/` – Shared backend logic (Domain, Infra, Core, Model, Tests).
+- `packages/sentra-core/` – Shared backend logic (Domain, Infra, Core, Model, Tests).
 - `apps/` – Application entrypoints (APIs, Admin UI, MCP Server, etc.).
 - `services/` – Service modules, agent infrastructure.
 - `deploy/` – Deployment scripts, Docker Compose, cloud infra.
@@ -38,7 +38,7 @@ The system supports both community (up to 3 users/devices, AGPLv3) and commercia
 
 #### 1. Install dependencies:
 ```bash
-cd core/sentra-core
+cd packages/sentra-core
 pip install -r requirements.txt
 # or, if using poetry
 poetry install
@@ -57,7 +57,7 @@ alembic upgrade head
 
 #### 4. Run tests:
 ```bash
-cd core/sentra-core
+cd packages/sentra-core
 pytest
 ```
 
@@ -114,9 +114,9 @@ npm run test
   Infrastructure in `sentra_core/infra/`  
   Core models, logging in `sentra_core/core/`
 - **Tests:**  
-  In `core/sentra-core/tests/`
+  In `packages/sentra-core/tests/`
 - **Migration scripts:**  
-  In `core/sentra-core/sentra_core/infra/sql/alembic/`
+  In `packages/sentra-core/sentra_core/infra/sql/alembic/`
 - **Frontend:**  
   In `apps/admin-ui/`
 - **Deployment:**  

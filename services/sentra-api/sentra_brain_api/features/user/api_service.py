@@ -6,10 +6,10 @@ from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.user.mappers import to_user_model
 from sentra_brain_api.features.user.schemas import SignupResponse, UserModel, UserProfileUpdate
-from sentra_core import logging
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.domain.services.user_service import UserService
-from sentra_core.infra.notifications.notification_service import NotificationService
+from sentra.shared import logging
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.domain.services.user_service import UserService
+from sentra.infra.notifications.notification_service import NotificationService
 from sqlalchemy.orm import Session
 import asyncio
 import os

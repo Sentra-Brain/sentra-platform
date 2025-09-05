@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 from uuid import uuid4
 from datetime import datetime, timezone
 
-import pytest
-from sentra_core.schemas.engine_event import EngineEvent
+from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from pydantic import ValidationError
 from pydantic_core import ValidationError as CoreValidationError
+import pytest
 
 
 def test_message_final_delivers_content():

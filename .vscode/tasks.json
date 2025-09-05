@@ -5,7 +5,7 @@
     {
       "label": "pytest: all (coverage)",
       "type": "shell",
-      "command": "python -m pytest -q core/sentra-engine/tests services/sentra-core/tests services/sentra-api/tests --maxfail=1 --disable-warnings --cov=core/sentra-engine/sentra_engine --cov=services/sentra-core/sentra_core --cov=services/sentra-api/sentra_brain_api --cov-branch --cov-report=term-missing:skip-covered --cov-report=xml:coverage.xml",
+      "command": "python -m pytest -q packages/sentra-core/tests packages/sentra-runtime/tests packages/sentra-rag/tests services/sentra-api/tests --maxfail=1 --disable-warnings --cov=packages/sentra-runtime/sentra_runtime --cov=packages/sentra-rsg/sentra_rag --cov=packages/sentra-core/sentra_core --cov=services/sentra-api/sentra_brain_api --cov-branch --cov-report=term-missing:skip-covered --cov-report=xml:coverage.xml",
       "options": {
         "cwd": "${workspaceFolder}",
         "env": {

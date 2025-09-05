@@ -8,16 +8,16 @@ import sys
 import uuid
 from typing import List, Dict, Any, Optional
 
-from sentra_core.domain.repository.document_repository import DocumentRepository
+from sentra.domain.repository.document_repository import DocumentRepository
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
-from sentra_core.logging import get_logger, configure_logging
-from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra.shared.logging import get_logger, configure_logging
+from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra.domain.services.indexing_publisher import IndexingJobPublisher
 # from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
-from sentra_core.infra.amqp.rabbitmq_consumer import RabbitMQConsumer  # ya usando aio-pika
-from sentra_core.infra.sql.postgres_service import create_db_session
+from sentra.infra.amqp.rabbitmq_consumer import RabbitMQConsumer  # ya usando aio-pika
+from sentra.infra.sql.postgres_service import create_db_session
 
 debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
 configure_logging(debug=debug_mode)

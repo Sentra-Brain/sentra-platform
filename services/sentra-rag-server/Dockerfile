@@ -4,10 +4,10 @@ FROM ${BASE_IMAGE}
 WORKDIR /app
 
 # Copy and install core packages
-COPY core/sentra-core /core/sentra-core
-COPY core/sentra-rag /core/sentra-rag
-RUN pip install -e /core/sentra-core
-RUN pip install -e /core/sentra-rag
+COPY packages/sentra-core /packages/sentra-core
+COPY packages/sentra-rag /packages/sentra-rag
+RUN pip install -e /packages/sentra-core
+RUN pip install -e /packages/sentra-rag
 
 # Install rag-server-specific requirements
 COPY services/sentra-rag-server/requirements.txt /app/requirements.txt

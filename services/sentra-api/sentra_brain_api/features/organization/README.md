@@ -79,7 +79,7 @@ curl -X PATCH "http://localhost:8100/organization" \
 Since the system assumes a single organization, you'll need to create the first organization record in the database. This can be done through the service layer:
 
 ```python
-from sentra_core.domain.services.organization_service import OrganizationService
+from sentra.domain.services.organization_service import OrganizationService
 
 # Create initial organization
 org_service = OrganizationService(db_session)
@@ -97,7 +97,7 @@ org_service.create_organization({
 Run the Alembic migration to create the organizations table:
 
 ```bash
-cd core/sentra-core
+cd packages/sentra-core
 alembic upgrade head
 ```
 

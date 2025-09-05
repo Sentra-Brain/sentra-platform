@@ -4,7 +4,7 @@ import os
 import tempfile
 import pytest
 from pathlib import Path
-from sentra_core.domain.entities.document_entity import DocumentFileType
+from sentra.domain.entities.document_entity import DocumentFileType
 from sentra_rag_worker.services.extraction import get_extractor, ExtractionPayload
 from sentra_rag_worker.services.extraction.pdf_extractor import PdfExtractor
 from sentra_rag_worker.services.extraction.text_extractor import TextExtractor

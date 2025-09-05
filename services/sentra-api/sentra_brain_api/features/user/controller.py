@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from uuid import UUID
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_brain_api.features.user.schemas import SignupResponse, UserModel, SignupModel, UserUpdate, UserProfileUpdate, UserProfileResponse
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.infra.sql.postgres_service import get_db
 from sentra_brain_api.features.user.mappers import to_user_model, to_user_profile_response
 from sentra_brain_api.features.user.constants import (
     SIGNUP_DESCRIPTION,
@@ -15,7 +15,7 @@ from sentra_brain_api.features.user.constants import (
     VALIDATE_USER_DESCRIPTION
 )
 from sentra_brain_api.features.user.api_service import UserApiService
-from sentra_core import logging
+from sentra.shared import logging
 
 logger = logging.get_logger("sentra_brain_api")
 

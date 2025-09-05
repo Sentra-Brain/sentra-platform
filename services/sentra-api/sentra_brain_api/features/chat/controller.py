@@ -1,17 +1,18 @@
 # sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
+from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_core.logging import get_logger
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.infra.nosql.mongo_session_repository import (
+from sentra.shared.logging import get_logger
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.infra.nosql.mongo_session_repository import (
     MongoSessionRepository,
     get_session_mongo_repository,
 )
 from sentra_brain_api.features.chat.schemas import SessionRequest
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
-from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
-from sentra_engine.models import ConversationRequest as EngineRequest, EngineEvent
+from sentra.runtime.models import ConversationRequest as EngineRequest
+from sentra.runtime.adapters.persistence_adapter import SessionPersistenceAdapter
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -36,7 +37,7 @@ class ChatController:
             current_user: UserEntity = Depends(get_authenticated_user),
         ):
             body.user_id = current_user.id
-            adapter = MongoPersistenceAdapter(
+            adapter = SessionPersistenceAdapter(
                 repo=mongo_repo, user_id=str(current_user.id)
             )
             conversation_id = str(body.session_id)
@@ -64,7 +65,7 @@ class ChatController:
 
             async def stream():
                 try:
-                    from sentra_engine.app import run_conversation
+                    from sentra.runtime.app import run_conversation
 
                     async for ev in run_conversation(engine_request):
                         await adapter.append_event(conversation_id, ev)

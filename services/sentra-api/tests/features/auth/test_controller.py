@@ -2,9 +2,9 @@ import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 from sentra_brain_api.main import app
-from sentra_core.infra.sql.postgres_service import get_db
+from sentra.infra.sql.postgres_service import get_db
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra_core.domain.entities.user_entity import UserEntity
+from sentra.domain.entities.user_entity import UserEntity
 
 client = TestClient(app)
 

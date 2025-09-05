@@ -1,8 +1,8 @@
 # /sentra-rag-server/sentra_rag_server/rag_engine.py
 # Core RAG engine for processing queries and managing context
-from sentra_rag.services.rag_service import RAGQueryService
-from sentra_rag.settings import rag_settings
-from sentra_rag.embeddings.provider import get_embedding_provider
+from sentra.rag.services.rag_service import RAGQueryService
+from sentra.rag.settings import rag_settings
+from sentra.rag.embeddings.provider import get_embedding_provider
 import chromadb
 from asyncio import to_thread
 from datetime import datetime

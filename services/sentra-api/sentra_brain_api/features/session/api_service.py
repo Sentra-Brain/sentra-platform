@@ -3,12 +3,12 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from sentra_core.domain.entities.session_entity import SessionEntity
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.domain.repository.session_repository import SessionRepository
-from sentra_core.domain.services.session_service import SessionService
-from sentra_core.infra.nosql.mongo_session_repository import MongoSessionRepository
-from sentra_core.logging import get_logger
+from sentra.domain.entities.session_entity import SessionEntity
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.domain.repository.session_repository import SessionRepository
+from sentra.domain.services.session_service import SessionService
+from sentra.infra.nosql.mongo_session_repository import MongoSessionRepository
+from sentra.shared.logging import get_logger
 
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.session.mappers import (
@@ -28,7 +28,7 @@ from sentra_brain_api.features.session.schemas import (
     UpdateSessionStateRequest,
     UpdateSessionStateResponse,
 )
-from sentra_engine.agents.title_agent import TitleAgent
+from sentra.runtime.agents.title_agent import TitleAgent
 
 logger = get_logger("session_api_service")
 

@@ -4,7 +4,7 @@ import re
 import os
 from pathlib import Path
 from typing import Optional, List, Dict, Any
-from sentra_core.domain.entities.document_entity import DocumentFileType
+from sentra.domain.entities.document_entity import DocumentFileType
 from sentra_rag_worker.services.extraction.base import ExtractionPayload
 
 

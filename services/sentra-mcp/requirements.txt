@@ -10,4 +10,4 @@ pytest-cov
 pytest-dotenv
 pytest-mock
 
--e ../../core/sentra-core
+-e ../../packages/sentra-core

@@ -37,9 +37,9 @@ remain on‑premises to meet GDPR, HIPAA and similar regulations.
 
 | Directory/Service         | Purpose |
 |--------------------------|---------|
-| `core/sentra-core`       | Domain entities, repositories and services for core data (users, conversations, documents). |
+| `packages/sentra-core`       | Domain entities, repositories and services for core data (users, conversations, documents). |
 | `core/sentra-engine-legacy`     | Legacy adapters and orchestrators for LLM serving, planning and context management. |
-| `core/sentra-rag`        | RAG base library: embeddings, vector store abstractions and RAG service. |
+| `packages/sentra-rag`        | RAG base library: embeddings, vector store abstractions and RAG service. |
 | `services/sentra-api`    | Main API gateway exposing REST endpoints; orchestrates core calls; integrates with Postgres, MongoDB, RabbitMQ and the vector DB. |
 | `services/sentra-mcp`    | Model Context Protocol server; centralises access to external tools and long‑running operations. |
 | `services/sentra-rag-*`  | Microservices for vector search (`server`) and document ingestion (`worker`). |

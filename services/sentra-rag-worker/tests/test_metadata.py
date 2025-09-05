@@ -2,7 +2,7 @@
 
 import tempfile
 import pytest
-from sentra_core.domain.entities.document_entity import DocumentFileType
+from sentra.domain.entities.document_entity import DocumentFileType
 from sentra_rag_worker.services.extraction.base import ExtractionPayload
 from sentra_rag_worker.services.metadata.detectors import (
     detect_title,

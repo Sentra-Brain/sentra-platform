@@ -5,11 +5,11 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 from typing import Optional
 
-from sentra_core.infra.sql.postgres_service import get_db
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra_core.domain.repository.document_repository import DocumentRepository
-from sentra_core.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra.infra.sql.postgres_service import get_db
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra.domain.repository.document_repository import DocumentRepository
+from sentra.domain.services.indexing_publisher import IndexingJobPublisher
 
 from sentra_brain_api.features.knowledge.api_service import KnowledgeApiService
 from sentra_brain_api.features.knowledge.schemas import (

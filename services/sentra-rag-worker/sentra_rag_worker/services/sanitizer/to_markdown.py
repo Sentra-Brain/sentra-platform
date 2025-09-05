@@ -3,7 +3,7 @@
 import re
 from typing import Dict, Optional, List
 from bs4 import BeautifulSoup
-from sentra_core.domain.entities.document_entity import DocumentFileType
+from sentra.domain.entities.document_entity import DocumentFileType
 from .common import clean_text, convert_pagebreaks, normalize_unicode
 
 

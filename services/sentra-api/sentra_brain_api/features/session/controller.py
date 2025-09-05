@@ -20,13 +20,13 @@ from sentra_brain_api.features.session.schemas import (
     UpdateSessionStateRequest,
     UpdateSessionStateResponse,
 )
-from sentra_core.domain.entities.user_entity import UserEntity
-from sentra_core.infra.nosql.mongo_session_repository import (
+from sentra.domain.entities.user_entity import UserEntity
+from sentra.infra.nosql.mongo_session_repository import (
     MongoSessionRepository,
     get_session_mongo_repository,
 )
-from sentra_core.infra.sql.postgres_service import get_db
-from sentra_core.logging import get_logger
+from sentra.infra.sql.postgres_service import get_db
+from sentra.shared.logging import get_logger
 
 logger = get_logger("sentra_brain_api.session")
 

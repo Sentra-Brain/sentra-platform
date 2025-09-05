@@ -6,12 +6,12 @@ ENV PYTHONUNBUFFERED=1
 WORKDIR /app
 
 # Copy and install core library
-COPY core/sentra-core /core/sentra-core
-RUN pip install -e /core/sentra-core
+COPY packages/sentra-core /packages/sentra-core
+RUN pip install -e /packages/sentra-core
 
 # Copy and install engine library
-COPY sentra-engine /sentra-engine
-RUN pip install -e /sentra-engine
+COPY packages/sentra-runtime /packages/sentra-runtime
+RUN pip install -e /packages/sentra-runtime
 
 # Copy and install API requirements
 COPY services/sentra-api/requirements.txt /app/requirements.txt

@@ -1,4 +1,4 @@
-from sentra_core.domain.entities.organization_entity import OrganizationEntity
+from sentra.domain.entities.organization_entity import OrganizationEntity
 from sentra_brain_api.features.organization.schemas import OrganizationResponse
 
 
