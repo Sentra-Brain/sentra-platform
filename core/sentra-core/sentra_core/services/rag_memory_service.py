@@ -41,17 +41,21 @@ class RagMemoryService(MemoryService):
                     }
                     try:
                         await client.post(url, json=payload, timeout=10.0)
-                    except Exception as exc:  # pragma: no cover - logging only
+                    except Exception as exc:
                         logger.warning(f"Failed to memorize event: {exc}")
 
     async def search_memory(self, user_id: str, query: str, k: int = 5) -> List[dict]:
-        """Search user memories using rag-server."""
+        """Search user memories using rag-server. If the server is unreachable or errors, log a warning and return an empty list."""
 
         url = f"{self.base_url}/search_memories"
         payload = {"user_id": user_id, "query": query, "limit": k}
-        async with httpx.AsyncClient() as client:
-            response = await client.post(url, json=payload, timeout=30.0)
-            response.raise_for_status()
-            data = response.json()
-        return data.get("results", [])
+        try:
+            async with httpx.AsyncClient() as client:
+                response = await client.post(url, json=payload, timeout=30.0)
+                response.raise_for_status()
+                data = response.json()
+            return data.get("results", [])
+        except Exception as exc:
+            logger.warning(f"Failed to search memories: {exc}")
+            return []
 
