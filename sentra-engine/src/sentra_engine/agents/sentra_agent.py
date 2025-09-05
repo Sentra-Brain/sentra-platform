@@ -10,6 +10,7 @@ from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.runners import Runner
 from google.genai import types
 
+from sentra_core.domain.services import session_service
 from sentra_core.settings import settings as core_settings
 from sentra_core.services import RagMemoryService
 
@@ -31,6 +32,7 @@ class SentraAgent:
         """Stream events produced by the agent."""
         task_run_id = uuid4().hex
         emit_event_log(EngineEvent(type="agent_started", task_run_id=task_run_id))
+
         yield EngineEvent(
             type="step_start", task_type="agent_execution", task_run_id=task_run_id
         )
@@ -61,9 +63,14 @@ class SentraAgent:
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
         session_service: SessionService = MongoSessionService()
-        await session_service.create_session(
+        session = await session_service.get_session(
             app_name="sentra", user_id=user_id, session_id=conversation_id
         )
+        if session is None:
+            raise RuntimeError(
+                f"Session not found for user_id={user_id}, session_id={conversation_id}. "
+                "Session must exist in both MongoDB and SQL."
+            )
         run_config = RunConfig(streaming_mode=StreamingMode.SSE)
         runner = Runner(
             agent=adk_agent,
@@ -101,9 +108,6 @@ class SentraAgent:
             type="message_final", content=response, task_run_id=task_run_id
         )
 
-        session = await session_service.get_session(
-            app_name="sentra", user_id=user_id, session_id=conversation_id
-        )
         await memory_service.add_session_to_memory(session)
 
         emit_event_log(
