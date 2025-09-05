@@ -1,124 +1,121 @@
-# sentra_brain_api/adapters/persistence_adapter.py
+"""Persistence adapter used by the API layer.
+
+The engine is persistence-agnostic. The API stores all events in MongoDB
+and keeps a small LRU cache of recent messages per conversation so the
+engine can be called with a compact context.
+"""
+from __future__ import annotations
+
 import asyncio
 from collections import OrderedDict
-from collections.abc import Mapping
-from typing import Any, Sequence
+from datetime import datetime, timezone
+from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
-from sentra_engine.persistence.ports.persistence import PersistencePort
-from sentra_engine.core.models import Message, StepEvent
-from sentra_engine.core.constants import CONTEXT_WINDOW_SIZE
 from sentra_core.schemas.engine_event import EngineEvent
 
-# ---- LRU cache (conversations) ---------------------------------------------
+
+# ---- LRU cache ---------------------------------------------------------------
 
 class _LRU:
     def __init__(self, capacity: int = 256):
         self.capacity = capacity
         self._lock = asyncio.Lock()
-        self._od: OrderedDict[str, list[Message]] = OrderedDict()
+        self._od: OrderedDict[str, list[str]] = OrderedDict()
 
-    async def get(self, key: str) -> list[Message] | None:
+    async def get(self, key: str) -> list[str] | None:
         async with self._lock:
             if key not in self._od:
                 return None
             self._od.move_to_end(key)
             return self._od[key]
 
-    async def put(self, key: str, value: list[Message]) -> None:
+    async def put(self, key: str, value: list[str]) -> None:
         async with self._lock:
             self._od[key] = value
             self._od.move_to_end(key)
             if len(self._od) > self.capacity:
                 self._od.popitem(last=False)
 
-    async def invalidate(self, key: str) -> None:
-        async with self._lock:
-            self._od.pop(key, None)
 
-_CONV_CACHE = _LRU(capacity=256)  # ~256 hot conversations per process
+_CONV_CACHE = _LRU(capacity=256)
+
 
 def _cache_key(user_id: str, conversation_id: str) -> str:
     return f"{user_id}:{conversation_id}"
 
-# ---- helpers ----------------------------------------------------------------
 
-def _event_to_payload(e: EngineEvent) -> dict[str, Any]:
-    data = e.model_dump(exclude_none=True)
-    data["event_id"] = e.event_id
-    data["timestamp"] = e.timestamp.isoformat()
-    return data
+# ---- adapter -----------------------------------------------------------------
 
-def _event_to_message(e: EngineEvent) -> Message:
-    msg = e.message
-    return Message(
-        id=str(msg.id if msg and msg.id else e.event_id),
-        role=str(msg.role if msg and msg.role else e.author),
-        content=str(e.content or ""),
-        timestamp=e.timestamp.isoformat(),
-        meta=e.meta,
-    )
+class MongoPersistenceAdapter:
+    """Persist conversation events and maintain a recent context cache."""
 
-def _dict_to_message(d: Mapping[str, Any]) -> Message:
-    msg = d.get("message") or {}
-    return Message(
-        id=str(msg.get("id") or d.get("event_id") or uuid4().hex),
-        role=str(msg.get("role") or d.get("author") or "system"),
-        content=str(d.get("content") or ""),
-        timestamp=d.get("timestamp"),
-        meta=d.get("meta"),
-    )
-
-# ---- adapter ----------------------------------------------------------------
-
-class MongoPersistenceAdapter(PersistencePort):
     def __init__(self, *, repo, user_id: str):
         self.repo = repo
         self.user_id = user_id
 
+    async def persist_user_message(
+        self, conversation_id: str, *, text: str, meta: Mapping[str, Any] | None = None
+    ) -> None:
+        event = EngineEvent(
+            event_id=uuid4().hex,
+            timestamp=datetime.now(timezone.utc),
+            type="message_final",
+            author="user",
+            content=text,
+            meta=dict(meta or {}),
+        )
+        await asyncio.to_thread(
+            self.repo.append_event,
+            session_id=conversation_id,
+            user_id=self.user_id,
+            event=event.model_dump(exclude_none=True),
+        )
+        key = _cache_key(self.user_id, conversation_id)
+        cached = await _CONV_CACHE.get(key) or []
+        cached.append(text)
+        await _CONV_CACHE.put(key, cached)
+
     async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
-        payload = _event_to_payload(event)
+        payload = event.model_dump(exclude_none=True)
+        if event.timestamp is not None:
+            payload["timestamp"] = event.timestamp.isoformat()
+        if event.event_id is not None:
+            payload["event_id"] = event.event_id
         await asyncio.to_thread(
             self.repo.append_event,
             session_id=conversation_id,
             user_id=self.user_id,
             event=payload,
         )
-
-        if event.type in {"message_delta", "message_final"}:
-            msg = _event_to_message(event)
+        if (
+            event.type == "message_final"
+            and event.content
+            and event.author in {"assistant", "user"}
+        ):
             key = _cache_key(self.user_id, conversation_id)
-            cached = await _CONV_CACHE.get(key)
-            if cached is None:
-                cached = await self.load_conversation(conversation_id)
-            cached = [*cached, msg][-CONTEXT_WINDOW_SIZE:]
+            cached = await _CONV_CACHE.get(key) or []
+            cached.append(event.content)
             await _CONV_CACHE.put(key, cached)
 
-    async def append_step_event(self, conversation_id: str, event: StepEvent) -> None:
-        # Not used in fast mode
-        return None
-
-    async def load_conversation(self, conversation_id: str) -> list[Message]:
+    async def get_recent_context(self, conversation_id: str, limit: int) -> list[str]:
         key = _cache_key(self.user_id, conversation_id)
         cached = await _CONV_CACHE.get(key)
         if cached is not None:
-            return cached
+            return cached[-limit:]
 
         doc = await asyncio.to_thread(
-            self.repo.get_conversation_by_id, conversation_id, self.user_id
+            self.repo.get_session_by_id, conversation_id, self.user_id
         )
-
-        raw: Sequence[Any]
-        if isinstance(doc, Mapping):
-            raw = doc.get("events") or []  # type: ignore[assignment]
-        else:
-            raw = []
-
-        out: list[Message] = []
+        raw: Sequence[Any] = doc.get("events", []) if isinstance(doc, Mapping) else []
+        msgs: list[str] = []
         for e in raw:
-            if isinstance(e, Mapping) and e.get("type") == "message_final":
-                out.append(_dict_to_message(e))
-
-        out = out[-CONTEXT_WINDOW_SIZE:]
-        await _CONV_CACHE.put(key, out)
-        return out
+            if (
+                isinstance(e, Mapping)
+                and e.get("type") == "message_final"
+                and e.get("author") in {"assistant", "user"}
+            ):
+                msgs.append(str(e.get("content") or ""))
+        msgs = msgs[-limit:]
+        await _CONV_CACHE.put(key, msgs)
+        return msgs

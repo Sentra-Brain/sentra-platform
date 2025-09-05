@@ -55,6 +55,26 @@ sys.modules["sentra_engine.engine"] = types.ModuleType(
 )
 sys.modules["sentra_engine.engine"].ConversationEngine = MagicMock(return_value=fake_engine) # type: ignore[attr-defined]
 
+# 🚨 Stub out google ADK/GenAI modules to avoid heavy dependencies
+fake_google = types.ModuleType("google")
+sys.modules["google"] = fake_google
+sys.modules["google.adk"] = types.ModuleType("google.adk")
+sys.modules["google.adk.models"] = types.ModuleType("google.adk.models")
+sys.modules["google.adk.models.lite_llm"] = types.ModuleType("google.adk.models.lite_llm")
+sys.modules["google.adk.models.lite_llm"].LiteLlm = MagicMock()
+sys.modules["google.adk.agents"] = types.ModuleType("google.adk.agents")
+sys.modules["google.adk.agents"].Agent = MagicMock()
+sys.modules["google.adk.agents.run_config"] = types.ModuleType("google.adk.agents.run_config")
+sys.modules["google.adk.agents.run_config"].RunConfig = MagicMock()
+sys.modules["google.adk.agents.run_config"].StreamingMode = MagicMock()
+sys.modules["google.adk.runners"] = types.ModuleType("google.adk.runners")
+sys.modules["google.adk.runners"].Runner = MagicMock()
+sys.modules["google.adk.sessions"] = types.ModuleType("google.adk.sessions")
+sys.modules["google.adk.sessions"].BaseSessionService = MagicMock()
+sys.modules["google.adk.sessions"].Session = MagicMock()
+sys.modules["google.genai"] = types.ModuleType("google.genai")
+sys.modules["google.genai"].types = types.SimpleNamespace(Content=MagicMock, Part=MagicMock)
+
 # ✅ Now safe to import rest of your dependencies
 from sentra_core.infra.sql.postgres_settings import settings as pg_settings
 from sentra_core.infra.nosql.mongo_settings import settings as mongo_settings

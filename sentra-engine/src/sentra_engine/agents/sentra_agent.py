@@ -20,7 +20,6 @@ from ..context import build_context
 from ..models import EngineEvent, ConversationRequest
 from ..telemetry import emit_event_log
 from sentra_engine.policies.guardrails import check_tool_allowed
-from sentra_engine.adapters.mongo_session_service import MongoSessionService
 
 
 class SentraAgent:
@@ -62,6 +61,8 @@ class SentraAgent:
         )
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
+        from sentra_engine.adapters.mongo_session_service import MongoSessionService
+
         session_service: BaseSessionService = MongoSessionService()
         session = await session_service.get_session(
             app_name="sentra", user_id=user_id, session_id=conversation_id
