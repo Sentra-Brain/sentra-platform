@@ -106,13 +106,13 @@ class MongoSessionService(SessionService):
             and event.message is None
         ):
             event.message = EventMessage(
-                id=str(event.event_id),
+                id=event.event_id,
                 role=event.author,
                 response_to=event.meta.get("response_to") if event.meta else None,
             )
 
         event_doc = event.model_dump()
-        event_doc["event_id"] = str(event.event_id)
+        event_doc["event_id"] = event.event_id
 
         state_delta = event.actions.state_delta if event.actions else None
         if state_delta:

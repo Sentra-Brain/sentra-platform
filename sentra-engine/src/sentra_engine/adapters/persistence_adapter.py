@@ -3,10 +3,10 @@ from datetime import datetime
 from typing import Any, Dict, Set, TYPE_CHECKING
 
 if TYPE_CHECKING:  # pragma: no cover - only for type checkers
-    from sentra_core.infra.nosql.mongo_session_repository import (
-        MongoSessionRepository,
-    )
-from sentra_engine.models import ConversationEvent
+  from sentra_core.infra.nosql.mongo_session_repository import (
+      MongoSessionRepository,
+  )
+from sentra_engine.models import EngineEvent
 
 
 class SessionPersistenceAdapter:
@@ -29,7 +29,7 @@ class SessionPersistenceAdapter:
         self.session_id = session_id
         self._seen: Set[str] = set()
 
-    def _event_key(self, event: ConversationEvent) -> str:
+    def _event_key(self, event: EngineEvent) -> str:
         """Return a stable identifier for an event."""
         if event.step_id:
             return f"{event.step_id}:{event.type}"
@@ -37,7 +37,7 @@ class SessionPersistenceAdapter:
             return f"{event.task_run_id}:{event.type}"
         return f"{event.type}:{event.content}"
 
-    async def persist_event(self, event: ConversationEvent) -> None:
+    async def persist_event(self, event: EngineEvent) -> None:
         """Persist an event if it hasn't been stored before."""
         key = self._event_key(event)
         if key in self._seen:

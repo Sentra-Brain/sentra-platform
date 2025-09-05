@@ -15,7 +15,7 @@ from sentra_core.services import RagMemoryService
 
 from .. import config
 from ..context import build_context
-from ..models import ConversationEvent, ConversationRequest
+from ..models import EngineEvent, ConversationRequest
 from ..telemetry import emit_event_log
 from sentra_engine.policies.guardrails import check_tool_allowed
 from sentra_core.services.mongo_session_service import MongoSessionService
@@ -27,11 +27,11 @@ class SentraAgent:
 
     async def run(
         self, request: ConversationRequest
-    ) -> AsyncGenerator[ConversationEvent, None]:
+    ) -> AsyncGenerator[EngineEvent, None]:
         """Stream events produced by the agent."""
         task_run_id = uuid4().hex
-        emit_event_log(ConversationEvent(type="agent_started", task_run_id=task_run_id))
-        yield ConversationEvent(
+        emit_event_log(EngineEvent(type="agent_started", task_run_id=task_run_id))
+        yield EngineEvent(
             type="step_start", task_type="agent_execution", task_run_id=task_run_id
         )
 
@@ -40,7 +40,7 @@ class SentraAgent:
         if request.context_source_ids or request.context_document_ids:
             check_tool_allowed("SentraAgent", "RagTool")
         context = await build_context(request)
-        emit_event_log(ConversationEvent(type="context_built", task_run_id=task_run_id))
+        emit_event_log(EngineEvent(type="context_built", task_run_id=task_run_id))
         prompt_parts = []
         if context.get("memories"):
             prompt_parts.append(context["memories"])
@@ -82,7 +82,7 @@ class SentraAgent:
                 for part in ev.content.parts:
                     if part.text:
                         chunks.append(part.text)
-                        yield ConversationEvent(
+                        yield EngineEvent(
                             type="message_delta",
                             content=part.text,
                             task_run_id=task_run_id,
@@ -91,13 +91,13 @@ class SentraAgent:
                 break
         response = "".join(chunks)
         emit_event_log(
-            ConversationEvent(
+            EngineEvent(
                 type="llm_called",
                 task_run_id=task_run_id,
                 meta={"engine": core_settings.llm_engine.value},
             )
         )
-        yield ConversationEvent(
+        yield EngineEvent(
             type="message_final", content=response, task_run_id=task_run_id
         )
 
@@ -107,10 +107,10 @@ class SentraAgent:
         await memory_service.add_session_to_memory(session)
 
         emit_event_log(
-            ConversationEvent(
+            EngineEvent(
                 type="agent_completed", task_run_id=task_run_id, status="success"
             )
         )
-        yield ConversationEvent(
+        yield EngineEvent(
             type="step_end", task_type="agent_execution", task_run_id=task_run_id
         )

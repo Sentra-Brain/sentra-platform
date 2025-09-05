@@ -1,15 +1,15 @@
 from typing import AsyncGenerator
 
-from sentra_engine.models import ConversationRequest, ConversationEvent
+from sentra_engine.models import ConversationRequest, EngineEvent
 from sentra_engine.tools import DbQueryTool, RagTool
 from sentra_engine.agents.workflows import ParallelAgent
 
 
 async def run_listings_search_agent(
     request: ConversationRequest, context: dict
-) -> AsyncGenerator[ConversationEvent, None]:
+) -> AsyncGenerator[EngineEvent, None]:
     """Yield a small stream of events for listings search."""
-    yield ConversationEvent(type="step_start", task_type="listings_search")
+    yield EngineEvent(type="step_start", task_type="listings_search")
 
     db = DbQueryTool()
     rag = RagTool()
@@ -33,5 +33,5 @@ async def run_listings_search_agent(
         parts.append("Insights:\n" + "\n".join(rag_text))
     content = "\n\n".join(parts) or "No data found."
 
-    yield ConversationEvent(type="message_delta", content=content)
-    yield ConversationEvent(type="step_end", task_type="listings_search")
+    yield EngineEvent(type="message_delta", content=content)
+    yield EngineEvent(type="step_end", task_type="listings_search")

@@ -69,7 +69,7 @@ export const chatService = {
                 const evt: EngineEvent = JSON.parse(json);
               onEvent(evt);
             } catch (err) {
-              console.error("Failed to parse ConversationEvent:", json, err);
+              console.error("Failed to parse EngineEvent:", json, err);
             }
           }
         }

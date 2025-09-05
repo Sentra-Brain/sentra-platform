@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Optional, Union
-from uuid import UUID
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 
@@ -18,11 +17,11 @@ class EventMessage(BaseModel):
 
 
 class EventEntity(BaseModel):
-    event_id: UUID
+    event_id: str
     timestamp: datetime
     type: str
-    author: str
-    content: Union[str, dict[str, Any]]
+    content: Optional[str] = None
+    author: Optional[str] = None
     task_type: Optional[str] = None
     task_run_id: Optional[str] = None
     step_id: Optional[str] = None
