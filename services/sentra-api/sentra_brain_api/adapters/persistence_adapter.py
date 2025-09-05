@@ -45,14 +45,14 @@ def _cache_key(user_id: str, conversation_id: str) -> str:
 
 def _event_to_payload(e: EngineEvent) -> dict[str, Any]:
     data = e.model_dump(exclude_none=True)
-    data["event_id"] = str(e.event_id)
+    data["event_id"] = e.event_id
     data["timestamp"] = e.timestamp.isoformat()
     return data
 
 def _event_to_message(e: EngineEvent) -> Message:
     msg = e.message
     return Message(
-        id=str(msg.id if msg and msg.id else e.event_id.hex),
+        id=str(msg.id if msg and msg.id else e.event_id),
         role=str(msg.role if msg and msg.role else e.author),
         content=str(e.content or ""),
         timestamp=e.timestamp.isoformat(),

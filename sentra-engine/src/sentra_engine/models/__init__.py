@@ -1,5 +1,5 @@
 """Data models for the Sentra engine."""
 
-from .conversation import ConversationEvent, ConversationRequest
+from .conversation import EngineEvent, ConversationRequest
 
-__all__ = ["ConversationRequest", "ConversationEvent"]
+__all__ = ["ConversationRequest", "EngineEvent"]

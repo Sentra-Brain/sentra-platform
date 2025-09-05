@@ -6,7 +6,7 @@ from typing import AsyncGenerator
 
 from ..context import build_context
 from ..errors import BudgetExhaustedError, TimeoutError, ToolError
-from ..models import ConversationEvent, ConversationRequest
+from ..models import EngineEvent, ConversationRequest
 from ..telemetry import emit_event_log
 from .sentra_agent import SentraAgent
 from ..orchestrators import route_legal_intent, route_real_estate_intent
@@ -26,26 +26,26 @@ class CoordinatorAgent:
     def __init__(self, persistence: SessionPersistenceAdapter | None = None):
         self.persistence = persistence
 
-    async def _persist(self, event: ConversationEvent) -> None:
+    async def _persist(self, event: EngineEvent) -> None:
         if self.persistence:
             await self.persistence.persist_event(event)
 
     async def run(
         self, request: ConversationRequest, fallback: bool = False
-    ) -> AsyncGenerator[ConversationEvent, None]:
+    ) -> AsyncGenerator[EngineEvent, None]:
         try:
             if fallback:
                 # Fallback mode: no tools or planners, short context
-                event = ConversationEvent(type="step_start", task_type="fallback")
+                event = EngineEvent(type="step_start", task_type="fallback")
                 await self._persist(event)
                 yield event
-                event = ConversationEvent(
+                event = EngineEvent(
                     type="message_delta",
                     content="I'm here to help, but cannot access external tools right now.",
                 )
                 await self._persist(event)
                 yield event
-                event = ConversationEvent(type="step_end", task_type="fallback")
+                event = EngineEvent(type="step_end", task_type="fallback")
                 await self._persist(event)
                 yield event
                 return
@@ -54,7 +54,7 @@ class CoordinatorAgent:
 
             if route_legal_intent(msg):
                 emit_event_log(
-                    ConversationEvent(type="agent_dispatched", label="legal")
+                    EngineEvent(type="agent_dispatched", label="legal")
                 )
                 context = await build_context(request)
                 async for event in run_contract_drafting_agent(request, context):
@@ -64,7 +64,7 @@ class CoordinatorAgent:
 
             if route_real_estate_intent(msg):
                 emit_event_log(
-                    ConversationEvent(type="agent_dispatched", label="real_estate")
+                    EngineEvent(type="agent_dispatched", label="real_estate")
                 )
                 context = await build_context(request)
                 async for event in run_listings_search_agent(request, context):
@@ -72,7 +72,7 @@ class CoordinatorAgent:
                     yield event
                 return
 
-            emit_event_log(ConversationEvent(type="fallback_triggered"))
+            emit_event_log(EngineEvent(type="fallback_triggered"))
             agent = SentraAgent()
             async for event in agent.run(request):
                 await self._persist(event)

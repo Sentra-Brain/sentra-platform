@@ -1,7 +1,8 @@
 import pytest
+import pytest
 
 from sentra_engine.adapters.persistence_adapter import SessionPersistenceAdapter
-from sentra_engine.models import ConversationEvent
+from sentra_engine.models import EngineEvent
 
 
 class DummyRepo:
@@ -18,7 +19,7 @@ async def test_persist_event_idempotent():
     adapter = SessionPersistenceAdapter(
         repo=repo, user_id="u1", session_id="s1"
     )
-    event = ConversationEvent(type="message_delta", content="hi", step_id="s1")
+    event = EngineEvent(type="message_delta", content="hi", step_id="s1")
 
     await adapter.persist_event(event)
     await adapter.persist_event(event)  # duplicate

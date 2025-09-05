@@ -8,7 +8,7 @@ from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 def test_message_final_delivers_content():
     final_text = "Hello world!"
     evt = EngineEvent(
-        event_id=uuid4(),
+        event_id=uuid4().hex,
         timestamp=datetime.now(timezone.utc),
         type="message_final",
         author="assistant",

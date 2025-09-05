@@ -1,21 +1,21 @@
 import pytest
 
 from sentra_engine.agents.coordinator import CoordinatorAgent
-from sentra_engine.models import ConversationEvent, ConversationRequest
+from sentra_engine.models import EngineEvent, ConversationRequest
 
 
 class DummyPersistence:
     def __init__(self):
         self.events = []
 
-    async def persist_event(self, event: ConversationEvent) -> None:
+    async def persist_event(self, event: EngineEvent) -> None:
         self.events.append(event)
 
 
 class StubSentraAgent:
     async def run(self, request: ConversationRequest):
-        yield ConversationEvent(type="message_delta", content="hi", step_id="s1")
-        yield ConversationEvent(type="message_final", content="bye", step_id="s1")
+        yield EngineEvent(type="message_delta", content="hi", step_id="s1")
+        yield EngineEvent(type="message_final", content="bye", step_id="s1")
 
 
 @pytest.mark.asyncio
