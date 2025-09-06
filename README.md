@@ -15,7 +15,7 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 ## Key Components
 
 ### 1️⃣ Core AI System
-- **LLM Engine:** Optimized llama.cpp server running local LLM models.
+- **LLM Engine:** vLLM is the default engine for running local LLM models, offering high performance and compatibility. llama.cpp is also supported as an optional backend for environments where GPU acceleration is not available or lightweight deployment is preferred.
 - **RAG Engine:** Private Retrieval Augmented Generation (ChromaDB or Qdrant).
 - **Agent Framework:** Modular, customizable task agents.
 - **MCP Integration Layer:** Connects Sentra Brain to external systems (ERP, CRM, WordPress, Outlook, etc.).

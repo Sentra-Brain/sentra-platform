@@ -4,7 +4,7 @@ Welcome to the official arc42 documentation for the Sentra Brain project.
 
 Sentra Brain is a private, modular AI platform focused on providing SMEs with secure, self-hosted AI services, combining:
 
-- Local LLM inference (llama.cpp or vLLM)
+- Local LLM inference (vLLM, with optional llama.cpp support)
 - Custom Model Context Protocol (MCP) Server
 - Retrieval-Augmented Generation (RAG) Layer (ChromaDB or Qdrant)
 - User Frontend (React + Tailwind)
@@ -42,7 +42,7 @@ graph TD
     AdminPanel["Admin Panel (Monitoring + Config)"]
     n8n["n8n Embedded<br/>(Workflow Automation – future phase)"]
     Gateway["API Gateway"]
-    LLM["LLM Server<br/>(llama.cpp)"]
+    LLM["LLM Server<br/>(vLLM)"]
     RAG["RAG Engine<br/>(ChromaDB/Qdrant)"]
     MCP["MCP Servers (per capability)"]
     ExternalTools["External Tools<br/>(CRM, ERP, Office Plugins)"]

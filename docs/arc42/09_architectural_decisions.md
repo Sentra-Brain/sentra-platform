@@ -12,7 +12,8 @@ All items here are considered fixed for Phase 1. Future enhancements like workfl
 
 | ADR #  | Topic                                         | Status    | Phase 1 Scope? | Notes                                      |
 |--------|-----------------------------------------------|-----------|----------------|--------------------------------------------|
-| 001    | LLM Backend Engine: llama.cpp Host-Based      | Final     | ✅ Yes         | Direct host execution for GPU efficiency    |
+| 001    | LLM Backend Engine: llama.cpp Host-Based      | Deprecated| ❌ No          | Replaced by ADR 010 (see below)            |
+| 010    | LLM Backend Engine: vLLM (OpenAI-compatible)  | Final     | ✅ Yes         | See [ADR 010](adr/010-replace-llama-server-with-vllm.md) for rationale |
 | 002    | Sentra API: Modular Orchestrator Design       | Final     | ✅ Yes         | FastAPI-based, layered (Chat, Auth, MCP Client) |
 | 003    | MCP Server Architecture: Split Per Capability | Final     | ✅ Yes         | TBD       |
 | 004    | RAG Engine: ChromaDB Default                  | Final     | ✅ Yes         | Local vector store                          |
@@ -24,14 +25,28 @@ All items here are considered fixed for Phase 1. Future enhancements like workfl
 
 ---
 
-## ADR 001 – LLM Backend Engine: llama.cpp Host-Based
+
+## ADR 001 – LLM Backend Engine: llama.cpp Host-Based (Deprecated)
 
 **Decision:**  
-Use llama.cpp running directly on the host OS (Ubuntu preferred) as the primary LLM server.
+llama.cpp was used as the initial LLM backend for host-based inference. This approach is now deprecated in favor of vLLM (see ADR 010).
 
 **Rationale:**  
-- Maximize GPU efficiency and simplicity.
-- Avoid Docker GPU binding complexities in Phase 1.
+- Simplicity and GPU efficiency for early prototypes.
+- Replaced due to scaling, concurrency, and compatibility needs.
+
+---
+
+## ADR 010 – LLM Backend Engine: vLLM (OpenAI-compatible)
+
+**Decision:**  
+vLLM is now the default LLM backend for Sentra Brain, providing OpenAI-compatible APIs, high concurrency, and efficient GPU utilization. See [adr/010-replace-llama-server-with-vllm.md](adr/010-replace-llama-server-with-vllm.md) for full context and rationale.
+
+**Rationale:**  
+- OpenAI-compatible API for easy integration
+- High concurrency and batching
+- Efficient GPU memory usage
+- Supports a wide range of HuggingFace models
 
 ---
 

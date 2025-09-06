@@ -20,7 +20,7 @@ This directory contains deployment scripts, manifests, and configuration files f
 | sentra-web       | Chat UI                                | 3100  | Custom build (React/Next.js)           |
 | sentra-admin     | Admin UI                               | 3001  | Custom build (React/Next.js)           |
 | sentra-api       | Orchestrator + API + Auth + MCP Client | 8100  | Custom (Python/Node.js)                |
-| llama-server     | LLM Backend                            | 11434 | ghcr.io/ggml-org/llama.cpp:server-cuda |
+| vllm-server      | LLM Backend (vLLM)                     | 8001  | vllm/vllm-openai:latest                |
 | sentra-vector-db | Vector Store (RAG)                     | 8000  | ghcr.io/chroma-core/chroma:latest      |
 | sentra-sql-db    | SQL Persistent Storage (Users/Configs) | 5432  | postgres:16-alpine                     |
 | sentra-nosql-db  | NoSQL Chat History Storage             | 27017 | mongo:7                                |
@@ -33,7 +33,7 @@ This directory contains deployment scripts, manifests, and configuration files f
 - Use `docker-compose.dev.yml` for local development with live reload and mounted volumes.
 - Use `docker-compose.yml` for deployment with pre-built images.
 - Environment variables are centralized in `.dev.env`.
-- GPU passthrough for `llama-server` is required both in production and local development:
+- GPU passthrough for `vllm-server` is required for optimal performance in both production and local development:
   - Ensure NVIDIA drivers and Docker NVIDIA runtime are installed.
   - For WSL2: install CUDA Toolkit inside WSL.
   - For Linux/Mac: `nvidia-container-toolkit` must be configured.
@@ -42,17 +42,17 @@ This directory contains deployment scripts, manifests, and configuration files f
 
 ### LLM Model Setup for Local Development
 
-- The `llama-server` container **requires a GGUF model file** mounted via Docker volume.
+- The `vllm-server` container **requires a HuggingFace Transformers model** (e.g., Llama-2, Mistral, Phi-2) mounted via Docker volume.
 - By default, **no model is included** in the repository or Docker images for licensing and size reasons.
-- Each developer must manually download a GGUF model from Hugging Face and mount it locally.
+- Each developer must manually download a compatible model from Hugging Face and mount it locally.
 
 #### Recommended Small Models for Development
 
-| Model                                       | Size    | Suggested Use            |
-| ------------------------------------------- | ------- | ------------------------ |
-| TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF      | ~1.8 GB | Fast local debugging     |
-| TheBloke/phi-2-GGUF                         | ~2–4 GB | General testing          |
-| TheBloke/CapybaraHermes-2.5-Mistral-7B-GGUF | ~7–8 GB | Balanced (A6000 capable) |
+| Model                                   | Size    | Suggested Use            |
+| --------------------------------------- | ------- | ------------------------ |
+| meta-llama/Llama-2-7b-chat-hf           | ~13 GB  | General testing          |
+| microsoft/Phi-2                        | ~2 GB   | Fast local debugging     |
+| mistralai/Mistral-7B-Instruct-v0.2      | ~13 GB  | Balanced (A6000 capable) |
 
 #### How to Download a Model (Example)
 
@@ -64,18 +64,18 @@ This directory contains deployment scripts, manifests, and configuration files f
 2. Download:
 
     ```bash
-    huggingface-cli download TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF --local-dir D:\models\tiny-llama
+  huggingface-cli download meta-llama/Llama-2-7b-chat-hf --local-dir D:\models\llama-2
     ```
 
 3. Update docker-compose.dev.yml:
 
     ```docker
-    volumes:
-        - D:\models:/models:ro
-    command: >
-        -m /models/tiny-llama/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf
-        --port 11434
-        --host 0.0.0.0
+  volumes:
+    - D:\models:/models:ro
+  command: >
+    --model /models/llama-2
+    --port 8001
+    --host 0.0.0.0
     ```
 
 ## Accessing Sentra Web and Admin in Production

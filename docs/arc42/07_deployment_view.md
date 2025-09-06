@@ -25,7 +25,7 @@ flowchart TD
     subgraph Client_Network["Client Private Network"]
         subgraph Sentra_Brain_Server["Sentra Brain Server"]
             API["API Gateway"]
-            LLM["LLM Server (llama.cpp)"]
+            LLM["LLM Server (vLLM)"]
             RAG["RAG Engine (ChromaDB/Qdrant)"]
             MCP["MCP Server"]
             Auth[Internal Auth Service]
@@ -81,7 +81,7 @@ flowchart TD
 | sentra-web         | Chat UI                                | 3100  | —                   |
 | sentra-admin       | Admin UI                               | 3200  | —                   |
 | sentra-api         | Orchestrator + API + Auth + MCP Client | 8100  | —                   |
-| llama-server       | LLM Backend                            | 11434 | —                   |
+| vllm-server        | LLM Backend (vLLM)                     | 8001  | —                   |
 | sentra-vector-db   | Vector Store (RAG)                     | 8000  | sentra-vector-data  |
 | sentra-sql-db      | SQL Persistent Storage (Users/Configs) | 5432  | sentra-sql-data     |
 | sentra-nosql-db    | NoSQL Chat History Storage             | 27017 | sentra-nosql-data   |
@@ -90,7 +90,7 @@ flowchart TD
 
 - All services are connected via the `sentrabrain-dev-net` Docker network in development.
 - Persistent data volumes apply only to SQL, NoSQL, and Vector Store services.
-- Ensure GPU passthrough is configured for `llama-server` in production environments.
+- Ensure GPU passthrough is configured for `vllm-server` in production environments.
 
 ---
 **Panel Access Notes:**

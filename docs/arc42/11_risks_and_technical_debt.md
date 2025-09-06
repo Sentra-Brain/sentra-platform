@@ -10,7 +10,7 @@ This section identifies key risks and areas of technical debt that may impact th
 
 | ID   | Risk Description                                           | Impact             | Mitigation Strategy                           |
 |------|-----------------------------------------------------------|-------------------|-----------------------------------------------|
-| R-01 | Over-reliance on llama.cpp for LLM serving                | Performance/Scale | Evaluate vLLM or alternative backends for future phases. |
+| R-01 | LLM backend performance and compatibility                  | Performance/Scale | vLLM is now the default backend; monitor for model compatibility and performance regressions. |
 | R-02 | Single-vendor management of n8n workflows                 | Operational       | Define a controlled access model for client-side usage in Phase 2. |
 | R-03 | ChromaDB scalability limitations                          | Performance       | Plan migration path to Qdrant or Weaviate if needed. |
 | R-04 | Manual GPU configuration in self-hosted environments      | Complexity        | Provide deployment scripts and vendor support packages. |
@@ -24,7 +24,7 @@ This section identifies key risks and areas of technical debt that may impact th
 ## 11.2 Technical Debt Areas
 
 - **LLM Service Bootstrapping:**  
-  As of Phase 1, llama.cpp deployment requires manual compilation and service setup. Automating this via scripts and installer packages is planned.
+  vLLM deployment is now automated via Docker. llama.cpp remains available for lightweight or CPU-only scenarios.
 
 - **MCP API Specification:**  
   Initial MCP servers may lack complete OpenAPI/Swagger specifications. This will be formalized to improve integration and maintainability.

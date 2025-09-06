@@ -30,12 +30,12 @@ This folder contains the source code and Docker configuration for the **Sentra B
 
 ## Technology Stack
 
-- **Backend Framework:** Python 3.12 + FastAPI
+- **Backend Framework:** Python 3.13 + FastAPI
 - **Database:**:
   - PostgreSQL (Auth and configuration)
   - MongoDB (Conversation history and chat metadata)
 - **Vector Store:** ChromaDB (external service)
-- **LLM Backend:** llama.cpp Server (external service)
+- **LLM Backend:** vLLM (default)
 - **State Management:** Token/session control via SQL + NoSQL
 - **Container Runtime:** Docker
 
