@@ -29,7 +29,7 @@ services:
     volumes:
       - ../services/sentra-api:/app
       - ../packages/sentra-core:/packages/sentra-core
-      - ../core/sentra-engine-legacy:/core/sentra-engine-legacy
+      - ../packages/sentra-runtime:/packages/sentra-runtime
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net

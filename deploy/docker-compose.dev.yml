@@ -46,7 +46,7 @@ services:
     volumes:
       - ../services/sentra-api:/app
       - ../packages/sentra-core:/packages/sentra-core
-      - ../sentra-engine:/sentra-engine
+      - ../sentra-runtime:/sentra-runtime
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net

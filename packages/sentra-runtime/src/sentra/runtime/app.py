@@ -15,7 +15,7 @@ async def run_conversation(
     """Run a conversation with the configured agents.
 
     This function is the main public entrypoint for consumers of the
-    ``sentra-engine`` package and simply delegates to the
+    ``sentra-runtime`` package and simply delegates to the
     :class:`CoordinatorAgent`.
 
     Args:

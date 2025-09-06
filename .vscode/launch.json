@@ -120,7 +120,7 @@
         "--cov-report=term-missing:skip-covered",
         "--cov-report=xml:${workspaceFolder}/coverage.xml"
       ],
-      "envFile": "${workspaceFolder}/core/sentra-engine/tests/.env.test",
+      "envFile": "${workspaceFolder}/packages/sentra-runtime/tests/.env.test",
       "env": {
         "COVERAGE_FILE": "${workspaceFolder}/.coverage",
         "COVERAGE_RCFILE": "${workspaceFolder}/.coveragerc"
@@ -182,8 +182,8 @@
       "name": "Stream Demo",
       "type": "debugpy",
       "request": "launch",
-      "program": "${workspaceFolder}/sentra-engine/examples/stream_demo.py",
-      "cwd": "${workspaceFolder}/sentra-engine",
+      "program": "${workspaceFolder}/sentra-runtime/examples/stream_demo.py",
+      "cwd": "${workspaceFolder}/sentra-runtime",
       "env": { "USE_DUMMY": "true" },
       "console": "integratedTerminal"
     }

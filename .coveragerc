@@ -12,7 +12,7 @@ omit =
 
 # IMPORTANT: list source roots so gutters map correctly
 source =
-    core/sentra-engine/sentra_engine
+    core/sentra-runtime/sentra_engine
     services/sentra-api/sentra_brain_api
     services/sentra-core/sentra_core
 
