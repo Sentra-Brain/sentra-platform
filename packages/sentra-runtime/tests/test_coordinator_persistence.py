@@ -4,11 +4,11 @@ from sentra.runtime.agents.coordinator import CoordinatorAgent
 from sentra.runtime.models import EngineEvent, ConversationRequest
 
 
-class DummyPersistence:
+class DummySink:
     def __init__(self):
         self.events = []
 
-    async def persist_event(self, event: EngineEvent) -> None:
+    async def on_event(self, event: EngineEvent) -> None:
         self.events.append(event)
 
 
@@ -19,12 +19,14 @@ class StubSentraAgent:
 
 
 @pytest.mark.asyncio
-async def test_coordinator_persists_events(monkeypatch):
+async def test_coordinator_emits_and_sinks_events(monkeypatch):
+    # Monkeypatch the SentraAgent used *inside* coordinator
     monkeypatch.setattr(
         "sentra.runtime.agents.coordinator.SentraAgent", StubSentraAgent
     )
-    persistence = DummyPersistence()
-    agent = CoordinatorAgent(persistence=persistence)
+
+    sink = DummySink()
+    agent = CoordinatorAgent(sink=sink)
     req = ConversationRequest(messages=["hello there"])
 
     collected = []
@@ -32,4 +34,4 @@ async def test_coordinator_persists_events(monkeypatch):
         collected.append(ev)
 
     assert [e.content for e in collected] == ["hi", "bye"]
-    assert [e.content for e in persistence.events] == ["hi", "bye"]
+    assert [e.content for e in sink.events] == ["hi", "bye"]

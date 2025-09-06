@@ -12,7 +12,7 @@ from sentra.infra.nosql.mongo_session_repository import (
 from sentra_brain_api.features.chat.schemas import SessionRequest
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra.runtime.models import ConversationRequest as EngineRequest
-from sentra.runtime.adapters.persistence_adapter import SessionPersistenceAdapter
+from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter as SessionPersistenceAdapter
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -37,9 +37,8 @@ class ChatController:
             current_user: UserEntity = Depends(get_authenticated_user),
         ):
             body.user_id = current_user.id
-            adapter = SessionPersistenceAdapter(
-                repo=mongo_repo, user_id=str(current_user.id)
-            )
+
+            adapter = SessionPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             conversation_id = str(body.session_id)
             await adapter.persist_user_message(
                 conversation_id,
@@ -47,20 +46,18 @@ class ChatController:
                 meta={"message_id": str(body.message_id)} if body.message_id else None,
             )
             recent = await adapter.get_recent_context(conversation_id, limit=50)
+
+            import asyncio
+            doc = await asyncio.to_thread(mongo_repo.get_session_by_id, conversation_id, str(current_user.id))
+            session_state = (doc or {}).get("state") or {"session": {}, "user": {}, "app": {}}
+
             engine_request = EngineRequest(
                 messages=[*recent, body.content],
-                context_source_ids=[
-                    str(cid) for cid in body.context_source_ids
-                ]
-                if body.context_source_ids
-                else None,
-                context_document_ids=[
-                    str(cid) for cid in body.context_document_ids
-                ]
-                if body.context_document_ids
-                else None,
                 user_id=str(body.user_id),
                 conversation_id=conversation_id,
+                context_source_ids=[str(cid) for cid in body.context_source_ids] if body.context_source_ids else None,
+                context_document_ids=[str(cid) for cid in body.context_document_ids] if body.context_document_ids else None,
+                session_state=session_state,
             )
 
             async def stream():

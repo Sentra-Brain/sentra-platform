@@ -13,11 +13,11 @@ async def test_coordinator_triggers_fallback(monkeypatch):
 
     async def failing_run(self, request):
         raise ToolError()
-        yield  # pragma: no cover - ensure async generator signature
+        yield  # pragma: no cover
 
     monkeypatch.setattr(sentra_agent.SentraAgent, "run", failing_run)
 
-    coord = CoordinatorAgent()
+    coord = CoordinatorAgent()  # no sink in normal API path
     req = ConversationRequest(messages=["hi"])
     events = []
     async for ev in coord.run(req):

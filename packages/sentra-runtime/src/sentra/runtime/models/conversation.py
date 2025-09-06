@@ -15,6 +15,7 @@ class ConversationRequest(BaseModel):
     context_document_ids: Optional[List[str]] = None
     user_id: Optional[str] = None
     conversation_id: Optional[str] = None
+    session_state: Optional[Dict[str, Any]] = None
 
 
 class EventActions(BaseModel):

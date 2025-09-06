@@ -8,19 +8,13 @@ from google.adk.models.lite_llm import LiteLlm
 from google.adk.agents import Agent
 from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.runners import Runner
-from google.adk.sessions import BaseSessionService
 from google.genai import types
 
-from sentra.domain.services import session_service
 from sentra.shared.settings import settings as core_settings
-from sentra.shared.services import RagMemoryService
-from google.adk.sessions import Session
-from .. import config
-from ..context import build_context
-from ..models import EngineEvent, ConversationRequest
-from ..telemetry import emit_event_log
+from sentra.runtime.context import build_context
+from sentra.runtime.models import EngineEvent, ConversationRequest
+from sentra.runtime.telemetry import emit_event_log
 from sentra.runtime.policies.guardrails import check_tool_allowed
-from sentra.runtime.adapters.mongo_session_service import MongoSessionService
 
 
 class SentraAgent:
@@ -36,8 +30,6 @@ class SentraAgent:
         yield EngineEvent(
             type="step_start", task_type="agent_execution", task_run_id=task_run_id
         )
-
-        memory_service = RagMemoryService()
 
         if request.context_source_ids or request.context_document_ids:
             check_tool_allowed("SentraAgent", "RagTool")
@@ -60,21 +52,20 @@ class SentraAgent:
             model=vllm,
             instruction="You are a helpful assistant that uses context and tools.",
         )
+        from sentra.runtime.adapters.session_ephemeral import EphemeralSessionService
+        from google.adk.sessions import Session
+
         user_id = request.user_id or "user"
         conversation_id = request.conversation_id or uuid4().hex
-        from sentra.runtime.adapters.mongo_session_service import MongoSessionService
-
-        session_service: BaseSessionService = MongoSessionService()
-        session = await session_service.get_session(
-            app_name="sentra", user_id=user_id, session_id=conversation_id
+        state = request.session_state or {"session": {}, "user": {}, "app": {}}
+        adk_session = Session(
+            app_name="sentra",
+            user_id=user_id,
+            session_id=conversation_id,
+            state=state,
+            events=[],
         )
-        if session is None:
-            raise RuntimeError(
-                f"Session not found for user_id={user_id}, session_id={conversation_id}. "
-                "Session must exist in both MongoDB and SQL."
-            )
-        # Convert SessionEntity to dict, then to ADK Session
-        adk_session = Session.model_validate(session.model_dump())
+        session_service = EphemeralSessionService(adk_session)
         run_config = RunConfig(streaming_mode=StreamingMode.SSE)
         runner = Runner(
             agent=adk_agent,
@@ -96,6 +87,7 @@ class SentraAgent:
                         chunks.append(part.text)
                         yield EngineEvent(
                             type="message_delta",
+                            author="assistant",
                             content=part.text,
                             task_run_id=task_run_id,
                         )
@@ -110,10 +102,11 @@ class SentraAgent:
             )
         )
         yield EngineEvent(
-            type="message_final", content=response, task_run_id=task_run_id
+            type="message_final",
+            author="assistant",
+            content=response,
+            task_run_id=task_run_id
         )
-
-        await memory_service.add_session_to_memory(session)
 
         emit_event_log(
             EngineEvent(
