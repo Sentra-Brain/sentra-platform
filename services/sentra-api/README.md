@@ -28,6 +28,15 @@ This folder contains the source code and Docker configuration for the **Sentra B
 
 ---
 
+
+---
+
+## Environment Configuration
+
+Copy `.env.example` to `.env` and fill in the required values for your deployment.
+
+---
+
 ## Technology Stack
 
 - **Backend Framework:** Python 3.13 + FastAPI

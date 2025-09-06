@@ -35,9 +35,16 @@ Fetches readable content from a public web URL. (Disabled by default.)
 
 ---
 
-## Environment Variables (`.env`)
 
-Example additions:
+---
+
+## Environment Configuration
+
+Copy `.env.example` to `.env` and fill in the required values for your deployment.
+
+---
+
+## Environment Variables (`.env`)
 
 ```env
 # Search Provider (DuckDuckGo)

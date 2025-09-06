@@ -32,6 +32,15 @@ docker build -t sentra-rag-server .
 docker run -p 9100:9100 sentra-rag-server
 ```
 
+
+---
+
+## Environment Configuration
+
+Copy `.env.example` to `.env` and fill in the required values for your deployment.
+
+---
+
 ## Environment Variables
 
 - `CHROMA_URL` - ChromaDB URL (default: http://chroma:8000)

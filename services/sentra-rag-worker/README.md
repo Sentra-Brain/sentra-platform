@@ -27,6 +27,15 @@ A background service for ingesting and indexing documents into a vector database
 [PostgreSQL (status + metadata)]
 ```
 
+
+---
+
+## Environment Configuration
+
+Copy `.env.example` to `.env` and fill in the required values for your deployment.
+
+---
+
 ## 🔧 Configuration
 
 Set via `.env` or environment variables:
