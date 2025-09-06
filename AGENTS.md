@@ -1,56 +1,102 @@
-<!--
-  Summarized AGENTS.md for Sentra Brain
-
-  This file contains the essential guidance for coding agents working on
-  the Sentra Brain monorepo.  It focuses on useful information: the
-  overall architecture, key verticals, monorepo structure, build
-  commands, code style guidelines, testing practices, pull request
-  conventions and high-level automation considerations.  Extraneous
-  commentary and deep implementation details have been removed.
-
-  See the full AGENTS.md for more context and examples.
--->
-
-# Sentra Brain – Essential Agent Guide
+---
+# Sentra Brain – Agent Coding Guide (2025)
 
 ## Overview
 
-Sentra Brain is a **private, modular AI server** for SMEs requiring
-full control over their data and AI infrastructure.
-It combines a local LLM serving engine (llama.cpp or vLLM), a private
-RAG engine (ChromaDB/Qdrant), an MCP integration layer and web UIs for
-administration and chat.  Data and computation
-remain on‑premises to meet GDPR, HIPAA and similar regulations.
+Sentra Brain is a modular, private AI server platform for professional environments needing compliance, privacy, and control. It is organized as a monorepo with clear separation between core packages, services, deployment, and frontends.
 
-### Supported sectors and use cases
+All code, data, and computation are designed to remain on-premises. The system is built for extensibility, regulatory compliance (GDPR, HIPAA, ISO/IEC 27001), and modularity.
 
-| Sector                  | Key uses:contentReference[oaicite:3]{index=3}:contentReference[oaicite:4]{index=4} |
-|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Accounting & Admin     | Automate tax filings (303, 111, 130, 190), payroll drafts, invoice extraction, form pre‑fill and agency communications with on‑prem control:contentReference[oaicite:5]{index=5}. |
-| Law Firms             | Compare and draft legal documents, find similar contracts, search jurisprudence and local folders, summarise case files:contentReference[oaicite:6]{index=6}. |
-| Financial Agencies     | Analyse financial reports, create incorporation checklists, fetch client data from platforms like Holded, summarise invoices, draft employment contracts and lookup aids, regulations and social security procedures:contentReference[oaicite:7]{index=7}. |
-| Industrial SMEs        | Customer‑support FAQ assistant and search of local technical manuals:contentReference[oaicite:8]{index=8}. |
-| Healthcare             | Fill medical certificates, check medication interactions, answer patient FAQs and summarise medical reports:contentReference[oaicite:9]{index=9}:contentReference[oaicite:10]{index=10}. |
-| Public sector & other  | Automate requests, generate meeting summaries and verify documents with vendor‑independent, on‑prem AI (detailed in internal docs). |
+## Monorepo Structure
 
-## Monorepo structure (high‑level)
+| Path                        | Purpose                                                                                 |
+|-----------------------------|-----------------------------------------------------------------------------------------|
+| `packages/sentra-core`      | Core domain logic, models, infrastructure, and tests.                                    |
+| `packages/sentra-rag`       | RAG (Retrieval Augmented Generation) base library: embeddings, vector store, RAG service.|
+| `packages/sentra-runtime`   | Runtime logic, orchestration, and supporting libraries.                                  |
+| `services/sentra-api`       | Main API gateway (REST), orchestrates core, integrates with DBs and vector stores.       |
+| `services/sentra-mcp`       | MCP (Model Context Protocol) server for external integrations and long-running ops.       |
+| `services/sentra-rag-*`     | Microservices for vector search (`server`) and document ingestion (`worker`).            |
+| `deploy/`                   | Docker Compose files, monitoring configs, deployment scripts, and related docs.          |
+| `frontends/`                | Web UIs: `sentra-admin` (admin panel), `sentra-web` (end-user chat).                    |
+| `docs/`                     | Technical documentation, ADRs, and internal guides.                                      |
+| `website/`                  | Public marketing site and documentation.                                                 |
 
-| Directory/Service         | Purpose |
-|--------------------------|---------|
-| `packages/sentra-core`       | Domain entities, repositories and services for core data (users, conversations, documents). |
-| `core/sentra-engine-legacy`     | Legacy adapters and orchestrators for LLM serving, planning and context management. |
-| `packages/sentra-rag`        | RAG base library: embeddings, vector store abstractions and RAG service. |
-| `services/sentra-api`    | Main API gateway exposing REST endpoints; orchestrates core calls; integrates with Postgres, MongoDB, RabbitMQ and the vector DB. |
-| `services/sentra-mcp`    | Model Context Protocol server; centralises access to external tools and long‑running operations. |
-| `services/sentra-rag-*`  | Microservices for vector search (`server`) and document ingestion (`worker`). |
-| `frontends/sentra-admin` | React/TypeScript admin panel: dashboards, settings, logs and dataset management. |
-| `frontends/sentra-web`   | End‑user chat interface with multiple modes and context selection. |
-| `deploy`                 | Docker compose files and monitoring config. |
-| `docs` / `dev-docs`      | Technical documentation, ADRs and internal guides. |
+## Coding Agent Expectations
 
-## Setup and development
+1. **Follow Monorepo Conventions:**
+  - Place new core logic in the appropriate `packages/` subfolder.
+  - Add new services to `services/` with their own code, tests, and requirements.
+  - Use `deploy/` for all deployment, Docker, and monitoring config changes.
+  - Frontend changes go in `frontends/`.
 
-1. **Clone and prepare**
-   ```bash
-   git clone git@github.com:jgccon/sentra-brain.git
-   cd sentra-brain
+2. **Testing:**
+  - Each package/service has its own `tests/` directory. Add or update tests alongside code changes.
+  - Run tests using `pytest` from the root or the relevant subfolder.
+  - Use the provided VS Code tasks for full coverage and CI parity.
+
+3. **Dependencies:**
+  - Python packages: use `pyproject.toml` (for packages) or `requirements.txt` (for services).
+  - Node.js frontends: use `package.json` in the relevant frontend folder.
+
+4. **Build & Run:**
+  - Use Docker Compose from `deploy/` for local/dev/prod environments.
+  - Each service/package can be run and tested independently if needed.
+
+5. **Documentation:**
+  - Update or add `README.md` in any package/service you modify.
+  - Central docs are in `docs/` and `deploy/README.md`.
+
+6. **Compliance & Privacy:**
+  - Never introduce external telemetry or data egress.
+  - Ensure all data and computation remain local unless explicitly required and documented.
+
+7. **Pull Requests & Automation:**
+  - All code must pass lint, type-check, and tests before merging.
+  - Run all relevant tests and build steps locally before PR.
+  - Document any new environment variables or deployment steps in the appropriate `README.md` or `deploy/` docs.
+
+## Quickstart for Agents
+
+1. **Clone and prepare:**
+  ```bash
+  git clone <repo-url>
+  cd sentra-brain
+  ```
+2. **Install dependencies:**
+  - For a Python package:
+    ```bash
+    cd packages/sentra-core
+    pip install -r requirements.txt  # or poetry install
+    ```
+  - For a service:
+    ```bash
+    cd services/sentra-api
+    pip install -r requirements.txt
+    ```
+  - For a frontend:
+    ```bash
+    cd frontends/sentra-admin
+    npm install
+    ```
+3. **Run tests:**
+  ```bash
+  pytest packages/sentra-core/tests
+  pytest services/sentra-api/tests
+  # or use VS Code tasks for full coverage
+  ```
+4. **Build and run locally:**
+  ```bash
+  cd deploy
+  docker compose -f docker-compose.dev.yml up --build
+  ```
+
+## Additional Guidance
+
+- Always check `.env` files and update as needed for new features.
+- If you add a new service or package, ensure it is documented and included in the appropriate Docker Compose file if needed.
+- For regulatory or compliance changes, update both code and documentation.
+
+---
+
+For further details, see the main `README.md` and `docs/`.
