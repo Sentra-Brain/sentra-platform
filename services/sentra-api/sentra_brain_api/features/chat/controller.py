@@ -12,11 +12,11 @@ from sentra.infra.nosql.mongo_session_repository import (
 from sentra_brain_api.features.chat.schemas import SessionRequest
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra.runtime.models import ConversationRequest as EngineRequest
-from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter as SessionPersistenceAdapter
+from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from datetime import datetime, timezone
 from uuid import uuid4
 
-logger = get_logger("sentra_brain_api.chat.v2")
+logger = get_logger("sentra_brain_api.features.chat")
 
 
 class ChatController:
@@ -38,7 +38,7 @@ class ChatController:
         ):
             body.user_id = current_user.id
 
-            adapter = SessionPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
+            adapter = MongoPersistenceAdapter(repo=mongo_repo, user_id=str(current_user.id))
             conversation_id = str(body.session_id)
             await adapter.persist_user_message(
                 conversation_id,
@@ -47,9 +47,7 @@ class ChatController:
             )
             recent = await adapter.get_recent_context(conversation_id, limit=50)
 
-            import asyncio
-            doc = await asyncio.to_thread(mongo_repo.get_session_by_id, conversation_id, str(current_user.id))
-            session_state = (doc or {}).get("state") or {"session": {}, "user": {}, "app": {}}
+            session_state = await adapter.get_session_state(conversation_id)
 
             engine_request = EngineRequest(
                 messages=[*recent, body.content],

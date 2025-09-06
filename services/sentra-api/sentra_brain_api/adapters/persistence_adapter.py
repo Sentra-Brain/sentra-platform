@@ -12,8 +12,10 @@ from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
+from sentra.shared.logging import get_logger
 from sentra.runtime.models.conversation import EngineEvent
 
+logger = get_logger("sentra_brain_api.chat.v2")
 
 # ---- LRU cache ---------------------------------------------------------------
 
@@ -119,3 +121,13 @@ class MongoPersistenceAdapter:
         msgs = msgs[-limit:]
         await _CONV_CACHE.put(key, msgs)
         return msgs
+    
+    async def get_session_state(self, conversation_id: str) -> dict[str, Any] | None:
+        try:
+            doc = await asyncio.to_thread(
+                self.repo.get_session_by_id, conversation_id, self.user_id
+            )
+            return (doc or {}).get("state", {"session": {}, "user": {}, "app": {}})
+        except Exception:
+            logger.exception("Failed to get session state")
+            return {"session": {}, "user": {}, "app": {}}

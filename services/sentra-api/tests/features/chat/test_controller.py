@@ -1,4 +1,5 @@
 import json
+from typing import Any
 import uuid
 from datetime import datetime, timezone
 
@@ -6,11 +7,11 @@ import pytest
 from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
-from sentra_core.domain.entities.user_entity import UserEntity
+from sentra.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_core.infra.nosql.mongo_session_repository import get_session_mongo_repository
-from sentra_core.schemas.engine_event import EngineEvent
+from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
+from sentra.schemas.engine_event import EngineEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 
@@ -28,6 +29,10 @@ class DummyAdapter:
 
     async def append_event(self, conversation_id, event):
         self.call_log.append(("append_event", conversation_id, event))
+
+    async def get_session_state(self, conversation_id: str) -> dict[str, Any] | None:
+        self.call_log.append(("get_session_state", conversation_id))
+        return {"session": {}, "user": {}, "app": {}}
 
 
 def parse_sse(text: str):
@@ -89,7 +94,7 @@ def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
         for ev in events:
             yield ev
 
-    monkeypatch.setattr("sentra_engine.app.run_conversation", fake_run)
+    monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
 
     client = TestClient(app)
     payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
@@ -117,7 +122,7 @@ def test_user_message_persisted_first(app, mock_user, monkeypatch):
             author="assistant",
         )
 
-    monkeypatch.setattr("sentra_engine.app.run_conversation", fake_run)
+    monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
     client = TestClient(app)
     payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
     client.post("/chat/send", json=payload)

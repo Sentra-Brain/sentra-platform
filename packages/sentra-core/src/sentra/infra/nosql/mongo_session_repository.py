@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from functools import lru_cache
 from uuid import UUID
 from pymongo import MongoClient
 from sentra.infra.nosql.mongo_settings import settings
@@ -87,9 +88,9 @@ class MongoSessionRepository:
             )
         return result.modified_count
 
-
-mongo_service_instance: MongoSessionRepository | None = None
-
+@lru_cache(maxsize=1)
+def _repo_singleton() -> MongoSessionRepository:
+    return MongoSessionRepository()
 
 def get_session_mongo_repository() -> MongoSessionRepository:
-    return mongo_service_instance
+    return _repo_singleton()
