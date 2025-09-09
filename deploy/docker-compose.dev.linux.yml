@@ -28,7 +28,8 @@ services:
       - "8080:8080"   # Metrics port
     volumes:
       - ../services/sentra-api:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-domain:/packages/sentra-domain
+      - ../packages/sentra-infra:/packages/sentra-infra
       - ../packages/sentra-runtime:/packages/sentra-runtime
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
@@ -38,7 +39,6 @@ services:
     depends_on:
       - sentra-sql-db
       - sentra-nosql-db
-      - sentra-vector-db
       - rabbitmq
 
   sentra-mcp:
@@ -52,7 +52,7 @@ services:
       - "5681:5681"   # Python debugpy
     volumes:
       - ../services/sentra-mcp:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-infra:/packages/sentra-infra
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -78,7 +78,7 @@ services:
       - "9100:9100"   
     volumes:
       - ../services/sentra-rag-server:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-infra:/packages/sentra-infra
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -99,7 +99,7 @@ services:
       - "8081:8080"   # Metrics port
     volumes:
       - ../services/sentra-rag-worker:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-infra:/packages/sentra-infra
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
       # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:

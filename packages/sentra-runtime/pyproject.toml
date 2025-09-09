@@ -7,7 +7,7 @@ name = "sentra-runtime"
 version = "0.0.0"
 description = "Sentra runtime package"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "google-adk",
     "pydantic",

@@ -1,0 +1,9 @@
+[project]
+name = "sentra-shared"
+version = "0.1.0"
+description = "Shared utilities and crosscutting concerns for Sentra projects."
+readme = "README.md"
+requires-python = ">=3.12"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,4 +1,4 @@
-# /sentra-rag/sentra/rag/services/rag_service.py
+# packages/sentra-rag/src/sentra/rag/services/rag_service.py
 from typing import List, Dict, Any, Optional
 from uuid import UUID
 from sentra.rag.embeddings.provider import get_embedding_provider

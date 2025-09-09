@@ -1,4 +1,4 @@
-# sentra_brain_api/features/chat/controller.py
+# services/sentra-api/sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from sentra.runtime.models.conversation import EngineEvent

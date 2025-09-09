@@ -4,9 +4,13 @@ FROM ${BASE_IMAGE}
 WORKDIR /app
 
 # Copy and install core packages
-COPY packages/sentra-core /packages/sentra-core
+COPY packages/sentra-domain /packages/sentra-domain
+COPY packages/sentra-shared /packages/sentra-shared
+COPY packages/sentra-infra /packages/sentra-infra
 COPY packages/sentra-rag /packages/sentra-rag
-RUN pip install -e /packages/sentra-core
+RUN pip install -e /packages/sentra-domain
+RUN pip install -e /packages/sentra-shared
+RUN pip install -e /packages/sentra-infra
 RUN pip install -e /packages/sentra-rag
 
 # Install worker-specific requirements

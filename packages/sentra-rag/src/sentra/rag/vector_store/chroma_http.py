@@ -1,3 +1,4 @@
+# packages/sentra-rag/src/sentra/rag/vector_store/chroma_http.py
 import httpx
 from typing import List, Dict, Any, Optional
 from uuid import UUID

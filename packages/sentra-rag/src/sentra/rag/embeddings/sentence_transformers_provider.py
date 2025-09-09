@@ -1,5 +1,4 @@
-# sentra/rag/embeddings/sentence_transformers_provider.py
-
+# packages/sentra-rag/src/sentra/rag/embeddings/sentence_transformers_provider.py
 from typing import List
 from sentence_transformers import SentenceTransformer
 from sentra.rag.embeddings.base import EmbeddingProvider

@@ -128,8 +128,8 @@ RUN pip install -r requirements.rag.txt
 ```dockerfile
 FROM sentra-rag-base:py3.13
 WORKDIR /app
-COPY packages/sentra-core /packages/sentra-core
-RUN pip install -e /packages/sentra-core
+COPY packages/sentra-infra /packages/sentra-infra
+RUN pip install -e /packages/sentra-infra
 COPY services/sentra-rag-worker /app
 CMD ["python", "-m", "sentra_rag_worker.main"]
 ```

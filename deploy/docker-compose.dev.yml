@@ -45,8 +45,9 @@ services:
       - "8080:8080"   # Metrics port
     volumes:
       - ../services/sentra-api:/app
-      - ../packages/sentra-core:/packages/sentra-core
-      - ../sentra-runtime:/sentra-runtime
+      - ../packages/sentra-infra:/packages/sentra-infra
+      - ../packages/sentra-domain:/packages/sentra-domain
+      - ../packages/sentra-runtime:/packages/sentra-runtime
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -64,7 +65,8 @@ services:
       - "5681:5681"   # Python debugpy
     volumes:
       - ../services/sentra-mcp:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-domain:/packages/sentra-domain
+      - ../packages/sentra-infra:/packages/sentra-infra
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -82,7 +84,9 @@ services:
       - "9100:9100"   
     volumes:
       - ../services/sentra-rag-server:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-domain:/packages/sentra-domain
+      - ../packages/sentra-infra:/packages/sentra-infra
+      - ../packages/sentra-rag:/packages/sentra-rag
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
@@ -103,7 +107,9 @@ services:
       - "8081:8080"   # Metrics port
     volumes:
       - ../services/sentra-rag-worker:/app
-      - ../packages/sentra-core:/packages/sentra-core
+      - ../packages/sentra-domain:/packages/sentra-domain
+      - ../packages/sentra-infra:/packages/sentra-infra
+      - ../packages/sentra-rag:/packages/sentra-rag
       - D:\sentra-knowledge:/mnt/sentra_knowledge:rw
       # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:

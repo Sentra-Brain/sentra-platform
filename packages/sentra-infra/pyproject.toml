@@ -1,0 +1,57 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+
+[project]
+name = "sentra-infra"
+version = "0.2.0"
+description = "Infrastructure adapters and persistence implementations (SQL, Mongo, AMQP, HTTP) for Sentra Brain. No domain logic."
+readme = "README.md"
+authors = [{ name = "Juan G Carmona" }]
+requires-python = ">=3.12"
+
+dependencies = [
+  "sentra-domain @ file:///packages/sentra-domain",
+  "sentra-shared @ file:///packages/sentra-shared",
+]
+
+
+[project.optional-dependencies]
+sql = [
+  "sqlalchemy>=2",
+  "alembic>=1.13",
+  "psycopg[binary]>=3",
+]
+mongo = [
+  "pymongo>=4",
+]
+amqp = [
+  "aio-pika>=9",
+]
+infra = [
+  "httpx>=0.27",
+]
+dev = [
+  "pytest==8.4.1",
+  "pytest-cov==6.2.1",
+  "pytest-mock==3.14.1",
+  "pytest-asyncio==1.1.0",
+  "debugpy==1.8.15",
+]
+all = [
+  "sqlalchemy>=2",
+  "alembic>=1.13",
+  "psycopg[binary]>=3",
+  "pymongo>=4",
+  "aio-pika>=9",
+  "httpx>=0.27",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+include = ["sentra.*"]

@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sentra-domain"
+version = "0.2.0"
+description = "Core Domain, entities, enums, repositories, services for Sentra"
+readme = "README.md"
+authors = [{ name = "Juan G Carmona" }]
+requires-python = ">=3.12"
+
+# Keep base light so runtime/engine doesn't drag infra deps
+dependencies = [
+  "pydantic>=2",
+]
+
+[project.optional-dependencies]
+sql = [
+  "sqlalchemy>=2",
+]
+dev = [
+  "pytest==8.4.1",
+  "pytest-cov==6.2.1",
+  "pytest-mock==3.14.1",
+  "pytest-asyncio==1.1.0",
+  "debugpy==1.8.15",
+]
+
+
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+namespaces = true
+include = ["sentra.*"]

@@ -1,4 +1,4 @@
-# sentra_brain_api/features/chat/schemas.py
+# services/sentra-api/sentra_brain_api/features/chat/schemas.py
 from enum import Enum
 from typing import List, Optional, Literal, Dict, Any
 from uuid import UUID

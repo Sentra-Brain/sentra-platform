@@ -8,9 +8,9 @@ from typing import Optional
 from sentra.infra.sql.postgres_service import get_db
 from sentra.domain.entities.user_entity import UserEntity
 from sentra.domain.enums.role import Role
-from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra.domain.repository.document_repository import DocumentRepository
-from sentra.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra.infra.sql.repositories.knowledge_source_repository_sql import KnowledgeSourceRepositorySql
+from sentra.infra.sql.repositories.document_repository_sql import DocumentRepositorySql
+from sentra.infra.amqp.indexing_publisher import IndexingJobPublisher
 
 from sentra_brain_api.features.knowledge.api_service import KnowledgeApiService
 from sentra_brain_api.features.knowledge.schemas import (
@@ -25,8 +25,8 @@ router = APIRouter()
 
 def _get_service(db: Session = Depends(get_db)) -> KnowledgeApiService:
     return KnowledgeApiService(
-        knowledge_repo=KnowledgeSourceRepository(db),
-        document_repo=DocumentRepository(db),
+        knowledge_repo=KnowledgeSourceRepositorySql(db),
+        document_repo=DocumentRepositorySql(db),
         indexing_publisher=IndexingJobPublisher()
     )
 

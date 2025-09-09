@@ -7,7 +7,6 @@ from sentra.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.auth_service import AuthService
-from sentra.domain.repository.user_repository  import UserRepository
 
 # Create Fake UserRepository so that this test doesn't depend on the actual database
 class FakeUserRepository():

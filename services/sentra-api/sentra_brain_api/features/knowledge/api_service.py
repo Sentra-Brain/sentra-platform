@@ -9,12 +9,12 @@ from sentra.domain.constants.file_types import ALLOWED_FILE_TYPES
 from sentra.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
 from sentra.domain.entities.document_entity import DocumentEntity
 from sentra.domain.entities.user_entity import UserEntity
-from sentra.domain.services.indexing_publisher import IndexingJobPublisher
-from sentra.domain.services.file_storage import FileStorageService
+from sentra.infra.amqp.indexing_publisher import IndexingJobPublisher
+from sentra.infra.storage.file_storage import FileStorageService
 from sentra.domain.services.knowledge_source_service import KnowledgeSourceService
 from sentra.domain.services.document_service import DocumentService
-from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra.domain.repository.document_repository import DocumentRepository
+from sentra.infra.sql.repositories.knowledge_source_repository_sql import KnowledgeSourceRepositorySql
+from sentra.infra.sql.repositories.document_repository_sql import DocumentRepositorySql
 from sentra.domain.enums.knowledge import KnowledgeSourceType, KnowledgeSourceVisibility
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra_brain_api.features.knowledge.schemas import CreateKnowledgeSourceRequest, DocumentMarkdownResponse, DocumentUploadRequest
@@ -27,8 +27,8 @@ logger = get_logger(__name__)
 class KnowledgeApiService:
     def __init__(
         self,
-        knowledge_repo: KnowledgeSourceRepository,
-        document_repo: DocumentRepository,
+        knowledge_repo: KnowledgeSourceRepositorySql,
+        document_repo: DocumentRepositorySql,
         indexing_publisher: IndexingJobPublisher
     ):
         self.knowledge_repo = knowledge_repo

@@ -7,7 +7,7 @@ from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra.shared.logging import get_logger
 from sentra_brain_api.features.auth.auth_service import AuthService
 from sentra_brain_api.features.auth.models import Token, RefreshTokenRequest, AccessToken
-from sentra.domain.repository.user_repository  import UserRepository
+from sentra.infra.sql.repositories.user_repository_sql  import UserRepositorySql
 from sentra.infra.sql.postgres_service import get_db
 
 logger = get_logger(__name__)
@@ -23,7 +23,7 @@ class AuthController:
             form_data: OAuth2PasswordRequestForm = Depends(),
             db: Session = Depends(get_db)
             ):
-            user_repo = UserRepository(db)
+            user_repo = UserRepositorySql(db)
             auth_service = AuthService(user_repo)
             logger.info(f"Logging in user: {form_data.username}")
             user = auth_service.authenticate_user(form_data.username, form_data.password)
@@ -50,7 +50,7 @@ class AuthController:
             request: RefreshTokenRequest,
             db: Session = Depends(get_db)
         ):
-            user_repo = UserRepository(db)
+            user_repo = UserRepositorySql(db)
             auth_service = AuthService(user_repo)
             logger.info("Refreshing access token")
             

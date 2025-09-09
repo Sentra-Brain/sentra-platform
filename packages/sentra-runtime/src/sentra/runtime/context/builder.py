@@ -4,11 +4,11 @@ from __future__ import annotations
 from typing import Dict
 import json
 
+from sentra.runtime.adapters.rag_memory_service import RagMemoryService
 from sentra.runtime.models.conversation import ConversationRequest
 from sentra.runtime.agents.summarizer import update_summary_and_entities
 from sentra.runtime.tools.rag_tool import RagTool
 from sentra.shared.settings import settings
-from sentra.shared.services import RagMemoryService
 
 SUMMARY_THRESHOLD = 5
 

@@ -8,13 +8,13 @@ import sys
 import uuid
 from typing import List, Dict, Any, Optional
 
-from sentra.domain.repository.document_repository import DocumentRepository
+from sentra.infra.sql.repositories.knowledge_source_repository_sql import KnowledgeSourceRepositorySql
+from sentra.infra.sql.repositories.document_repository_sql import DocumentRepositorySql
 from sentra_rag_worker.core.config import settings
 from sentra_rag_worker.services.document_processor import DocumentProcessor
 from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra.shared.logging import get_logger, configure_logging
-from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra.domain.services.indexing_publisher import IndexingJobPublisher
+from sentra.infra.amqp.indexing_publisher import IndexingJobPublisher
 # from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
 from sentra.infra.amqp.rabbitmq_consumer import RabbitMQConsumer  # ya usando aio-pika
 from sentra.infra.sql.postgres_service import create_db_session
@@ -111,8 +111,8 @@ class RAGWorker:
         db = create_db_session()
         try:
             logger.info("🔍 Scanning folder sources for new files")
-            knowledge_source_repo = KnowledgeSourceRepository(db)
-            document_repo = DocumentRepository(db)
+            knowledge_source_repo = KnowledgeSourceRepositorySql(db)
+            document_repo = DocumentRepositorySql(db)
             scanner = FolderScanner(knowledge_source_repo, document_repo)
 
             new_jobs = scanner.scan_folder_sources()

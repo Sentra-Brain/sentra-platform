@@ -37,6 +37,3 @@ pytest-cov
 pytest-dotenv
 pytest-mock
 python-jose
-
--e ../../packages/sentra-core
--e ../../packages/sentra-runtime

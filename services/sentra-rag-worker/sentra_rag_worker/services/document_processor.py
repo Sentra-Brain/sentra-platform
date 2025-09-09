@@ -1,6 +1,6 @@
 from pathlib import Path
 from sentra.domain.entities.document_entity import DocumentFileType, DocumentStatus
-from sentra.domain.services.file_storage import FileStorageService
+from sentra.infra.storage.file_storage import FileStorageService
 from sentra.rag.embeddings.provider import get_embedding_provider
 from sentra_rag_worker.services.extraction import get_extractor
 from sentra_rag_worker.services.sanitizer import cast_to_markdown
@@ -8,8 +8,8 @@ from sentra_rag_worker.services.metadata import extract_metadata
 from sentra_rag_worker.services.text_chunker import TextChunker
 from sentra.rag.vector_store.service import get_vector_store_service
 from sentra.shared.logging import get_logger, set_request_id
-from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
-from sentra.domain.repository.document_repository import DocumentRepository
+from sentra.infra.sql.repositories.knowledge_source_repository_sql import KnowledgeSourceRepositorySql
+from sentra.infra.sql.repositories.document_repository_sql import DocumentRepositorySql
 from sentra.infra.sql.postgres_service import create_db_session
 from typing import Dict, Any, Optional
 from uuid import UUID
@@ -31,7 +31,7 @@ class DocumentProcessor:
         """Lazy import of settings to avoid circular imports"""
         from sentra.shared.settings import settings
         return settings
-    
+
     def _get_file_storage(self) -> FileStorageService:
         """Lazy initialization of file storage service"""
         if self._file_storage is None:
@@ -67,7 +67,7 @@ class DocumentProcessor:
 
         db = create_db_session()
         try:
-            document_repo = DocumentRepository(db)
+            document_repo = DocumentRepositorySql(db)
             file_storage = self._get_file_storage()
 
             def fail(reason: str) -> bool:
@@ -186,12 +186,12 @@ class DocumentProcessor:
         error: Optional[str] = None, 
         chunks_count: Optional[int] = None, 
         metadata: Optional[Dict[str, Any]] = None,
-        repo: Optional[DocumentRepository] = None
+        repo: Optional[DocumentRepositorySql] = None
     ):
         try:
             if not repo:
                 db = create_db_session()
-                repo = DocumentRepository(db)
+                repo = DocumentRepositorySql(db)
                 
                 # Enhanced status update with metadata
                 self._update_document_with_metadata(repo, document_id, status, error, chunks_count, metadata)
@@ -206,7 +206,7 @@ class DocumentProcessor:
 
     def _update_document_with_metadata(
         self,
-        repo: DocumentRepository,
+        repo: DocumentRepositorySql,
         document_id: UUID,
         status: DocumentStatus,
         error: Optional[str],
@@ -240,7 +240,7 @@ class DocumentProcessor:
         
         repo.update_status(document_id, status, error, status_message, chunks_count)
 
-    def _fail(self, document_id: UUID, error: str, repo: DocumentRepository) -> bool:
+    def _fail(self, document_id: UUID, error: str, repo: DocumentRepositorySql) -> bool:
         logger.error(error)
         self._set_status(document_id, DocumentStatus.FAILED, error, repo=repo)
         return False

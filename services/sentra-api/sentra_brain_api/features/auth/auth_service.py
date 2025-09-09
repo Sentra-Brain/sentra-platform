@@ -1,11 +1,10 @@
 from datetime import datetime, timedelta, timezone
-from fastapi import HTTPException, status
 from jose import ExpiredSignatureError, JWTError, jwt
 from passlib.context import CryptContext
 from sentra.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
 from sentra.domain.entities.user_entity import UserEntity
-from sentra.domain.repository.user_repository  import UserRepository
+from sentra.infra.sql.repositories.user_repository_sql import UserRepositorySql
 from sentra.shared import logging
 
 logger = logging.get_logger("sentra_brain_api")
@@ -13,7 +12,7 @@ logger = logging.get_logger("sentra_brain_api")
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 class AuthService:   
-    def __init__(self, user_repo: UserRepository):
+    def __init__(self, user_repo: UserRepositorySql):
         self.user_repo = user_repo
 
     def authenticate_user(self, username: str, password: str) -> UserEntity | None:

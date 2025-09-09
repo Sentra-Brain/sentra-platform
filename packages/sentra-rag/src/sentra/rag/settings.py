@@ -1,3 +1,4 @@
+# packages/sentra-rag/src/sentra/rag/settings.py
 from pydantic import Field, ValidationError
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

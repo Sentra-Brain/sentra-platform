@@ -1,3 +1,4 @@
+# packages/sentra-rag/src/sentra/rag/vector_store/service.py
 from sentra.rag.settings import rag_settings
 from sentra.rag.vector_store.base import BaseVectorStore
 from sentra.rag.vector_store.chroma_http import ChromaHttpVectorStore

@@ -10,7 +10,7 @@ from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.runners import Runner
 from google.genai import types
 
-from sentra.shared.settings import settings as core_settings
+from sentra.shared.settings import settings
 from sentra.runtime.context import build_context
 from sentra.runtime.models import EngineEvent, ConversationRequest
 from sentra.runtime.telemetry import emit_event_log
@@ -44,8 +44,8 @@ class SentraAgent:
         prompt = "\n".join(prompt_parts)
 
         vllm = LiteLlm(
-            model=core_settings.vllm_model,
-            api_base=f"{core_settings.vllm_server_url}/v1",
+            model=settings.vllm_model,
+            api_base=f"{settings.vllm_server_url}/v1",
         )
         adk_agent = Agent(
             name="sentra_agent",
@@ -98,7 +98,7 @@ class SentraAgent:
             EngineEvent(
                 type="llm_called",
                 task_run_id=task_run_id,
-                meta={"engine": core_settings.llm_engine.value},
+                meta={"engine": settings.llm_engine.value},
             )
         )
         yield EngineEvent(

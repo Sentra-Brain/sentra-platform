@@ -1,5 +1,4 @@
-# sentra/rag/embeddings/base.py
-
+# packages/sentra-rag/src/sentra/rag/embeddings/base.py
 from abc import ABC, abstractmethod
 from typing import List
 

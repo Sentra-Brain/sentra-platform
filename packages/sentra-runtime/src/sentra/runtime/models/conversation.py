@@ -1,3 +1,4 @@
+# packages/sentra-runtime/src/sentra/runtime/models/conversation.py
 """Pydantic models for conversation handling."""
 from __future__ import annotations
 

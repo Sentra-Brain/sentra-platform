@@ -5,12 +5,14 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR /app
 
-# Copy and install core library
-COPY packages/sentra-core /packages/sentra-core
-RUN pip install -e /packages/sentra-core
-
-# Copy and install engine library
+# Copy and install sentra libraries
+COPY packages/sentra-domain /packages/sentra-domain
+COPY packages/sentra-shared /packages/sentra-shared
+COPY packages/sentra-infra /packages/sentra-infra
 COPY packages/sentra-runtime /packages/sentra-runtime
+RUN pip install -e /packages/sentra-domain
+RUN pip install -e /packages/sentra-shared
+RUN pip install -e /packages/sentra-infra
 RUN pip install -e /packages/sentra-runtime
 
 # Copy and install API requirements

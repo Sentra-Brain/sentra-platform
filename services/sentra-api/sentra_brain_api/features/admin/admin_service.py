@@ -1,5 +1,5 @@
+from sentra.infra.sql.repositories.user_repository_sql import UserRepositorySql
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra.domain.repository.user_repository import UserRepository
 from sentra.shared.logging import get_logger
 from sqlalchemy.orm import Session
 from uuid import UUID
@@ -7,7 +7,7 @@ from uuid import UUID
 logger = get_logger(__name__)
 
 class AdminService:
-    def __init__(self, user_repository: UserRepository):
+    def __init__(self, user_repository: UserRepositorySql):
         self.user_repository = user_repository
 
     def delete_user(self, user_id: UUID) -> None:

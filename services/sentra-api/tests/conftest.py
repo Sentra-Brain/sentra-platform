@@ -37,7 +37,9 @@ os.environ.update({
     "RABBITMQ_PORT": "5672",
     "RABBITMQ_USER": "guest",
     "RABBITMQ_PASSWORD": "guest",
-    "RABBITMQ_QUEUE": "test_queue"
+    "RABBITMQ_QUEUE": "test_queue",
+    "RAG_SERVER_URL": "http://localhost:8001",
+    "RAG_QUERY_TIMEOUT": "10",
 })
 
 # 🚨 Patch mongo_session_repository BEFORE it's imported anywhere
@@ -97,6 +99,7 @@ def load_settings():
     rabbitmq_settings.rabbitmq_user = "guest"
     rabbitmq_settings.rabbitmq_password = "guest"
     rabbitmq_settings.rabbitmq_queue = "test_queue"
+    rag_server_url="http://localhost:8001"
     yield
 
 @pytest.fixture(scope='module')

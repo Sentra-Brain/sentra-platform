@@ -3,13 +3,13 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
-from sentra.infra.sql.postgres_settings import settings
 from sentra_brain_api.core.exceptions import SentraHTTPException
-from sentra.shared.logging import get_logger
-from sentra.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.auth.models import TokenData
-from sentra.domain.repository.user_repository import UserRepository
+from sentra.domain.entities.user_entity import UserEntity
 from sentra.infra.sql.postgres_service import get_db
+from sentra.infra.sql.postgres_settings import settings
+from sentra.infra.sql.repositories.user_repository_sql import UserRepositorySql
+from sentra.shared.logging import get_logger
 
 logger = get_logger("sentra.auth")
 
@@ -18,7 +18,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/token")
 
 def get_authenticated_user(token: str = Depends(oauth2_scheme),
                             db: Session = Depends(get_db)) -> UserEntity:
-    user_repo = UserRepository(db)
+    user_repo = UserRepositorySql(db)
 
     try:
         payload = jwt.decode(token, settings.secret_key, algorithms=[settings.algorithm])

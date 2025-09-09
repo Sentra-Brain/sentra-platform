@@ -7,8 +7,8 @@ from uuid import UUID, uuid4
 from sentra.shared.logging import get_logger
 from sentra.domain.entities.document_entity import DocumentEntity, DocumentFileType, DocumentStatus
 from sentra.domain.entities.knowledge_source_entity import KnowledgeSourceEntity
-from sentra.domain.repository.document_repository import DocumentRepository
-from sentra.domain.repository.knowledge_source_repository import KnowledgeSourceRepository
+from sentra.infra.sql.repositories.knowledge_source_repository_sql import KnowledgeSourceRepositorySql
+from sentra.infra.sql.repositories.document_repository_sql import DocumentRepositorySql
 from sentra_rag_worker.core.config import settings
 
 logger = get_logger(__name__)
@@ -26,8 +26,8 @@ class FolderScanner:
 
     def __init__(
         self,
-        source_repo: KnowledgeSourceRepository,
-        document_repo: DocumentRepository
+        source_repo: KnowledgeSourceRepositorySql,
+        document_repo: DocumentRepositorySql
     ):
         self.source_repo = source_repo
         self.document_repo = document_repo

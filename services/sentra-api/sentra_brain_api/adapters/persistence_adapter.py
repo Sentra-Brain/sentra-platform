@@ -1,3 +1,4 @@
+# services/sentra-api/sentra_brain_api/adapters/persistence_adapter.py
 """Persistence adapter used by the API layer.
 
 The engine is persistence-agnostic. The API stores all events in MongoDB
