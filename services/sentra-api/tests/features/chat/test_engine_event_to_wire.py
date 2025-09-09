@@ -3,7 +3,6 @@ from uuid import uuid4
 
 from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
-import pytest
 
 
 def test_message_final_delivers_content():
@@ -20,12 +19,13 @@ def test_message_final_delivers_content():
     assert out.content == final_text
 
 
-def test_engine_event_requires_event_id():
-    evt = EngineEvent.model_construct(
-        timestamp=datetime.now(timezone.utc),
-        type="message_final",
-        author="assistant",
-        content="hi",
-    )
-    with pytest.raises(Exception):
-        engine_event_to_wire(evt)
+def test_engine_event_generates_missing_fields():
+    """Events lacking identifiers should be populated automatically."""
+    evt = EngineEvent(type="message_final", author="assistant", content="hi")
+    out = engine_event_to_wire(evt)
+    # EngineEvent should now have id/timestamp set
+    assert evt.event_id is not None
+    assert evt.timestamp is not None
+    # And the wire model should reflect those values
+    assert out.event_id == evt.event_id
+    assert out.timestamp == evt.timestamp.isoformat()
