@@ -63,8 +63,8 @@ class ChatController:
                     from sentra.runtime.app import run_conversation
 
                     async for ev in run_conversation(engine_request):
-                        await adapter.append_event(conversation_id, ev)
                         out = engine_event_to_wire(ev)
+                        await adapter.append_event(conversation_id, ev)
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
@@ -78,8 +78,8 @@ class ChatController:
                         content=str(e),
                         meta={"path": "/chat/send"},
                     )
-                    await adapter.append_event(conversation_id, err_evt)
                     out = engine_event_to_wire(err_evt)
+                    await adapter.append_event(conversation_id, err_evt)
                     yield f"data: {out.model_dump_json()}\n\n"
 
             return StreamingResponse(

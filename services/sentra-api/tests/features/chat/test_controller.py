@@ -11,7 +11,7 @@ from sentra.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
-from sentra.schemas.engine_event import EngineEvent
+from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 
@@ -127,3 +127,35 @@ def test_user_message_persisted_first(app, mock_user, monkeypatch):
     payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
     client.post("/chat/send", json=payload)
     assert adapter.call_log[0][0] == "persist_user_message"
+
+
+def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
+    """Engine events missing identifiers should still stream correctly."""
+    app, adapter = app
+    adapter.call_log.clear()
+
+    events = [EngineEvent(type="message_final", content="ok", author="assistant")]
+
+    async def fake_run(_req):
+        for ev in events:
+            yield ev
+
+    monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
+
+    client = TestClient(app)
+    payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
+    resp = client.post("/chat/send", json=payload)
+    assert resp.status_code == 200
+
+    parsed = parse_sse(resp.text)
+    assert len(parsed) == 1
+    evt = parsed[0]
+    assert evt["type"] == "message_final"
+    assert "event_id" in evt and "timestamp" in evt
+
+    # ensure persisted event got populated fields
+    append_calls = [c for c in adapter.call_log if c[0] == "append_event"]
+    assert len(append_calls) == 1
+    stored_evt = append_calls[0][2]
+    assert stored_evt.event_id == evt["event_id"]
+    assert stored_evt.timestamp.isoformat() == evt["timestamp"]
