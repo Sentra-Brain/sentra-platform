@@ -5,9 +5,9 @@ import WaitingForAnswer from './WaitingForAnswer'
 import StepPanel from './StepPanel'
 import ErrorBubble from './ErrorBubble'
 import ToolPanel from './ToolPanel'
-import type { EngineEvent } from '@features/chat/types/events'
+import type { Event } from '@features/chat/types/events'
 
-export default function EventList({ events }: { events: EngineEvent[] }) {
+export default function EventList({ events }: { events: Event[] }) {
   const endRef = useRef<HTMLDivElement | null>(null)
   const waitingForAnswer = useAppSelector((state) => state.events.waitingForAnswer)
 
@@ -22,18 +22,18 @@ export default function EventList({ events }: { events: EngineEvent[] }) {
       {events.map((evt) => {
         switch (evt.type) {
           case 'user_message':
-            return <MessageBubble key={evt.event_id} id={evt.event_id} role="user" content={evt.content} />
+            return <MessageBubble key={evt.id} id={evt.id} role="user" content={evt.content} />
           case 'message_delta':
           case 'message_final':
-            return <MessageBubble key={evt.event_id} id={evt.event_id} role="assistant" content={evt.content || ''} />
+            return <MessageBubble key={evt.id} id={evt.id} role="assistant" content={evt.content || ''} />
           case 'step_start':
           case 'step_progress':
           case 'step_end':
-            return <StepPanel key={evt.event_id} event={evt} />
+            return <StepPanel key={evt.id} event={evt} />
           case 'step_error':
-            return <ErrorBubble key={evt.event_id} label={evt.label} content={evt.content} />
+            return <ErrorBubble key={evt.id} label={evt.label} content={evt.content} />
           case 'tool_call':
-            return <ToolPanel key={evt.event_id} label={evt.label} content={evt.content} />
+            return <ToolPanel key={evt.id} label={evt.label} content={evt.content} />
           default:
             return null
         }

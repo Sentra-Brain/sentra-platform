@@ -64,8 +64,9 @@ describe('Session Creation and Rendering Flow Fixes', () => {
 
     // Add user event
     const userEvent = {
-      event_id: 'evt-1',
+      id: 'evt-1',
       type: 'user_message' as const,
+      role: 'user',
       content: 'Test message',
       timestamp: new Date().toISOString(),
     }

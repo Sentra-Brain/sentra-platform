@@ -1,10 +1,10 @@
 // features/chat/components/ChatContent.tsx
 import { useAppSelector } from '@store/hooks'
 import EventList from './EventList'
-import type { EngineEvent } from '@features/chat/types/events'
+import type { Event } from '@features/chat/types/events'
 
 export default function ChatContent() {
-  const events: EngineEvent[] = useAppSelector((state) => state.events.events)
+  const events: Event[] = useAppSelector((state) => state.events.events)
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-6">

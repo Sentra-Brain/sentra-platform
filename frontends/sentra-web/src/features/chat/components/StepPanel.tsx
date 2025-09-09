@@ -1,6 +1,6 @@
-import type { EngineEvent } from '@features/chat/types/events'
+import type { Event } from '@features/chat/types/events'
 
-export default function StepPanel({ event }: { event: EngineEvent }) {
+export default function StepPanel({ event }: { event: Event }) {
   const label = (event as any).label || 'Step'
   const status = (event as any).status || ''
   const content = event.content || ''

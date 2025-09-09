@@ -11,8 +11,8 @@ from sentra.domain.entities.user_entity import UserEntity
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
-from sentra.runtime.models.conversation import EngineEvent
-from sentra_brain_api.features.chat.mappers import engine_event_to_wire
+from sentra.schemas import Event
+from sentra_brain_api.features.chat.mappers import event_to_wire
 
 
 class DummyAdapter:
@@ -20,7 +20,7 @@ class DummyAdapter:
         self.call_log = []
         self.recent: list[str] = []
 
-    async def persist_user_message(self, conversation_id, *, text, meta=None):
+    async def persist_user_message(self, conversation_id, *, text, id=None):
         self.call_log.append(("persist_user_message", conversation_id, text))
 
     async def get_recent_context(self, conversation_id, limit):
@@ -67,26 +67,26 @@ def app(mock_user, monkeypatch):
 def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
     app, adapter = app
     events = [
-        EngineEvent(
-            event_id=uuid.uuid4().hex,
+        Event(
+            id=uuid.uuid4(),
             timestamp=datetime.now(timezone.utc),
             type="message_delta",
             content="a",
-            author="assistant",
+            role="assistant",
         ),
-        EngineEvent(
-            event_id=uuid.uuid4().hex,
+        Event(
+            id=uuid.uuid4(),
             timestamp=datetime.now(timezone.utc),
             type="message_delta",
             content="b",
-            author="assistant",
+            role="assistant",
         ),
-        EngineEvent(
-            event_id=uuid.uuid4().hex,
+        Event(
+            id=uuid.uuid4(),
             timestamp=datetime.now(timezone.utc),
             type="message_final",
             content="ab",
-            author="assistant",
+            role="assistant",
         ),
     ]
 
@@ -101,7 +101,7 @@ def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
     resp = client.post("/chat/send", json=payload)
     assert resp.status_code == 200
     parsed = parse_sse(resp.text)
-    expected = [engine_event_to_wire(e).model_dump() for e in events]
+    expected = [json.loads(event_to_wire(e).model_dump_json()) for e in events]
     assert parsed == expected
     # Persist calls
     assert adapter.call_log[0][0] == "persist_user_message"
@@ -114,12 +114,12 @@ def test_user_message_persisted_first(app, mock_user, monkeypatch):
     adapter.call_log.clear()
 
     async def fake_run(_req):
-        yield EngineEvent(
-            event_id=uuid.uuid4().hex,
+        yield Event(
+            id=uuid.uuid4(),
             timestamp=datetime.now(timezone.utc),
             type="message_final",
             content="ok",
-            author="assistant",
+            role="assistant",
         )
 
     monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
@@ -134,7 +134,7 @@ def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
     app, adapter = app
     adapter.call_log.clear()
 
-    events = [EngineEvent(type="message_final", content="ok", author="assistant")]
+    events = [Event(type="message_final", content="ok", role="assistant")]
 
     async def fake_run(_req):
         for ev in events:
@@ -151,11 +151,11 @@ def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
     assert len(parsed) == 1
     evt = parsed[0]
     assert evt["type"] == "message_final"
-    assert "event_id" in evt and "timestamp" in evt
+    assert "id" in evt and "timestamp" in evt
 
     # ensure persisted event got populated fields
     append_calls = [c for c in adapter.call_log if c[0] == "append_event"]
     assert len(append_calls) == 1
     stored_evt = append_calls[0][2]
-    assert stored_evt.event_id == evt["event_id"]
-    assert stored_evt.timestamp.isoformat() == evt["timestamp"]
+    assert str(stored_evt.id) == evt["id"]
+    assert stored_evt.timestamp.isoformat().replace("+00:00", "Z") == evt["timestamp"]

@@ -1,21 +1,22 @@
 import pytest
 
 from sentra.runtime.agents.coordinator import CoordinatorAgent
-from sentra.runtime.models import EngineEvent, ConversationRequest
+from sentra.runtime.models import ConversationRequest
+from sentra.schemas import Event
 
 
 class DummySink:
     def __init__(self):
         self.events = []
 
-    async def on_event(self, event: EngineEvent) -> None:
+    async def on_event(self, event: Event) -> None:
         self.events.append(event)
 
 
 class StubSentraAgent:
     async def run(self, request: ConversationRequest):
-        yield EngineEvent(type="message_delta", content="hi", step_id="s1")
-        yield EngineEvent(type="message_final", content="bye", step_id="s1")
+        yield Event(type="message_delta", role="assistant", content="hi", step_id="s1")
+        yield Event(type="message_final", role="assistant", content="bye", step_id="s1")
 
 
 @pytest.mark.asyncio

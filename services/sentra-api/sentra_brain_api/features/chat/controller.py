@@ -1,7 +1,7 @@
 # sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
-from sentra.runtime.models.conversation import EngineEvent
+from sentra.runtime.models import ConversationRequest
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.shared.logging import get_logger
 from sentra.domain.entities.user_entity import UserEntity
@@ -10,11 +10,9 @@ from sentra.infra.nosql.mongo_session_repository import (
     get_session_mongo_repository,
 )
 from sentra_brain_api.features.chat.schemas import SessionRequest
-from sentra_brain_api.features.chat.mappers import engine_event_to_wire
-from sentra.runtime.models import ConversationRequest as EngineRequest
+from sentra_brain_api.features.chat.mappers import event_to_wire
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
-from datetime import datetime, timezone
-from uuid import uuid4
+from sentra.schemas import Event
 
 logger = get_logger("sentra_brain_api.features.chat")
 
@@ -43,13 +41,13 @@ class ChatController:
             await adapter.persist_user_message(
                 conversation_id,
                 text=body.content,
-                meta={"message_id": str(body.message_id)} if body.message_id else None,
+                id=str(body.id) if body.id else None,
             )
             recent = await adapter.get_recent_context(conversation_id, limit=50)
 
             session_state = await adapter.get_session_state(conversation_id)
 
-            engine_request = EngineRequest(
+            engine_request = ConversationRequest(
                 messages=[*recent, body.content],
                 user_id=str(body.user_id),
                 conversation_id=conversation_id,
@@ -63,22 +61,21 @@ class ChatController:
                     from sentra.runtime.app import run_conversation
 
                     async for ev in run_conversation(engine_request):
-                        out = engine_event_to_wire(ev)
+                        out = event_to_wire(ev)
                         await adapter.append_event(conversation_id, ev)
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
-                    err_evt = EngineEvent(
-                        event_id=uuid4().hex,
-                        timestamp=datetime.now(timezone.utc),
+                    err_evt = Event(
                         type="step_error",
+                        role="system",
                         task_type="chat_pipeline",
                         label="Streaming failed",
                         status="error",
                         content=str(e),
                         meta={"path": "/chat/send"},
                     )
-                    out = engine_event_to_wire(err_evt)
+                    out = event_to_wire(err_evt)
                     await adapter.append_event(conversation_id, err_evt)
                     yield f"data: {out.model_dump_json()}\n\n"
 

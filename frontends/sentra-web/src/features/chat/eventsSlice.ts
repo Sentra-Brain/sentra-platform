@@ -1,5 +1,5 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { EngineEvent } from '@features/chat/types/events'
+import type { Event } from '@features/chat/types/events'
 import type { ConversationMode } from '@features/chat/types/mode'
 
 export interface SelectedContext {
@@ -10,7 +10,7 @@ export interface SelectedContext {
 
 interface EventsState {
   sessionId: string | null
-  events: EngineEvent[]
+  events: Event[]
   waitingForAnswer: boolean
   isStreaming: boolean
   inputDisabled: boolean
@@ -44,11 +44,11 @@ const eventsSlice = createSlice({
     setSessionId(state, action: PayloadAction<string | null>) {
       state.sessionId = action.payload
     },
-    addEvent(state, action: PayloadAction<EngineEvent>) {
+    addEvent(state, action: PayloadAction<Event>) {
       state.events.push(action.payload)
     },
-    updateEvent(state, action: PayloadAction<EngineEvent>) {
-      const idx = state.events.findIndex(e => e.event_id === action.payload.event_id)
+    updateEvent(state, action: PayloadAction<Event>) {
+      const idx = state.events.findIndex(e => e.id === action.payload.id)
       if (idx === -1) {
         state.events.push(action.payload)
         return

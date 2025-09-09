@@ -31,8 +31,8 @@ class RagMemoryService(MemoryService):
         url = f"{self.base_url}/memorize"
         async with httpx.AsyncClient() as client:
             for event in session.events:
-                author = getattr(event, "author", None) or (event.meta or {}).get("author")
-                if event.type == "message_final" and author in (None, "assistant"):
+                role = getattr(event, "role", None) or (event.meta or {}).get("role")
+                if event.type == "message_final" and role in (None, "assistant"):
                     text = event.content if isinstance(event.content, str) else str(event.content)
                     payload = {
                         "user_id": session.user_id,

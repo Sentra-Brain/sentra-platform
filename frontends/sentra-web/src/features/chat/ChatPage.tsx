@@ -25,8 +25,9 @@ export default function ChatPage() {
             dispatch(resetEvents());
             payload.messages.forEach(m => {
               dispatch(addEvent({
-                event_id: m.id,
+                id: m.id,
                 type: 'message_final',
+                role: m.role,
                 content: m.content,
                 timestamp: new Date(m.timestamp).toISOString(),
               }))

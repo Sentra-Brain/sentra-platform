@@ -13,7 +13,7 @@ from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
 from sentra.shared.logging import get_logger
-from sentra.runtime.models.conversation import EngineEvent
+from sentra.schemas import Event
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
@@ -57,33 +57,41 @@ class MongoPersistenceAdapter:
         self.user_id = user_id
 
     async def persist_user_message(
-        self, conversation_id: str, *, text: str, meta: Mapping[str, Any] | None = None
+        self,
+        conversation_id: str,
+        *,
+        text: str,
+        id: str | None = None,
+        meta: Mapping[str, Any] | None = None,
     ) -> None:
-        event = EngineEvent(
-            event_id=uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            type="message_final",
-            author="user",
+        event = Event(
+            id=uuid4() if id is None else id,
+            type="user_input",
+            role="user",
             content=text,
             meta=dict(meta or {}),
         )
+        payload = event.model_dump(exclude_none=True)
+        payload["id"] = str(event.id)
+        payload["_id"] = str(event.id)
+        payload["timestamp"] = event.timestamp.isoformat()
         await asyncio.to_thread(
             self.repo.append_event,
             session_id=conversation_id,
             user_id=self.user_id,
-            event=event.model_dump(exclude_none=True),
+            event=payload,
         )
         key = _cache_key(self.user_id, conversation_id)
         cached = await _CONV_CACHE.get(key) or []
         cached.append(text)
         await _CONV_CACHE.put(key, cached)
 
-    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
+    async def append_event(self, conversation_id: str, event: Event) -> None:
         payload = event.model_dump(exclude_none=True)
+        payload["id"] = str(event.id)
+        payload["_id"] = str(event.id)
         if event.timestamp is not None:
             payload["timestamp"] = event.timestamp.isoformat()
-        if event.event_id is not None:
-            payload["event_id"] = event.event_id
         await asyncio.to_thread(
             self.repo.append_event,
             session_id=conversation_id,
@@ -93,7 +101,7 @@ class MongoPersistenceAdapter:
         if (
             event.type == "message_final"
             and event.content
-            and event.author in {"assistant", "user"}
+            and event.role in {"assistant", "user"}
         ):
             key = _cache_key(self.user_id, conversation_id)
             cached = await _CONV_CACHE.get(key) or []
@@ -115,7 +123,7 @@ class MongoPersistenceAdapter:
             if (
                 isinstance(e, Mapping)
                 and e.get("type") == "message_final"
-                and e.get("author") in {"assistant", "user"}
+                and e.get("role") in {"assistant", "user"}
             ):
                 msgs.append(str(e.get("content") or ""))
         msgs = msgs[-limit:]

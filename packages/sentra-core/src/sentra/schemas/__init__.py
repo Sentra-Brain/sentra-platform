@@ -1,3 +1,3 @@
-from .engine_event import EngineEvent
+from .event import Event
 
-__all__ = ["EngineEvent"]
+__all__ = ["Event"]

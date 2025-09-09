@@ -3,6 +3,7 @@ from enum import Enum
 from typing import List, Optional, Literal, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, Field
+from sentra.schemas import Event
 
 # ---------- Input ----------
 
@@ -19,15 +20,15 @@ class SessionOptions(BaseModel):
 class SessionRequest(BaseModel):
     user_id: UUID = Field(..., description="ID of the user sending the message")
     session_id: UUID = Field(..., description="ID of the session")
-    message_id: Optional[UUID] = Field(default=None, description="ID of the message being sent")
-    response_message_id: Optional[UUID] = Field(
+    id: Optional[UUID] = Field(default=None, description="ID of the message being sent")
+    response_id: Optional[UUID] = Field(
         default=None, description="Pre-assigned ID for the assistant response message"
     )
     content: str = Field(..., description="Content of the message")
     model: Optional[str] = Field(
         default="sentra-brain", description="Model to use for the session"
     )
-    parent_message_id: Optional[UUID] = Field(
+    parent_id: Optional[UUID] = Field(
         default=None, description="ID of the parent message"
     )
     intent_override: Optional[str] = Field(
@@ -59,28 +60,7 @@ class PlanOutlineStep(BaseModel):
     args_hint: Optional[str] = None
 
 
-class SessionEvent(BaseModel):
-    event_id: str
-    timestamp: str
-    type: Literal[
-        "plan_outline",
-        "step_start",
-        "step_progress",
-        "step_end",
-        "step_error",
-        "message_delta",
-        "message_final",
-    ]
-    author: Optional[str] = None
-    task_type: Optional[str] = None
-    task_run_id: Optional[str] = None
-    step_id: Optional[str] = None
-    label: Optional[str] = None
-    status: Optional[str] = None
-    content: Optional[Any] = None
-    meta: Optional[Dict[str, Any]] = None
-    actions: Optional[Dict[str, Any]] = None
-    message: Optional[Dict[str, Any]] = None
+class SessionEvent(Event):
     plan_step_id: Optional[str] = None
     steps: Optional[List[PlanOutlineStep]] = None
 

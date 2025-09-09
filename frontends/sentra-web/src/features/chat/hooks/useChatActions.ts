@@ -14,7 +14,7 @@ import {
   setWaitingForAnswer,
 } from '@features/chat/eventsSlice'
 import { chatService } from '@features/chat/chatService'
-import type { EngineEvent } from '@features/chat/types/events'
+import type { Event } from '@features/chat/types/events'
 
 export function useChatActions() {
   const dispatch = useAppDispatch()
@@ -43,8 +43,9 @@ export function useChatActions() {
     dispatch(setWaitingForAnswer(true))
 
     dispatch(addEvent({
-      event_id: userMessageId,
+      id: userMessageId,
       type: 'user_message',
+      role: 'user',
       content: trimmed,
       timestamp: new Date().toISOString(),
     }))
@@ -55,19 +56,20 @@ export function useChatActions() {
       {
         user_id: userId,
         session_id: sessionId!,
-        message_id: userMessageId,
-        response_message_id: assistantMessageId,
+        id: userMessageId,
+        response_id: assistantMessageId,
         content: trimmed,
         context_source_ids: selectedContext.useRag ? selectedContext.sourceIds : [],
         context_document_ids: selectedContext.useRag ? selectedContext.documentIds : [],
         mode,
       },
-      (event: EngineEvent) => {
+      (event: Event) => {
         switch (event.type) {
           case 'message_delta': {
             dispatch(updateEvent({
-              event_id: assistantMessageId,
+              id: assistantMessageId,
               type: 'message_delta',
+              role: 'assistant',
               content: event.content,
               timestamp: event.timestamp,
             }))
@@ -75,8 +77,9 @@ export function useChatActions() {
           }
           case 'message_final': {
             dispatch(updateEvent({
-              event_id: assistantMessageId,
+              id: assistantMessageId,
               type: 'message_final',
+              role: 'assistant',
               content: event.content ?? '',
               timestamp: event.timestamp,
             }))

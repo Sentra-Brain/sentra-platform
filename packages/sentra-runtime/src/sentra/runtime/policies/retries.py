@@ -7,8 +7,8 @@ import logging
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
-from sentra.runtime.models import EngineEvent
 from sentra.runtime.telemetry import emit_event_log
+from sentra.schemas import Event
 
 T = TypeVar("T")
 
@@ -47,15 +47,17 @@ async def retry_with_backoff(
                     "%s attempt %d/%d failed: %s", name, attempt, max_retries, exc
                 )
             emit_event_log(
-                EngineEvent(
+                Event(
                     type="message_delta",
+                    role="system",
                     content=f"{name} failed (attempt {attempt}/{max_retries})",
                 )
             )
             if attempt >= max_retries:
                 emit_event_log(
-                    EngineEvent(
+                    Event(
                         type="message_delta",
+                        role="system",
                         content=f"{name} failed after {max_retries} attempts",
                     )
                 )
