@@ -12,7 +12,6 @@ from sentra.domain.models.event import SentraEvent
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
-from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 
 class DummyAdapter:
@@ -101,7 +100,7 @@ def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
     resp = client.post("/chat/send", json=payload)
     assert resp.status_code == 200
     parsed = parse_sse(resp.text)
-    expected = [engine_event_to_wire(e).model_dump() for e in events]
+    expected = [e.model_dump(by_alias=True) for e in events]
     assert parsed == expected
     # Persist calls
     assert adapter.call_log[0][0] == "persist_user_message"

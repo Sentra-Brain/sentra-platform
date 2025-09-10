@@ -4,7 +4,7 @@ from fastapi.responses import StreamingResponse
 
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra_brain_api.features.chat.mappers import engine_event_to_wire
+ 
 from sentra_brain_api.features.chat.schemas import ChatSendRequest
 from sentra.domain.entities.user_entity import UserEntity
 from sentra.domain.models.event import SentraEvent, SentraEventType

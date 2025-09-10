@@ -39,35 +39,3 @@ class ChatSendRequest(BaseModel):
         default=None, description="RAG documents"
     )
 
-
-class PlanOutlineStep(BaseModel):
-    step_id: str
-    title: str
-    description: str
-    action: Literal["respond", "tool", "rag", "think", "ask_params"]
-    args_hint: Optional[str] = None
-
-class SessionEvent(BaseModel):
-    id: str
-    timestamp: str
-    type: Literal[
-        "plan_outline",
-        "step_start",
-        "step_progress",
-        "step_end",
-        "step_error",
-        "message_delta",
-        "message_final",
-    ]
-    author: Optional[str] = None
-    task_type: Optional[str] = None
-    task_run_id: Optional[str] = None
-    step_id: Optional[str] = None
-    label: Optional[str] = None
-    status: Optional[str] = None
-    content: Optional[Any] = None
-    meta: Optional[Dict[str, Any]] = None
-    actions: Optional[Dict[str, Any]] = None
-    message: Optional[Dict[str, Any]] = None
-    plan_step_id: Optional[str] = None
-    steps: Optional[List[PlanOutlineStep]] = None
