@@ -60,7 +60,9 @@ class MongoPersistenceAdapter:
         self, conversation_id: str, *, text: str, event_id: UUID
     ) -> None:
         event = SentraEvent.user_message(text, id=event_id)
-        payload = event.to_mongo_dict()
+        payload = event.model_dump(exclude_none=True)
+        payload["id"] = str(event.id)
+        payload["timestamp"] = event.timestamp.isoformat()
 
         await asyncio.to_thread(
             self.repo.append_event,
@@ -74,7 +76,9 @@ class MongoPersistenceAdapter:
         await _CONV_CACHE.put(key, cached)
 
     async def append_event(self, conversation_id: str, event: SentraEvent) -> None:
-        payload = event.to_mongo_dict()
+        payload = event.model_dump(exclude_none=True)
+        payload["id"] = str(event.id)
+        payload["timestamp"] = event.timestamp.isoformat()
         await asyncio.to_thread(
             self.repo.append_event,
             session_id=conversation_id,

@@ -64,11 +64,7 @@ class SentraEvent(SerializableModel):
     def is_final_response(self) -> bool:
         return self.type == SentraEventType.MESSAGE_FINAL
 
-    def to_mongo_dict(self) -> dict[str, Any]:
-        data = self.model_dump(exclude_none=True)
-        data["id"] = str(self.id)
-        data["timestamp"] = self.timestamp.isoformat()
-        return data
+    # to_mongo_dict removed; use model_dump(exclude_none=True) and format id/timestamp as needed
 
     # ----------------- CONSTRUCTORS -----------------
     @classmethod
