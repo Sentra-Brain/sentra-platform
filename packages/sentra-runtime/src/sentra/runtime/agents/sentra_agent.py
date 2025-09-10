@@ -10,9 +10,10 @@ from google.adk.agents.run_config import RunConfig, StreamingMode
 from google.adk.runners import Runner
 from google.genai import types
 
+from sentra.domain.models.event import SentraEvent
 from sentra.shared.settings import settings
 from sentra.runtime.context import build_context
-from sentra.runtime.models import EngineEvent, ConversationRequest
+from sentra.runtime.models import ConversationRequest
 from sentra.runtime.telemetry import emit_event_log
 from sentra.runtime.policies.guardrails import check_tool_allowed
 
@@ -22,19 +23,19 @@ class SentraAgent:
 
     async def run(
         self, request: ConversationRequest
-    ) -> AsyncGenerator[EngineEvent, None]:
+    ) -> AsyncGenerator[SentraEvent, None]:
         """Stream events produced by the agent."""
         task_run_id = uuid4().hex
-        emit_event_log(EngineEvent(type="agent_started", task_run_id=task_run_id))
+        emit_event_log(SentraEvent(type="agent_started", task_run_id=task_run_id))
 
-        yield EngineEvent(
+        yield SentraEvent(
             type="step_start", task_type="agent_execution", task_run_id=task_run_id
         )
 
         if request.context_source_ids or request.context_document_ids:
             check_tool_allowed("SentraAgent", "RagTool")
         context = await build_context(request)
-        emit_event_log(EngineEvent(type="context_built", task_run_id=task_run_id))
+        emit_event_log(SentraEvent(type="context_built", task_run_id=task_run_id))
         prompt_parts = []
         if context.get("memories"):
             prompt_parts.append(context["memories"])
@@ -85,7 +86,7 @@ class SentraAgent:
                 for part in ev.content.parts:
                     if part.text:
                         chunks.append(part.text)
-                        yield EngineEvent(
+                        yield SentraEvent(
                             type="message_delta",
                             author="assistant",
                             content=part.text,
@@ -95,13 +96,13 @@ class SentraAgent:
                 break
         response = "".join(chunks)
         emit_event_log(
-            EngineEvent(
+            SentraEvent(
                 type="llm_called",
                 task_run_id=task_run_id,
                 meta={"engine": settings.llm_engine.value},
             )
         )
-        yield EngineEvent(
+        yield SentraEvent(
             type="message_final",
             author="assistant",
             content=response,
@@ -109,10 +110,10 @@ class SentraAgent:
         )
 
         emit_event_log(
-            EngineEvent(
+            SentraEvent(
                 type="agent_completed", task_run_id=task_run_id, status="success"
             )
         )
-        yield EngineEvent(
+        yield SentraEvent(
             type="step_end", task_type="agent_execution", task_run_id=task_run_id
         )

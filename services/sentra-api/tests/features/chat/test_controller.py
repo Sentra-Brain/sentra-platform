@@ -8,10 +8,10 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from sentra.domain.entities.user_entity import UserEntity
+from sentra.domain.models.event import SentraEvent
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
-from sentra.runtime.models.conversation import EngineEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 
@@ -67,21 +67,21 @@ def app(mock_user, monkeypatch):
 def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
     app, adapter = app
     events = [
-        EngineEvent(
+        SentraEvent(
             event_id=uuid.uuid4().hex,
             timestamp=datetime.now(timezone.utc),
             type="message_delta",
             content="a",
             author="assistant",
         ),
-        EngineEvent(
+        SentraEvent(
             event_id=uuid.uuid4().hex,
             timestamp=datetime.now(timezone.utc),
             type="message_delta",
             content="b",
             author="assistant",
         ),
-        EngineEvent(
+        SentraEvent(
             event_id=uuid.uuid4().hex,
             timestamp=datetime.now(timezone.utc),
             type="message_final",
@@ -114,7 +114,7 @@ def test_user_message_persisted_first(app, mock_user, monkeypatch):
     adapter.call_log.clear()
 
     async def fake_run(_req):
-        yield EngineEvent(
+        yield SentraEvent(
             event_id=uuid.uuid4().hex,
             timestamp=datetime.now(timezone.utc),
             type="message_final",
@@ -134,7 +134,7 @@ def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
     app, adapter = app
     adapter.call_log.clear()
 
-    events = [EngineEvent(type="message_final", content="ok", author="assistant")]
+    events = [SentraEvent(type="message_final", content="ok", author="assistant")]
 
     async def fake_run(_req):
         for ev in events:

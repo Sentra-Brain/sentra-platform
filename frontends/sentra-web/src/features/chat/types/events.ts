@@ -20,7 +20,7 @@ export type StepEndMeta = {
 };
 
 export type MessageDeltaEvent = {
-  event_id: string;
+  id: string;
   type: "message_delta";
   content: string;
   timestamp: string;
@@ -33,7 +33,7 @@ export type StepErrorMeta = {
 };
 
 export type ToolCallEvent = {
-  event_id: string;
+  id: string;
   type: "tool_call";
   label?: string;
   content?: string;
@@ -41,7 +41,7 @@ export type ToolCallEvent = {
 };
 
 export type UserMessageEvent = {
-  event_id: string;
+  id: string;
   type: "user_message";
   content: string;
   timestamp: string;
@@ -50,14 +50,14 @@ export type UserMessageEvent = {
 // Chat event types
 
 export type MessageFinalEvent = {
-  event_id: string;
+  id: string;
   type: "message_final";
   content?: string;
   timestamp: string;
 };
 
 export type StepStartEvent = {
-  event_id: string;
+  id: string;
   type: "step_start";
   task_type?: string;
   task_run_id?: string;
@@ -70,7 +70,7 @@ export type StepStartEvent = {
 };
 
 export type StepEndEvent = {
-  event_id: string;
+  id: string;
   type: "step_end";
   task_type?: string;
   task_run_id?: string;
@@ -84,7 +84,7 @@ export type StepEndEvent = {
 
 
 export type StepProgressEvent = {
-  event_id: string;
+  id: string;
   type: "step_progress";
   task_type?: string;
   task_run_id?: string;
@@ -97,7 +97,7 @@ export type StepProgressEvent = {
 };
 
 export type StepErrorEvent = {
-  event_id: string;
+  id: string;
   type: "step_error";
   task_type?: string;
   task_run_id?: string;
@@ -109,7 +109,7 @@ export type StepErrorEvent = {
   timestamp: string;
 };
 
-export type EngineEvent =
+export type SentraEvent =
   | MessageDeltaEvent
   | MessageFinalEvent
   | StepStartEvent

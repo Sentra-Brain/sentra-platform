@@ -5,13 +5,14 @@ from datetime import datetime, timezone
 from typing import AsyncGenerator
 from uuid import uuid4
 
-from sentra.runtime.models.conversation import EngineEvent, ConversationRequest
+from sentra.domain.models.event import SentraEvent
+from sentra.runtime.models.conversation import ConversationRequest
 from sentra.runtime.agents import CoordinatorAgent
 
 
 async def run_conversation(
     request: ConversationRequest,
-) -> AsyncGenerator[EngineEvent, None]:
+) -> AsyncGenerator[SentraEvent, None]:
     """Run a conversation with the configured agents.
 
     This function is the main public entrypoint for consumers of the
@@ -22,7 +23,7 @@ async def run_conversation(
         request: Incoming conversation request data.
 
     Yields:
-        ``EngineEvent`` objects representing the streaming response.
+        ``SentraEvent`` objects representing the streaming response.
     """
 
     agent = CoordinatorAgent()

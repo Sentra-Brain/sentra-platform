@@ -60,7 +60,7 @@ class PlanOutlineStep(BaseModel):
 
 
 class SessionEvent(BaseModel):
-    event_id: str
+    id: str
     timestamp: str
     type: Literal[
         "plan_outline",

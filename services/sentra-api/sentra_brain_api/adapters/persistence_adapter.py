@@ -9,12 +9,11 @@ from __future__ import annotations
 
 import asyncio
 from collections import OrderedDict
-from datetime import datetime, timezone
 from typing import Any, Mapping, Sequence
 from uuid import uuid4
 
+from sentra.domain.models.event import SentraEvent
 from sentra.shared.logging import get_logger
-from sentra.runtime.models.conversation import EngineEvent
 
 logger = get_logger("sentra_brain_api.chat.v2")
 
@@ -60,46 +59,47 @@ class MongoPersistenceAdapter:
     async def persist_user_message(
         self, conversation_id: str, *, text: str, meta: Mapping[str, Any] | None = None
     ) -> None:
-        event = EngineEvent(
-            event_id=uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            type="message_final",
-            author="user",
-            content=text,
-            meta=dict(meta or {}),
-        )
-        await asyncio.to_thread(
-            self.repo.append_event,
-            session_id=conversation_id,
-            user_id=self.user_id,
-            event=event.model_dump(exclude_none=True),
-        )
-        key = _cache_key(self.user_id, conversation_id)
-        cached = await _CONV_CACHE.get(key) or []
-        cached.append(text)
-        await _CONV_CACHE.put(key, cached)
+        event = SentraEvent.user_message(text, meta=dict(meta or {}))        
+        payload = event.to_mongo_dict()
 
-    async def append_event(self, conversation_id: str, event: EngineEvent) -> None:
-        payload = event.model_dump(exclude_none=True)
-        if event.timestamp is not None:
-            payload["timestamp"] = event.timestamp.isoformat()
-        if event.event_id is not None:
-            payload["event_id"] = event.event_id
         await asyncio.to_thread(
             self.repo.append_event,
             session_id=conversation_id,
             user_id=self.user_id,
             event=payload,
         )
+        key = _cache_key(self.user_id, conversation_id)
+        cached = await _CONV_CACHE.get(key) or []
+        cached.append(text)
+        await _CONV_CACHE.put(key, cached)
+
+    async def append_event(self, conversation_id: str, event: SentraEvent) -> None:
+        payload = event.to_mongo_dict()
+        await asyncio.to_thread(
+            self.repo.append_event,
+            session_id=conversation_id,
+            user_id=self.user_id,
+            event=payload,
+        )
+        # Update LRU cache only for final user/assistant messages
         if (
             event.type == "message_final"
             and event.content
             and event.author in {"assistant", "user"}
         ):
-            key = _cache_key(self.user_id, conversation_id)
-            cached = await _CONV_CACHE.get(key) or []
-            cached.append(event.content)
-            await _CONV_CACHE.put(key, cached)
+            # Extract text safely
+            text = None
+            if event.content.parts:
+                # Take first text part (common case)
+                first = event.content.parts[0]
+                if first.text:
+                    text = first.text
+
+            if text:
+                key = _cache_key(self.user_id, conversation_id)
+                cached = await _CONV_CACHE.get(key) or []
+                cached.append(text)
+                await _CONV_CACHE.put(key, cached)
 
     async def get_recent_context(self, conversation_id: str, limit: int) -> list[str]:
         key = _cache_key(self.user_id, conversation_id)

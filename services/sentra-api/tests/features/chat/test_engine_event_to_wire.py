@@ -1,13 +1,13 @@
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from sentra.runtime.models.conversation import EngineEvent
+from sentra.domain.models.event import SentraEvent
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 
 
 def test_message_final_delivers_content():
     final_text = "Hello world!"
-    evt = EngineEvent(
+    evt = SentraEvent(
         event_id=uuid4().hex,
         timestamp=datetime.now(timezone.utc),
         type="message_final",
@@ -21,9 +21,9 @@ def test_message_final_delivers_content():
 
 def test_engine_event_generates_missing_fields():
     """Events lacking identifiers should be populated automatically."""
-    evt = EngineEvent(type="message_final", author="assistant", content="hi")
+    evt = SentraEvent(type="message_final", author="assistant", content="hi")
     out = engine_event_to_wire(evt)
-    # EngineEvent should now have id/timestamp set
+    # SentraEvent should now have id/timestamp set
     assert evt.event_id is not None
     assert evt.timestamp is not None
     # And the wire model should reflect those values

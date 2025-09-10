@@ -1,7 +1,8 @@
 # services/sentra-api/sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
-from sentra.runtime.models.conversation import EngineEvent
+
+from sentra.domain.models.event import SentraEvent
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.shared.logging import get_logger
 from sentra.domain.entities.user_entity import UserEntity
@@ -68,14 +69,11 @@ class ChatController:
                         yield f"data: {out.model_dump_json()}\n\n"
                 except Exception as e:
                     logger.exception("Streaming failed")
-                    err_evt = EngineEvent(
-                        event_id=uuid4().hex,
-                        timestamp=datetime.now(timezone.utc),
-                        type="step_error",
+                    err_evt = SentraEvent.error(
+                        str(e),
                         task_type="chat_pipeline",
                         label="Streaming failed",
                         status="error",
-                        content=str(e),
                         meta={"path": "/chat/send"},
                     )
                     out = engine_event_to_wire(err_evt)

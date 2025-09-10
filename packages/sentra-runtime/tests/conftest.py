@@ -22,6 +22,12 @@ def anyio_backend() -> str:
 fake_google = types.ModuleType("google")
 sys.modules.setdefault("google", fake_google)
 sys.modules["google.adk"] = types.ModuleType("google.adk")
+
+# Add events stub
+sys.modules["google.adk.events"] = types.ModuleType("google.adk.events")
+sys.modules["google.adk.events"].Event = MagicMock()
+sys.modules["google.adk.events"].EventActions = MagicMock()
+
 sys.modules["google.adk.models"] = types.ModuleType("google.adk.models")
 sys.modules["google.adk.models.lite_llm"] = types.ModuleType("google.adk.models.lite_llm")
 sys.modules["google.adk.models.lite_llm"].LiteLlm = MagicMock()

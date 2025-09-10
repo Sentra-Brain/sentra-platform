@@ -11,13 +11,13 @@ from __future__ import annotations
 import logging
 from uuid import uuid4
 
-from ..models import EngineEvent
+from sentra.domain.models.event import SentraEvent
 
 
 logger = logging.getLogger(__name__)
 
 
-def emit_event_log(event: EngineEvent) -> None:
+def emit_event_log(event: SentraEvent) -> None:
     """Emit a structured log for ``event``.
 
     A ``task_run_id`` is injected when missing to aid in correlating events

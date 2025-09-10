@@ -1,5 +1,25 @@
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import type { EngineEvent } from '@features/chat/types/events'
+// Updated event types to match backend structure
+
+export type SentraEventContentPart = {
+  text?: string;
+  function_call?: Record<string, unknown>;
+  function_response?: Record<string, unknown>;
+};
+
+export type SentraEventContent = {
+  role?: string;
+  parts: SentraEventContentPart[];
+};
+
+export type SentraEvent = {
+  id: string;
+  type: string; // e.g., 'user_message', 'message_delta', etc.
+  author?: string;
+  content?: SentraEventContent;
+  timestamp: string;
+  // plus meta, status, etc.
+} & Record<string, unknown>;
 import type { ConversationMode } from '@features/chat/types/mode'
 
 export interface SelectedContext {
@@ -8,14 +28,14 @@ export interface SelectedContext {
   useRag: boolean
 }
 
-interface EventsState {
-  sessionId: string | null
-  events: EngineEvent[]
-  waitingForAnswer: boolean
-  isStreaming: boolean
-  inputDisabled: boolean
-  selectedContext: SelectedContext
-  mode: ConversationMode
+export interface EventsState {
+  sessionId: string | null;
+  events: SentraEvent[];
+  waitingForAnswer: boolean;
+  isStreaming: boolean;
+  inputDisabled: boolean;
+  selectedContext: SelectedContext;
+  mode: ConversationMode;
 }
 
 const storedMode =
@@ -44,22 +64,27 @@ const eventsSlice = createSlice({
     setSessionId(state, action: PayloadAction<string | null>) {
       state.sessionId = action.payload
     },
-    addEvent(state, action: PayloadAction<EngineEvent>) {
+  addEvent(state, action: PayloadAction<SentraEvent>) {
+    state.events.push(action.payload)
+  },
+  updateEvent(state, action: PayloadAction<SentraEvent>) {
+    const idx = state.events.findIndex(e => e.id === action.payload.id)
+    if (idx === -1) {
       state.events.push(action.payload)
-    },
-    updateEvent(state, action: PayloadAction<EngineEvent>) {
-      const idx = state.events.findIndex(e => e.event_id === action.payload.event_id)
-      if (idx === -1) {
-        state.events.push(action.payload)
-        return
-      }
-      const existing = state.events[idx] as any
-      if (action.payload.type === 'message_delta') {
-        existing.content = (existing.content || '') + (action.payload as any).content
-      } else {
-        state.events[idx] = { ...existing, ...action.payload }
-      }
-    },
+      return
+    }
+    const existing = state.events[idx] as SentraEvent;
+    // For message_delta, append text parts if present
+    if (action.payload.type === 'message_delta' && existing.content && action.payload.content) {
+      // Merge parts arrays (assume all parts are text for now)
+      existing.content.parts = [
+        ...(existing.content.parts || []),
+        ...(action.payload.content.parts || [])
+      ];
+    } else {
+      state.events[idx] = { ...existing, ...action.payload } as SentraEvent;
+    }
+  },
     resetEvents(state) {
       state.events = []
       state.sessionId = null
