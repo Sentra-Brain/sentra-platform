@@ -1,14 +1,12 @@
-from __future__ import annotations
-
-from sentra.domain.models.event import SentraEvent
-
 """Retry utilities for tool calls."""
+from __future__ import annotations
 
 import asyncio
 import logging
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
+from sentra.domain.models.event import SentraEvent, SentraEventType
 from sentra.runtime.telemetry import emit_event_log
 
 T = TypeVar("T")
@@ -49,14 +47,14 @@ async def retry_with_backoff(
                 )
             emit_event_log(
                 SentraEvent(
-                    type="message_delta",
+                    type=SentraEventType.MESSAGE_DELTA,
                     content=f"{name} failed (attempt {attempt}/{max_retries})",
                 )
             )
             if attempt >= max_retries:
                 emit_event_log(
                     SentraEvent(
-                        type="message_delta",
+                        type=SentraEventType.MESSAGE_DELTA,
                         content=f"{name} failed after {max_retries} attempts",
                     )
                 )

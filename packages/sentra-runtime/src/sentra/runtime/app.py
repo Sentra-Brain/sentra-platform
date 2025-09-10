@@ -28,8 +28,4 @@ async def run_conversation(
 
     agent = CoordinatorAgent()
     async for event in agent.run(request):
-        if event.event_id is None:
-            event.event_id = uuid4().hex
-        if event.timestamp is None:
-            event.timestamp = datetime.now(timezone.utc)
         yield event

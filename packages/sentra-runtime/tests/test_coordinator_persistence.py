@@ -1,6 +1,12 @@
 import pytest
+from uuid import uuid4
 
-from sentra.domain.models.event import SentraEvent
+from sentra.domain.models.event import (
+    SentraEvent,
+    SentraEventType,
+    SentraEventContent,
+    SentraEventContentPart,
+)
 from sentra.runtime.agents.coordinator import CoordinatorAgent
 from sentra.runtime.models import ConversationRequest
 
@@ -14,9 +20,23 @@ class DummySink:
 
 
 class StubSentraAgent:
-    async def run(self, request: ConversationRequest):
-        yield SentraEvent(type="message_delta", content="hi", step_id="s1")
-        yield SentraEvent(type="message_final", content="bye", step_id="s1")
+    async def run(self, request: ConversationRequest, task_run_id: str):
+        yield SentraEvent(
+            author="assistant",
+            type=SentraEventType.MESSAGE_DELTA,
+            content=SentraEventContent(
+                role="assistant", parts=[SentraEventContentPart(text="hi")]
+            ),
+            task_run_id=task_run_id,
+        )
+        yield SentraEvent(
+            author="assistant",
+            type=SentraEventType.MESSAGE_DELTA,
+            content=SentraEventContent(
+                role="assistant", parts=[SentraEventContentPart(text="bye")]
+            ),
+            task_run_id=task_run_id,
+        )
 
 
 @pytest.mark.asyncio
@@ -34,5 +54,7 @@ async def test_coordinator_emits_and_sinks_events(monkeypatch):
     async for ev in agent.run(req):
         collected.append(ev)
 
-    assert [e.content for e in collected] == ["hi", "bye"]
-    assert [e.content for e in sink.events] == ["hi", "bye"]
+    # Assert assistant deltas came through
+    assert [p.text for e in collected if e.author == "assistant" for p in e.content.parts] == ["hi", "bye"]
+    assert [p.text for e in sink.events if e.author == "assistant" for p in e.content.parts] == ["hi", "bye"]
+

@@ -4,8 +4,6 @@ from typing import List, Optional, Literal, Dict, Any
 from uuid import UUID
 from pydantic import BaseModel, Field
 
-# ---------- Input ----------
-
 class SessionMode(str, Enum):
     FAST = "fast"
     PLAN = "plan"
@@ -41,9 +39,6 @@ class ChatSendRequest(BaseModel):
         default=None, description="RAG documents"
     )
 
-# ---------- Output (wire/SSE) ----------
-
-
 
 class PlanOutlineStep(BaseModel):
     step_id: str
@@ -51,7 +46,6 @@ class PlanOutlineStep(BaseModel):
     description: str
     action: Literal["respond", "tool", "rag", "think", "ask_params"]
     args_hint: Optional[str] = None
-
 
 class SessionEvent(BaseModel):
     id: str
@@ -77,16 +71,3 @@ class SessionEvent(BaseModel):
     message: Optional[Dict[str, Any]] = None
     plan_step_id: Optional[str] = None
     steps: Optional[List[PlanOutlineStep]] = None
-
-
-# ---- Backwards compatibility helpers
-class SessionDelta(BaseModel):
-    role: str = "assistant"
-    content: str
-    final: bool = False
-
-
-class SessionResponse(BaseModel):
-    content: str = Field(
-        ..., description="Final response content from the assistant."
-    )

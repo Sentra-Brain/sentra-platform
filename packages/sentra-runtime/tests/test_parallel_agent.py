@@ -1,6 +1,7 @@
 import time
 import anyio
 
+from sentra.domain.models.event import SentraEventType
 from sentra.runtime.agents.real_estate.use_case_listings_search import run_listings_search_agent
 from sentra.runtime.models import ConversationRequest
 from sentra.runtime.tools import DbQueryTool, RagTool
@@ -21,9 +22,10 @@ def test_listings_search_runs_db_and_rag_in_parallel(monkeypatch):
 
     async def _run():
         req = ConversationRequest(messages=["Find listings"])
+        task_run_id = "test-task"
 
         events: list = []
-        async for ev in run_listings_search_agent(req, {}):
+        async for ev in run_listings_search_agent(req, {}, task_run_id=task_run_id):
             events.append(ev)
         return events
 
@@ -34,6 +36,9 @@ def test_listings_search_runs_db_and_rag_in_parallel(monkeypatch):
     # Each tool sleeps 0.2s; sequential execution would be ~0.4s
     assert elapsed < 0.35
 
-    content = next(e.content for e in events if e.type == "message_delta")
-    assert "Flat A" in content
-    assert "Insight A" in content
+    # Grab assistant final message
+    assistant_event = next(e for e in events if e.type == SentraEventType.MESSAGE_FINAL)
+    text = "".join(p.text for p in assistant_event.content.parts if p.text)
+
+    assert "Flat A" in text
+    assert "Insight A" in text

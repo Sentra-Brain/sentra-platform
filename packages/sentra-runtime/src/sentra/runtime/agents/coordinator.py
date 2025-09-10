@@ -1,11 +1,9 @@
 from __future__ import annotations
 
-from sentra.domain.models.event import SentraEvent
-
-"""Coordinator agent that delegates to the general SentraAgent."""
-
 from typing import AsyncGenerator
+from uuid import uuid4
 
+from sentra.domain.models.event import SentraEvent, SentraEventType
 from sentra.runtime.agents.legal.use_case_contract_drafting import run_contract_drafting_agent
 from sentra.runtime.agents.real_estate.use_case_listings_search import run_listings_search_agent
 from sentra.runtime.agents.sentra_agent import SentraAgent
@@ -18,12 +16,7 @@ from sentra.runtime.telemetry import emit_event_log
 
 
 class CoordinatorAgent:
-    """Thin wrapper that forwards requests to :class:`SentraAgent`.
-
-    The agent attempts to route the request to more specialised agents and
-    falls back to a simplified flow if tools fail, time out or budgets are
-    exhausted.
-    """
+    """Delegates a conversation request to a specialised agent or the general SentraAgent."""
 
     def __init__(self, sink: EventSink | None = None):
         self.sink = sink
@@ -32,53 +25,48 @@ class CoordinatorAgent:
         if self.sink:
             await self.sink.on_event(event)
 
-    async def run(
-        self, request: ConversationRequest, fallback: bool = False
-    ) -> AsyncGenerator[SentraEvent, None]:
+    async def run(self, request: ConversationRequest) -> AsyncGenerator[SentraEvent, None]:
+        task_run_id = uuid4().hex
+        msg = request.messages[-1]
+
         try:
-            if fallback:
-                # Fallback mode: no tools or planners, short context
-                event = SentraEvent(type="step_start", task_type="fallback")
-                await self._persist(event)
-                yield event
-                event = SentraEvent(
-                    type="message_delta",
-                    content="I'm here to help, but cannot access external tools right now.",
-                )
-                await self._persist(event)
-                yield event
-                event = SentraEvent(type="step_end", task_type="fallback")
-                await self._persist(event)
-                yield event
-                return
-
-            msg = request.messages[-1]
-
+            # --- Legal intent ---
             if route_legal_intent(msg):
-                emit_event_log(SentraEvent(type="agent_dispatched", label="legal"))
+                event = SentraEvent.system_message("Dispatching legal agent", type=SentraEventType.STEP_START, task_run_id=task_run_id, meta={"agent": "legal"})
+                emit_event_log(event)
+                await self._persist(event)
+
                 context = await build_context(request)
-                async for event in run_contract_drafting_agent(request, context):
+                async for event in run_contract_drafting_agent(request, context, task_run_id):                    
                     await self._persist(event)
                     yield event
+
+                yield SentraEvent.system_message("Legal agent completed", type=SentraEventType.STEP_END, task_run_id=task_run_id, status="success", meta={"agent": "legal"})
                 return
 
+            # --- Real estate intent ---
             if route_real_estate_intent(msg):
-                emit_event_log(SentraEvent(type="agent_dispatched", label="real_estate"))
+                event = SentraEvent.system_message("Dispatching real estate agent", type=SentraEventType.STEP_START,     task_run_id=task_run_id, meta={"agent": "real_estate"})
+                emit_event_log(event)
+                await self._persist(event)
+
                 context = await build_context(request)
-                async for event in run_listings_search_agent(request, context):
+                async for event in run_listings_search_agent(request, context, task_run_id):
                     await self._persist(event)
                     yield event
+
+                yield SentraEvent.system_message("Real estate agent completed", type=SentraEventType.STEP_END, task_run_id=task_run_id, status="success", meta={"agent": "real_estate"})
                 return
 
-            emit_event_log(SentraEvent(type="fallback_triggered"))
+            # --- Default to general SentraAgent ---
+            emit_event_log(SentraEvent.system_message("Dispatching general agent", type=SentraEventType.STEP_START, task_run_id=task_run_id, meta={"agent": "sentra"}))
             agent = SentraAgent()
-            async for event in agent.run(request):
+            async for event in agent.run(request, task_run_id=task_run_id):
                 await self._persist(event)
                 yield event
+
+            yield SentraEvent.system_message("General agent completed", type=SentraEventType.STEP_END, task_run_id=task_run_id, status="success", meta={"agent": "sentra"})
 
         except (ToolError, TimeoutError, BudgetExhaustedError):
-            if fallback:
-                raise
-            async for event in self.run(request, fallback=True):
-                await self._persist(event)
-                yield event
+            yield SentraEvent.error("Coordinator agent failed", task_run_id=task_run_id)
+            raise
