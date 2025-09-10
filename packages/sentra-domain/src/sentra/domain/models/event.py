@@ -12,6 +12,8 @@ class SerializableModel(BaseModel):
     model_config = ConfigDict(
         extra='forbid',
         ser_json_bytes='base64',
+        uuid4_as_str=True,
+        datetime_as_iso=True,
         val_json_bytes='base64',
         alias_generator=alias_generators.to_camel,
         populate_by_name=True,
@@ -52,7 +54,7 @@ class SentraEvent(SerializableModel):
 
     # Core semantics
     author: str  # "user", "assistant", or "system"
-    type: str    # e.g. "message_delta", "message_final", "step_start", etc.
+    type: SentraEventType    # e.g. "message_delta", "message_final", "step_start", etc.
     content: Optional[SentraEventContent] = None
 
     # Tracking & status

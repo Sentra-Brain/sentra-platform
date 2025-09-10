@@ -1,4 +1,5 @@
 # packages/sentra-domain/tests/models/test_event.py
+import json
 from uuid import UUID
 from sentra.domain.models.event import SentraEvent, SentraEventContent, SentraEventContentPart, SentraEventType
 
@@ -53,9 +54,9 @@ def test_error_helper_sets_status():
     assert e.content.parts[0].text == "boom"
 
 
-def test_to_mongo_dict_normalizes():
+def test_model_dump_json_normalizes():
     e = SentraEvent.user_message("hello")
-    data = e.to_mongo_dict()
+    data = json.loads(e.model_dump_json(exclude_none=True, by_alias=True))
     assert isinstance(data["id"], str)
     assert "T" in data["timestamp"]
     assert data["content"]["parts"][0]["text"] == "hello"
