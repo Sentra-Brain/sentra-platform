@@ -10,7 +10,7 @@ from sentra.infra.nosql.mongo_session_repository import (
     MongoSessionRepository,
     get_session_mongo_repository,
 )
-from sentra_brain_api.features.chat.schemas import SessionRequest
+from sentra_brain_api.features.chat.schemas import ChatSendRequest
 from sentra_brain_api.features.chat.mappers import engine_event_to_wire
 from sentra.runtime.models import ConversationRequest as EngineRequest
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
@@ -32,7 +32,7 @@ class ChatController:
             description="Sends a message using the ADK engine and streams the assistant response",
         )
         async def send_message_v2(
-            body: SessionRequest,
+            body: ChatSendRequest,
             request: Request,
             mongo_repo: MongoSessionRepository = Depends(get_session_mongo_repository),
             current_user: UserEntity = Depends(get_authenticated_user),
@@ -44,7 +44,7 @@ class ChatController:
             await adapter.persist_user_message(
                 conversation_id,
                 text=body.content,
-                meta={"message_id": str(body.message_id)} if body.message_id else None,
+                event_id=body.event_id,
             )
             recent = await adapter.get_recent_context(conversation_id, limit=50)
 

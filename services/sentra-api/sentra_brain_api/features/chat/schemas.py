@@ -16,19 +16,13 @@ class SessionOptions(BaseModel):
     max_tokens: Optional[int] = None
 
 
-class SessionRequest(BaseModel):
+class ChatSendRequest(BaseModel):
     user_id: UUID = Field(..., description="ID of the user sending the message")
     session_id: UUID = Field(..., description="ID of the session")
-    message_id: Optional[UUID] = Field(default=None, description="ID of the message being sent")
-    response_message_id: Optional[UUID] = Field(
-        default=None, description="Pre-assigned ID for the assistant response message"
-    )
+    event_id: UUID = Field(..., description="ID of the user event being sent")
     content: str = Field(..., description="Content of the message")
     model: Optional[str] = Field(
         default="sentra-brain", description="Model to use for the session"
-    )
-    parent_message_id: Optional[UUID] = Field(
-        default=None, description="ID of the parent message"
     )
     intent_override: Optional[str] = Field(
         default=None, description="Intent to override"

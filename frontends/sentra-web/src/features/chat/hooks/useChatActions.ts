@@ -27,8 +27,8 @@ export function useChatActions() {
     if (!trimmed) return
 
     let sessionId = currentSessionId
-    const userMessageId = uuidv4()
-    const assistantMessageId = uuidv4()
+  const userEventId = uuidv4()
+  const assistantEventId = uuidv4()
 
     const wasNewSession = !sessionId
 
@@ -43,10 +43,11 @@ export function useChatActions() {
     dispatch(setWaitingForAnswer(true))
 
     dispatch(addEvent({
-      id: userMessageId,
+      event_id: userEventId,
       type: 'user_message',
-      content: trimmed,
+      content: { parts: [{ text: trimmed }] },
       timestamp: new Date().toISOString(),
+      assistant_event_id: assistantEventId,
     }))
 
     let titleTriggered = false
@@ -55,9 +56,8 @@ export function useChatActions() {
       {
         user_id: userId,
         session_id: sessionId!,
-        message_id: userMessageId,
-        response_message_id: assistantMessageId,
-        content: trimmed,
+        event_id: userEventId,
+        content: trimmed, // If backend expects string, keep as is. If not, wrap as above.
         context_source_ids: selectedContext.useRag ? selectedContext.sourceIds : [],
         context_document_ids: selectedContext.useRag ? selectedContext.documentIds : [],
         mode,
@@ -66,18 +66,26 @@ export function useChatActions() {
         switch (event.type) {
           case 'message_delta': {
             dispatch(updateEvent({
-              id: assistantMessageId,
+              event_id: assistantEventId,
               type: 'message_delta',
-              content: event.content,
+              content: event.content
+                ? typeof event.content === 'string'
+                  ? { parts: [{ text: event.content }] }
+                  : event.content
+                : undefined,
               timestamp: event.timestamp,
             }))
             break
           }
           case 'message_final': {
             dispatch(updateEvent({
-              id: assistantMessageId,
+              event_id: assistantEventId,
               type: 'message_final',
-              content: event.content ?? '',
+              content: event.content
+                ? typeof event.content === 'string'
+                  ? { parts: [{ text: event.content }] }
+                  : event.content
+                : undefined,
               timestamp: event.timestamp,
             }))
 
@@ -98,7 +106,14 @@ export function useChatActions() {
           case 'step_error':
           case 'tool_call': {
             // normal step/tool events
-            dispatch(addEvent(event))
+            dispatch(addEvent({
+              ...event,
+              content: event.content
+                ? typeof event.content === 'string'
+                  ? { parts: [{ text: event.content }] }
+                  : event.content
+                : undefined,
+            }))
             break
           }
           default:

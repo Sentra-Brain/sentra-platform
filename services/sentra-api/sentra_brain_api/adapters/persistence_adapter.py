@@ -10,7 +10,7 @@ from __future__ import annotations
 import asyncio
 from collections import OrderedDict
 from typing import Any, Mapping, Sequence
-from uuid import uuid4
+from uuid import uuid4, UUID
 
 from sentra.domain.models.event import SentraEvent
 from sentra.shared.logging import get_logger
@@ -57,9 +57,9 @@ class MongoPersistenceAdapter:
         self.user_id = user_id
 
     async def persist_user_message(
-        self, conversation_id: str, *, text: str, meta: Mapping[str, Any] | None = None
+        self, conversation_id: str, *, text: str, event_id: UUID
     ) -> None:
-        event = SentraEvent.user_message(text, meta=dict(meta or {}))        
+        event = SentraEvent.user_message(text, id=event_id)
         payload = event.to_mongo_dict()
 
         await asyncio.to_thread(

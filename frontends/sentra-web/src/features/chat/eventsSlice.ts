@@ -13,7 +13,7 @@ export type SentraEventContent = {
 };
 
 export type SentraEvent = {
-  id: string;
+  event_id: string;
   type: string; // e.g., 'user_message', 'message_delta', etc.
   author?: string;
   content?: SentraEventContent;
@@ -68,7 +68,7 @@ const eventsSlice = createSlice({
     state.events.push(action.payload)
   },
   updateEvent(state, action: PayloadAction<SentraEvent>) {
-    const idx = state.events.findIndex(e => e.id === action.payload.id)
+    const idx = state.events.findIndex(e => e.event_id === action.payload.event_id)
     if (idx === -1) {
       state.events.push(action.payload)
       return

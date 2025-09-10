@@ -6,8 +6,7 @@ import type { ConversationMode } from "@features/chat/types/mode";
   type ChatSendPayload = {
     user_id?: string;
     session_id: string;
-    message_id: string;
-    response_message_id: string;
+    event_id: string;
     content: string;
     context_source_ids?: string[];
     context_document_ids?: string[];
