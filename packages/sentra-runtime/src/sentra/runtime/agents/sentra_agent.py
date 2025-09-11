@@ -28,14 +28,14 @@ class SentraAgent:
         """Stream events produced by the agent."""
 
         # --- agent start
-        emit_event_log(SentraEvent.system_message("Agent started", task_run_id=task_run_id))
+        # emit_event_log(SentraEvent.system_message("Agent started", task_run_id=task_run_id))
         yield SentraEvent(author="system", type=SentraEventType.STEP_START, task_run_id=task_run_id, meta={"step": "agent_execution"})
 
         # --- build context
         if request.context_source_ids or request.context_document_ids:
             check_tool_allowed("SentraAgent", "RagTool")
         context = await build_context(request)
-        emit_event_log(SentraEvent.system_message("Context built", task_run_id=task_run_id))
+        # emit_event_log(SentraEvent.system_message("Context built", task_run_id=task_run_id))
 
         # --- assemble prompt
         prompt_parts: list[str] = []
@@ -95,9 +95,9 @@ class SentraAgent:
 
         # --- final message
         response = "".join(chunks)
-        emit_event_log(SentraEvent.system_message("LLM called", task_run_id=task_run_id, meta={"engine": settings.llm_engine.value}))
+        # emit_event_log(SentraEvent.system_message("LLM called", task_run_id=task_run_id, meta={"engine": settings.llm_engine.value}))
         yield SentraEvent.assistant_message(response, task_run_id=task_run_id)
 
         # --- agent completed
-        emit_event_log(SentraEvent.system_message("Agent completed", task_run_id=task_run_id, status="success"))
+        # emit_event_log(SentraEvent.system_message("Agent completed", task_run_id=task_run_id, status="success"))
         yield SentraEvent(author="system", type=SentraEventType.STEP_END, task_run_id=task_run_id, meta={"step": "agent_execution"})

@@ -1,6 +1,7 @@
 # services/sentra-api/sentra_brain_api/features/chat/controller.py
 from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
+from fastuuid import uuid4
 
 from sentra_brain_api.adapters.persistence_adapter import MongoPersistenceAdapter
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
@@ -37,7 +38,7 @@ class ChatController:
             await adapter.persist_user_message(
                 conversation_id,
                 text=body.content,
-                event_id=body.event_id,
+                event_id=body.event_id or uuid4(),
             )
             recent = await adapter.get_recent_context(conversation_id, limit=50)
 

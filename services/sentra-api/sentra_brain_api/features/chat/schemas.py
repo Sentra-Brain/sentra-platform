@@ -14,19 +14,14 @@ class SessionOptions(BaseModel):
     max_tokens: Optional[int] = None
 
 
+
 class ChatSendRequest(BaseModel):
-    user_id: UUID = Field(..., description="ID of the user sending the message")
     session_id: UUID = Field(..., description="ID of the session")
-    event_id: UUID = Field(..., description="ID of the user event being sent")
-    content: str = Field(..., description="Content of the message")
-    model: Optional[str] = Field(
-        default="sentra-brain", description="Model to use for the session"
-    )
-    intent_override: Optional[str] = Field(
-        default=None, description="Intent to override"
-    )
-    stream: Optional[bool] = Field(
-        default=True, description="Whether to stream the response"
+    content: str = Field(..., description="Content of the user message")
+    
+    # Optional fields
+    event_id: Optional[UUID] = Field(
+        default=None, description="Client-generated ID of the user event"
     )
     mode: SessionMode = Field(
         default=SessionMode.FAST, description="Engine mode"
@@ -38,4 +33,3 @@ class ChatSendRequest(BaseModel):
     context_document_ids: Optional[List[UUID]] = Field(
         default=None, description="RAG documents"
     )
-

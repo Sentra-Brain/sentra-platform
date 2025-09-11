@@ -1,16 +1,19 @@
 // src/features/chat/types/events.ts
 
-export enum SentraEventType {
-  MESSAGE_DELTA = 'message_delta',
-  MESSAGE_FINAL = 'message_final',
-  ERROR = 'error',
-  AGENT_STARTED = 'agent_started',
-  AGENT_COMPLETED = 'agent_completed',
-  STEP_START = 'step_start',
-  STEP_END = 'step_end',
-  CONTEXT_BUILT = 'context_built',
-  LLM_CALLED = 'llm_called',
-}
+export const SentraEventType = {
+  MESSAGE_DELTA: 'message_delta',
+  MESSAGE_FINAL: 'message_final',
+  ERROR: 'error',
+  AGENT_STARTED: 'agent_started',
+  AGENT_COMPLETED: 'agent_completed',
+  STEP_START: 'step_start',
+  STEP_END: 'step_end',
+  CONTEXT_BUILT: 'context_built',
+  LLM_CALLED: 'llm_called',
+} as const;
+
+export type SentraEventType =
+  typeof SentraEventType[keyof typeof SentraEventType];
 
 export type SentraEventContentPart = {
   text?: string;
@@ -34,41 +37,41 @@ export interface BaseEvent {
 }
 
 export interface MessageDeltaEvent extends BaseEvent {
-  type: SentraEventType.MESSAGE_DELTA;
+  type: typeof SentraEventType.MESSAGE_DELTA;
   content: SentraEventContent;
 }
 
 export interface MessageFinalEvent extends BaseEvent {
-  type: SentraEventType.MESSAGE_FINAL;
+  type: typeof SentraEventType.MESSAGE_FINAL;
   content: SentraEventContent;
 }
 
 export interface ErrorEvent extends BaseEvent {
-  type: SentraEventType.ERROR;
+  type: typeof SentraEventType.ERROR;
 }
 
 export interface StepStartEvent extends BaseEvent {
-  type: SentraEventType.STEP_START;
+  type: typeof SentraEventType.STEP_START;
 }
 
 export interface StepEndEvent extends BaseEvent {
-  type: SentraEventType.STEP_END;
+  type: typeof SentraEventType.STEP_END;
 }
 
 export interface ContextBuiltEvent extends BaseEvent {
-  type: SentraEventType.CONTEXT_BUILT;
+  type: typeof SentraEventType.CONTEXT_BUILT;
 }
 
 export interface LlmCalledEvent extends BaseEvent {
-  type: SentraEventType.LLM_CALLED;
+  type: typeof SentraEventType.LLM_CALLED;
 }
 
 export interface AgentStartedEvent extends BaseEvent {
-  type: SentraEventType.AGENT_STARTED;
+  type: typeof SentraEventType.AGENT_STARTED;
 }
 
 export interface AgentCompletedEvent extends BaseEvent {
-  type: SentraEventType.AGENT_COMPLETED;
+  type: typeof SentraEventType.AGENT_COMPLETED;
 }
 
 export type SentraEvent =
@@ -81,4 +84,3 @@ export type SentraEvent =
   | LlmCalledEvent
   | AgentStartedEvent
   | AgentCompletedEvent;
-
