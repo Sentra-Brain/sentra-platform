@@ -1,121 +1,84 @@
 // src/features/chat/types/events.ts
 
-// METADATA TYPES FOR CHAT EVENTS
+export enum SentraEventType {
+  MESSAGE_DELTA = 'message_delta',
+  MESSAGE_FINAL = 'message_final',
+  ERROR = 'error',
+  AGENT_STARTED = 'agent_started',
+  AGENT_COMPLETED = 'agent_completed',
+  STEP_START = 'step_start',
+  STEP_END = 'step_end',
+  CONTEXT_BUILT = 'context_built',
+  LLM_CALLED = 'llm_called',
+}
 
-export type StepStartMeta = {
-  stage?: string;
-  [key: string]: unknown;
+export type SentraEventContentPart = {
+  text?: string;
+  function_call?: Record<string, unknown>;
+  function_response?: Record<string, unknown>;
 };
 
-export type StepProgressMeta = {
-  progress?: number;
-  stage?: string;
-  [key: string]: unknown;
+export type SentraEventContent = {
+  role: string;
+  parts: SentraEventContentPart[];
 };
 
-export type StepEndMeta = {
-  chunks_found?: number;
-  source_ids?: string[];
-  document_ids?: string[];
-};
-
-export type MessageDeltaEvent = {
-  event_id: string;
-  type: "message_delta";
-  content: string;
+export interface BaseEvent {
+  id: string;
   timestamp: string;
-};
-
-export type StepErrorMeta = {
-  error?: string;
-  code?: string;
-  [key: string]: unknown;
-};
-
-export type ToolCallEvent = {
-  event_id: string;
-  type: "tool_call";
-  label?: string;
-  content?: string;
-  timestamp: string;
-};
-
-export type UserMessageEvent = {
-  event_id: string;
-  type: "user_message";
-  content: string;
-  timestamp: string;
-};
-
-// Chat event types
-
-export type MessageFinalEvent = {
-  event_id: string;
-  type: "message_final";
-  content?: string;
-  timestamp: string;
-};
-
-export type StepStartEvent = {
-  event_id: string;
-  type: "step_start";
-  task_type?: string;
+  author: string;
   task_run_id?: string;
-  step_id?: string;
-  label?: string;
   status?: string;
-  content?: string;
-  meta?: StepStartMeta;
-  timestamp: string;
-};
+  meta?: Record<string, unknown>;
+  content?: SentraEventContent;
+}
 
-export type StepEndEvent = {
-  event_id: string;
-  type: "step_end";
-  task_type?: string;
-  task_run_id?: string;
-  step_id?: string;
-  label?: string;
-  status?: string;
-  content?: string;
-  meta?: StepEndMeta;
-  timestamp: string;
-};
+export interface MessageDeltaEvent extends BaseEvent {
+  type: SentraEventType.MESSAGE_DELTA;
+  content: SentraEventContent;
+}
 
+export interface MessageFinalEvent extends BaseEvent {
+  type: SentraEventType.MESSAGE_FINAL;
+  content: SentraEventContent;
+}
 
-export type StepProgressEvent = {
-  event_id: string;
-  type: "step_progress";
-  task_type?: string;
-  task_run_id?: string;
-  step_id?: string;
-  label?: string;
-  status?: string;
-  content?: string;
-  meta?: StepProgressMeta;
-  timestamp: string;
-};
+export interface ErrorEvent extends BaseEvent {
+  type: SentraEventType.ERROR;
+}
 
-export type StepErrorEvent = {
-  event_id: string;
-  type: "step_error";
-  task_type?: string;
-  task_run_id?: string;
-  step_id?: string;
-  label?: string;
-  status?: string;
-  content?: string;
-  meta?: StepErrorMeta;
-  timestamp: string;
-};
+export interface StepStartEvent extends BaseEvent {
+  type: SentraEventType.STEP_START;
+}
+
+export interface StepEndEvent extends BaseEvent {
+  type: SentraEventType.STEP_END;
+}
+
+export interface ContextBuiltEvent extends BaseEvent {
+  type: SentraEventType.CONTEXT_BUILT;
+}
+
+export interface LlmCalledEvent extends BaseEvent {
+  type: SentraEventType.LLM_CALLED;
+}
+
+export interface AgentStartedEvent extends BaseEvent {
+  type: SentraEventType.AGENT_STARTED;
+}
+
+export interface AgentCompletedEvent extends BaseEvent {
+  type: SentraEventType.AGENT_COMPLETED;
+}
 
 export type SentraEvent =
   | MessageDeltaEvent
   | MessageFinalEvent
+  | ErrorEvent
   | StepStartEvent
   | StepEndEvent
-  | StepProgressEvent
-  | StepErrorEvent
-  | ToolCallEvent
-  | UserMessageEvent;
+  | ContextBuiltEvent
+  | LlmCalledEvent
+  | AgentStartedEvent
+  | AgentCompletedEvent;
 

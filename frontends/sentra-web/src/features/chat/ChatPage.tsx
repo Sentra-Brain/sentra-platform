@@ -10,6 +10,7 @@ import { useAppDispatch } from "@store/hooks";
 import { fetchSessionById } from "@features/sessions/sessionsSlice";
 import type { SessionDetails } from "@features/sessions/types/sessionModels";
 import { addEvent, resetEvents } from "./eventsSlice";
+import { SentraEventType } from "./types/events";
 
 export default function ChatPage() {
   const dispatch = useAppDispatch();
@@ -25,9 +26,10 @@ export default function ChatPage() {
             dispatch(resetEvents());
             payload.messages.forEach(m => {
               dispatch(addEvent({
-                event_id: m.id,
-                type: 'message_final',
-                content: m.content,
+                id: m.id,
+                type: SentraEventType.MESSAGE_FINAL,
+                author: m.role,
+                content: { role: m.role, parts: [{ text: m.content }] },
                 timestamp: new Date(m.timestamp).toISOString(),
               }))
             });

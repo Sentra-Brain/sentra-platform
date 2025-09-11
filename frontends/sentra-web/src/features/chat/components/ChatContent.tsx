@@ -1,10 +1,10 @@
 // features/chat/components/ChatContent.tsx
 import { useAppSelector } from '@store/hooks'
 import EventList from './EventList'
-import type { SentraEvent } from '@features/chat/types/events'
+import { selectAllEvents } from '@features/chat/eventsSlice'
 
 export default function ChatContent() {
-  const events: SentraEvent[] = useAppSelector((state) => state.events.events)
+  const events = useAppSelector(selectAllEvents)
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-6">

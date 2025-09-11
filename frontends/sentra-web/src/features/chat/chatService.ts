@@ -6,7 +6,7 @@ import type { ConversationMode } from "@features/chat/types/mode";
   type ChatSendPayload = {
     user_id?: string;
     session_id: string;
-    event_id: string;
+    id: string;
     content: string;
     context_source_ids?: string[];
     context_document_ids?: string[];
@@ -65,8 +65,12 @@ export const chatService = {
             if (!json) continue;
 
             try {
-                const evt: SentraEvent = JSON.parse(json);
-              onEvent(evt);
+              const parsed = JSON.parse(json);
+              if (parsed && typeof parsed.id === 'string' && parsed.type) {
+                onEvent(parsed as SentraEvent);
+              } else {
+                console.error('Malformed event:', parsed);
+              }
             } catch (err) {
               console.error("Failed to parse EngineEvent:", json, err);
             }
