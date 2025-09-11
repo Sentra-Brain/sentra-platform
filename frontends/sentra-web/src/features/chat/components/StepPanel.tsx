@@ -1,4 +1,4 @@
-import type { SentraEvent, SentraEventContent } from '../eventsSlice'
+import type { SentraEvent, SentraEventContent } from '@features/chat/types/events'
 
 function renderContent(content?: SentraEventContent) {
   if (!content || !content.parts) return null
@@ -7,15 +7,10 @@ function renderContent(content?: SentraEventContent) {
 }
 
 export default function StepPanel({ event }: { event: SentraEvent }) {
-  const label = 'label' in event && event.label ? event.label : 'Step';
-  const status = 'status' in event && event.status ? event.status : '';
-  let progress: number | undefined = undefined;
-  if ('meta' in event && event.meta && Object.prototype.hasOwnProperty.call(event.meta, 'progress')) {
-    const meta = event.meta as { progress?: number };
-    if (typeof meta.progress === 'number') {
-      progress = meta.progress;
-    }
-  }
+  const meta = event.meta as { label?: string; progress?: number } | undefined
+  const label = meta?.label ?? 'Step'
+  const status = event.status || ''
+  const progress: number | undefined = meta?.progress
 
   return (
     <div className="border rounded-lg p-3 bg-gray-100 text-gray-800">

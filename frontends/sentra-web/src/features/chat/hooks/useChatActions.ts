@@ -14,7 +14,7 @@ import {
   setWaitingForAnswer,
 } from '@features/chat/eventsSlice'
 import { chatService } from '@features/chat/chatService'
-import type { SentraEvent } from '@features/chat/types/events'
+import { SentraEventType, type SentraEvent } from '@features/chat/types/events'
 
 export function useChatActions() {
   const dispatch = useAppDispatch()
@@ -27,8 +27,13 @@ export function useChatActions() {
     if (!trimmed) return
 
     let sessionId = currentSessionId
-  const userEventId = uuidv4()
-  const assistantEventId = uuidv4()
+    const userEvent: SentraEvent = {
+      id: uuidv4(),
+      type: SentraEventType.MESSAGE_FINAL,
+      author: 'user',
+      content: { role: 'user', parts: [{ text: trimmed }] },
+      timestamp: new Date().toISOString(),
+    }
 
     const wasNewSession = !sessionId
 
@@ -42,13 +47,7 @@ export function useChatActions() {
     dispatch(setStreaming(true))
     dispatch(setWaitingForAnswer(true))
 
-    dispatch(addEvent({
-      event_id: userEventId,
-      type: 'user_message',
-      content: { parts: [{ text: trimmed }] },
-      timestamp: new Date().toISOString(),
-      assistant_event_id: assistantEventId,
-    }))
+    dispatch(addEvent(userEvent))
 
     let titleTriggered = false
 
@@ -56,68 +55,27 @@ export function useChatActions() {
       {
         user_id: userId,
         session_id: sessionId!,
-        event_id: userEventId,
-        content: trimmed, // If backend expects string, keep as is. If not, wrap as above.
+        id: userEvent.id,
+        content: trimmed,
         context_source_ids: selectedContext.useRag ? selectedContext.sourceIds : [],
         context_document_ids: selectedContext.useRag ? selectedContext.documentIds : [],
         mode,
       },
-  (event: SentraEvent) => {
-        switch (event.type) {
-          case 'message_delta': {
-            dispatch(updateEvent({
-              event_id: assistantEventId,
-              type: 'message_delta',
-              content: event.content
-                ? typeof event.content === 'string'
-                  ? { parts: [{ text: event.content }] }
-                  : event.content
-                : undefined,
-              timestamp: event.timestamp,
-            }))
-            break
-          }
-          case 'message_final': {
-            dispatch(updateEvent({
-              event_id: assistantEventId,
-              type: 'message_final',
-              content: event.content
-                ? typeof event.content === 'string'
-                  ? { parts: [{ text: event.content }] }
-                  : event.content
-                : undefined,
-              timestamp: event.timestamp,
-            }))
+      (event: SentraEvent) => {
+        dispatch(updateEvent(event))
+        if (event.type === SentraEventType.MESSAGE_FINAL) {
+          dispatch(setWaitingForAnswer(false))
+          dispatch(setStreaming(false))
 
-            dispatch(setWaitingForAnswer(false))
-            dispatch(setStreaming(false))
-
-            if (wasNewSession && !titleTriggered) {
-              titleTriggered = true
-              dispatch(regenerateTitle(sessionId!)).catch(err => {
-                console.warn('Failed to regenerate title', err)
-              })
-            }
-            break
+          if (wasNewSession && !titleTriggered) {
+            titleTriggered = true
+            dispatch(regenerateTitle(sessionId!)).catch(err => {
+              console.warn('Failed to regenerate title', err)
+            })
           }
-          case 'step_start':
-          case 'step_progress':
-          case 'step_end':
-          case 'step_error':
-          case 'tool_call': {
-            // normal step/tool events
-            dispatch(addEvent({
-              ...event,
-              content: event.content
-                ? typeof event.content === 'string'
-                  ? { parts: [{ text: event.content }] }
-                  : event.content
-                : undefined,
-            }))
-            break
-          }
-          default:
-            break
+        } else if (event.type === SentraEventType.ERROR) {
+          dispatch(setWaitingForAnswer(false))
+          dispatch(setStreaming(false))
         }
       },
       (err) => {

@@ -2,6 +2,7 @@
 import { describe, it, expect } from 'vitest'
 import { configureStore } from '@reduxjs/toolkit'
 import eventsReducer, { setWaitingForAnswer, addEvent } from '../src/features/chat/eventsSlice'
+import { SentraEventType } from '../src/features/chat/types/events'
 import sessionReducer, { updateSessionTitle } from '../src/features/sessions/sessionsSlice'
 
 describe('Session Creation and Rendering Flow Fixes', () => {
@@ -62,19 +63,20 @@ describe('Session Creation and Rendering Flow Fixes', () => {
       },
     })
 
-    // Add user event
     const userEvent = {
-      event_id: 'evt-1',
-      type: 'user_message' as const,
-      content: 'Test message',
+      id: 'evt-1',
+      type: SentraEventType.MESSAGE_FINAL,
+      author: 'user',
+      content: { role: 'user', parts: [{ text: 'Test message' }] },
       timestamp: new Date().toISOString(),
     }
 
     store.dispatch(addEvent(userEvent))
 
     const state = store.getState()
-    expect(state.events.events).toHaveLength(1)
-    expect(state.events.events[0].type).toBe('user_message')
-    expect((state.events.events[0] as any).content).toBe('Test message')
+    expect(state.events.order).toHaveLength(1)
+    const stored = state.events.eventsById['evt-1']
+    expect(stored.type).toBe(SentraEventType.MESSAGE_FINAL)
+    expect(stored.content?.parts[0].text).toBe('Test message')
   })
 })

@@ -1,4 +1,4 @@
-import type { SentraEventContent } from '../eventsSlice'
+import type { SentraEventContent } from '@features/chat/types/events'
 
 function renderContent(content?: SentraEventContent) {
   if (!content || !content.parts) return null

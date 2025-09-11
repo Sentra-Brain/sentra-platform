@@ -5,24 +5,8 @@ import WaitingForAnswer from './WaitingForAnswer'
 import StepPanel from './StepPanel'
 import ErrorBubble from './ErrorBubble'
 import ToolPanel from './ToolPanel'
-
-
-
-import type { SentraEvent, SentraEventContent } from '../eventsSlice'
-
-function toSentraEventContent(content: unknown): SentraEventContent | undefined {
-  if (!content) return undefined
-  if (
-    typeof content === 'object' &&
-    content !== null &&
-    'parts' in content &&
-    Array.isArray((content as { parts?: unknown }).parts)
-  ) {
-    return content as SentraEventContent
-  }
-  if (typeof content === 'string') return { parts: [{ text: content }] }
-  return undefined
-}
+import { SentraEventType, type SentraEvent } from '@features/chat/types/events'
+import type { MessageRole } from '@features/sessions/types/sessionModels'
 
 export default function EventList({ events }: { events: SentraEvent[] }) {
   const endRef = useRef<HTMLDivElement | null>(null)
@@ -37,24 +21,51 @@ export default function EventList({ events }: { events: SentraEvent[] }) {
   return (
     <div className="flex flex-col gap-4 overflow-y-auto">
       {events.map((evt) => {
-        const content = toSentraEventContent(evt.content)
-        switch (evt.type) {
-          case 'user_message':
-            return <MessageBubble key={evt.id} id={evt.id} role="user" content={content} />
-          case 'message_delta':
-          case 'message_final':
-            return <MessageBubble key={evt.id} id={evt.id} role="assistant" content={content} />
-          case 'step_start':
-          case 'step_progress':
-          case 'step_end':
-            return <StepPanel key={evt.id} event={{ ...evt, content }} />
-          case 'step_error':
-            return <ErrorBubble key={evt.id} label={evt.label} content={content} />
-          case 'tool_call':
-            return <ToolPanel key={evt.id} label={evt.label} content={content} />
-          default:
-            return null
+        if (
+          evt.type === SentraEventType.MESSAGE_DELTA ||
+          evt.type === SentraEventType.MESSAGE_FINAL
+        ) {
+          const role = evt.author as MessageRole
+          if (
+            evt.content?.parts.some(
+              (p) => p.function_call || p.function_response
+            )
+          ) {
+            return (
+              <ToolPanel
+                key={evt.id}
+                label={evt.meta?.label as string | undefined}
+                content={evt.content}
+              />
+            )
+          }
+          return (
+            <MessageBubble
+              key={evt.id}
+              id={evt.id}
+              role={role}
+              content={evt.content}
+            />
+          )
         }
+        if (
+          evt.type === SentraEventType.STEP_START ||
+          evt.type === SentraEventType.STEP_END ||
+          evt.type === SentraEventType.CONTEXT_BUILT ||
+          evt.type === SentraEventType.LLM_CALLED
+        ) {
+          return <StepPanel key={evt.id} event={evt} />
+        }
+        if (evt.type === SentraEventType.ERROR) {
+          return (
+            <ErrorBubble
+              key={evt.id}
+              label={evt.meta?.label as string | undefined}
+              content={evt.content}
+            />
+          )
+        }
+        return null
       })}
       {waitingForAnswer && <WaitingForAnswer />}
       <div ref={endRef} />
