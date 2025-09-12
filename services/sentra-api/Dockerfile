@@ -7,12 +7,12 @@ WORKDIR /app
 
 # Copy and install sentra libraries
 COPY packages/sentra-domain /packages/sentra-domain
-COPY packages/sentra-shared /packages/sentra-shared
-COPY packages/sentra-infra /packages/sentra-infra
-COPY packages/sentra-runtime /packages/sentra-runtime
 RUN pip install -e /packages/sentra-domain
+COPY packages/sentra-shared /packages/sentra-shared
 RUN pip install -e /packages/sentra-shared
+COPY packages/sentra-infra /packages/sentra-infra
 RUN pip install -e /packages/sentra-infra
+COPY packages/sentra-runtime /packages/sentra-runtime
 RUN pip install -e /packages/sentra-runtime
 
 # Copy and install API requirements

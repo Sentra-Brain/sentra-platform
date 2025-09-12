@@ -9,25 +9,20 @@ systems can hook in without touching the call‑sites.
 from __future__ import annotations
 
 import logging
-from uuid import uuid4
-
-from sentra.domain.models.event import SentraEvent
+from google.adk.events.event import Event
 
 
 logger = logging.getLogger(__name__)
 
 
-def emit_event_log(event: SentraEvent) -> None:
-    """Emit a structured log for ``event``.
-
-    A ``task_run_id`` is injected when missing to aid in correlating events
-    that belong to the same conversation.  Only non-``None`` values are
-    included in the final log record.
-    """
-
-    if event.task_run_id is None:
-        event.task_run_id = uuid4().hex
-    logger.info("event", extra=event.model_dump(exclude_none=True))
+def emit_event_log(event: Event) -> None:
+    """Emit a structured log for an ADK Event."""
+    flat = event.model_dump(exclude_none=True)
+    md = event.custom_metadata or {}
+    for k, v in md.items():
+        if k not in flat:
+            flat[k] = v
+    logger.info("event", extra=flat)
 
 
 __all__ = ["emit_event_log"]

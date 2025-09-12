@@ -1,6 +1,7 @@
 from typing import AsyncGenerator
 
-from sentra.domain.models.event import SentraEvent, SentraEventType
+from google.adk.events.event import Event
+from google.genai import types
 from sentra.runtime.models import ConversationRequest
 from sentra.runtime.tools import DbQueryTool, RagTool
 from sentra.runtime.agents.workflows import ParallelAgent
@@ -8,16 +9,11 @@ from sentra.runtime.agents.workflows import ParallelAgent
 
 async def run_listings_search_agent(
     request: ConversationRequest, context: dict, task_run_id: str
-) -> AsyncGenerator[SentraEvent, None]:
+) -> AsyncGenerator[Event, None]:
     """Dummy agent that yields a small stream of events for listings search."""
 
     # Start step
-    yield SentraEvent.system_message (
-        "Listings search started",
-        type=SentraEventType.STEP_START,
-        task_run_id=task_run_id,
-        meta={"step": "listings_search"},
-    )
+    yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Listings search started")]), custom_metadata={"type": "step_start", "step": "listings_search"})
 
     db = DbQueryTool()
     rag = RagTool()
@@ -43,12 +39,7 @@ async def run_listings_search_agent(
     content = "\n\n".join(parts) or "No data found."
 
     # Final assistant message
-    yield SentraEvent.assistant_message(content, task_run_id=task_run_id)
+    yield Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text=content)]), custom_metadata={"type": "message_final"})
 
     # End step
-    yield SentraEvent.system_message(
-        "Listings search completed",
-        type=SentraEventType.STEP_END,
-        task_run_id=task_run_id,
-        meta={"step": "listings_search"},
-    )
+    yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Listings search completed")]), custom_metadata={"type": "step_end", "step": "listings_search"})

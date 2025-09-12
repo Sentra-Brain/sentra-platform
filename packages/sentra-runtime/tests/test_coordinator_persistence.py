@@ -1,12 +1,8 @@
 import pytest
 from uuid import uuid4
 
-from sentra.domain.models.event import (
-    SentraEvent,
-    SentraEventType,
-    SentraEventContent,
-    SentraEventContentPart,
-)
+from google.adk.events.event import Event
+from google.genai import types
 from sentra.runtime.agents.coordinator import CoordinatorAgent
 from sentra.runtime.models import ConversationRequest
 
@@ -15,28 +11,14 @@ class DummySink:
     def __init__(self):
         self.events = []
 
-    async def on_event(self, event: SentraEvent) -> None:
+    async def on_event(self, event: Event) -> None:
         self.events.append(event)
 
 
 class StubSentraAgent:
     async def run(self, request: ConversationRequest, task_run_id: str):
-        yield SentraEvent(
-            author="assistant",
-            type=SentraEventType.MESSAGE_DELTA,
-            content=SentraEventContent(
-                role="assistant", parts=[SentraEventContentPart(text="hi")]
-            ),
-            task_run_id=task_run_id,
-        )
-        yield SentraEvent(
-            author="assistant",
-            type=SentraEventType.MESSAGE_DELTA,
-            content=SentraEventContent(
-                role="assistant", parts=[SentraEventContentPart(text="bye")]
-            ),
-            task_run_id=task_run_id,
-        )
+        yield Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text="hi")]), custom_metadata={"type": "message_delta"})
+        yield Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text="bye")]), custom_metadata={"type": "message_delta"})
 
 
 @pytest.mark.asyncio

@@ -1,7 +1,6 @@
 import time
 import anyio
-
-from sentra.domain.models.event import SentraEventType
+from google.adk.events.event import Event
 from sentra.runtime.agents.real_estate.use_case_listings_search import run_listings_search_agent
 from sentra.runtime.models import ConversationRequest
 from sentra.runtime.tools import DbQueryTool, RagTool
@@ -37,7 +36,7 @@ def test_listings_search_runs_db_and_rag_in_parallel(monkeypatch):
     assert elapsed < 0.35
 
     # Grab assistant final message
-    assistant_event = next(e for e in events if e.type == SentraEventType.MESSAGE_FINAL)
+    assistant_event = next(e for e in events if (e.custom_metadata or {}).get("type") == "message_final")
     text = "".join(p.text for p in assistant_event.content.parts if p.text)
 
     assert "Flat A" in text

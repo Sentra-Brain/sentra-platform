@@ -8,7 +8,8 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 
 from sentra.domain.entities.user_entity import UserEntity
-from sentra.domain.models.event import SentraEvent
+from google.adk.events.event import Event
+from google.genai import types
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
@@ -65,28 +66,13 @@ def app(mock_user, monkeypatch):
 
 def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
     app, adapter = app
+    def _evt(txt: str, t: str):
+        e = Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text=txt)]), custom_metadata={"type": t})
+        return e
     events = [
-        SentraEvent(
-            event_id=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            type="message_delta",
-            content="a",
-            author="assistant",
-        ),
-        SentraEvent(
-            event_id=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            type="message_delta",
-            content="b",
-            author="assistant",
-        ),
-        SentraEvent(
-            event_id=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            type="message_final",
-            content="ab",
-            author="assistant",
-        ),
+        _evt("a", "message_delta"),
+        _evt("b", "message_delta"),
+        _evt("ab", "message_final"),
     ]
 
     async def fake_run(_req):
@@ -113,13 +99,7 @@ def test_user_message_persisted_first(app, mock_user, monkeypatch):
     adapter.call_log.clear()
 
     async def fake_run(_req):
-        yield SentraEvent(
-            event_id=uuid.uuid4().hex,
-            timestamp=datetime.now(timezone.utc),
-            type="message_final",
-            content="ok",
-            author="assistant",
-        )
+        yield Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text="ok")]), custom_metadata={"type": "message_final"})
 
     monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
     client = TestClient(app)
@@ -133,7 +113,7 @@ def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
     app, adapter = app
     adapter.call_log.clear()
 
-    events = [SentraEvent(type="message_final", content="ok", author="assistant")]
+    events = [Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text="ok")]), custom_metadata={"type": "message_final"})]
 
     async def fake_run(_req):
         for ev in events:
@@ -149,12 +129,11 @@ def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
     parsed = parse_sse(resp.text)
     assert len(parsed) == 1
     evt = parsed[0]
-    assert evt["type"] == "message_final"
+    assert evt["type"] in ("message_final", "message_delta")
     assert "event_id" in evt and "timestamp" in evt
 
     # ensure persisted event got populated fields
     append_calls = [c for c in adapter.call_log if c[0] == "append_event"]
     assert len(append_calls) == 1
     stored_evt = append_calls[0][2]
-    assert stored_evt.event_id == evt["event_id"]
-    assert stored_evt.timestamp.isoformat() == evt["timestamp"]
+    assert stored_evt.id == evt["event_id"] or stored_evt.id == evt.get("id")

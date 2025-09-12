@@ -3,7 +3,8 @@ from __future__ import annotations
 from typing import AsyncGenerator
 from uuid import uuid4
 
-from sentra.domain.models.event import SentraEvent, SentraEventType
+from google.adk.events.event import Event
+from google.genai import types
 from sentra.runtime.agents.legal.use_case_contract_drafting import run_contract_drafting_agent
 from sentra.runtime.agents.real_estate.use_case_listings_search import run_listings_search_agent
 from sentra.runtime.agents.sentra_agent import SentraAgent
@@ -21,18 +22,18 @@ class CoordinatorAgent:
     def __init__(self, sink: EventSink | None = None):
         self.sink = sink
 
-    async def _persist(self, event: SentraEvent) -> None:
+    async def _persist(self, event: Event) -> None:
         if self.sink:
             await self.sink.on_event(event)
 
-    async def run(self, request: ConversationRequest) -> AsyncGenerator[SentraEvent, None]:
+    async def run(self, request: ConversationRequest) -> AsyncGenerator[Event, None]:
         task_run_id = uuid4().hex
         msg = request.messages[-1]
 
         try:
             # --- Legal intent ---
             if route_legal_intent(msg):
-                event = SentraEvent.system_message("Dispatching legal agent", type=SentraEventType.STEP_START, task_run_id=task_run_id, meta={"agent": "legal"})
+                event = Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Dispatching legal agent")]), custom_metadata={"type": "step_start", "agent": "legal"})
                 emit_event_log(event)
                 await self._persist(event)
 
@@ -41,12 +42,12 @@ class CoordinatorAgent:
                     await self._persist(event)
                     yield event
 
-                yield SentraEvent.system_message("Legal agent completed", type=SentraEventType.STEP_END, task_run_id=task_run_id, status="success", meta={"agent": "legal"})
+                yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Legal agent completed")]), custom_metadata={"type": "step_end", "status": "success", "agent": "legal"})
                 return
 
             # --- Real estate intent ---
             if route_real_estate_intent(msg):
-                event = SentraEvent.system_message("Dispatching real estate agent", type=SentraEventType.STEP_START,     task_run_id=task_run_id, meta={"agent": "real_estate"})
+                event = Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Dispatching real estate agent")]), custom_metadata={"type": "step_start", "agent": "real_estate"})
                 emit_event_log(event)
                 await self._persist(event)
 
@@ -55,18 +56,18 @@ class CoordinatorAgent:
                     await self._persist(event)
                     yield event
 
-                yield SentraEvent.system_message("Real estate agent completed", type=SentraEventType.STEP_END, task_run_id=task_run_id, status="success", meta={"agent": "real_estate"})
+                yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Real estate agent completed")]), custom_metadata={"type": "step_end", "status": "success", "agent": "real_estate"})
                 return
 
             # --- Default to general SentraAgent ---
-            emit_event_log(SentraEvent.system_message("Dispatching general agent", type=SentraEventType.STEP_START, task_run_id=task_run_id, meta={"agent": "sentra"}))
+            emit_event_log(Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Dispatching general agent")]), custom_metadata={"type": "step_start", "agent": "sentra"}))
             agent = SentraAgent()
             async for event in agent.run(request, task_run_id=task_run_id):
                 await self._persist(event)
                 yield event
 
-            yield SentraEvent.system_message("General agent completed", type=SentraEventType.STEP_END, task_run_id=task_run_id, status="success", meta={"agent": "sentra"})
+            yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="General agent completed")]), custom_metadata={"type": "step_end", "status": "success", "agent": "sentra"})
 
         except (ToolError, TimeoutError, BudgetExhaustedError):
-            yield SentraEvent.error("Coordinator agent failed", task_run_id=task_run_id)
+            yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Coordinator agent failed")]), custom_metadata={"type": "error", "status": "error"})
             raise
