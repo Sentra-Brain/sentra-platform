@@ -17,3 +17,4 @@ class ConversationRequest(BaseModel):
     user_id: Optional[str] = None
     conversation_id: Optional[str] = None
     session_state: Optional[Dict[str, Any]] = None
+    agent: Optional[str] = None  # explicit agent selection (e.g. "default_agent", "legal")

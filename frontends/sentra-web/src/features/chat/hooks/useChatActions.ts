@@ -20,6 +20,7 @@ export function useChatActions() {
   const dispatch = useAppDispatch();
   const currentSessionId = useAppSelector((s) => s.session.currentSessionId);
   const { selectedContext, mode } = useAppSelector((s) => s.events);
+  const selectedAgent = useAppSelector((s) => s.agents.selected);
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim();
@@ -30,7 +31,7 @@ export function useChatActions() {
     // Step 1: ensure session exists
     if (!sessionId) {
       const newSession = await dispatch(
-        createSession({ initial_prompt: trimmed })
+        createSession({ initial_prompt: trimmed, agent: selectedAgent || undefined })
       ).unwrap();
       sessionId = newSession.id;
       dispatch(selectSession(sessionId));
@@ -63,6 +64,7 @@ export function useChatActions() {
           ? selectedContext.documentIds
           : [],
         mode,
+        agent: selectedAgent || undefined,
       },
       (event: SentraEvent) => {
         dispatch(updateEvent(event));

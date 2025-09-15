@@ -54,6 +54,7 @@ class ChatController:
                 context_source_ids=[str(cid) for cid in body.context_source_ids] if body.context_source_ids else None,
                 context_document_ids=[str(cid) for cid in body.context_document_ids] if body.context_document_ids else None,
                 session_state=session_state,
+                agent=body.agent,
             )
 
             async def stream():

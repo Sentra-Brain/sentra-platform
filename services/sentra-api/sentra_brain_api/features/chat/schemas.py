@@ -33,3 +33,4 @@ class ChatSendRequest(BaseModel):
     context_document_ids: Optional[List[UUID]] = Field(
         default=None, description="RAG documents"
     )
+    agent: Optional[str] = Field(default=None, description="Explicit agent selection override")

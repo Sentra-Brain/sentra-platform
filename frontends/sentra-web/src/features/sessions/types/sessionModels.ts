@@ -26,6 +26,7 @@ export type SessionDetails = {
 
 export type CreateSessionRequest = {
   initial_prompt: string;
+  agent?: string; // selected agent name
 };
 
 export type CreateSessionResponse = {

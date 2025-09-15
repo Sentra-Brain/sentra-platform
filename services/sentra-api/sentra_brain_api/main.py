@@ -21,6 +21,7 @@ from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.session.controller import SessionController
 from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
+from sentra_brain_api.features.agents import AgentsController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra.shared import logging
 from sentra.infra.sql import postgres_service
@@ -81,6 +82,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     public_settings_controller = PublicSettingsController()
     session_controller = SessionController()
     llm_proxy_controller = LLMProxyController()
+    agents_controller = AgentsController()
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(chat_controller.router, prefix="/chat", tags=["chat"])
@@ -94,6 +96,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
     app.include_router(organization_router, prefix="", tags=["organization"])
+    app.include_router(agents_controller.router, prefix="", tags=["agents"])
 
     # Setup observability (only if not in test mode)
     # if os.getenv("TESTING") != "true":

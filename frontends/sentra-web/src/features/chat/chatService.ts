@@ -10,6 +10,7 @@ import type { ConversationMode } from "@features/chat/types/mode";
     context_source_ids?: string[];
     context_document_ids?: string[];
     mode?: ConversationMode;
+    agent?: string;
   };
 
   // NEW: event callback uses SentraEvent
