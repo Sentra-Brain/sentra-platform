@@ -21,6 +21,9 @@ python-multipart
 uvicorn
 wsproto
 
+# ADK runtime (align with sentra-runtime package)
+google-adk
+
 # OpenTelemetry instrumentation
 opentelemetry-api
 opentelemetry-sdk

@@ -11,6 +11,7 @@ from sentra.domain.entities.user_entity import UserEntity
 from google.adk.events.event import Event
 from google.genai import types
 from sentra_brain_api.features.chat.controller import ChatController
+from sentra_brain_api.adapters.session_service import get_session_service, APP_NAME
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.mongo_session_repository import get_session_mongo_repository
 
@@ -82,12 +83,22 @@ def test_streaming_persists_and_streams_events(app, mock_user, monkeypatch):
     monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
 
     client = TestClient(app)
-    payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
+    # Omit session_id to force creation
+    payload = {"user_id": str(mock_user.id), "content": "hi"}
     resp = client.post("/chat/send", json=payload)
     assert resp.status_code == 200
     parsed = parse_sse(resp.text)
+    # First event should include session_id field
+    assert "session_id" in parsed[0]
+    session_id = parsed[0]["session_id"]
+    # Remove session_id for comparison of event payloads
+    comparable = []
+    for p in parsed:
+        cp = dict(p)
+        cp.pop("session_id", None)
+        comparable.append(cp)
     expected = [e.model_dump(by_alias=True) for e in events]
-    assert parsed == expected
+    assert comparable == expected
     # Persist calls
     assert adapter.call_log[0][0] == "persist_user_message"
     append_calls = [c for c in adapter.call_log if c[0] == "append_event"]
@@ -103,7 +114,7 @@ def test_user_message_persisted_first(app, mock_user, monkeypatch):
 
     monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
     client = TestClient(app)
-    payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
+    payload = {"user_id": str(mock_user.id), "content": "hi"}
     client.post("/chat/send", json=payload)
     assert adapter.call_log[0][0] == "persist_user_message"
 
@@ -122,13 +133,17 @@ def test_streaming_generates_missing_fields(app, mock_user, monkeypatch):
     monkeypatch.setattr("sentra.runtime.app.run_conversation", fake_run)
 
     client = TestClient(app)
-    payload = {"user_id": str(mock_user.id), "session_id": str(uuid.uuid4()), "content": "hi"}
+    payload = {"user_id": str(mock_user.id), "content": "hi"}
     resp = client.post("/chat/send", json=payload)
     assert resp.status_code == 200
 
     parsed = parse_sse(resp.text)
     assert len(parsed) == 1
     evt = parsed[0]
+    assert "session_id" in evt
+    # Strip session_id for remaining assertions
+    sid = evt.pop("session_id")
+    assert isinstance(sid, str) and len(sid) > 0
     assert evt["type"] in ("message_final", "message_delta")
     assert "event_id" in evt and "timestamp" in evt
 

@@ -135,13 +135,19 @@ class CoordinatorAgent:
                     for part in ev.content.parts:
                         if part.text:
                             chunks.append(part.text)
-                            yield Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text=part.text)]), custom_metadata={"type": "message_delta"})
+                            delta_evt = Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text=part.text)]), custom_metadata={"type": "message_delta"})
+                            await self._persist(delta_evt)
+                            yield delta_evt
                 if ev.is_final_response():
                     break
 
             final_text = "".join(chunks)
-            yield Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text=final_text)]), custom_metadata={"type": "message_final"})
-            yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="default_agent completed")]), custom_metadata={"type": "step_end", "status": "success", "agent": "default_agent"})
+            final_evt = Event(author="assistant", content=types.Content(role="assistant", parts=[types.Part(text=final_text)]), custom_metadata={"type": "message_final"})
+            await self._persist(final_evt)
+            yield final_evt
+            end_evt = Event(author="system", content=types.Content(role="system", parts=[types.Part(text="default_agent completed")]), custom_metadata={"type": "step_end", "status": "success", "agent": "default_agent"})
+            await self._persist(end_evt)
+            yield end_evt
 
         except (ToolError, TimeoutError, BudgetExhaustedError):
             yield Event(author="system", content=types.Content(role="system", parts=[types.Part(text="Coordinator agent failed")]), custom_metadata={"type": "error", "status": "error"})

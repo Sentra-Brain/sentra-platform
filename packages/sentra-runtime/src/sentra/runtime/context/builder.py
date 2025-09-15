@@ -4,7 +4,7 @@ from __future__ import annotations
 from typing import Dict
 import json
 
-from sentra.runtime.adapters.rag_memory_service import RagMemoryService
+from sentra.runtime.memory import search_memories
 from sentra.runtime.models.conversation import ConversationRequest
 from sentra.runtime.agents.summarizer import update_summary_and_entities
 from sentra.runtime.tools.rag_tool import RagTool
@@ -12,7 +12,7 @@ from sentra.shared.settings import settings
 
 SUMMARY_THRESHOLD = 5
 
-memory_service = RagMemoryService()
+MEMORY_LIMIT = 5  # number of past memory snippets to surface
 
 
 async def build_context(request: ConversationRequest) -> Dict[str, str]:
@@ -52,17 +52,19 @@ async def build_context(request: ConversationRequest) -> Dict[str, str]:
 
     memories = ""
     if request.user_id and request.messages:
-        results = await memory_service.search_memory(
-            request.user_id, request.messages[-1]
-        )
+        results = await search_memories(request.user_id, request.messages[-1], limit=MEMORY_LIMIT)
         seen_mem: set[str] = set()
         deduped_mem: list[str] = []
         for res in results:
-            content = res.get("content")
-            if content and content not in seen_mem:
-                seen_mem.add(content)
-                deduped_mem.append(content)
-        memories = "\n".join(deduped_mem)
+            # Support both ADK MemoryResult objects (``text`` attr) and dict fallbacks.
+            text = getattr(res, "text", None)
+            if text is None and isinstance(res, dict):
+                text = res.get("text") or res.get("content")
+            if text and text not in seen_mem and text not in request.messages:
+                seen_mem.add(text)
+                deduped_mem.append(text)
+        if deduped_mem:
+            memories = "Memories:\n" + "\n".join(deduped_mem)
 
     context: Dict[str, str] = {"history": history, "knowledge": knowledge, "memories": memories}
 

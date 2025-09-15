@@ -17,11 +17,16 @@ logger = logging.getLogger(__name__)
 
 def emit_event_log(event: Event) -> None:
     """Emit a structured log for an ADK Event."""
-    flat = event.model_dump(exclude_none=True)
-    md = event.custom_metadata or {}
+    try:
+        flat = event.model_dump(exclude_none=True)  # type: ignore[attr-defined]
+    except Exception:
+        # Fallback for lightweight test stubs
+        flat = {
+            "author": getattr(event, "author", None),
+        }
+    md = getattr(event, "custom_metadata", {}) or {}
     for k, v in md.items():
-        if k not in flat:
-            flat[k] = v
+        flat.setdefault(k, v)
     logger.info("event", extra=flat)
 
 
