@@ -1,6 +1,3 @@
 > **Community Fair-Use:** Sentra Brain CE is AGPL-3.0.  
 > Free **internal use up to 5 seats** per organization; commercial license required beyond that.  
 > See **`COMMUNITY-TERMS.md`** and **`LICENSE`**.
-# sentra-shared
-
-This package contains shared utilities and crosscutting concerns for Sentra projects, such as logging, settings, and other common modules.

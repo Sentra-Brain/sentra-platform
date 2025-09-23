@@ -13,13 +13,15 @@ These constraints define the framework within which all architectural decisions 
 - **Regulatory Compliance**  
   All components and workflows must comply with GDPR and relevant data protection laws applicable to SME clients in Europe.
 
-- **Licensing Model**  
-  Sentra Brain operates under a dual model:  
-  - **Open Core (AGPLv3)**: Up to 3 users/devices, self-hosted by the community.  
-  - **Commercial License**: Hardware + software package sold exclusively by JGCarmona Consulting S.L.U.
 
-- **Deployment Restrictions**  
-  Public SaaS hosting is not permitted for core functions. Installations must be self-hosted, either on-premises or within private cloud environments controlled by the client.
+- **Open Core (AGPL-3.0):** Community Edition is self-hosted and open source.
+- **Community Fair-Use:** free internal use up to **5 named seats** per organization (see `COMMUNITY-TERMS.md`).
+- **Commercial License:** required for >5 seats, multi-instance production, resale/embedding, or managed service scenarios.
+
+
+- **Deployment Restrictions**
+  Core functions are **self-hosted** (on-prem or private cloud under the client’s control).
+  No mandatory vendor telemetry; optional activation may exchange only license/version metadata.
 
 - **Client Profile**  
   The architecture must prioritize ease of use and maintainability for SMEs, not large enterprises or consumer markets.

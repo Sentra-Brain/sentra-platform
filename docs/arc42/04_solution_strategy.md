@@ -1,3 +1,7 @@
+**Community Fair-Use & Activation (Optional)**
+- Free internal use for up to **5 named users** per org (Community Edition).
+- Optional **activation** may assign an **anonymous Instance ID** for license validation.
+- Commercial license required beyond fair-use thresholds.
 # 4. Solution Strategy
 
 ## Overview

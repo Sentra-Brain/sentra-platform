@@ -20,26 +20,20 @@ This philosophy guides both technical and business decisions throughout the syst
 
 | Stakeholder            | Role                     | Expectations                                        |
 |-----------------------|-------------------------|----------------------------------------------------|
-| JGCarmona Consulting   | Vendor & Integrator      | Provide turnkey deployment, support, and licensing |
+| Juan G. Carmona       | Maintainer & Publisher     | Publish releases, docs; offer optional commercial licensing & support |
 | SME Administrators     | Platform Users           | Access private AI capabilities securely            |
 | SME End Users          | Platform Users           | Access private AI capabilities securely            |
 | Regulatory Authorities | Compliance Auditors      | Ensure GDPR and security standards are met         |
 
 ## Operating Model and Service Approach
 
-Sentra Brain is not a purely self-service platform. Its deployment and configuration follow a controlled model managed exclusively by JGCarmona Consulting S.L.U. to ensure security, consistency, and support quality.
 
-- **Vendor-Managed Installation:**  
-  JGCarmona Consulting handles hardware provisioning, system installation, and initial configuration based on the client's vertical and requirements.
+Sentra Brain supports **self-service deployment** (on-prem or private cloud). Community Edition is open and installable by anyone; commercial terms apply when usage exceeds the community fair-use thresholds.
 
-- **Pre-Configured Workflows:**  
-  Workflow automation via n8n or similar tools is prepared and maintained by JGCarmona Consulting. Access to modify or extend these workflows may be opened to SME Administrators in future versions.
-
-- **Maintenance and Support Services:**  
-  Ongoing updates, security patches, and operational support are provided under a commercial licensing agreement.
-
-- **Controlled Monitoring:**  
-  Each Sentra Brain instance includes a protected monitoring mechanism (e.g., secure `/health` endpoint or encrypted telemetry) accessible only to JGCarmona Consulting for service health checks and license validation. This is explicitly designed to respect client privacy and regulatory compliance while enabling essential vendor support.
+- **Installation Options:** Self-service is supported. Assistance is optional (consultants/contributors may help on a project basis).
+- **Pre-Configured Workflows (optional):** Reference automations (e.g., n8n) are offered as templates; admins can adopt, change, or remove them.
+- **Maintenance & Updates:** Community Edition receives public releases. Commercial deployments can add SLAs and assisted upgrades.
+- **Activation (optional, future):** A lightweight flow may provide an **anonymous Instance ID** to validate licensing and update eligibility. **No application content** is transmitted—only license/version metadata.
 
 ## Top Quality Goals
 

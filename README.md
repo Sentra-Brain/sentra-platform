@@ -1,3 +1,6 @@
+> **Community Fair-Use:** Sentra Brain CE is AGPL-3.0.  
+> Free **internal use up to 5 seats** per organization; commercial license required beyond that.  
+> See **`COMMUNITY-TERMS.md`** and **`LICENSE`**.
 # Sentra Brain – Product Description
 
 Sentra Brain is a **modular private AI server** designed for professional environments requiring full control over their data, regulatory compliance, and AI infrastructure.

@@ -1,3 +1,6 @@
+> **Community Fair-Use:** Sentra Brain CE is AGPL-3.0.  
+> Free **internal use up to 5 seats** per organization; commercial license required beyond that.  
+> See **`COMMUNITY-TERMS.md`** and **`LICENSE`**.
 # Sentra API (Orchestrator + Auth + MCP Client)
 
 This folder contains the source code and Docker configuration for the **Sentra Brain backend API service**.

@@ -31,7 +31,7 @@ graph TD
 
 | Priority | Quality Attribute | Description                                                                                      |
 |----------|-------------------|--------------------------------------------------------------------------------------------------|
-| 1        | Privacy           | All client data, chat histories, and configuration remain under full local control. No telemetry. |
+| 1        | Privacy           | All client data and logs remain local. **No content telemetry** is sent. If activation is enabled, only **license/version metadata** is exchanged. |
 | 1        | Security          | Internal authentication, encrypted communication, vendor-restricted health endpoints only.        |
 | 2        | Modularity        | LLM, RAG, MCP Servers (split by capability) must operate independently and be replaceable.        |
 | 2        | Reliability       | Services must operate predictably under defined loads, with clear failure recovery mechanisms.    |

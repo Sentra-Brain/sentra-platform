@@ -148,13 +148,10 @@ Self-hosted deployment is mandatory. Hybrid deployment is optional under vendor 
 
 ---
 
+
 ## ADR 009 – Monitoring & Licensing Mechanism
 
-**Decision:**  
-Implement a health monitoring and license validation endpoint (`/health`), only accessible by JGCarmona Consulting.
-
-**Rationale:**  
-- Enforce licensing.  
-- Provide basic support monitoring without privacy compromises.
+**Decision:** Health endpoints remain **local/admin-only**.  
+An **optional activation** can issue an **anonymous Instance ID** for licensing/update eligibility without content telemetry.
 
 ---

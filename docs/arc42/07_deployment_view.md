@@ -39,7 +39,6 @@ flowchart TD
     subgraph External_Connections["Optional External Services"]
         DataSources[External Data Sources]
         CRM_APIs[CRM/ERP APIs]
-        Vendor_Monitoring[JGCarmona Monitoring Endpoint]
     end
 
     Frontend --> API
@@ -54,7 +53,7 @@ flowchart TD
     API --> n8n
     RAG --> DataSources
     MCP --> CRM_APIs
-    Vendor_Monitoring --> API
+**Activation (optional):** outbound-only channel exchanging **license/version metadata**; no content or user data leaves the environment.
 ```
 ## 7.3 Deployment Considerations
 
@@ -95,10 +94,10 @@ flowchart TD
 ---
 **Panel Access Notes:**
 - **Admin Panel (client admins only):** For SME Administrators to manage their own Sentra Brain instance, including service monitoring, configuration, and client-scope n8n workflows.
-- **Vendor Control Panel (vendor super admins only):** For JGCarmona Consulting to manage licensing, system health, root configuration, and vendor-scope n8n workflows.
+- **Vendor Control Panel (vendor super admins only):** For Juan G Carmona to manage licensing, system health, root configuration, and vendor-scope n8n workflows.
 - For all references to these panels, see [Section 12: Glossary](12_glossary.md).
 
 - **Management and Maintenance:**  
-  - JGCarmona Consulting is responsible for initial deployment, configuration, and ongoing monitoring.  
+  - Juan G Carmona is responsible for initial deployment, configuration, and ongoing monitoring.  
   - Clients may be granted limited admin access based on licensing agreements.
 

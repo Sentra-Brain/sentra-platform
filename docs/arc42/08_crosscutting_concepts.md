@@ -14,6 +14,8 @@ This section captures the crosscutting architectural concepts applied throughout
 - **Role-Based Access Control:** Only authorized users can access sensitive areas like configuration or monitoring.
 - **Encrypted Communication:** All internal and external API communication uses HTTPS and, where applicable, mutual TLS.
 
+**Activation (optional):** When enabled, activation transmits **only** license/version metadata. **No content or user data** is transmitted.
+
 ---
 
 ## Vendor Monitoring and Support Access
@@ -21,7 +23,7 @@ This section captures the crosscutting architectural concepts applied throughout
 In future phases, Sentra Brain may include a dedicated Vendor Control Panel and embedded workflow engine (n8n). These features are not part of the core Phase 1 deployment baseline.
 
 - **Health Monitoring Endpoint:**
-  - Each Sentra Brain instance exposes a secure `/health` endpoint for service monitoring and license validation, restricted to JGCarmona Consulting systems.
+  - Each Sentra Brain instance exposes a secure `/health` endpoint for service monitoring and license validation, restricted to Juan G Carmona systems.
   - Vendor Control Panel access mechanisms are planned for future phases.
 
 - **License Validation:**

@@ -10,7 +10,7 @@ This glossary defines key terms, acronyms, and system components used throughout
 
 | Term / Acronym        | Definition                                                                                       |
 |----------------------|--------------------------------------------------------------------------------------------------|
-| Sentra Brain         | Modular, self-hosted private AI platform developed and deployed by JGCarmona Consulting.         |
+| Sentra Brain         | Modular, self-hosted private AI platform developed and deployed by Juan G Carmona.         |
 | LLM                  | Large Language Model. AI model used for generating text responses and processing queries.         |
 | llama.cpp            | Open-source LLM serving engine optimized for local GPU inference.                                 |
 | RAG                  | Retrieval-Augmented Generation. Combines document search with LLM query completion.              |

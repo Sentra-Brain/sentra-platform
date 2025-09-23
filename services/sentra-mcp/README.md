@@ -1,3 +1,6 @@
+> **Community Fair-Use:** Sentra Brain CE is AGPL-3.0.  
+> Free **internal use up to 5 seats** per organization; commercial license required beyond that.  
+> See **`COMMUNITY-TERMS.md`** and **`LICENSE`**.
 # Sentra MCP Server (`sentra-mcp`)
 
 This service exposes external tools ("skills") to the Sentra API using the FastMCP protocol. It allows the LLM to call tools like `web.search` or `web.fetch` via structured tool calls.
