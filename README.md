@@ -5,7 +5,7 @@ Sentra Brain is a **modular private AI server** designed for professional enviro
 It operates under an **Open Core + Licensed Hardware/Software** business model:
 
 - The core software is **publicly available** for self-hosting, limited to a maximum of 3 active users/devices.
-- **JGCarmona Consulting S.L.U.** is the sole authorized vendor and integrator for commercial deployments, including:
+- **Juan G Carmona** is the sole authorized vendor and integrator for commercial deployments, including:
   - Licensing beyond the free user/device limit.
   - Deployment on official Sentra Brain-certified hardware.
   - Custom integration and support services.
@@ -55,7 +55,7 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 - **Full Local Control**: Data never leaves the client's infrastructure.
 - **Regulatory Compliance**: GDPR, HIPAA, ISO/IEC 27001 alignment.
 - **Modular and Extensible**: Scalable agent framework.
-- **Professionally Managed Installations**: Hardware + Software + Licensing exclusively by JGCarmona Consulting S.L.U.
+- **Professionally Managed Installations**: Hardware + Software + Licensing exclusively by Juan G Carmona
 
 ---
 
