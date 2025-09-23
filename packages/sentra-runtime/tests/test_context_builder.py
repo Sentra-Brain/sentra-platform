@@ -1,7 +1,7 @@
 import json
 import pytest
 
-from sentra.runtime.context import build_context
+from sentra.runtime.context.builder import build_context
 from sentra.runtime.models import ConversationRequest
 from sentra.runtime.tools.rag_tool import RagChunk, RagTool
 from sentra.shared.settings import settings

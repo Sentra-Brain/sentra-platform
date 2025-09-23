@@ -12,7 +12,7 @@ def test_listings_search_runs_db_and_rag_in_parallel(monkeypatch):
         await anyio.sleep(0.2)
         return ["Flat A"]
 
-    async def fake_retrieve(self, query: str, *, agent_name: str = "SentraAgent", source_ids=None, document_ids=None, top_k: int = 6):
+    async def fake_retrieve(self, query: str, *, agent_name: str = "sentra_agent", source_ids=None, document_ids=None, top_k: int = 6):
         await anyio.sleep(0.2)
         return [RagChunk(content="Insight A")]
 

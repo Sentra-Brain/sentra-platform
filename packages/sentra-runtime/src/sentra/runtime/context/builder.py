@@ -76,3 +76,13 @@ async def build_context(request: ConversationRequest) -> Dict[str, str]:
         context["entities"] = json.dumps(entities)
 
     return context
+
+def flatten_context(context: Dict[str, str], latest_message: str) -> str:
+    """Turn structured context + latest message into a flat prompt string."""
+    parts: list[str] = []
+    for key in ("memories", "history", "knowledge", "summary", "entities"):
+        if context.get(key):
+            parts.append(str(context[key]))
+    if latest_message:
+        parts.append(latest_message)
+    return "\n".join(parts)

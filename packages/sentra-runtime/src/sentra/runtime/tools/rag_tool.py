@@ -28,7 +28,7 @@ class RagTool:
         self,
         query: str,
         *,
-        agent_name: str = "SentraAgent",
+        agent_name: str = "sentra_agent",
         source_ids: List[str] | None = None,
         document_ids: List[str] | None = None,
         top_k: int = 6,

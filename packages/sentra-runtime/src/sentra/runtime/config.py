@@ -13,7 +13,7 @@ class Settings(BaseSettings):
 
     tool_allowlist: dict[str, list[str]] = Field(
         default_factory=lambda: {
-            "SentraAgent": ["RagTool", "DbQueryTool"],
+            "sentra_agent": ["RagTool", "DbQueryTool"],
             "LegalDraftingAgent": ["RagTool"],
             "ListingsSearchAgent": ["DbQueryTool"],
         },
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
 
     rag_source_allowlist: dict[str, list[str]] = Field(
         default_factory=lambda: {
-            "SentraAgent": ["*"],
+            "sentra_agent": ["*"],
             "LegalDraftingAgent": ["legal-templates", "clauses"],
             "ListingsSearchAgent": ["re-listings"],
         },
