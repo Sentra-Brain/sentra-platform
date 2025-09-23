@@ -30,7 +30,7 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 - **Self-hosted Community Version:**  
   - Up to 3 active users/devices.  
   - AGPL v3 license.  
-- **Commercial Version (Licensed by JGCarmona Consulting S.L.U.):**  
+- **Commercial Version (Licensed by Juan G. Carmona):**  
   - Unlimited users/devices.  
   - Regulatory compliance support.  
   - Installation on certified hardware, pre-configured and optimized.
@@ -60,5 +60,5 @@ It operates under an **Open Core + Licensed Hardware/Software** business model:
 ---
 
 For enterprise licensing, support or integration services:  
-📩 [Contact JGCarmona Consulting](mailto:juan@jgcarmona.com)  
+📩 [Contact Juan G. Carmona](mailto:juan@jgcarmona.com)  
 🌐 [https://sentrabrain.com](https://sentrabrain.com)
