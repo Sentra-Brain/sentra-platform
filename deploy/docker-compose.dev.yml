@@ -1,4 +1,5 @@
 services:
+
   sentra-web:
     build:
       context: ../frontends/sentra-web    
@@ -73,6 +74,15 @@ services:
     env_file:
       - ../services/sentra-mcp/.env
 
+  sentra-rag-base:
+    build:
+      context: ../services/sentra-rag-base
+      dockerfile: Dockerfile
+    image: sentra-rag-base:dev
+    container_name: sentra-rag-base
+    networks:
+      - sentrabrain-dev-net
+      
   sentra-rag-server:
     build:
       context: ../
@@ -94,6 +104,7 @@ services:
       - ../services/sentra-rag-server/.env
     depends_on:
       - sentra-vector-db
+      - sentra-rag-base
 
   sentra-rag-worker:
     build:
@@ -120,6 +131,7 @@ services:
       - sentra-sql-db
       - sentra-vector-db
       - rabbitmq
+      - sentra-rag-base
 
   vllm:
     image: vllm/vllm-openai

@@ -63,9 +63,10 @@ services:
     build:
       context: ../services/sentra-rag-base
       dockerfile: Dockerfile
-    image: sentra-rag-base:latest
+    image: sentra-rag-base:dev
     container_name: sentra-rag-base
-    restart: no
+    networks:
+      - sentrabrain-dev-net
   
   sentra-rag-server:
     build:
@@ -86,6 +87,7 @@ services:
       - ../services/sentra-rag-server/.env
     depends_on:
       - sentra-vector-db
+      - sentra-rag-base
 
   sentra-rag-worker:
     build:
@@ -110,6 +112,7 @@ services:
       - sentra-sql-db
       - sentra-vector-db
       - rabbitmq
+      - sentra-rag-base
 
   llama:
     image: ghcr.io/kth8/llama-server:llama-3.2-1b-instruct
