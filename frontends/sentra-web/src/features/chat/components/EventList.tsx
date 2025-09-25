@@ -6,7 +6,7 @@ import StepPanel from './StepPanel'
 import ErrorBubble from './ErrorBubble'
 import ToolPanel from './ToolPanel'
 import { SentraEventType, type SentraEvent } from '@features/chat/types/events'
-import type { MessageRole } from '@features/sessions/types/sessionModels'
+import type { MessageRole } from '@features/conversations/types/conversationModels'
 
 export default function EventList({ events }: { events: SentraEvent[] }) {
   const endRef = useRef<HTMLDivElement | null>(null)

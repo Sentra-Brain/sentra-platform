@@ -1,7 +1,7 @@
 import { MoreHorizontal } from "lucide-react";
 import { useRef, useState, type MouseEvent } from "react";
 import clsx from "clsx";
-import { SessionMenu } from "./SessionMenu";
+import { ConversationMenu } from "./ConversationMenu"
 
 interface Props {
   id: string;
@@ -13,7 +13,7 @@ interface Props {
   onRegenerate: (id: string) => void;
 }
 
-export function SessionItem({
+export function ConversationItem({
   id,
   title,
   active,
@@ -38,55 +38,35 @@ export function SessionItem({
         top: rect.bottom + window.scrollY,
         left: rect.left + window.scrollX,
       });
-      setMenuOpen((prev) => !prev);
     }
+    setMenuOpen((open) => !open);
   };
 
   return (
-    <li
+    <div
       className={clsx(
-        "relative flex items-center justify-between px-3 rounded-md text-sm font-medium transition-colors cursor-pointer group",
-        active
-          ? "bg-[var(--sentra-accent)] text-[var(--sentra-primary)]"
-          : "hover:bg-[var(--sentra-primary-light)] text-[var(--sentra-text)]"
+        "flex items-center justify-between px-2 py-1 cursor-pointer",
+        active && "bg-[var(--sentra-accent-light)]"
       )}
       onClick={handleClick}
     >
-      <span className="truncate flex-1">{title || "Untitled"}</span>
-
+      <span className="truncate flex-1">{title}</span>
       <button
         ref={buttonRef}
+        className="ml-2 p-1 rounded hover:bg-[var(--sentra-accent-light)]"
         onClick={toggleMenu}
-        title="Options"
-        className="
-          invisible group-hover:visible
-          p-0 m-0
-          text-[var(--sentra-text)]
-          hover:text-[var(--sentra-accent-light)]
-          transition
-        "
       >
         <MoreHorizontal size={16} />
       </button>
-
       {menuOpen && (
-        <SessionMenu
+        <ConversationMenu
           position={menuPosition}
-          onRename={() => {
-            onRename(id);
-            setMenuOpen(false);
-          }}
-          onRegenerate={() => {
-            onRegenerate(id);
-            setMenuOpen(false);
-          }}
-          onDelete={() => {
-            onDelete(id);
-            setMenuOpen(false);
-          }}
+          onRename={() => onRename(id)}
+          onDelete={() => onDelete(id)}
+          onRegenerate={() => onRegenerate(id)}
           onClose={() => setMenuOpen(false)}
         />
       )}
-    </li>
+    </div>
   );
 }

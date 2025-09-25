@@ -9,7 +9,7 @@ from google.adk.sessions import Session
 from google.adk.events.event import Event
 from google.genai import types
 
-from sentra.runtime.adapters.session_ephemeral import EphemeralSessionService
+from sentra.runtime.adapters.adk_session_service import get_adk_session_service
 from sentra.runtime.agents.agent_loader import AgentLoader
 from sentra.runtime.ports.event_sink import EventSink
 
@@ -40,7 +40,7 @@ class AgentRunner:
             last_update_time=time.time(),
         )
 
-        session_service = EphemeralSessionService(adk_session)
+        session_service = get_adk_session_service()
         run_config = RunConfig(streaming_mode=StreamingMode.SSE)
         runner = Runner(agent=adk_agent, app_name="sentra", session_service=session_service)
 

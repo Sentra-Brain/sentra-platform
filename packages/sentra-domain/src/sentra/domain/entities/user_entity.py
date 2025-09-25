@@ -29,6 +29,6 @@ class UserEntity(BaseEntity):
         self.roles = ",".join(role.value for role in roles)
 
     # Relationships
-    sessions = relationship("SessionEntity", back_populates="created_by", cascade="all, delete-orphan")
+    conversations = relationship("ConversationEntity", back_populates="created_by", cascade="all, delete-orphan")
     documents = relationship("DocumentEntity", back_populates="created_by", cascade="all, delete-orphan")
     knowledge_sources = relationship("KnowledgeSourceEntity", back_populates="created_by", cascade="all, delete-orphan")

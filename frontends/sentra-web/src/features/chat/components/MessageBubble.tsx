@@ -1,6 +1,6 @@
 // features/chat/components/MessageBubble.tsx
 import type { SentraEventContent } from '@features/chat/types/events'
-import type { MessageRole } from '@features/sessions/types/sessionModels'
+import type { MessageRole } from '@features/conversations/types/conversationModels'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 

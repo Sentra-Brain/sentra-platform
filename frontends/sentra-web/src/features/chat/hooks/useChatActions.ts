@@ -2,11 +2,11 @@
 import { useAppDispatch, useAppSelector } from "@store/hooks";
 import { v4 as uuidv4 } from "uuid";
 import {
-  createSession,
-  selectSession,
-  fetchSessionById,
+  createConversation,
+  selectConversation,
+  fetchConversationById,
   regenerateTitle,
-} from "@features/sessions/sessionsSlice";
+} from "@features/conversations/conversationsSlice";
 import {
   addEvent,
   updateEvent,
@@ -18,7 +18,7 @@ import { SentraEventType, type SentraEvent } from "@features/chat/types/events";
 
 export function useChatActions() {
   const dispatch = useAppDispatch();
-  const currentSessionId = useAppSelector((s) => s.session.currentSessionId);
+  const currentConversationId = useAppSelector((s) => s.conversation.currentConversationId);
   const { selectedContext, mode } = useAppSelector((s) => s.events);
   const selectedAgent = useAppSelector((s) => s.agents.selected);
 
@@ -26,16 +26,16 @@ export function useChatActions() {
     const trimmed = content.trim();
     if (!trimmed) return;
 
-    let sessionId = currentSessionId;
+    let conversationId = currentConversationId;
 
-    // Step 1: ensure session exists
-    if (!sessionId) {
-      const newSession = await dispatch(
-        createSession({ initial_prompt: trimmed, agent: selectedAgent || undefined })
+    // Step 1: ensure conversation exists
+    if (!conversationId) {
+      const newConversation = await dispatch(
+        createConversation({ initial_prompt: trimmed, agent: selectedAgent || undefined })
       ).unwrap();
-      sessionId = newSession.id;
-      dispatch(selectSession(sessionId));
-      await dispatch(fetchSessionById(sessionId));
+      conversationId = newConversation.id;
+      dispatch(selectConversation(conversationId));
+      await dispatch(fetchConversationById(conversationId));
     }
 
     // Step 2: add local user event
@@ -54,7 +54,7 @@ export function useChatActions() {
     // Step 3: send message to API
     chatService.sendMessageStream(
       {
-        session_id: sessionId!,
+        session_id: conversationId!,
         event_id: userEvent.id, // optional
         content: trimmed,
         context_source_ids: selectedContext.useRag
@@ -71,8 +71,8 @@ export function useChatActions() {
         if (event.type === SentraEventType.MESSAGE_FINAL) {
           dispatch(setWaitingForAnswer(false));
           dispatch(setStreaming(false));
-          if (!currentSessionId) {
-            dispatch(regenerateTitle(sessionId!)).catch(console.warn);
+          if (!currentConversationId) {
+            dispatch(regenerateTitle(conversationId!)).catch(console.warn);
           }
         }
       },

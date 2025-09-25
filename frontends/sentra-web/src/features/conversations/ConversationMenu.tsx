@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 
-interface SessionMenuProps {
+interface ConversationMenuProps {
   position: { top: number; left: number };
   onRename: () => void;
   onDelete: () => void;
@@ -8,16 +8,16 @@ interface SessionMenuProps {
   onClose: () => void;
 }
 
-export function SessionMenu({
+export function ConversationMenu({
   position,
   onRename,
   onDelete,
   onRegenerate,
   onClose,
-}: SessionMenuProps) {
+}: ConversationMenuProps) {
   const ref = useRef<HTMLDivElement>(null);
   useEffect(() => {
-    console.log("[SessionMenu] position:", position);
+    // console.log("[ConversationMenu] position:", position);
   }, [position]);
 
   useEffect(() => {
@@ -41,22 +41,13 @@ export function SessionMenu({
         left: `${position.left}px`,
       }}
     >
-      <button
-        className="w-full px-3 py-1 text-left text-sm hover:bg-[var(--sentra-accent-light)]"
-        onClick={onRename}
-      >
+      <button className="block w-full px-4 py-2 text-left" onClick={onRename}>
         Rename
       </button>
-      <button
-        className="w-full px-3 py-1 text-left text-sm hover:bg-[var(--sentra-accent-light)]"
-        onClick={onRegenerate}
-      >
-        Regenerate title
+      <button className="block w-full px-4 py-2 text-left" onClick={onRegenerate}>
+        Regenerate Title
       </button>
-      <button
-        className="w-full px-3 py-1 text-left text-sm text-red-500 hover:bg-red-100 hover:text-red-700"
-        onClick={onDelete}
-      >
+      <button className="block w-full px-4 py-2 text-left text-red-500" onClick={onDelete}>
         Delete
       </button>
     </div>

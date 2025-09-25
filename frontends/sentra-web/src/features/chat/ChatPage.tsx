@@ -7,21 +7,21 @@ import ChatInputContainer from "./components/ChatInputContainer";
 
 import { useEffect } from "react";
 import { useAppDispatch } from "@store/hooks";
-import { fetchSessionById } from "@features/sessions/sessionsSlice";
-import type { SessionDetails } from "@features/sessions/types/sessionModels";
+import { fetchConversationById } from "@features/conversations/conversationsSlice";
+import type { ConversationDetails } from "@features/conversations/types/conversationModels";
 import { addEvent, resetEvents } from "./eventsSlice";
 import { SentraEventType } from "./types/events";
 
 export default function ChatPage() {
   const dispatch = useAppDispatch();
-  const currentSessionId = useAppSelector(
-      (state) => state.session.currentSessionId
+  const currentConversationId = useAppSelector(
+      (state) => state.conversation.currentConversationId
     );
 
   useEffect(() => {
-    if (currentSessionId) {
-        dispatch(fetchSessionById(currentSessionId)).then((res) => {
-          const payload = res.payload as SessionDetails;
+    if (currentConversationId) {
+        dispatch(fetchConversationById(currentConversationId)).then((res) => {
+          const payload = res.payload as ConversationDetails;
           if (payload?.messages) {
             dispatch(resetEvents());
             payload.messages.forEach(m => {
@@ -36,9 +36,9 @@ export default function ChatPage() {
           }
         });
       }
-    }, [currentSessionId, dispatch]);
+    }, [currentConversationId, dispatch]);
 
-    const isConversationActive = !!currentSessionId;
+    const isConversationActive = !!currentConversationId;
 
   return (
     <div className="flex flex-col h-full w-full min-h-0">

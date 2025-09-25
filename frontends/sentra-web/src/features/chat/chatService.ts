@@ -3,18 +3,18 @@ import { tokenStorage } from "@shared/utils/tokenStorage";
 import type { SentraEvent } from "@features/chat/types/events";
 import type { ConversationMode } from "@features/chat/types/mode";
 
-  type ChatSendPayload = {
-    session_id: string;
-    event_id: string;
-    content: string;
-    context_source_ids?: string[];
-    context_document_ids?: string[];
-    mode?: ConversationMode;
-    agent?: string;
-  };
+type ChatSendPayload = {
+  session_id: string;
+  event_id: string;
+  content: string;
+  context_source_ids?: string[];
+  context_document_ids?: string[];
+  mode?: ConversationMode;
+  agent?: string;
+};
 
-  // NEW: event callback uses SentraEvent
-  type OnEventCallback = (event: SentraEvent) => void;
+// NEW: event callback uses SentraEvent
+type OnEventCallback = (event: SentraEvent) => void;
 type OnErrorCallback = (error: Error) => void;
 
 export const chatService = {

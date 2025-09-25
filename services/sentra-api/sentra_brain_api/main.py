@@ -1,10 +1,10 @@
 # main.py
 
 # from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse, RedirectResponse
 from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
@@ -18,7 +18,7 @@ from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
 from sentra_brain_api.features.organization.controller import router as organization_router
 from sentra_brain_api.features.public.controller import PublicSettingsController
-from sentra_brain_api.features.session.controller import SessionController
+from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.features.agents import AgentsController
@@ -80,7 +80,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     admin_settings_controller = AdminSettingsController()
     settings_controller = SettingsController()
     public_settings_controller = PublicSettingsController()
-    session_controller = SessionController()
+    conversation_controller = ConversationController()
     llm_proxy_controller = LLMProxyController()
     agents_controller = AgentsController()
 
@@ -91,7 +91,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
     app.include_router(admin_settings_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(settings_controller.router, prefix="", tags=["settings"])
     app.include_router(public_settings_controller.router, prefix="/public", tags=["public"])
-    app.include_router(session_controller.router, prefix="/sessions", tags=["sessions"])
+    app.include_router(conversation_controller.router, prefix="/conversations", tags=["conversations"])
     app.include_router(sources.router, prefix="/knowledge/sources", tags=["knowledge"])
     app.include_router(documents.router, prefix="/knowledge", tags=["knowledge"])
     app.include_router(llm_proxy_controller.router, prefix="/v1", tags=["llm-proxy"])
@@ -112,6 +112,13 @@ async def redirect_to_swagger():
     logger.info("Redirect to swagger...")
     return RedirectResponse(url="/docs")
 
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    logger.exception(f"Unhandled error for {request.url}: {exc}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": f"Internal Server Error: {exc.__class__.__name__}"},
+    )
 
 if __name__ == "__main__":
     import uvicorn

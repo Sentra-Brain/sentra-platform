@@ -4,7 +4,7 @@ import { configureStore } from '@reduxjs/toolkit'
 import authReducer from '../features/auth/authSlice'
 import eventsReducer from '../features/chat/eventsSlice'
 import agentsReducer from '../features/agents/agentsSlice'
-import sessionReducer from '../features/sessions/sessionsSlice'
+import conversationReducer from '../features/conversations/conversationsSlice'
 import knowledgeReducer from '../features/knowledge/knowledgeSlice'
 // import settingsReducer from '../features/settings/settingsSlice'
 import uiReducer from './slices/uiSlice'
@@ -13,7 +13,7 @@ export const store = configureStore({
   reducer: {
     auth: authReducer,
       events: eventsReducer,
-      session: sessionReducer,
+    conversation: conversationReducer,
     agents: agentsReducer,
     knowledge: knowledgeReducer,
     // settings: settingsReducer,
