@@ -47,4 +47,3 @@ class ConversationService:
     def update_title(self, conversation_id: UUID, title: str):
         self.sql_repo.update_title(conversation_id, title)
 
-    # State management is now handled by ADK or other persistent layer if needed.

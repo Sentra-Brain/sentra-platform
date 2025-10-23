@@ -12,10 +12,9 @@ authors = [{ name = "Juan G Carmona" }]
 requires-python = ">=3.12"
 
 dependencies = [
-  "sentra-domain @ file:///packages/sentra-domain",
-  "sentra-shared @ file:///packages/sentra-shared",
+  "sentra-domain",
+  "sentra-shared",
 ]
-
 
 [project.optional-dependencies]
 sql = [

@@ -86,7 +86,7 @@ class ConversationApiService:
 
 		title = await self.title_agent.generate(messages)
 		if title:
-			self.service.update_title(conversation_id, user.id, title)
+			self.service.update_title(conversation_id, title)
 			conversation.title = title
 
 		return UpdateConversationResponse(
