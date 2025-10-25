@@ -1,5 +1,0 @@
-[
-  {"type": "step_start", "task_type": "contract_drafting"},
-  {"type": "message_delta", "content": "Here's a draft clause for your contract..."},
-  {"type": "step_end", "task_type": "contract_drafting"}
-]

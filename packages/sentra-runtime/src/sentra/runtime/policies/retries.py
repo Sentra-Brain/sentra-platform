@@ -6,10 +6,6 @@ import logging
 from collections.abc import Awaitable, Callable
 from typing import TypeVar
 
-from google.adk.events.event import Event
-from google.genai import types
-from sentra.runtime.telemetry import emit_event_log
-
 T = TypeVar("T")
 
 
@@ -46,10 +42,7 @@ async def retry_with_backoff(
                 logger.warning(
                     "%s attempt %d/%d failed: %s", name, attempt, max_retries, exc
                 )
-            emit_event_log(Event(author="system", content=types.Content(role="system", parts=[types.Part(text=f"{name} retry {attempt}/{max_retries}" )]), custom_metadata={"type": "message_delta"}))
-            emit_event_log(Event(author="system", content=None, custom_metadata={"type": "message_delta", "message": f"{name} failed (attempt {attempt}/{max_retries})"}))
             if attempt >= max_retries:
-                emit_event_log(Event(author="system", content=None, custom_metadata={"type": "message_delta", "message": f"{name} failed after {max_retries} attempts"}))
                 return None
             await asyncio.sleep(delay)
             delay *= 2
