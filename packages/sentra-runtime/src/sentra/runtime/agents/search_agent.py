@@ -1,6 +1,6 @@
 # agents/search_agent.py
 from agent_framework import ChatAgent
-from tools.mcp_tools import search_duckduckgo
+from sentra.runtime.tools.mcp_tools import search_duckduckgo
 
 def build_search_agent(chat_client):
     return ChatAgent(

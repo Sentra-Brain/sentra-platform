@@ -7,7 +7,7 @@ from sentra.runtime.adapters.mongo_chat_message_store import MongoChatMessageSto
 from sentra.runtime.adapters.rag_context_provider import RagContextProvider
 
 
-class SentraBaseAgent(ChatAgent):
+class BaseAgent(ChatAgent):
     """Base ChatAgent that injects standard Sentra configuration and persistence."""
 
     def __init__(
@@ -21,11 +21,11 @@ class SentraBaseAgent(ChatAgent):
         tools: list | None = None,
         top_k: int = 5,
     ):
-        """Initialize a Sentra agent with preconfigured context and persistence."""
+        """Initialize an agent with preconfigured context and persistence."""
         self.chat_client = OpenAIChatClient(
-            endpoint=settings.vllm_server_url,
-            api_key=settings.openai_api_key or "none",
-            ai_model_id=settings.vllm_model,
+            endpoint=settings.open_api_base,
+            api_key=settings.open_api_key or "none",
+            ai_model_id=settings.model_id,
         )
 
         self.store = MongoChatMessageStore(conversation_id, user_id)

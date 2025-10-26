@@ -11,24 +11,27 @@ logger = get_logger(__name__)
 class LLMEngine(str, Enum):
 	VLLM = "vllm"
 	LLAMA = "llama"  # llama-server
-
-
-class EngineMode(str, Enum):
-	"""Selectable conversation engine backends."""
-
-	LEGACY = "legacy"
-	ADK = "adk"
-
+	DMR = "dmr"  # DMR server
 
 class SentraSettings(BaseSettings):
 	# ---- LLM backend selection ----
 	llm_engine: LLMEngine = Field(
 		default=LLMEngine.VLLM, json_schema_extra={"env": "LLM_ENGINE"}
 	)
-	# ---- Conversation engine selection ----
-	engine_mode: EngineMode = Field(
-		default=EngineMode.LEGACY, json_schema_extra={"env": "ENGINE_MODE"}
+	
+	# ---- LLM server settings ----
+	# OpenAI compatible server URL (like DMR)
+	open_api_base: str = Field(
+		default="http://localhost:12434/engines/llama.cpp/v1", json_schema_extra={"env": "OPEN_API_BASE"}
 	)
+	open_api_key: str = Field(
+		default="", json_schema_extra={"env": "OPEN_API_KEY"}
+	)
+	model_id: str = Field(
+		default="ai/gpt-oss:latest", json_schema_extra={"env": "MODEL_ID"}
+	)
+
+	# VLLM server settings
 	vllm_server_url: str = Field(
 		default="http://vllm:8000", json_schema_extra={"env": "VLLM_SERVER_URL"}
 	)
@@ -36,6 +39,8 @@ class SentraSettings(BaseSettings):
 		default="hosted_vllm//models/meta-llama--Llama-3.1-8B-Instruct",
 		json_schema_extra={"env": "VLLM_MODEL"},
 	)
+
+	# Llama-server settings
 	llama_server_url: str = Field(
 		default="http://llama_server:8080",
 		json_schema_extra={"env": "LLAMA_SERVER_URL"},

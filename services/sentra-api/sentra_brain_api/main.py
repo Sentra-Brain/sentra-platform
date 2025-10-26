@@ -1,6 +1,4 @@
 # main.py
-
-# from sentra_brain_api.core.observability import instrument_app, add_correlation_id_middleware
 from fastapi import FastAPI, Request
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
@@ -25,7 +23,6 @@ from sentra_brain_api.features.agents import AgentsController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra.shared import logging
 from sentra.infra.sql import postgres_service
-from sentra.runtime.mcp.adapters.fastmcp import get_mcp
 import os
 
 
@@ -35,19 +32,10 @@ def get_lifespan(config: AppLifecycleConfig):
     @asynccontextmanager
     async def lifespan(app: FastAPI):
         logger.info("App startup: initializing resources...")
-
-        if config.init_mcp:
-            mcp_client = get_mcp()
-            await mcp_client.startup()
-            app.state.mcp_client = mcp_client
-
         if config.init_db:
             postgres_service.init_db()
-
         yield
 
-        if config.init_mcp:
-            await app.state.mcp_client.shutdown()
 
     return lifespan
 

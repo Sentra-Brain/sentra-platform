@@ -3,7 +3,6 @@ bcrypt==4.0.1
 debugpy
 email-validator
 fastapi
-fastmcp
 httpcore>=1.0.9
 httpx>=0.28.1
 passlib 
@@ -11,6 +10,7 @@ passlib[bcrypt]
 pika
 psycopg2-binary
 pydantic
+pydantic-core
 pydantic-settings
 pymongo
 sqlalchemy

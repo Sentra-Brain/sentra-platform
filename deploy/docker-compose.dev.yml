@@ -17,22 +17,22 @@ services:
     env_file:
       - ../frontends/sentra-web/.env
 
-  sentra-admin:
-    build:
-      context: ../frontends/sentra-admin 
-    command: ["npm", "run", "dev:inspect"]
-    image: sentra-admin:dev
-    container_name: sentra-admin
-    ports:
-      - "3200:3200"   # App
-      - "3229:9329"   # Node.js Inspect
-    volumes:
-      - ../frontends/sentra-admin:/app
-      - /app/node_modules
-    networks:
-      - sentrabrain-dev-net
-    env_file:
-      - ../frontends/sentra-admin/.env
+  # sentra-admin:
+  #   build:
+  #     context: ../frontends/sentra-admin 
+  #   command: ["npm", "run", "dev:inspect"]
+  #   image: sentra-admin:dev
+  #   container_name: sentra-admin
+  #   ports:
+  #     - "3200:3200"   # App
+  #     - "3229:9329"   # Node.js Inspect
+  #   volumes:
+  #     - ../frontends/sentra-admin:/app
+  #     - /app/node_modules
+  #   networks:
+  #     - sentrabrain-dev-net
+  #   env_file:
+  #     - ../frontends/sentra-admin/.env
 
   sentra-api:
     build:
@@ -55,24 +55,24 @@ services:
     env_file:
       - ../services/sentra-api/.env
 
-  sentra-mcp:
-    build:
-      context: ../
-      dockerfile: services/sentra-mcp/Dockerfile
-    image: sentra-mcp:dev
-    container_name: sentra-mcp
-    ports:
-      - "8200:8200"
-      - "5681:5681"   # Python debugpy
-    volumes:
-      - ../services/sentra-mcp:/app
-      - ../packages/sentra-domain:/packages/sentra-domain
-      - ../packages/sentra-infra:/packages/sentra-infra
-      - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
-    networks:
-      - sentrabrain-dev-net
-    env_file:
-      - ../services/sentra-mcp/.env
+  # sentra-mcp:
+  #   build:
+  #     context: ../
+  #     dockerfile: services/sentra-mcp/Dockerfile
+  #   image: sentra-mcp:dev
+  #   container_name: sentra-mcp
+  #   ports:
+  #     - "8200:8200"
+  #     - "5681:5681"   # Python debugpy
+  #   volumes:
+  #     - ../services/sentra-mcp:/app
+  #     - ../packages/sentra-domain:/packages/sentra-domain
+  #     - ../packages/sentra-infra:/packages/sentra-infra
+  #     - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
+  #   networks:
+  #     - sentrabrain-dev-net
+  #   env_file:
+  #     - ../services/sentra-mcp/.env
 
   sentra-rag-base:
     build:
@@ -133,27 +133,44 @@ services:
       - rabbitmq
       - sentra-rag-base
 
-  vllm:
-    image: vllm/vllm-openai
-    container_name: vllm
+  # vllm:
+  #   image: vllm/vllm-openai
+  #   container_name: vllm
+  #   ports:
+  #     - "8002:8000"  # External port 8002, internal remains 8000
+  #   volumes:
+  #     - D:\models:/models:ro
+  #   command: >
+  #     --model /models/meta-llama--Llama-3.1-8B-Instruct
+  #     --dtype float16
+  #     --gpu-memory-utilization 0.9
+  #     --enable-auto-tool-choice
+  #     --tool-call-parser llama3_json
+  #   networks:
+  #     - sentrabrain-dev-net
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - capabilities: [gpu]
+  #   runtime: nvidia
+
+  gateway:
+    image: docker/mcp-gateway    
+    container_name: mcp_gateway
     ports:
-      - "8002:8000"  # External port 8002, internal remains 8000
+      - "8811:8811"
     volumes:
-      - D:\models:/models:ro
-    command: >
-      --model /models/meta-llama--Llama-3.1-8B-Instruct
-      --dtype float16
-      --gpu-memory-utilization 0.9
-      --enable-auto-tool-choice
-      --tool-call-parser llama3_json
-    networks:
-      - sentrabrain-dev-net
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - capabilities: [gpu]
-    runtime: nvidia
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "~/.docker/mcp:/mcp"
+    command:
+      - --catalog=/mcp/catalogs/docker-mcp.yaml
+      - --config=/mcp/config.yaml
+      - --registry=/mcp/registry.yaml
+      - --secrets=docker-desktop
+      - --watch=true
+      - --transport=streaming
+      - --port=8811
 
   sentra-sql-db:
     image: postgres:16-alpine
