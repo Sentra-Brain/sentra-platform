@@ -10,7 +10,6 @@ import platform
 import socket
 import subprocess
 import datetime
-import json
 import getpass
 
 import psutil       # pip install psutil

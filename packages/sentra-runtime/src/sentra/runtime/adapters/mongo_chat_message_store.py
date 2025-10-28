@@ -8,7 +8,7 @@ logger = get_logger(__name__)
 
 
 class MongoChatMessageStore(ChatMessageStore):
-    """MAF-compatible ChatMessageStore backed by MongoConversationRepository."""
+    """MAF-compatible ChatMessageStore backed by ConversationMongoRepository."""
 
     def __init__(self, conversation_id, user_id):
         self.repo = get_conversation_mongo_repository()

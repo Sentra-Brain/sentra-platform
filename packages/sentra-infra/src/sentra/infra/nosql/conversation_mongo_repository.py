@@ -1,4 +1,4 @@
-# packages/sentra-infra/src/sentra/infra/nosql/repositories/conversation_repository_mongo.py
+# packages/sentra-infra/src/sentra/infra/nosql/repositories/conversation_mongo_repository.py
 from datetime import datetime, timezone
 from functools import lru_cache
 from uuid import UUID

@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from sentra.domain.entities.conversation_entity import ConversationEntity
 from sentra.domain.entities.user_entity import UserEntity
 from sentra.domain.services.conversation_service import ConversationService
-from sentra.infra.nosql.conversation_mongo_repository import MongoConversationRepository
+from sentra.infra.nosql.conversation_mongo_repository import ConversationMongoRepository
 from sentra.infra.sql.repositories.conversation_repository_sql import ConversationRepositorySql
 from sentra.runtime.agents.agent_factory import AgentFactory
 from sentra.shared.logging import get_logger
@@ -33,7 +33,7 @@ from sentra_brain_api.features.conversation.schemas import (
 logger = get_logger("conversation_api_service")
 
 class ConversationApiService:
-    def __init__(self, db: Session, agent_factory: AgentFactory, mongo_repo: MongoConversationRepository):
+    def __init__(self, db: Session, agent_factory: AgentFactory, mongo_repo: ConversationMongoRepository):
         self.service = ConversationService(
             sql_repo=ConversationRepositorySql(db),
             mongo_repo=mongo_repo

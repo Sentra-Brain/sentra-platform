@@ -9,7 +9,9 @@ description = "Sentra runtime package"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "agent-framework", 
+    "setuptools>=68",
+    "wheel",
+    "agent-framework",
     "pydantic",
     "anyio",
     "pytest",
