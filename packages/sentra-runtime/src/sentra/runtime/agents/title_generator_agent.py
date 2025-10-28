@@ -1,10 +1,22 @@
-# agents/title_generator_agent.py
-from agent_framework import ChatAgent
+# sentra/runtime/agents/title_generator_agent.py
+from sentra.runtime.agents.base_agent import BaseAgent
+from sentra.runtime.agents.registry import AgentTemplate, agent_registry
 
-def build_title_generator_agent(chat_client):
-    return ChatAgent(
+class TitleGeneratorAgent(BaseAgent):
+    """Generates concise titles from provided text."""
+    pass
+
+agent_registry.register(
+    AgentTemplate(
+        key="title_generator",
         name="TitleGeneratorAgent",
-        description="Generates short, descriptive titles summarizing input topics.",
-        instructions="Create a concise, human-readable title summarizing the given text or conversation.",
-        chat_client=chat_client,
+        description="Generates short, human-readable titles summarizing input text.",
+        instructions=(
+            "Given a short text or the first exchange of a conversation, "
+            "produce a concise, clear title (≤ 8 words)."
+        ),
+        default_model_id="ai/smollm3:Q8_0",
+        agent_cls=TitleGeneratorAgent,
+        provide_tools=None,
     )
+)

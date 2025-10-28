@@ -38,7 +38,7 @@ class ConversationResponse(BaseMongoModel):
 	initial_prompt: Optional[str] = None
 	created_at: datetime
 	updated_at: Optional[datetime] = None
-	events: List[ResponseStreamEvent]
+	messages: Optional[List[ResponseStreamEvent]] = []
 
 class UpdateConversationRequest(BaseModel):
 	title: Optional[str] = Field(

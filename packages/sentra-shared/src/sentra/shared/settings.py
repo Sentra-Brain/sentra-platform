@@ -21,10 +21,10 @@ class SentraSettings(BaseSettings):
 	
 	# ---- LLM server settings ----
 	# OpenAI compatible server URL (like DMR)
-	open_api_base: str = Field(
+	openai_api_base: str = Field(
 		default="http://localhost:12434/engines/llama.cpp/v1", json_schema_extra={"env": "OPEN_API_BASE"}
 	)
-	open_api_key: str = Field(
+	openai_api_key: str = Field(
 		default="", json_schema_extra={"env": "OPEN_API_KEY"}
 	)
 	model_id: str = Field(

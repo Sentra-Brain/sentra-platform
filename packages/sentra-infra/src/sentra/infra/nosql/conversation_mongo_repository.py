@@ -47,6 +47,7 @@ class ConversationMongoRepository(IConversationNoSQLRepository):
         doc = {
             "_id": str(conversation_id),
             "user_id": str(user_id),
+            "title": fields.get("title", "Untitled"),
             "created_at": datetime.now(timezone.utc),
             "messages": [],
             "metadata": {},

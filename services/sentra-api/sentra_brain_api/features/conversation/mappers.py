@@ -14,7 +14,7 @@ def entity_to_response(entity: ConversationEntity) -> ConversationResponse:
 		initial_prompt=getattr(entity, "initial_prompt", None),
 		created_at=entity.created_at,
 		updated_at=getattr(entity, "updated_at", None),
-		events=[ResponseStreamEvent(**event) if isinstance(event, dict) else event for event in getattr(entity, "events", [])],
+		messages=[ResponseStreamEvent(**event) if isinstance(event, dict) else event for event in getattr(entity, "events", [])],
 	)
 
 def entity_to_list_item_response(entity: ConversationEntity) -> ConversationListItemResponse:

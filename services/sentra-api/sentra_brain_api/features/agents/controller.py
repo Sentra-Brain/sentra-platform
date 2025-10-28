@@ -1,6 +1,6 @@
+# features/agents/controller.py
 from fastapi import APIRouter
-
-from sentra_brain_api.core import app_state
+from sentra.runtime.agents.registry import agent_registry
 from sentra.shared.logging import get_logger
 
 logger = get_logger("sentra_brain_api.agents")
@@ -11,19 +11,20 @@ class AgentsController:
         self._add_routes()
 
     def _add_routes(self):
-        @self.router.get("/agents", summary="List available conversational agents")
-        async def list_agents():  # noqa: D401
-            """
-            Returns a list of all available registered agents
-            from the global AgentFactory instance.
-            """
-            if not app_state.agent_factory:
-                logger.warning("AgentFactory not initialized.")
-                return {"agents": []}
-
+        @self.router.get("/agents", summary="List available Sentra agents")
+        async def list_agents():
+            """Return all registered Sentra agent templates."""
             try:
-                agents = [agent.name for agent in app_state.agent_factory.all()]
-                return {"agents": agents}
+                templates = [
+                    {
+                        "key": key,
+                        "name": tmpl.name,
+                        "description": tmpl.description,
+                        "model": tmpl.default_model_id,
+                    }
+                    for key, tmpl in agent_registry.templates.items() 
+                ]
+                return {"agents": templates}
             except Exception as e:
                 logger.exception("Failed to list agents: %s", e)
                 return {"agents": [], "error": str(e)}

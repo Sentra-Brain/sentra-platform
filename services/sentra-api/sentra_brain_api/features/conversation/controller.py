@@ -6,7 +6,6 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
-from sentra_brain_api.core import app_state
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_brain_api.features.conversation.api_service import ConversationApiService
 from sentra_brain_api.features.conversation.schemas import (
@@ -43,7 +42,6 @@ class ConversationController:
 	) -> ConversationApiService:
 		return ConversationApiService(
 			db=db,
-			agent_factory=app_state.agent_factory,
 			mongo_repo=mongo_repo
 		)
 

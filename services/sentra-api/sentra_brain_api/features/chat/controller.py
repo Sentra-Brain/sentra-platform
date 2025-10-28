@@ -1,18 +1,16 @@
 # services/sentra-api/sentra_brain_api/features/chat/controller.py
 
-from fastapi import APIRouter, Depends, Request, HTTPException
+from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 from fastapi.encoders import jsonable_encoder
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_brain_api.features.chat.schemas import ChatSendRequest
 from sentra.domain.entities.user_entity import UserEntity
-from sentra.runtime.agents.sentra_agent import build_sentra_agent
+from sentra.runtime.agents.registry import agent_registry
 from sentra.shared.logging import get_logger
 import json
 
 logger = get_logger("sentra_brain_api.features.chat")
-
-
 class ChatController:
     def __init__(self):
         self.router = APIRouter()
@@ -32,19 +30,16 @@ class ChatController:
             user_id = str(current_user.id)
             conversation_id = str(body.session_id)
 
-            # Instantiate our SentraAgent (BaseAgent subclass)
-            agent = build_sentra_agent(user_id=user_id, conversation_id=conversation_id)
-            thread = agent.get_new_thread()
+            # Build agent bound to this user+conversation
+            template = agent_registry.get("sentra")
+            agent = template.build(user_id=user_id, conversation_id=conversation_id)
 
             async def stream():
                 try:
-                    # Run and stream updates directly from MAF
-                    response = await agent.run(body.content, thread=thread, stream=True)
-                    async for update in response:
+                    async for update in agent.run_stream(body.content):
                         payload = jsonable_encoder(update)
                         yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
-
-                    # Indicate end of stream
+                        
                     yield f"data: {json.dumps({'session_id': conversation_id, 'status': 'complete'})}\n\n"
 
                 except Exception as e:

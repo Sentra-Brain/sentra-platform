@@ -3,11 +3,11 @@ from fastapi import FastAPI, Request
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
-from sentra_brain_api.core import app_state
 from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
 from sentra_brain_api.core.constants import SWAGGER_FAVICON_URL, SWAGGER_UI_PARAMETERS, TITLE, VERSION
+from sentra_brain_api.core.agent_bootstrap import initialize_agents
 from sentra_brain_api.core.lifecycle_config import AppLifecycleConfig
 from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
@@ -23,7 +23,7 @@ from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra.infra.sql import postgres_service
-from sentra.runtime.agents.agent_factory import AgentFactory
+from sentra.runtime.agents.registry import agent_registry
 from sentra.shared import logging
 import os
 
@@ -39,22 +39,19 @@ def get_lifespan(config: AppLifecycleConfig):
         if config.init_db:
             postgres_service.init_db()
 
-        # AgentFactory initialization (MAF agents)
+        # Agent Registry initialization
         try:
-            logger.info("Initializing AgentFactory with default agents...")
-            app_state.agent_factory = AgentFactory().init_defaults()
-            logger.info("AgentFactory initialized with %d agents", len(app_state.agent_factory.all()))
+            logger.info("Initializing Sentra Agent Registry...")
+            initialize_agents()
+            logger.info("Agent Registry initialized with %d templates", len(agent_registry.list_templates()))
         except Exception as e:
-            logger.exception("Failed to initialize AgentFactory: %s", e)
+            logger.exception("❌ Failed to initialize Agent Registry: %s", e)
             raise
 
-        # --- yield to allow FastAPI app to start ---
         yield
 
         # Shutdown cleanup (optional)
-        logger.info("App shutdown: releasing resources...")
-        app_state.agent_factory = None
-        logger.info("AgentFactory cleared")
+        logger.info("App shutdown complete.")
 
     return lifespan
 
