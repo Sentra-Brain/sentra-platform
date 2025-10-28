@@ -1,9 +1,9 @@
 # packages/sentra-runtime/src/sentra/runtime/agents/base_agent.py
 from agent_framework import ChatAgent
 from agent_framework.openai import OpenAIChatClient
-from sentra.shared.settings import settings
-from sentra.runtime.adapters.mongo_chat_message_store import MongoChatMessageStore
+from sentra.runtime.adapters.hybrid_chat_message_store import ChatMessageStoreHybrid
 from sentra.runtime.adapters.rag_context_provider import RagContextProvider
+from sentra.shared.settings import settings
 
 class BaseAgent(ChatAgent):
     """Base ChatAgent that injects Sentra config and persistence (Mongo + RAG)."""
@@ -28,7 +28,7 @@ class BaseAgent(ChatAgent):
         )
 
         store_factory = (
-            (lambda: MongoChatMessageStore(conversation_id, user_id))
+            (lambda: ChatMessageStoreHybrid(conversation_id, user_id))
             if persist and user_id and conversation_id
             else None
         )

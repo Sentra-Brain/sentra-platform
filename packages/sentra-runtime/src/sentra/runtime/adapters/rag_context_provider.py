@@ -44,9 +44,6 @@ class RagContextProvider(ContextProvider):
         self.base_url = (rag_server_url or settings.rag_server_url).rstrip("/")
         self._memories: list[str] = []
 
-    # ------------------------------------------------------------------ #
-    # Before invoking the underlying LLM                                 #
-    # ------------------------------------------------------------------ #
     async def invoking(
         self,
         messages: ChatMessage | Sequence[ChatMessage],
@@ -86,9 +83,6 @@ class RagContextProvider(ContextProvider):
 
         return Context(instructions=f"Relevant background facts:\n{context_text}")
 
-    # ------------------------------------------------------------------ #
-    # After invoking (post-run hook)                                     #
-    # ------------------------------------------------------------------ #
     async def invoked(
         self,
         request_messages: ChatMessage | Sequence[ChatMessage],
@@ -123,9 +117,6 @@ class RagContextProvider(ContextProvider):
                 except Exception as exc:
                     logger.warning(f"[RAG] memorize failed: {exc}")
 
-    # ------------------------------------------------------------------ #
-    # Persistence support (for thread serialization)                     #
-    # ------------------------------------------------------------------ #
     def serialize(self) -> str:
         """Serialize current state (e.g. last retrieved memories)."""
         return json.dumps({"memories": self._memories, "top_k": self.top_k})

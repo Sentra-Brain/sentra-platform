@@ -1,9 +1,9 @@
 # services/sentra-api/sentra_brain_api/features/chat/controller.py
-
 from fastapi import APIRouter, Depends, Request
-from fastapi.responses import StreamingResponse
 from fastapi.encoders import jsonable_encoder
+from fastapi.responses import StreamingResponse
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
+from sentra_brain_api.features.chat.api_service import ChatApiService
 from sentra_brain_api.features.chat.schemas import ChatSendRequest
 from sentra.domain.entities.user_entity import UserEntity
 from sentra.runtime.agents.registry import agent_registry
@@ -16,6 +16,9 @@ class ChatController:
         self.router = APIRouter()
         self._add_routes()
 
+    def _get_service(self) -> ChatApiService:
+        return ChatApiService()
+
     def _add_routes(self):
         @self.router.post(
             "/send",
@@ -25,7 +28,8 @@ class ChatController:
         async def send_message(
             body: ChatSendRequest,
             request: Request,
-            current_user: UserEntity = Depends(get_authenticated_user),
+            current_user: UserEntity = Depends(get_authenticated_user),            
+			api_service: ChatApiService = Depends(self._get_service),
         ):
             user_id = str(current_user.id)
             conversation_id = str(body.session_id)
@@ -36,15 +40,15 @@ class ChatController:
 
             async def stream():
                 try:
-                    async for update in agent.run_stream(body.content):
+                    async for update in api_service.send_message_stream(user_id, conversation_id, body.content):
                         payload = jsonable_encoder(update)
                         yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
                         
-                    yield f"data: {json.dumps({'session_id': conversation_id, 'status': 'complete'})}\n\n"
+                    yield f"data: {json.dumps({'conversation_id': conversation_id, 'status': 'complete'})}\n\n"
 
                 except Exception as e:
                     logger.exception("Agent run failed")
-                    err_payload = {"session_id": conversation_id, "error": str(e)}
+                    err_payload = {"conversation_id": conversation_id, "error": str(e)}
                     yield f"data: {json.dumps(err_payload, ensure_ascii=False)}\n\n"
 
             return StreamingResponse(

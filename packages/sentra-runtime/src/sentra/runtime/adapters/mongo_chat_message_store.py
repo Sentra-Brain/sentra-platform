@@ -20,7 +20,7 @@ class MongoChatMessageStore(ChatMessageStore):
         for msg in messages:
             try:
                 # Full serialized representation (for exact reconstruction)
-                data = msg.to_dict(exclude=ChatMessage.DEFAULT_EXCLUDE)
+                data = msg.to_dict()
 
                 # lightweight _view projection for quick UI retrieval
                 role_value = getattr(getattr(msg, "role", None), "value", None) or "unknown"

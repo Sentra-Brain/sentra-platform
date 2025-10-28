@@ -1,4 +1,4 @@
-# packages/sentra-infra/src/sentra/infra/nosql/repositories/conversation_mongo_repository.py
+# packages/sentra-infra/src/sentra/infra/nosql/conversation_mongo_repository.py
 from datetime import datetime, timezone
 from functools import lru_cache
 from uuid import UUID
@@ -8,7 +8,6 @@ from sentra.infra.nosql.mongo_settings import settings
 from sentra.shared.logging import get_logger
 
 logger = get_logger("sentra.infra.nosql.repositories.conversation_mongo_repository")
-
 
 class ConversationMongoRepository(IConversationNoSQLRepository):
     """MongoDB implementation for runtime conversation persistence (messages, metadata mirror)."""
@@ -26,22 +25,13 @@ class ConversationMongoRepository(IConversationNoSQLRepository):
             f"at {settings.mongo_host}:{settings.mongo_port}"
         )
 
-    # -------------------------------------------------------------------------
-    # Initialization
-    # -------------------------------------------------------------------------
     def _ensure_indexes(self):
         coll = self.db["conversations"]
         coll.create_index([("user_id", 1), ("_id", 1)], name="by_user_and_id")
 
-    # -------------------------------------------------------------------------
-    # Collection access
-    # -------------------------------------------------------------------------
     def _coll(self):
         return self.db["conversations"]
 
-    # -------------------------------------------------------------------------
-    # CRUD
-    # -------------------------------------------------------------------------
     def create_conversation(self, conversation_id: UUID, user_id: UUID, **fields) -> dict:
         """Create a new conversation document."""
         doc = {
@@ -79,9 +69,21 @@ class ConversationMongoRepository(IConversationNoSQLRepository):
         """Delete a conversation document."""
         self._coll().delete_one({"_id": str(conversation_id), "user_id": str(user_id)})
 
-    # -------------------------------------------------------------------------
-    # Helpers / extensions
-    # -------------------------------------------------------------------------
+    def save_thread_state(self, conversation_id: UUID, user_id: UUID, state: dict) -> None:
+        """Persist serialized AgentThread state alongside the conversation."""
+        self._coll().update_one(
+            {"_id": str(conversation_id), "user_id": str(user_id)},
+            {"$set": {"thread_state": state}},
+            upsert=True,
+        )
+
+    def load_thread_state(self, conversation_id: UUID, user_id: UUID) -> dict | None:
+        doc = self._coll().find_one(
+            {"_id": str(conversation_id), "user_id": str(user_id)},
+            {"thread_state": 1, "_id": 0},
+        )
+        return doc.get("thread_state") if doc else None
+
     def _stringify_uuids(self, obj):
         """Recursively convert UUIDs to strings for Mongo serialization."""
         if isinstance(obj, UUID):

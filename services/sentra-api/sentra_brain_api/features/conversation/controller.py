@@ -91,7 +91,7 @@ class ConversationController:
 			current_user: UserEntity = Depends(get_authenticated_user),
 			service: ConversationApiService = Depends(self._get_service),
 		):
-			return service.get_conversation(conversation_id)
+			return service.get_conversation(current_user, conversation_id)
 
 		@self.router.put(
 			"/{conversation_id}",

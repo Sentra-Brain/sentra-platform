@@ -8,6 +8,7 @@ from sentra.domain.entities.user_entity import UserEntity
 from sentra.domain.services.conversation_service import ConversationService
 from sentra.infra.nosql.conversation_mongo_repository import ConversationMongoRepository
 from sentra.infra.sql.repositories.conversation_repository_sql import ConversationRepositorySql
+from sentra.runtime.models import conversation
 from sentra.shared.logging import get_logger
 from sentra.runtime.agents.registry import agent_registry
 
@@ -127,11 +128,14 @@ class ConversationApiService:
             for conv in conversations
         ]
 
-    def get_conversation(self, conversation_id: UUID) -> ConversationResponse:
-        entity = self.service.get_conversation(conversation_id)
+    def get_conversation(
+            self, user: UserEntity, conversation_id: UUID
+            ) -> ConversationResponse:
+        entity = self.service.get_conversation(conversation_id, user.id)
         if not entity:
             raise SentraHTTPException(status_code=404, details="Conversation not found")
-        return entity_to_response(entity)
+        conversation =  ConversationResponse.from_mongo(entity)
+        return conversation
 
     def update_conversation(
         self, conversation_id: UUID, req: UpdateConversationRequest
@@ -169,7 +173,7 @@ class ConversationApiService:
     def get_events(
         self, user: UserEntity, conversation_id: UUID, since: datetime | None
     ) -> list[ResponseStreamEvent]:
-        entity = self.service.get_conversation(conversation_id)
+        entity = self.service.get_conversation(conversation_id, user.id)
 
         if not entity:
             raise SentraHTTPException(
