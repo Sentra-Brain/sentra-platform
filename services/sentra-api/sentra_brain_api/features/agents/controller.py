@@ -1,7 +1,9 @@
 from fastapi import APIRouter
 
-from sentra.runtime.agents.agent_loader import AgentLoader
+from sentra_brain_api.core import app_state
+from sentra.shared.logging import get_logger
 
+logger = get_logger("sentra_brain_api.agents")
 
 class AgentsController:
     def __init__(self):
@@ -11,13 +13,17 @@ class AgentsController:
     def _add_routes(self):
         @self.router.get("/agents", summary="List available conversational agents")
         async def list_agents():  # noqa: D401
-            loader = AgentLoader()
-            # Only return agents we can load successfully to avoid exposing partial implementations
-            names: list[str] = []
-            for name in loader.list_agents():
-                try:
-                    loader.load_agent(name)
-                    names.append(name)
-                except Exception:
-                    continue
-            return {"agents": names}
+            """
+            Returns a list of all available registered agents
+            from the global AgentFactory instance.
+            """
+            if not app_state.agent_factory:
+                logger.warning("AgentFactory not initialized.")
+                return {"agents": []}
+
+            try:
+                agents = [agent.name for agent in app_state.agent_factory.all()]
+                return {"agents": agents}
+            except Exception as e:
+                logger.exception("Failed to list agents: %s", e)
+                return {"agents": [], "error": str(e)}

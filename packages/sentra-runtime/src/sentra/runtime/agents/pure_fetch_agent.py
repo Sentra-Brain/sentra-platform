@@ -1,6 +1,6 @@
 # agents/pure_fetch_agent.py
 from agent_framework import ChatAgent
-from tools.mcp_tools import fetch_webpage
+from sentra.runtime.tools.mcp import fetch_webpage
 
 def build_pure_fetch_agent(chat_client):
     return ChatAgent(

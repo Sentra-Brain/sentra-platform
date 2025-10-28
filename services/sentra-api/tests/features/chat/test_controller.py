@@ -13,7 +13,7 @@ from google.genai import types
 from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.adapters.session_service import get_session_service, APP_NAME
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
-from sentra.infra.nosql.mongo_conversation_repository import get_session_mongo_repository
+from sentra.infra.nosql.conversation_mongo_repository import get_session_mongo_repository
 
 
 class DummyAdapter:

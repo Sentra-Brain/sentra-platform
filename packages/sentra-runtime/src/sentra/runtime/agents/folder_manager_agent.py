@@ -1,5 +1,5 @@
 from agent_framework import ChatAgent
-from tools.filesystem import all_tools
+from sentra.runtime.tools.filesystem import all_tools
 
 
 def build_folder_manager_agent(chat_client):

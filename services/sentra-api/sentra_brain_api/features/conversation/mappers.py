@@ -1,7 +1,7 @@
 from sentra.domain.entities.conversation_entity import ConversationEntity
 from sentra_brain_api.features.conversation.schemas import (
 	CreateConversationResponse,
-	EventResponse,
+	ResponseStreamEvent,
 	ConversationListItemResponse,
 	ConversationResponse,
 )
@@ -14,7 +14,7 @@ def entity_to_response(entity: ConversationEntity) -> ConversationResponse:
 		initial_prompt=getattr(entity, "initial_prompt", None),
 		created_at=entity.created_at,
 		updated_at=getattr(entity, "updated_at", None),
-		events=[EventResponse(**event) if isinstance(event, dict) else event for event in getattr(entity, "events", [])],
+		events=[ResponseStreamEvent(**event) if isinstance(event, dict) else event for event in getattr(entity, "events", [])],
 	)
 
 def entity_to_list_item_response(entity: ConversationEntity) -> ConversationListItemResponse:

@@ -22,14 +22,15 @@ class ConversationListItemResponse(BaseModel):
 	created_at: datetime = Field(..., description="Creation timestamp")
 	model_config = {"from_attributes": True, "populate_by_name": True}
 
-class EventResponse(BaseModel):
-	id: UUID = Field(..., description="Unique identifier of the event")
-	role: Literal["user", "assistant", "system"] = Field(..., description="Role of the event sender")
-	content: str = Field(..., description="Content of the event")
-	timestamp: datetime = Field(..., description="Timestamp of the event")
-	is_system_prompt: Optional[bool] = Field(
-		None, description="Indicates if the event is a system prompt"
-	)
+class ResponseStreamEvent(BaseMongoModel):
+    type: str  # e.g., "response.output_text.delta", "response.completed"
+    sequence_number: int
+    output_index: Optional[int] = None
+    content_index: Optional[int] = None
+    item_id: Optional[str] = None
+    data: Optional[dict[str, Any]] = None
+    delta: Optional[str] = None  # For text deltas
+    timestamp: datetime
 
 class ConversationResponse(BaseMongoModel):
 	title: Optional[str] = None
@@ -37,7 +38,7 @@ class ConversationResponse(BaseMongoModel):
 	initial_prompt: Optional[str] = None
 	created_at: datetime
 	updated_at: Optional[datetime] = None
-	events: List[EventResponse]
+	events: List[ResponseStreamEvent]
 
 class UpdateConversationRequest(BaseModel):
 	title: Optional[str] = Field(

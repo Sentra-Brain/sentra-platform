@@ -1,6 +1,6 @@
 # agents/system_inspector_agent.py
 from agent_framework import ChatAgent
-from tools.system import (
+from sentra.runtime.tools.system import (
     get_system_info,
     get_user_info,
     get_hardware_info,

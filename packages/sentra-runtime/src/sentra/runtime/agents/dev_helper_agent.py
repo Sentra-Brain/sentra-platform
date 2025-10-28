@@ -1,6 +1,6 @@
 # agents/dev_helper_agent.py
 from agent_framework import ChatAgent
-from tools.development import (
+from sentra.runtime.tools.development import (
     create_project_structure,
     insert_code_snippet,
     run_python_script,

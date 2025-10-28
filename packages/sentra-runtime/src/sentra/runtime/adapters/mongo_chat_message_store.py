@@ -1,6 +1,7 @@
+# packages/sentra-runtime/src/sentra/runtime/adapters/mongo_chat_message_store.py
 from datetime import datetime, timezone
 from agent_framework import ChatMessage, ChatMessageStore
-from sentra.infra.nosql.mongo_conversation_repository import get_conversation_mongo_repository
+from sentra.infra.nosql.conversation_mongo_repository import get_conversation_mongo_repository
 from sentra.shared.logging import get_logger
 
 logger = get_logger(__name__)

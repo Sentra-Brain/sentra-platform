@@ -1,11 +1,11 @@
 # packages/sentra-infra/src/sentra/infra/sql/repositories/session_repository_sql.py
 from sqlalchemy.orm import Session
 from sentra.domain.entities.conversation_entity import ConversationEntity
-from sentra.domain.repository.conversation_repository import IConversationRepository
+from sentra.domain.repository.conversation_repository import IConversationSQLRepository
 from sentra.infra.sql.repositories.base_repository import BaseRepository
 from uuid import UUID, uuid4
 
-class ConversationRepositorySql(BaseRepository[ConversationEntity], IConversationRepository):
+class ConversationRepositorySql(BaseRepository[ConversationEntity], IConversationSQLRepository):
     def __init__(self, db: Session):
         super().__init__(ConversationEntity, db)
 

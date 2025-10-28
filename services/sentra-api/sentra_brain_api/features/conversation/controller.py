@@ -6,13 +6,14 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 
+from sentra_brain_api.core import app_state
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_brain_api.features.conversation.api_service import ConversationApiService
 from sentra_brain_api.features.conversation.schemas import (
 	CreateConversationRequest,
 	CreateConversationResponse,
 	DeleteConversationResponse,
-	EventResponse,
+	ResponseStreamEvent,
 	ConversationListItemResponse,
 	ConversationResponse,
 	UpdateConversationRequest,
@@ -21,8 +22,10 @@ from sentra_brain_api.features.conversation.schemas import (
 	UpdateConversationStateResponse,
 )
 from sentra.domain.entities.user_entity import UserEntity
+from sentra.infra.nosql.conversation_mongo_repository import ConversationMongoRepository, get_conversation_mongo_repository
 from sentra.infra.sql.postgres_service import get_db
 from sentra.shared.logging import get_logger
+
 
 logger = get_logger("sentra_brain_api.conversation")
 
@@ -35,8 +38,14 @@ class ConversationController:
 	def _get_service(
 		self,
 		db: Session = Depends(get_db),
+		
+        mongo_repo: ConversationMongoRepository = Depends(get_conversation_mongo_repository)
 	) -> ConversationApiService:
-		return ConversationApiService(db=db)
+		return ConversationApiService(
+			db=db,
+			agent_factory=app_state.agent_factory,
+			mongo_repo=mongo_repo
+		)
 
 	def _add_routes(self):
 		@self.router.post(
@@ -113,7 +122,7 @@ class ConversationController:
 
 		@self.router.get(
 			"/{conversation_id}/events",
-			response_model=list[EventResponse],
+			response_model=list[ResponseStreamEvent],
 			description="Retrieve events for the conversation",
 		)
 		def get_events(

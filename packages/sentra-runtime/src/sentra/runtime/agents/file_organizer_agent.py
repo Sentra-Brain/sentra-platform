@@ -1,6 +1,6 @@
 # agents/file_organizer_agent.py
 from agent_framework import ChatAgent
-from tools.filesystem import (
+from sentra.runtime.tools.filesystem import (
     list_directory,
     search_files,
     move_file,

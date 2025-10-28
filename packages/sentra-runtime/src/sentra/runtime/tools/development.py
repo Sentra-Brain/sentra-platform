@@ -4,10 +4,8 @@ tools/development.py
 Developer-oriented tools that let an AI agent create, modify, build, and
 inspect code projects locally.  Compatible with @ai_function.
 """
-
 import os
 import subprocess
-import json
 import shutil
 from pathlib import Path
 from typing import Annotated, Optional

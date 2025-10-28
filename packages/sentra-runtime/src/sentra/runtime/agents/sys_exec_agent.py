@@ -1,6 +1,6 @@
 # agents/sys_exec_agent.py
 from agent_framework import ChatAgent
-from tools.system import run_command, list_processes
+from sentra.runtime.tools.system import run_command, list_processes
 
 def build_sys_exec_agent(chat_client):
     return ChatAgent(
