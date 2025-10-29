@@ -8,7 +8,6 @@ from sentra.domain.entities.user_entity import UserEntity
 from sentra.domain.services.conversation_service import ConversationService
 from sentra.infra.nosql.conversation_mongo_repository import ConversationMongoRepository
 from sentra.infra.sql.repositories.conversation_repository_sql import ConversationRepositorySql
-from sentra.runtime.models import conversation
 from sentra.shared.logging import get_logger
 from sentra.runtime.agents.registry import agent_registry
 
@@ -56,7 +55,6 @@ class ConversationApiService:
         if request.initial_prompt:
             async def _generate_initial_title(conv_id: UUID, prompt: str):
                 try:
-                    from sentra.runtime.agents.registry import agent_registry
                     logger.info(f"[Async] Generating initial title for conversation {conv_id}...")
                     template = agent_registry.get("title_generator")
 
@@ -68,7 +66,7 @@ class ConversationApiService:
                     result = await title_agent.run([prompt], store=False)  # also tell provider not to store
                     title = getattr(result, "text", None) or str(result)
                     if title:
-                        self.service.update_title(conv_id, title)
+                        self.service.update_title(conv_id, user.id, title)
                         logger.info(f"[Async] Title updated for {conv_id}: {title}")
                 except Exception as e:
                     logger.error(f"[Async] Failed to generate title for {conv_id}: {e}")

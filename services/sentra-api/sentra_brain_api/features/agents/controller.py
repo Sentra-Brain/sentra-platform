@@ -15,15 +15,7 @@ class AgentsController:
         async def list_agents():
             """Return all registered Sentra agent templates."""
             try:
-                templates = [
-                    {
-                        "key": key,
-                        "name": tmpl.name,
-                        "description": tmpl.description,
-                        "model": tmpl.default_model_id,
-                    }
-                    for key, tmpl in agent_registry.templates.items() 
-                ]
+                templates = agent_registry.list_templates()
                 return {"agents": templates}
             except Exception as e:
                 logger.exception("Failed to list agents: %s", e)

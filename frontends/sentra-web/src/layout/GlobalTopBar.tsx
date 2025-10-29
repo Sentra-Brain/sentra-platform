@@ -3,7 +3,7 @@ import { Moon, Sun, UserCircle } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { toggleTheme } from '@store/slices/uiSlice';
 import { useAppDispatch, useAppSelector } from "@store/hooks";
-import ModeDropdown from "@features/chat/components/ModeDropdown";
+import AgentSelector from "@features/agents/components/AgentSelector";
 import SearchInput from "@features/search/SearchInput";
 // import GlobalMenuPanel from './GlobalMenuPanel';
 
@@ -51,7 +51,7 @@ export default function GlobalTopBar() {
           {getBreadcrumb()}
         </span>
       </div>
-      <ModeDropdown />
+      <AgentSelector />
       {/* Center */}
       <div className="flex-1 flex justify-center px-2 max-w-[600px]">
         <SearchInput />

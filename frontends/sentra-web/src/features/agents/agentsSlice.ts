@@ -1,30 +1,37 @@
-import { createSlice, createAsyncThunk, type PayloadAction } from '@reduxjs/toolkit';
-import apiClient from '@shared/api/apiClient';
+import { createSlice, createAsyncThunk, type PayloadAction } from "@reduxjs/toolkit";
+import { agentsService } from "./agentsService";
+import type { AgentInfo } from "./types/agentModels";
 
 export interface AgentsState {
-  available: string[];
+  agents: AgentInfo[];
   loading: boolean;
   error: string | null;
-  selected: string | null; // agent chosen for next new session
+  selected?: AgentInfo | null;
 }
 
 const initialState: AgentsState = {
-  available: [],
+  agents: [],
   loading: false,
   error: null,
-  selected: 'default_agent',
+  selected: null,
 };
 
-export const fetchAgents = createAsyncThunk('agents/fetch', async () => {
-  const res = await apiClient.get('/agents');
-  return res.data.agents as string[];
+// ─────────────────────────────────────────────
+// Async thunk: load agents from API
+// ─────────────────────────────────────────────
+export const fetchAgents = createAsyncThunk("agents/fetch", async () => {
+  const res = await agentsService.listAgents();
+  return res.agents;
 });
 
+// ─────────────────────────────────────────────
+// Slice definition
+// ─────────────────────────────────────────────
 const agentsSlice = createSlice({
-  name: 'agents',
+  name: "agents",
   initialState,
   reducers: {
-    selectAgent(state, action: PayloadAction<string>) {
+    selectAgent(state, action: PayloadAction<AgentInfo | null>) {
       state.selected = action.payload;
     },
   },
@@ -36,14 +43,18 @@ const agentsSlice = createSlice({
       })
       .addCase(fetchAgents.fulfilled, (state, action) => {
         state.loading = false;
-        state.available = action.payload;
+        state.agents = action.payload;
+
+        // Auto-select default agent if none selected
         if (!state.selected && action.payload.length > 0) {
-          state.selected = action.payload.includes('default_agent') ? 'default_agent' : action.payload[0];
+          const defaultAgent =
+            action.payload.find((a) => a.key === "default_agent") || action.payload[0];
+          state.selected = defaultAgent;
         }
       })
       .addCase(fetchAgents.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message || 'Failed to load agents';
+        state.error = action.error.message || "Failed to load agents";
       });
   },
 });

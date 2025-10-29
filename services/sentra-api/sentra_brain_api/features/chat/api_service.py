@@ -16,11 +16,12 @@ class ChatApiService:
         thread = None
         if serialized:
             thread = await agent.deserialize_thread(serialized)
+        else:            
+            thread = agent.get_new_thread()
 
         async for update in agent.run_stream(message, thread=thread):
             yield update
 
-        # Persist thread state after completion
-        if thread:
-            serialized_state = await thread.serialize()
-            await store.save_thread_state(serialized_state)
+
+        serialized_state = await thread.serialize()
+        await store.save_thread_state(serialized_state)
