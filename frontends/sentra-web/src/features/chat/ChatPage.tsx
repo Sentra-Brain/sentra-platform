@@ -1,6 +1,5 @@
 // features/chat/ChatPage.tsx
 import { useAppSelector } from "@store/hooks";
-import ChatHeader from "./components/ChatHeader";
 import ChatContent from "./components/ChatContent";
 import ChatFooter from "./components/ChatFooter";
 import ChatInputContainer from "./components/ChatInputContainer";
@@ -44,7 +43,6 @@ export default function ChatPage() {
     <div className="flex flex-col h-full w-full min-h-0">
       {isConversationActive ? (
         <>
-          <ChatHeader />
           <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
             <ChatContent />
             <ChatFooter>
