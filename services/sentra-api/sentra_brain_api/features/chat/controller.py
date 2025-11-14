@@ -6,11 +6,11 @@ from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra_brain_api.features.chat.api_service import ChatApiService
 from sentra_brain_api.features.chat.schemas import ChatSendRequest
 from sentra.domain.entities.user_entity import UserEntity
-from sentra.runtime.agents.registry import agent_registry
 from sentra.shared.logging import get_logger
 import json
 
 logger = get_logger("sentra_brain_api.features.chat")
+
 class ChatController:
     def __init__(self):
         self.router = APIRouter()
@@ -23,33 +23,31 @@ class ChatController:
         @self.router.post(
             "/send",
             response_class=StreamingResponse,
-            description="Send a message via SentraAgent (MAF PoC)",
+            description="Send a message via SentraExecutor",
         )
         async def send_message(
             body: ChatSendRequest,
             request: Request,
-            current_user: UserEntity = Depends(get_authenticated_user),            
-			api_service: ChatApiService = Depends(self._get_service),
+            current_user: UserEntity = Depends(get_authenticated_user),
+            api_service: ChatApiService = Depends(self._get_service),
         ):
             user_id = str(current_user.id)
             conversation_id = str(body.session_id)
 
-            # Build agent bound to this user+conversation
-            template = agent_registry.get("sentra")
-            agent = template.build(user_id=user_id, conversation_id=conversation_id)
-
             async def stream():
                 try:
-                    async for update in api_service.send_message_stream(user_id, conversation_id, body.content):
+                    async for update in api_service.send_message_stream(
+                        user_id=user_id,
+                        conversation_id=conversation_id,
+                        message=body.content,
+                    ):
                         payload = jsonable_encoder(update)
                         yield f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
-                        
+                    # End-of-stream signal
                     yield f"data: {json.dumps({'conversation_id': conversation_id, 'status': 'complete'})}\n\n"
-
                 except Exception as e:
-                    logger.exception("Agent run failed")
-                    err_payload = {"conversation_id": conversation_id, "error": str(e)}
-                    yield f"data: {json.dumps(err_payload, ensure_ascii=False)}\n\n"
+                    logger.exception("Chat stream failed")
+                    yield f"data: {json.dumps({'conversation_id': conversation_id, 'error': str(e)})}\n\n"
 
             return StreamingResponse(
                 stream(),
