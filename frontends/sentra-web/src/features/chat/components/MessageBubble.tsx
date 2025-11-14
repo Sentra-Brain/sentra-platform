@@ -1,24 +1,12 @@
 // features/chat/components/MessageBubble.tsx
-import type { SentraEventContent } from '@features/chat/types/events'
-import type { MessageRole } from '@features/conversations/types/conversationModels'
+import type { Role } from '@ag-ui/core'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 type Props = {
   id: string
-  role: MessageRole
-  content?: SentraEventContent
-}
-
-function renderContent(content?: SentraEventContent) {
-  if (!content || !content.parts) return null
-  // For now, concatenate all text parts, ignore function_call/response
-  const text = content.parts.map(p => p.text).filter(Boolean).join('')
-  return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]}>
-      {text}
-    </ReactMarkdown>
-  )
+  role: Role
+  content: string
 }
 
 export default function MessageBubble({ role, content }: Props) {
@@ -32,8 +20,8 @@ export default function MessageBubble({ role, content }: Props) {
           : 'bg-[var(--sentra-primary-light)] self-start'
       }`}
       style={{ color: 'var(--color-text-base)' }}
-    >
-      {renderContent(content)}
+      >
+      <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
     </div>
   )
 }

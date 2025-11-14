@@ -19,7 +19,7 @@ export default function ChatInputContainer() {
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const dispatch = useAppDispatch()
-  const { sendMessage } = useChatActions()
+  const { sendMessage, stopStreaming } = useChatActions()
   const isStreaming = useAppSelector(s => s.events.isStreaming)
   const { selectedContext } = useAppSelector(s => s.events)
   const sources = useAppSelector(s => s.knowledge.sources)
@@ -42,7 +42,7 @@ export default function ChatInputContainer() {
   }
 
   const handleStop = () => {
-    // Future: abort logic
+    stopStreaming()
   }
 
   const handleContextSelectorOpen = () => {
