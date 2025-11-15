@@ -27,14 +27,14 @@ export const chatService = {
     const token = tokenStorage.getAccessToken();
 
     const agent = new HttpAgent({
-      url: `${apiBaseUrl}/chat/agui/stream`,
+      url: `${apiBaseUrl}/chat/agui`,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       threadId: payload.threadId,
     });
 
     const runInput: RunAgentInput = {
       threadId: payload.threadId,
-      runId: uuidv4(), // ✅ required
+      runId: uuidv4(),
       messages: [
         {
           id: payload.messageId,
@@ -42,8 +42,8 @@ export const chatService = {
           content: payload.content,
         },
       ],
-      tools: [], // ✅ required (even if not used)
-      context: [], // ✅ required (even if empty)
+      tools: [], 
+      context: [], 
       forwardedProps: {
         mode: payload.mode,
         agent: payload.agent,
