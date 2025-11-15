@@ -1,4 +1,5 @@
 // src/features/chat/hooks/useChatActions.ts
+import { useRef } from "react";
 import { useAppDispatch, useAppSelector } from "@store/hooks";
 import { v4 as uuidv4 } from "uuid";
 import {
@@ -9,18 +10,32 @@ import {
 } from "@features/conversations/conversationsSlice";
 import {
   addEvent,
-  updateEvent,
   setStreaming,
   setWaitingForAnswer,
 } from "@features/chat/eventsSlice";
 import { chatService } from "@features/chat/chatService";
-import { SentraEventType, type SentraEvent } from "@features/chat/types/events";
+import { EventType } from "@ag-ui/core";
+import { createCompletedMessageEvents } from "@features/chat/utils/aguiMessages";
 
 export function useChatActions() {
   const dispatch = useAppDispatch();
+  const abortRef = useRef<(() => void) | null>(null);
   const currentConversationId = useAppSelector((s) => s.conversation.currentConversationId);
   const { selectedContext, mode } = useAppSelector((s) => s.events);
   const selectedAgent = useAppSelector((s) => s.agents.selected);
+
+  const cancelActiveStream = () => {
+    if (abortRef.current) {
+      abortRef.current();
+      abortRef.current = null;
+    }
+  };
+
+  const stopStreaming = () => {
+    cancelActiveStream();
+    dispatch(setWaitingForAnswer(false));
+    dispatch(setStreaming(false));
+  };
 
   const sendMessage = async (content: string) => {
     const trimmed = content.trim();
@@ -39,50 +54,54 @@ export function useChatActions() {
     }
 
     // Step 2: add local user event
-    const userEvent: SentraEvent = {
-      id: uuidv4(),
-      type: SentraEventType.MESSAGE_FINAL,
-      author: "user",
-      content: { role: "user", parts: [{ text: trimmed }] },
-      timestamp: new Date().toISOString(),
-    };
-    dispatch(addEvent(userEvent));
+    const userMessageId = uuidv4();
+    createCompletedMessageEvents(userMessageId, "user", trimmed).forEach((event) =>
+      dispatch(addEvent(event))
+    );
 
     dispatch(setStreaming(true));
     dispatch(setWaitingForAnswer(true));
 
     // Step 3: send message to API
-    chatService.sendMessageStream(
+    cancelActiveStream();
+    abortRef.current = chatService.sendMessageStream(
       {
-        session_id: conversationId!,
-        event_id: userEvent.id, // optional
+        threadId: conversationId!,
+        messageId: userMessageId,
         content: trimmed,
-        context_source_ids: selectedContext.useRag
+        contextSourceIds: selectedContext.useRag
           ? selectedContext.sourceIds
           : [],
-        context_document_ids: selectedContext.useRag
+        contextDocumentIds: selectedContext.useRag
           ? selectedContext.documentIds
           : [],
         mode,
         agent: selectedAgent || undefined,
       },
-      (event: SentraEvent) => {
-        dispatch(updateEvent(event));
-        if (event.type === SentraEventType.MESSAGE_FINAL) {
-          dispatch(setWaitingForAnswer(false));
-          dispatch(setStreaming(false));
+      (event) => {
+        dispatch(addEvent(event));
+        if (event.type === EventType.RUN_FINISHED) {
+          stopStreaming();
           if (!currentConversationId) {
             dispatch(regenerateTitle(conversationId!)).catch(console.warn);
           }
         }
+        if (event.type === EventType.RUN_ERROR) {
+          stopStreaming();
+        }
       },
       (err) => {
         console.error("Streaming error:", err);
-        dispatch(setWaitingForAnswer(false));
-        dispatch(setStreaming(false));
+        dispatch(
+          addEvent({
+            type: EventType.RUN_ERROR,
+            message: err.message,
+          })
+        );
+        stopStreaming();
       }
     );
   };
 
-  return { sendMessage };
+  return { sendMessage, stopStreaming };
 }

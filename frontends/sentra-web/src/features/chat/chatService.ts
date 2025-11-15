@@ -1,21 +1,22 @@
-// sentra-web/src/features/chat/chatService.ts
+import { HttpAgent } from "@ag-ui/client";
+import type { BaseEvent as AGUIEvent, RunAgentInput } from "@ag-ui/core";
 import { tokenStorage } from "@shared/utils/tokenStorage";
-import type { SentraEvent } from "@features/chat/types/events";
-import type { ConversationMode } from "@features/chat/types/mode";
+import { v4 as uuidv4 } from "uuid";
 
 type ChatSendPayload = {
-  session_id: string;
-  event_id: string;
+  threadId: string;
+  messageId: string;
   content: string;
-  context_source_ids?: string[];
-  context_document_ids?: string[];
-  mode?: ConversationMode;
+  contextSourceIds: string[];
+  contextDocumentIds: string[];
+  mode: string;
   agent?: string;
 };
 
-// NEW: event callback uses SentraEvent
-type OnEventCallback = (event: SentraEvent) => void;
+type OnEventCallback = (event: AGUIEvent) => void;
 type OnErrorCallback = (error: Error) => void;
+
+const apiBaseUrl = import.meta.env.VITE_API_URL || "http://127.0.0.1:8100";
 
 export const chatService = {
   sendMessageStream(
@@ -24,63 +25,44 @@ export const chatService = {
     onError?: OnErrorCallback
   ): () => void {
     const token = tokenStorage.getAccessToken();
-    const controller = new AbortController();
 
-    const url = `${
-      import.meta.env.VITE_API_URL || "http://127.0.0.1:8100"
-    }/chat/send`;
+    const agent = new HttpAgent({
+      url: `${apiBaseUrl}/chat/agui`,
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      threadId: payload.threadId,
+    });
 
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    const runInput: RunAgentInput = {
+      threadId: payload.threadId,
+      runId: uuidv4(),
+      messages: [
+        {
+          id: payload.messageId,
+          role: "user",
+          content: payload.content,
+        },
+      ],
+      tools: [], 
+      context: [], 
+      forwardedProps: {
+        mode: payload.mode,
+        agent: payload.agent,
+        context_source_ids: payload.contextSourceIds,
+        context_document_ids: payload.contextDocumentIds,
       },
-      body: JSON.stringify(payload),
-      signal: controller.signal,
-    })
-      .then(async (response) => {
-        if (!response.ok || !response.body) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
+    };
 
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder("utf-8");
-        let buffer = "";
+    const subscription = agent.run(runInput).subscribe({
+      next: onEvent,
+      error: (err) => {
+        const normalized = err instanceof Error ? err : new Error(String(err));
+        onError?.(normalized);
+      },
+    });
 
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-
-          const lines = buffer.split("\n");
-          buffer = lines.pop() || "";
-
-          for (const line of lines) {
-            const clean = line.trim();
-            if (!clean.startsWith("data:")) continue;
-
-            const json = clean.slice(5).trim();
-            if (!json) continue;
-
-            try {
-              const parsed = JSON.parse(json);
-              if (parsed && typeof parsed.id === 'string' && parsed.type) {
-                onEvent(parsed as SentraEvent);
-              } else {
-                console.error('Malformed event:', parsed);
-              }
-            } catch (err) {
-              console.error("Failed to parse EngineEvent:", json, err);
-            }
-          }
-        }
-      })
-      .catch((err) => {
-        if (onError && !controller.signal.aborted) onError(err);
-      });
-
-    return () => controller.abort();
+    return () => {
+      subscription.unsubscribe();
+      agent.abortRun();
+    };
   },
 };

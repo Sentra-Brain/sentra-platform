@@ -1,5 +1,6 @@
 import { createSlice, type PayloadAction, createSelector } from '@reduxjs/toolkit'
-import { SentraEventType, type SentraEvent } from '@features/chat/types/events'
+import type { BaseEvent as AGUIEvent, Role } from '@ag-ui/core'
+import { EventType } from '@ag-ui/core'
 import type { ConversationMode } from '@features/chat/types/mode'
 
 export interface SelectedContext {
@@ -10,8 +11,7 @@ export interface SelectedContext {
 
 export interface EventsState {
   sessionId: string | null
-  eventsById: Record<string, SentraEvent>
-  order: string[]
+  events: AGUIEvent[]
   waitingForAnswer: boolean
   isStreaming: boolean
   inputDisabled: boolean
@@ -26,8 +26,7 @@ const storedMode =
 
 const initialState: EventsState = {
   sessionId: null,
-  eventsById: {},
-  order: [],
+  events: [],
   waitingForAnswer: false,
   isStreaming: false,
   inputDisabled: false,
@@ -46,37 +45,11 @@ const eventsSlice = createSlice({
     setSessionId(state, action: PayloadAction<string | null>) {
       state.sessionId = action.payload
     },
-    addEvent(state, action: PayloadAction<SentraEvent>) {
-      const evt = action.payload
-      if (!state.eventsById[evt.id]) {
-        state.eventsById[evt.id] = evt
-        state.order.push(evt.id)
-      }
-    },
-    updateEvent(state, action: PayloadAction<SentraEvent>) {
-      const evt = action.payload
-      const existing = state.eventsById[evt.id]
-      if (!existing) {
-        state.eventsById[evt.id] = evt
-        state.order.push(evt.id)
-        return
-      }
-      if (
-        evt.type === SentraEventType.MESSAGE_DELTA &&
-        existing.content &&
-        evt.content
-      ) {
-        existing.content.parts = [
-          ...existing.content.parts,
-          ...evt.content.parts,
-        ]
-      } else {
-        state.eventsById[evt.id] = { ...existing, ...evt }
-      }
+    addEvent(state, action: PayloadAction<AGUIEvent>) {
+      state.events.push(action.payload)
     },
     resetEvents(state) {
-      state.eventsById = {}
-      state.order = []
+      state.events = []
       state.sessionId = null
     },
     setWaitingForAnswer(state, action: PayloadAction<boolean>) {
@@ -132,30 +105,95 @@ const eventsSlice = createSlice({
   },
 })
 
-// Selectors
-export const selectAllEvents = (state: { events: EventsState }): SentraEvent[] =>
-  state.events.order.map(id => state.events.eventsById[id])
+export const selectAllEvents = (state: { events: EventsState }): AGUIEvent[] =>
+  state.events.events
 
-export const selectMessages = createSelector(selectAllEvents, events =>
-  events.filter(e =>
-    e.type === SentraEventType.MESSAGE_DELTA ||
-    e.type === SentraEventType.MESSAGE_FINAL
-  )
-)
+export type RenderableEvent =
+  | {
+      id: string
+      type: 'message_delta' | 'final'
+      role: Role
+      content: string
+    }
+  | {
+      id: string
+      type: 'error'
+      content: string
+    }
 
-export const selectSteps = createSelector(selectAllEvents, events =>
-  events.filter(e =>
-    e.type === SentraEventType.STEP_START ||
-    e.type === SentraEventType.STEP_END ||
-    e.type === SentraEventType.CONTEXT_BUILT ||
-    e.type === SentraEventType.LLM_CALLED
-  )
+const buildRenderableEvents = (events: AGUIEvent[]): RenderableEvent[] => {
+  const orderedKeys: string[] = []
+  const entries = new Map<string, RenderableEvent>()
+  const ensureMessageEntry = (messageId: string, role?: Role) => {
+    const existing = entries.get(messageId) as RenderableEvent | undefined
+    if (!existing) {
+      const entry: RenderableEvent = {
+        id: messageId,
+        type: 'message_delta',
+        role: (role ?? 'assistant') as Role,
+        content: '',
+      }
+      entries.set(messageId, entry)
+      orderedKeys.push(messageId)
+      return entry
+    }
+    if (role && 'role' in existing) {
+      existing.role = role
+    }
+    return existing
+  }
+
+  let errorCount = 0
+
+  for (const event of events) {
+    switch (event.type) {
+      case EventType.TEXT_MESSAGE_START: {
+        ensureMessageEntry(event.messageId, event.role)
+        break
+      }
+      case EventType.TEXT_MESSAGE_CONTENT: {
+        const entry = ensureMessageEntry(event.messageId)
+        if ('role' in entry) {
+          entry.content = `${entry.content}${event.delta}`
+          entry.type = 'message_delta'
+        }
+        break
+      }
+      case EventType.TEXT_MESSAGE_END: {
+        const entry = ensureMessageEntry(event.messageId)
+        if ('role' in entry) {
+          entry.type = 'final'
+        }
+        break
+      }
+      case EventType.RUN_ERROR: {
+        const errorId = `error-${errorCount++}`
+        entries.set(errorId, {
+          id: errorId,
+          type: 'error',
+          content: event.message,
+        })
+        orderedKeys.push(errorId)
+        break
+      }
+      default:
+        break
+    }
+  }
+
+  return orderedKeys
+    .map(key => entries.get(key))
+    .filter((entry): entry is RenderableEvent => Boolean(entry))
+}
+
+export const selectRenderableEvents = createSelector(
+  selectAllEvents,
+  buildRenderableEvents,
 )
 
 export const {
   setSessionId,
   addEvent,
-  updateEvent,
   resetEvents,
   setWaitingForAnswer,
   setStreaming,

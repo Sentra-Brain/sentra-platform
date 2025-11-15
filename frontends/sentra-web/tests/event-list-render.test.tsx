@@ -4,34 +4,28 @@ import { renderToString } from 'react-dom/server'
 import { Provider } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import EventList from '../src/features/chat/components/EventList'
-import eventsReducer from '../src/features/chat/eventsSlice'
-import { SentraEventType, type SentraEvent } from '../src/features/chat/types/events'
+import eventsReducer, { type RenderableEvent } from '../src/features/chat/eventsSlice'
 
 describe('EventList rendering', () => {
-  it('renders messages, steps, and errors', () => {
+  it('renders messages and errors', () => {
     const store = configureStore({ reducer: { events: eventsReducer } })
-    const events: SentraEvent[] = [
+    const events: RenderableEvent[] = [
       {
         id: '1',
-        type: SentraEventType.MESSAGE_FINAL,
-        author: 'user',
-        content: { role: 'user', parts: [{ text: 'hi' }] },
-        timestamp: '2025-01-01T00:00:00Z',
+        type: 'final',
+        role: 'user',
+        content: 'hi',
       },
       {
         id: '2',
-        type: SentraEventType.STEP_START,
-        author: 'system',
-        content: { role: 'system', parts: [{ text: 'process' }] },
-        timestamp: '2025-01-01T00:00:01Z',
-        meta: { label: 'Step' },
+        type: 'message_delta',
+        role: 'assistant',
+        content: 'thinking...',
       },
       {
         id: '3',
-        type: SentraEventType.ERROR,
-        author: 'system',
-        content: { role: 'system', parts: [{ text: 'oops' }] },
-        timestamp: '2025-01-01T00:00:02Z',
+        type: 'error',
+        content: 'oops',
       },
     ]
 
@@ -42,7 +36,7 @@ describe('EventList rendering', () => {
     )
 
     expect(html).toContain('hi')
-    expect(html).toContain('process')
+    expect(html).toContain('thinking...')
     expect(html).toContain('oops')
   })
 })

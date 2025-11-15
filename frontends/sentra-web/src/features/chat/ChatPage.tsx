@@ -9,7 +9,16 @@ import { useAppDispatch } from "@store/hooks";
 import { fetchConversationById } from "@features/conversations/conversationsSlice";
 import type { ConversationDetails } from "@features/conversations/types/conversationModels";
 import { addEvent, resetEvents } from "./eventsSlice";
-import { SentraEventType } from "./types/events";
+import { createCompletedMessageEvents } from "./utils/aguiMessages";
+import type { Role } from "@ag-ui/core";
+import type { MessageRole } from "@features/conversations/types/conversationModels";
+
+const toAGUIRole = (role: MessageRole): Role => {
+  if (role === "user" || role === "system") {
+    return role;
+  }
+  return "assistant";
+};
 
 export default function ChatPage() {
   const dispatch = useAppDispatch();
@@ -19,25 +28,24 @@ export default function ChatPage() {
 
   useEffect(() => {
     if (currentConversationId) {
-        dispatch(fetchConversationById(currentConversationId)).then((res) => {
-          const payload = res.payload as ConversationDetails;
-          if (payload?.messages) {
-            dispatch(resetEvents());
-            payload.messages.forEach(m => {
-              dispatch(addEvent({
-                id: m.id,
-                type: SentraEventType.MESSAGE_FINAL,
-                author: m.role,
-                content: { role: m.role, parts: [{ text: m.content }] },
-                timestamp: new Date(m.timestamp).toISOString(),
-              }))
-            });
-          }
+      dispatch(resetEvents());
+      dispatch(fetchConversationById(currentConversationId)).then((res) => {
+        const payload = res.payload as ConversationDetails;
+        payload?.messages?.forEach((message) => {
+          createCompletedMessageEvents(
+            message.id,
+            toAGUIRole(message.role),
+            message.content,
+            message.timestamp,
+          ).forEach((event) => dispatch(addEvent(event)));
         });
-      }
-    }, [currentConversationId, dispatch]);
+      });
+    } else {
+      dispatch(resetEvents());
+    }
+  }, [currentConversationId, dispatch]);
 
-    const isConversationActive = !!currentConversationId;
+  const isConversationActive = !!currentConversationId;
 
   return (
     <div className="flex flex-col h-full w-full min-h-0">

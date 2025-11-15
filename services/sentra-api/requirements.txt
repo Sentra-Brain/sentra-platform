@@ -22,6 +22,7 @@ uvicorn
 wsproto
 
 agent-framework
+agent-framework-ag-ui
 
 # OpenTelemetry instrumentation
 opentelemetry-api

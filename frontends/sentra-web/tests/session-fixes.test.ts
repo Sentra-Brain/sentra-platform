@@ -4,27 +4,28 @@ import { configureStore } from "@reduxjs/toolkit";
 import eventsReducer, {
   setWaitingForAnswer,
   addEvent,
+  selectRenderableEvents,
 } from "../src/features/chat/eventsSlice";
-import { SentraEventType } from "../src/features/chat/types/events";
-import sessionReducer, {
-  updateSessionTitle,
-} from "../src/features/sessions/sessionsSlice";
+import { EventType } from "@ag-ui/core";
+import conversationReducer, {
+  updateConversationTitle,
+} from "../src/features/conversations/conversationsSlice";
 
 describe("Session Creation and Rendering Flow Fixes", () => {
   it("should update session title in Redux state", () => {
     const store = configureStore({
       reducer: {
-        session: sessionReducer,
+        conversation: conversationReducer,
       },
       preloadedState: {
-        session: {
-          sessions: [
+        conversation: {
+          conversations: [
             { id: "test-conv-1", title: "Untitled", created_at: "2025-01-01" },
           ],
-          currentSessionId: null,
-          selectedSessionDetails: null,
+          currentConversationId: null,
+          selectedConversationDetails: null,
           loadingList: false,
-          loadingSession: false,
+          loadingConversation: false,
           error: null,
         },
       },
@@ -32,14 +33,14 @@ describe("Session Creation and Rendering Flow Fixes", () => {
 
     // Simulate title update after LLM generation
     store.dispatch(
-      updateSessionTitle({
+      updateConversationTitle({
         id: "test-conv-1",
         title: "Updated LLM Generated Title",
       })
     );
 
     const state = store.getState();
-    const session = state.session.sessions.find((c) => c.id === "test-conv-1");
+    const session = state.conversation.conversations.find((c) => c.id === "test-conv-1");
 
     expect(session?.title).toBe("Updated LLM Generated Title");
   });
@@ -63,27 +64,41 @@ describe("Session Creation and Rendering Flow Fixes", () => {
     expect(store.getState().events.waitingForAnswer).toBe(false);
   });
 
-  it("should handle messages correctly", () => {
+  it("should aggregate chat messages for rendering", () => {
     const store = configureStore({
       reducer: {
         events: eventsReducer,
       },
     });
 
-    const userEvent = {
+    store.dispatch(
+      addEvent({
+        type: EventType.TEXT_MESSAGE_START,
+        messageId: "evt-1",
+        role: "user",
+      })
+    );
+    store.dispatch(
+      addEvent({
+        type: EventType.TEXT_MESSAGE_CONTENT,
+        messageId: "evt-1",
+        delta: "Test message",
+      })
+    );
+    store.dispatch(
+      addEvent({
+        type: EventType.TEXT_MESSAGE_END,
+        messageId: "evt-1",
+      })
+    );
+
+    const renderable = selectRenderableEvents(store.getState());
+    expect(renderable).toHaveLength(1);
+    expect(renderable[0]).toMatchObject({
       id: "evt-1",
-      type: SentraEventType.MESSAGE_FINAL,
-      author: "user",
-      content: { role: "user", parts: [{ text: "Test message" }] },
-      timestamp: new Date().toISOString(),
-    };
-
-    store.dispatch(addEvent(userEvent));
-
-    const state = store.getState();
-    expect(state.events.order).toHaveLength(1);
-    const stored = state.events.eventsById["evt-1"];
-    expect(stored.type).toBe(SentraEventType.MESSAGE_FINAL);
-    expect(stored.content?.parts[0].text).toBe("Test message");
+      type: "final",
+      content: "Test message",
+      role: "user",
+    });
   });
 });
