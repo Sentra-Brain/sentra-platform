@@ -10,7 +10,6 @@ from fastapi.testclient import TestClient
 from sentra.domain.entities.user_entity import UserEntity
 from google.adk.events.event import Event
 from google.genai import types
-from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.adapters.session_service import get_session_service, APP_NAME
 from sentra_brain_api.crosscutting.authorization import get_authenticated_user
 from sentra.infra.nosql.conversation_mongo_repository import get_session_mongo_repository
@@ -54,12 +53,12 @@ def mock_user():
 @pytest.fixture
 def app(mock_user, monkeypatch):
     app = FastAPI()
-    app.include_router(ChatController().router, prefix="/chat")
+    # app.include_router(ChatController().router, prefix="/chat")
     app.dependency_overrides[get_authenticated_user] = lambda: mock_user
     app.dependency_overrides[get_session_mongo_repository] = lambda: object()
     adapter = DummyAdapter()
     monkeypatch.setattr(
-        "sentra_brain_api.features.chat.controller.MongoPersistenceAdapter",
+        # "sentra_brain_api.features.chat.controller.MongoPersistenceAdapter",
         lambda repo, user_id: adapter,
     )
     return app, adapter

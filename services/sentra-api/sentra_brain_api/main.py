@@ -13,7 +13,6 @@ from sentra_brain_api.features.admin.controller import AdminController
 from sentra_brain_api.features.admin.settings.controller import SettingsController as AdminSettingsController
 from sentra_brain_api.features.agents import AgentsController
 from sentra_brain_api.features.auth.controller import AuthController
-from sentra_brain_api.features.chat.controller import ChatController
 from sentra_brain_api.features.conversation.controller import ConversationController
 from sentra_brain_api.features.knowledge.routes import sources, documents
 from sentra_brain_api.features.llm_proxy.controller import LLMProxyController
