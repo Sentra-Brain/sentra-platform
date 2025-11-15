@@ -1,8 +1,7 @@
-// sentra-web/src/features/chat/chatService.ts
 import { HttpAgent } from "@ag-ui/client";
 import type { BaseEvent as AGUIEvent, RunAgentInput } from "@ag-ui/core";
-import type { ConversationMode } from "@features/chat/types/mode";
 import { tokenStorage } from "@shared/utils/tokenStorage";
+import { v4 as uuidv4 } from "uuid";
 
 type ChatSendPayload = {
   threadId: string;
@@ -10,7 +9,7 @@ type ChatSendPayload = {
   content: string;
   contextSourceIds: string[];
   contextDocumentIds: string[];
-  mode: ConversationMode;
+  mode: string;
   agent?: string;
 };
 
@@ -23,17 +22,19 @@ export const chatService = {
   sendMessageStream(
     payload: ChatSendPayload,
     onEvent: OnEventCallback,
-    onError?: OnErrorCallback,
+    onError?: OnErrorCallback
   ): () => void {
     const token = tokenStorage.getAccessToken();
+
     const agent = new HttpAgent({
-      url: `${apiBaseUrl}/chat`,
+      url: `${apiBaseUrl}/chat/agui/stream`,
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       threadId: payload.threadId,
     });
 
     const runInput: RunAgentInput = {
       threadId: payload.threadId,
+      runId: uuidv4(), // ✅ required
       messages: [
         {
           id: payload.messageId,
@@ -41,6 +42,8 @@ export const chatService = {
           content: payload.content,
         },
       ],
+      tools: [], // ✅ required (even if not used)
+      context: [], // ✅ required (even if empty)
       forwardedProps: {
         mode: payload.mode,
         agent: payload.agent,
@@ -50,7 +53,7 @@ export const chatService = {
     };
 
     const subscription = agent.run(runInput).subscribe({
-      next: (event) => onEvent(event),
+      next: onEvent,
       error: (err) => {
         const normalized = err instanceof Error ? err : new Error(String(err));
         onError?.(normalized);

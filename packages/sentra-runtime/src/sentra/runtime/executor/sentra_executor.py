@@ -32,8 +32,8 @@ class SentraExecutor(ExecutorProtocol):
         workflow_registry: Optional[WorkflowRegistry] = None,
     ) -> None:
         self.discovery = SentraEntityDiscovery(
-            agent_registry=agent_registry or agent_registry,
-            workflow_registry=workflow_registry,
+            ag_registry=agent_registry or agent_registry,
+            wf_registry=workflow_registry,
         )
   
   

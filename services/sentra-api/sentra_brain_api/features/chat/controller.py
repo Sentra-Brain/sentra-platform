@@ -74,16 +74,10 @@ class ChatController:
             message = body.get("message")
             conversation_id = body.get("thread_id", "default")
 
-            async def stream_agui():
+            async def stream_agui():                
                 try:
-                    async for update in api_service.send_message_stream(
-                        user_id=user_id,
-                        conversation_id=conversation_id,
-                        message=message,
-                    ):
-                        agui_event = self._to_agui_event(update)
-                        yield f"data: {json.dumps(agui_event, ensure_ascii=False)}\n\n"
-                    yield f"data: {json.dumps({'type': 'done'})}\n\n"
+                    async for update in api_service.send_message_agui_stream(user_id, conversation_id, message):
+                        yield f"data: {json.dumps(update, ensure_ascii=False)}\n\n"
                 except Exception as e:
                     logger.exception("AG-UI stream failed")
                     yield f"data: {json.dumps({'type': 'error', 'message': str(e)})}\n\n"
@@ -97,24 +91,3 @@ class ChatController:
                     "Connection": "keep-alive",
                 },
             )
-
-    def _to_agui_event(self, update: dict) -> dict:
-        match update.get("type"):
-            case "message":
-                return {"type": "MESSAGE", "content": update.get("content")}
-            case "tool_call":
-                return {
-                    "type": "TOOL_CALL_START",
-                    "toolCallId": update.get("id", "call1"),
-                    "toolCallName": update.get("name"),
-                }
-            case "tool_result":
-                return {
-                    "type": "TOOL_CALL_RESULT",
-                    "toolCallId": update.get("id", "call1"),
-                    "content": update.get("result"),
-                }
-            case "error":
-                return {"type": "error", "message": update.get("message")}
-            case _:
-                return {"type": "MESSAGE", "content": str(update)}
