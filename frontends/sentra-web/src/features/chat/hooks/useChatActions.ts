@@ -12,6 +12,7 @@ import {
   addEvent,
   setStreaming,
   setWaitingForAnswer,
+  type AGUIEvent,
 } from "@features/chat/eventsSlice";
 import { chatService } from "@features/chat/chatService";
 import { EventType } from "@ag-ui/core";
@@ -46,7 +47,7 @@ export function useChatActions() {
     // Step 1: ensure conversation exists
     if (!conversationId) {
       const newConversation = await dispatch(
-        createConversation({ initial_prompt: trimmed, agent: selectedAgent || undefined })
+        createConversation({ initial_prompt: trimmed, agent: selectedAgent?.key || undefined })
       ).unwrap();
       conversationId = newConversation.id;
       dispatch(selectConversation(conversationId));
@@ -76,10 +77,10 @@ export function useChatActions() {
           ? selectedContext.documentIds
           : [],
         mode,
-        agent: selectedAgent || undefined,
+        agent: selectedAgent?.key || undefined,
       },
       (event) => {
-        dispatch(addEvent(event));
+        dispatch(addEvent(event as AGUIEvent));
         if (event.type === EventType.RUN_FINISHED) {
           stopStreaming();
           if (!currentConversationId) {

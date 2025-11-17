@@ -37,6 +37,8 @@ def initialize_agents() -> None:
     # ----------------------------------------------------------------
     # Load core agents explicitly
     # ----------------------------------------------------------------
+    
+    logger.info("Initializing Sentra Agent Registry...")
     for mod in CORE_AGENTS:
         try:
             importlib.import_module(mod)

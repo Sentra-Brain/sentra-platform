@@ -6,17 +6,21 @@ export type CompletedMessageEventTuple = [
   TextMessageContentEvent,
   TextMessageEndEvent,
 ];
-
 export function createCompletedMessageEvents(
   messageId: string,
   role: Role,
   content: string,
-  timestamp?: number,
+  timestamp?: number
 ): CompletedMessageEventTuple {
+  const safeRole: Role = 
+    role === "user" || role === "assistant" || role === "system" || role === "developer"
+      ? role
+      : "assistant";
+
   const start: TextMessageStartEvent = {
     type: EventType.TEXT_MESSAGE_START,
     messageId,
-    role,
+    role: safeRole,
     timestamp,
   };
 

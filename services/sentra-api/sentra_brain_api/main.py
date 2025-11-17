@@ -3,6 +3,8 @@ from fastapi import FastAPI, Request
 from fastapi.concurrency import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, RedirectResponse
+from sentra.runtime.tools.mcp import init_mcp_client
+from sentra.runtime.tools.mcp_gateway_client import MCPGatewayClient
 from sentra_brain_api.core.constants import CONTACT
 from sentra_brain_api.core.constants import DESCRIPTION
 from sentra_brain_api.core.constants import LICENSE_INFO
@@ -20,7 +22,7 @@ from sentra_brain_api.features.organization.controller import router as organiza
 from sentra_brain_api.features.public.controller import PublicSettingsController
 from sentra_brain_api.features.settings.controller import SettingsController
 from sentra_brain_api.features.user.controller import UserController
-from sentra_brain_api.features.chat.agui_adapter import register_sentra_agui_endpoint
+from sentra_brain_api.features.chat.agui_controller import AGUIChatController
 from sentra_brain_api.middleware.error_handler import ErrorHandlerMiddleware
 from sentra.infra.sql import postgres_service
 from sentra.runtime.agents.registry import agent_registry
@@ -39,15 +41,13 @@ def get_lifespan(config: AppLifecycleConfig):
         if config.init_db:
             postgres_service.init_db()
 
-        # Agent Registry initialization
         try:
-            logger.info("Initializing Sentra Agent Registry...")
             initialize_agents()
-            logger.info("Agent Registry initialized with %d templates", len(agent_registry.list_templates()))
-            register_sentra_agui_endpoint(app, path="/chat/agui")
-            logger.info("Registered AG-UI endpoint at /chat/agui")
+            mcp_client = MCPGatewayClient(os.getenv("MCP_GATEWAY_URL", "http://localhost:8811/mcp"))
+            init_mcp_client(mcp_client)
+
         except Exception as e:
-            logger.exception("❌ Failed to initialize Agent Registry: %s", e)
+            logger.exception("❌ Failed to initialize resources: %s", e)
             raise
 
         yield
@@ -81,6 +81,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
 
     auth_controller = AuthController()
     user_controller = UserController()
+    agui_chat = AGUIChatController()
     admin_controller = AdminController()
     admin_settings_controller = AdminSettingsController()
     settings_controller = SettingsController()
@@ -91,6 +92,7 @@ def create_app(config: AppLifecycleConfig = AppLifecycleConfig()):
 
     app.include_router(auth_controller.router, prefix="/auth", tags=["auth"])
     app.include_router(user_controller.router, prefix="/users", tags=["users"])
+    app.include_router(agui_chat.router, prefix="", tags=["chat"])
     app.include_router(admin_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(admin_settings_controller.router, prefix="/admin", tags=["admin"])
     app.include_router(settings_controller.router, prefix="", tags=["settings"])

@@ -14,10 +14,14 @@ import type { Role } from "@ag-ui/core";
 import type { MessageRole } from "@features/conversations/types/conversationModels";
 
 const toAGUIRole = (role: MessageRole): Role => {
-  if (role === "user" || role === "system") {
-    return role;
+  switch (role) {
+    case "user":
+    case "system":
+    case "assistant":
+      return role;
+    default:
+      return "assistant";
   }
-  return "assistant";
 };
 
 export default function ChatPage() {
