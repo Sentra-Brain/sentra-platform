@@ -1,0 +1,38 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using Sentra.Domain.Enums;
+
+namespace Sentra.Domain.Entities;
+
+[Table("users")]
+public class UserEntity : BaseEntity
+{
+    public string Username { get; set; }
+    public string Email { get; set; }
+    public string FullName { get; set; }
+    public string HashedPassword { get; set; }
+    public bool Disabled { get; set; } = false;
+    public string Roles { get; set; }
+    public string? JobTitle { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Bio { get; set; }
+    public string PreferredLanguage { get; set; } = "es";
+    public string Timezone { get; set; } = "Europe/Madrid";
+
+    public IList<ConversationEntity> Conversations { get; set; }
+    public IList<DocumentEntity> Documents { get; set; }
+    public IList<KnowledgeSourceEntity> KnowledgeSources { get; set; }
+
+    public IEnumerable<Role> GetRoles()
+    {
+        foreach (var r in Roles.Split(',', StringSplitOptions.RemoveEmptyEntries))
+            yield return Enum.Parse<Role>(r, true);
+    }
+
+    public void SetRoles(IEnumerable<Role> roles)
+    {
+        Roles = string.Join(",", roles);
+    }
+}

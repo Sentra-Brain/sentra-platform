@@ -16,7 +16,7 @@ All code, data, and computation are designed to remain on-premises. The system i
 | `packages/sentra-runtime`   | Runtime logic, orchestration, and supporting libraries.                                  |
 | `services/sentra-api`       | Main API gateway (REST), orchestrates core, integrates with DBs and vector stores.       |
 | `services/sentra-mcp`       | MCP (Model Context Protocol) server for external integrations and long-running ops.       |
-| `services/sentra-rag-*`     | Microservices for vector search (`server`) and document ingestion (`worker`).            |
+| `services/Sentra.Rag.*`     | Microservices for vector search (`server`) and document ingestion (`worker`).            |
 | `deploy/`                   | Docker Compose files, monitoring configs, deployment scripts, and related docs.          |
 | `frontends/`                | Web UIs: `sentra-admin` (admin panel), `sentra-web` (end-user chat).                    |
 | `docs/`                     | Technical documentation, ADRs, and internal guides.                                      |

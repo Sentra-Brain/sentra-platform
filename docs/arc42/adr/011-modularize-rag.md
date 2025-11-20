@@ -10,7 +10,7 @@ Sentra Brain is evolving to support Retrieval-Augmented Generation (RAG) capabil
 
 Currently:
 
-* `sentra-rag-worker` performs document indexing via RabbitMQ.
+* `Sentra.Rag.Worker` performs document indexing via RabbitMQ.
 * The `sentra-api` is beginning to support RAG-based prompting.
 
 However, using sentence-transformers and ChromaDB within the API introduces significant image bloat, longer build times, and tight coupling between conversational logic and heavy ML infrastructure. Reusing embedding and vector store logic is also problematic as it’s currently isolated inside the worker.
@@ -25,12 +25,12 @@ core/
 ├── sentra-rag/             # RAG logic: embeddings, vector store, chunking
 
 services/
-├── sentra-rag-base/        # Shared Docker image with heavy RAG dependencies
-├── sentra-rag-server/      # Lightweight API for RAG retrieval
-├── sentra-rag-worker/      # Async document indexer via RabbitMQ
+├── Sentra.Rag.Base/        # Shared Docker image with heavy RAG dependencies
+├── Sentra.Rag.Server/      # Lightweight API for RAG retrieval
+├── Sentra.Rag.Worker/      # Async document indexer via RabbitMQ
 ```
 
-A shared **Docker base image** (`Dockerfile`) already exists within `sentra-rag-worker` as `Dockerfile.base` and `requirements.rag.txt`. This base image will be **moved to `services/sentra-rag-base/`** to serve as the foundation for both the server and worker.
+A shared **Docker base image** (`Dockerfile`) already exists within `Sentra.Rag.Worker` as `Dockerfile.base` and `requirements.rag.txt`. This base image will be **moved to `src/Sentra.Rag.Base/`** to serve as the foundation for both the server and worker.
 
 The shared Python package `packages/sentra-rag/` will include:
 
@@ -39,7 +39,7 @@ The shared Python package `packages/sentra-rag/` will include:
 * Chunking logic
 * Shared DTOs and filters
 
-The API (`sentra-api`) will offload embedding and retrieval to `sentra-rag-server` over HTTP, keeping its own image lightweight and fast to deploy.
+The API (`sentra-api`) will offload embedding and retrieval to `Sentra.Rag.Server` over HTTP, keeping its own image lightweight and fast to deploy.
 
 ## Consequences
 
@@ -75,9 +75,9 @@ The API (`sentra-api`) will offload embedding and retrieval to `sentra-rag-serve
 ## Implementation Plan
 
 1. Create `packages/sentra-rag` as internal shared library.
-2. Move embedding and vector store logic from `sentra-rag-worker` into `sentra-rag`.
-3. Build `sentra-rag-server` as a minimal FastAPI service with `/retrieve` and `/embed` endpoints.
-4. Move `Dockerfile.base` and `requirements.rag.txt` into `services/sentra-rag-base/` and standardize the build.
+2. Move embedding and vector store logic from `Sentra.Rag.Worker` into `sentra-rag`.
+3. Build `Sentra.Rag.Server` as a minimal FastAPI service with `/retrieve` and `/embed` endpoints.
+4. Move `Dockerfile.base` and `requirements.rag.txt` into `src/Sentra.Rag.Base/` and standardize the build.
 5. Update both `rag-server` and `rag-worker` to use the base image.
 6. Update `sentra-api` to query `rag-server` when RAG is requested in a conversation.
 

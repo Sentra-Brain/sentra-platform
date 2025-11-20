@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'services/sentra-rag-server/**'
+      - 'src/Sentra.Rag.Server/**'
       - 'packages/sentra-rag/**'
-      - '.github/workflows/cicd-sentra-rag-server.yml'
+      - '.github/workflows/cicd-Sentra.Rag.Server.yml'
   pull_request:
     paths:
-      - 'services/sentra-rag-server/**'
+      - 'src/Sentra.Rag.Server/**'
       - 'packages/sentra-rag/**'
-      - '.github/workflows/cicd-sentra-rag-server.yml'
+      - '.github/workflows/cicd-Sentra.Rag.Server.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/sentra-rag-server
+        working-directory: src/Sentra.Rag.Server
     steps:
       - uses: actions/checkout@v4
 
@@ -48,7 +48,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/sentra-rag-server
+        working-directory: src/Sentra.Rag.Server
     steps:
       - uses: actions/checkout@v4
 
@@ -70,18 +70,18 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -f services/sentra-rag-server/Dockerfile \
-            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:latest \
-            -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:${{ steps.get_version.outputs.version }} \
+          docker build -f src/Sentra.Rag.Server/Dockerfile \
+            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Base:latest \
+            -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Server:${{ steps.get_version.outputs.version }} \
             .
         working-directory: .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:${{ steps.get_version.outputs.version }}
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Server:${{ steps.get_version.outputs.version }}
 
       - name: Tag and push 'latest'
         run: |
-          docker tag ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:${{ steps.get_version.outputs.version }} \
-            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:latest
-          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-server:latest
+          docker tag ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Server:${{ steps.get_version.outputs.version }} \
+            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Server:latest
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Server:latest

@@ -4,14 +4,14 @@ on:
   push:
     branches: [main]
     paths:
-      - 'services/sentra-rag-worker/**'
+      - 'src/Sentra.Rag.Worker/**'
       - 'packages/sentra-core/**'
-      - '.github/workflows/cicd-sentra-rag-worker.yml'
+      - '.github/workflows/cicd-Sentra.Rag.Worker.yml'
   pull_request:
     paths:
-      - 'services/sentra-rag-worker/**'
+      - 'src/Sentra.Rag.Worker/**'
       - 'packages/sentra-core/**'
-      - '.github/workflows/cicd-sentra-rag-worker.yml'
+      - '.github/workflows/cicd-Sentra.Rag.Worker.yml'
   workflow_dispatch:
 
 permissions:
@@ -31,7 +31,7 @@ jobs:
       - name: Check if requirements.rag.txt has changed
         id: check
         run: |
-          if git diff --name-only HEAD~1 HEAD | grep -q "services/sentra-rag-worker/requirements.rag.txt"; then
+          if git diff --name-only HEAD~1 HEAD | grep -q "src/Sentra.Rag.Worker/requirements.rag.txt"; then
             echo "needs-rebuild=true" >> $GITHUB_OUTPUT
             echo "requirements.rag.txt has changed, base image rebuild needed"
           else
@@ -46,7 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/sentra-rag-worker
+        working-directory: src/Sentra.Rag.Worker
     steps:
       - uses: actions/checkout@v4
 
@@ -71,7 +71,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: services/sentra-rag-worker
+        working-directory: src/Sentra.Rag.Worker
     steps:
       - uses: actions/checkout@v4
 
@@ -93,18 +93,18 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -f services/sentra-rag-worker/Dockerfile \
-            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-base:latest \
-            -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:${{ steps.get_version.outputs.version }} \
+          docker build -f src/Sentra.Rag.Worker/Dockerfile \
+            --build-arg BASE_IMAGE=${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Base:latest \
+            -t ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Worker:${{ steps.get_version.outputs.version }} \
             .
         working-directory: .
 
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:${{ steps.get_version.outputs.version }}
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Worker:${{ steps.get_version.outputs.version }}
 
       - name: Tag and push 'latest'
         run: |
-          docker tag ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:${{ steps.get_version.outputs.version }} \
-            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:latest
-          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/sentra-rag-worker:latest
+          docker tag ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Worker:${{ steps.get_version.outputs.version }} \
+            ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Worker:latest
+          docker push ${{ secrets.AZURE_REGISTRY_LOGIN_SERVER }}/Sentra.Rag.Worker:latest

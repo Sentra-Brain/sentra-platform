@@ -1,6 +1,13 @@
 # Code Summaries
 code_summary.txt
 
+# Aspire generated files
+.aspire/
+
+# Container data folders
+/data/*
+!/data/.gitkeep 
+
 # User-specific files
 *.rsuser
 *.suo

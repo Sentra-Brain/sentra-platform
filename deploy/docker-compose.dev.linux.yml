@@ -59,60 +59,60 @@ services:
     env_file:
       - ../services/sentra-mcp/.env
 
-  sentra-rag-base:
+  Sentra.Rag.Base:
     build:
-      context: ../services/sentra-rag-base
+      context: ../src/Sentra.Rag.Base
       dockerfile: Dockerfile
-    image: sentra-rag-base:dev
-    container_name: sentra-rag-base
+    image: Sentra.Rag.Base:dev
+    container_name: Sentra.Rag.Base
     networks:
       - sentrabrain-dev-net
   
-  sentra-rag-server:
+  Sentra.Rag.Server:
     build:
       context: ../
-      dockerfile: services/sentra-rag-server/Dockerfile
-    image: sentra-rag-server:dev
-    container_name: sentra-rag-server
+      dockerfile: src/Sentra.Rag.Server/Dockerfile
+    image: Sentra.Rag.Server:dev
+    container_name: Sentra.Rag.Server
     ports:
       - "5680:5680"   # Python debugpy
       - "9100:9100"   
     volumes:
-      - ../services/sentra-rag-server:/app
+      - ../src/Sentra.Rag.Server:/app
       - ../packages/sentra-infra:/packages/sentra-infra
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
     env_file:
-      - ../services/sentra-rag-server/.env
+      - ../src/Sentra.Rag.Server/.env
     depends_on:
       - sentra-vector-db
-      - sentra-rag-base
+      - Sentra.Rag.Base
 
-  sentra-rag-worker:
+  Sentra.Rag.Worker:
     build:
       context: ../
-      dockerfile: services/sentra-rag-worker/Dockerfile
-    image: sentra-rag-worker:dev
-    container_name: sentra-rag-worker
+      dockerfile: src/Sentra.Rag.Worker/Dockerfile
+    image: Sentra.Rag.Worker:dev
+    container_name: Sentra.Rag.Worker
     pull_policy: always
     ports:
       - "5679:5679"   # Python debugpy
       - "8081:8080"   # Metrics port
     volumes:
-      - ../services/sentra-rag-worker:/app
+      - ../src/Sentra.Rag.Worker:/app
       - ../packages/sentra-infra:/packages/sentra-infra
       - ${HOME}/sentra-knowledge:/mnt/sentra_knowledge:rw
       # - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
     networks:
       - sentrabrain-dev-net
     env_file:
-      - ../services/sentra-rag-worker/.env
+      - ../src/Sentra.Rag.Worker/.env
     depends_on:
       - sentra-sql-db
       - sentra-vector-db
       - rabbitmq
-      - sentra-rag-base
+      - Sentra.Rag.Base
 
   llama:
     image: ghcr.io/kth8/llama-server:llama-3.2-1b-instruct

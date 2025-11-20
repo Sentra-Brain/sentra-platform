@@ -32,16 +32,16 @@ services:
     env_file:
       - .prod.env
 
-  sentra-rag-base:
-    image: sentrabrain.azurecr.io/sentra-rag-base:latest
-    container_name: sentra-rag-base
+  Sentra.Rag.Base:
+    image: sentrabrain.azurecr.io/Sentra.Rag.Base:latest
+    container_name: Sentra.Rag.Base
     pull_policy: always
     networks:
       - sentrabrain-net
 
-  sentra-rag-worker:
-    image: sentrabrain.azurecr.io/sentra-rag-worker:latest
-    container_name: sentra-rag-worker
+  Sentra.Rag.Worker:
+    image: sentrabrain.azurecr.io/Sentra.Rag.Worker:latest
+    container_name: Sentra.Rag.Worker
     pull_policy: always
     volumes:
       - /opt/sentra-brain/knowledge:/mnt/sentra_knowledge:rw
@@ -53,7 +53,7 @@ services:
       - sentra-sql-db
       - sentra-vector-db
       - rabbitmq
-      - sentra-rag-base
+      - Sentra.Rag.Base
 
   vllm:
     image: vllm/vllm-openai

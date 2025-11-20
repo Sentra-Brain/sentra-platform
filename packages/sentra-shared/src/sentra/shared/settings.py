@@ -89,7 +89,7 @@ class SentraSettings(BaseSettings):
 
 	# ---- RAG server ----
 	rag_server_url: str = Field(
-		default="http://sentra-rag-server:9100",
+		default="http://Sentra.Rag.Server:9100",
 		json_schema_extra={"env": "RAG_SERVER_URL"},
 	)
 

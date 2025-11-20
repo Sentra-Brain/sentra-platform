@@ -1,0 +1,23 @@
+########################
+# HTTP server settings #
+########################
+port: 8000
+listen_address: "0.0.0.0"
+max_payload_size_bytes: 41943040
+cors_allow_origins: ["*"]
+
+########################
+# OpenTelemetry config #
+########################
+open_telemetry:
+  service_name: "chroma"
+  endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"  # Aspire injects this
+  filters:
+    - crate_name: "chroma_frontend"
+      filter_level: "trace"
+
+####################
+# General settings #
+####################
+persist_path: "/data"
+allow_reset: false
