@@ -62,6 +62,44 @@ var rabbit = builder.AddRabbitMQ("rabbitmq", rabbitUser, rabbitPass)
     .WithManagementPlugin()
     .WithDataBindMount(source: $"{dataFolder}/rabbitmq", isReadOnly: false);
 
+
+// ============================================================
+// Docker MCP Gateway
+// ============================================================
+var mcpGateway = builder
+    .AddContainer("mcp-gateway", "docker/mcp-gateway", "latest")
+    .WithContainerName("mcp_gateway")
+    .WithBindMount("/var/run/docker.sock", "/var/run/docker.sock")
+    .WithBindMount(
+        Path.Combine(
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+            ".docker/mcp"
+        ),
+        "/mcp"
+    )
+    .WithArgs(
+        "--catalog=/mcp/catalogs/docker-mcp.yaml",
+        "--config=/mcp/config.yaml",
+        "--registry=/mcp/registry.yaml",
+        "--secrets=docker-desktop",
+        "--watch=true",
+        "--transport=streaming",
+        "--port=8811"
+    )
+    .WithEndpoint(
+        port: 8811,
+        targetPort: 8811,
+        scheme: "tcp",
+        name: "mcp",
+        env: null,
+        isProxied: false,
+        isExternal: true
+    )
+    .WithLifetime(ContainerLifetime.Persistent);
+
+
+
+
 // ============================================================
 // API Service
 // ============================================================
@@ -84,5 +122,15 @@ builder.AddNpmApp("sentra-web", "../Sentra.Web")
     .WithHttpEndpoint(env: "VITE_PORT")
     .WithExternalHttpEndpoints()
     .PublishAsDockerFile();
+
+// ============================================================
+// Sentra Rag Worker
+// ============================================================
+
+#pragma warning disable ASPIREHOSTINGPYTHON001 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+var pythonapp = builder.AddPythonApp("sentra-rag-worker", "../Sentra.Rag.Worker", "sentra_rag_worker/main.py")
+       .WithHttpEndpoint(env: "PORT")
+       .WithExternalHttpEndpoints();
+#pragma warning restore ASPIREHOSTINGPYTHON001
 
 builder.Build().Run();

@@ -1,13 +1,13 @@
-ARG BASE_IMAGE=Sentra.Rag.Base:latest
+ARG BASE_IMAGE=sentra-rag-base:latest
 FROM ${BASE_IMAGE}
 
 WORKDIR /app
 
 # Copy and install core packages
-COPY packages/sentra-domain /packages/sentra-domain
-COPY packages/sentra-shared /packages/sentra-shared
-COPY packages/sentra-infra /packages/sentra-infra
-COPY packages/sentra-rag /packages/sentra-rag
+COPY ../packages/sentra-domain /packages/sentra-domain
+COPY ../packages/sentra-shared /packages/sentra-shared
+COPY ../packages/sentra-infra /packages/sentra-infra
+COPY ../packages/sentra-rag /packages/sentra-rag
 RUN pip install -e /packages/sentra-domain
 RUN pip install -e /packages/sentra-shared
 RUN pip install -e /packages/sentra-infra

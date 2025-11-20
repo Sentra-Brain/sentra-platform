@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=Sentra.Rag.Base:latest
+ARG BASE_IMAGE=sentra-rag-base:latest
 FROM ${BASE_IMAGE}
 
 WORKDIR /app

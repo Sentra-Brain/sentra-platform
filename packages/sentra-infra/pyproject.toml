@@ -52,5 +52,3 @@ package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
-namespaces = true
-include = ["sentra.*"]

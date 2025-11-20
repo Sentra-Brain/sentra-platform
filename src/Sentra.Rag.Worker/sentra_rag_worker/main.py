@@ -16,7 +16,7 @@ from sentra_rag_worker.services.folder_scanner import FolderScanner
 from sentra.shared.logging import get_logger, configure_logging
 from sentra.infra.amqp.indexing_publisher import IndexingJobPublisher
 # from sentra_rag_worker.core.observability import instrument_worker, trace_job_processing, get_correlation_id_from_message
-from sentra.infra.amqp.rabbitmq_consumer import RabbitMQConsumer  # ya usando aio-pika
+from sentra.infra.amqp.rabbitmq_consumer import RabbitMQConsumer
 from sentra.infra.sql.postgres_service import create_db_session
 
 debug_mode = os.getenv("DEBUG_MODE", "false").lower() == "true"
