@@ -13,10 +13,10 @@ public class KnowledgeSourceEntity : BaseEntity
     public string? Path { get; set; }
     public string? Description { get; set; }
 
-    public KnowledgeSourceVisibility Visibility { get; set; } = KnowledgeSourceVisibility.PRIVATE;
+    public KnowledgeSourceVisibility Visibility { get; set; } = KnowledgeSourceVisibility.Private;
     public bool AutoIndex { get; set; } = false;
 
-    public KnowledgeSourceStatus Status { get; set; } = KnowledgeSourceStatus.ACTIVE;
+    public KnowledgeSourceStatus Status { get; set; } = KnowledgeSourceStatus.Active;
 
     public Guid CreatedById { get; set; }
     public UserEntity CreatedBy { get; set; }

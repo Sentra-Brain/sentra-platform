@@ -1,7 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using Sentra.Domain.Enums;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sentra.Domain.Entities;
 

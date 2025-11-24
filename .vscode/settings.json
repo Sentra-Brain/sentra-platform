@@ -11,20 +11,18 @@
     "**/__pycache__": true,
     "**/.pytest_cache": true
   },
-  "python.envFile": "${workspaceFolder}/.env",
-  "coverage-gutters.coverageFileNames": ["coverage.xml"],
-  "coverage-gutters.showGutterCoverage": true,
-  "coverage-gutters.showLineCoverage": true,
-  "coverage-gutters.highlightPartialLines": true,
-  "sqltools.connections": [
-    {
-      "previewLimit": 50,
-      "server": "127.0.0.1",
-      "port": 5432,
-      "driver": "PostgreSQL",
-      "name": "sentra_db",
-      "database": "sentra_brain",
-      "username": "sentra_admin"
-    }
+
+  "python.defaultInterpreterPath": "${workspaceFolder}/.venv/Scripts/python.exe",
+
+  "python.analysis.autoImportCompletions": true,
+  "python.analysis.useLibraryCodeForTypes": true,
+
+  "python.analysis.extraPaths": [
+    "${workspaceFolder}/packages",
+    "${workspaceFolder}/packages/sentra-domain/src",
+    "${workspaceFolder}/packages/sentra-engine/src",
+    "${workspaceFolder}/packages/sentra-infra/src",
+    "${workspaceFolder}/packages/sentra-shared/src",
+    "${workspaceFolder}/services"
   ]
 }

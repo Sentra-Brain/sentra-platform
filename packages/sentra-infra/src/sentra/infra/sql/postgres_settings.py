@@ -17,7 +17,7 @@ class PostgresSettings(BaseSettings):
     access_token_expire_minutes: int = Field(..., json_schema_extra={"env": "ACCESS_TOKEN_EXPIRE_MINUTES"})
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        # env_file=".env",
         extra="allow"
     )
 

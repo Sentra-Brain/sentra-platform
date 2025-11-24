@@ -159,5 +159,6 @@ if __name__ == "__main__":
         import debugpy
         debugpy.listen(("0.0.0.0", 5680))
         debugpy.wait_for_client()
+    port = int(os.getenv("PORT", "9100"))
 
-    uvicorn.run(app, host="0.0.0.0", port=9100, log_level="debug" if debug_mode else "info")
+    uvicorn.run(app, host="0.0.0.0", port=port, log_level="debug" if debug_mode else "info")

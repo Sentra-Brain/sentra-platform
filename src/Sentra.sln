@@ -1,6 +1,7 @@
-﻿Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.8.0.0
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 18
+VisualStudioVersion = 18.3.11206.111 d18.3
 MinimumVisualStudioVersion = 17.8.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentra.AppHost", "Sentra.AppHost\Sentra.AppHost.csproj", "{6C76FAC9-E6B2-420D-85DE-90AB82F407D9}"
 EndProject
@@ -9,6 +10,16 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentra.Api", "Sentra.Api\Sentra.Api.csproj", "{379861BE-C63A-484C-8745-223299AE1533}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentra.Tests", "Sentra.Tests\Sentra.Tests.csproj", "{2CF80D21-D449-414B-96BD-B2529BFFDC0C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Domain", "Sentra.Domain\Sentra.Domain.csproj", "{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Contracts", "Sentra.Contracts\Sentra.Contracts.csproj", "{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Infrastructure", "Sentra.Infrastructure\Sentra.Infrastructure.csproj", "{28D7AEC6-22A3-6207-B111-211F747D7763}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Shared", "Sentra.Shared\Sentra.Shared.csproj", "{4A04C66E-658D-8CC2-91EA-AD802114AF57}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Application", "Sentra.Application\Sentra.Application.csproj", "{9F41507E-9B38-40B7-941D-C54E5D19F084}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,10 +43,26 @@ Global
 		{2CF80D21-D449-414B-96BD-B2529BFFDC0C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CF80D21-D449-414B-96BD-B2529BFFDC0C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2CF80D21-D449-414B-96BD-B2529BFFDC0C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F51397FA-5E66-441D-B46B-AED2DBEF9FE0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F51397FA-5E66-441D-B46B-AED2DBEF9FE0}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F51397FA-5E66-441D-B46B-AED2DBEF9FE0}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F51397FA-5E66-441D-B46B-AED2DBEF9FE0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{28D7AEC6-22A3-6207-B111-211F747D7763}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{28D7AEC6-22A3-6207-B111-211F747D7763}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{28D7AEC6-22A3-6207-B111-211F747D7763}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{28D7AEC6-22A3-6207-B111-211F747D7763}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4A04C66E-658D-8CC2-91EA-AD802114AF57}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4A04C66E-658D-8CC2-91EA-AD802114AF57}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4A04C66E-658D-8CC2-91EA-AD802114AF57}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4A04C66E-658D-8CC2-91EA-AD802114AF57}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F41507E-9B38-40B7-941D-C54E5D19F084}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F41507E-9B38-40B7-941D-C54E5D19F084}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F41507E-9B38-40B7-941D-C54E5D19F084}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F41507E-9B38-40B7-941D-C54E5D19F084}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

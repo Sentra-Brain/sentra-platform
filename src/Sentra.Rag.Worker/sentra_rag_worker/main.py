@@ -138,7 +138,6 @@ async def main():
         debugpy.listen(("0.0.0.0", 5679))
         debugpy.wait_for_client()
         logger.info("✅ Debugger attached")
-
     logger.info("🚀 Starting Sentra.Rag.Worker...")
     logger.info(f"📡 RabbitMQ: {settings.rabbitmq_host}:{settings.rabbitmq_port}")
     logger.info(f"📚 ChromaDB: {settings.chroma_url}")

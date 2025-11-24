@@ -14,7 +14,7 @@ public class DocumentEntity : BaseEntity
     public DocumentFileType Filetype { get; set; }
     public string Path { get; set; }
 
-    public DocumentStatus Status { get; set; } = DocumentStatus.PENDING;
+    public DocumentStatus Status { get; set; } = DocumentStatus.Pending;
     public string? StatusMessage { get; set; }
     public string? Error { get; set; }
     public int? ChunksCount { get; set; }
