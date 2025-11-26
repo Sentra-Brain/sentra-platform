@@ -74,6 +74,10 @@ app.UseSwaggerUI(options =>
 {
     options.SwaggerEndpoint("/openapi/v1.json", "Sentra API v1");
     options.RoutePrefix = "docs";
+    options.OAuthClientId("swagger-ui");
+    options.OAuthClientSecret("swagger-ui-secret");
+    options.OAuthAppName("Sentra API Explorer");
+    options.OAuthUsePkce();
 });
 
 app.UseReDoc(options =>

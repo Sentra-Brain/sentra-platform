@@ -18,31 +18,64 @@ internal sealed class BearerSecuritySchemeTransformer(
         if (!schemes.Any(s => s.Name == "Bearer"))
             return;
 
-        // 1. Define the Bearer security scheme
         document.Components ??= new OpenApiComponents();
-        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();
+        document.Components.SecuritySchemes ??= new Dictionary<string, IOpenApiSecurityScheme>();       
 
+        //
+        // 1. OAuth2 Password flow (to force Swagger UI to show a login form)
+        //
+        document.Components.SecuritySchemes["OAuthPassword"] =
+            new OpenApiSecurityScheme
+            {
+                Type = SecuritySchemeType.OAuth2,
+                Description = "Authenticate using username and password (mapped to /auth/token).",
+                Flows = new OpenApiOAuthFlows
+                {
+                    Password = new OpenApiOAuthFlow
+                    {
+                        TokenUrl = new Uri("/auth/token", UriKind.Relative),
+                        Scopes = new Dictionary<string, string>
+                        {
+                            { "api", "Access the Sentra API" }
+                        }
+                    }
+                }
+            };
+
+        //
+        // 1. Bearer (your current scheme - leave untouched)
+        //
         document.Components.SecuritySchemes["Bearer"] = new OpenApiSecurityScheme
         {
             Type = SecuritySchemeType.Http,
-            Scheme = "bearer",           // Authorization: Bearer <token>
+            Scheme = "bearer",
             In = ParameterLocation.Header,
-            BearerFormat = "Json Web Token",
+            BearerFormat = "JWT",
             Description = "JWT Bearer authentication"
         };
 
-        // 2. Apply it as a requirement on all operations
+        //
+        // 3. Apply security requirements to every operation
+        //
         foreach (var path in document.Paths.Values)
         {
-            if (path == null) continue;
-            if (path.Operations == null) continue;
+            if (path?.Operations == null)
+                continue;
+
             foreach (var operation in path.Operations.Values)
             {
                 operation.Security ??= new List<OpenApiSecurityRequirement>();
 
+                // Bearer
                 operation.Security.Add(new OpenApiSecurityRequirement
                 {
                     [new OpenApiSecuritySchemeReference("Bearer", document)] = []
+                });
+
+                // OAuth password flow
+                operation.Security.Add(new OpenApiSecurityRequirement
+                {
+                    [new OpenApiSecuritySchemeReference("OAuthPassword", document)] = new List<string> { "api" }
                 });
             }
         }
