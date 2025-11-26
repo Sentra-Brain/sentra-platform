@@ -24,7 +24,11 @@ public class DocumentEntity : BaseEntity
     public string? MarkdownHash { get; set; }
     public bool HasMarkdown { get; set; } = false;
 
+    [ForeignKey(nameof(KnowledgeSource))]
     public Guid KnowledgeSourceId { get; set; }
+    public KnowledgeSourceEntity? KnowledgeSource { get; set; }
+
+    [ForeignKey(nameof(CreatedBy))]
     public Guid CreatedById { get; set; }
-    public UserEntity CreatedBy { get; set; }
+    public UserEntity? CreatedBy { get; set; }
 }

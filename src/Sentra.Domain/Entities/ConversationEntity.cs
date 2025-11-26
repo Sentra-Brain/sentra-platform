@@ -10,6 +10,7 @@ public class ConversationEntity : BaseEntity
     public string? Description { get; set; }
     public string? InitialPrompt { get; set; }
 
+    [ForeignKey(nameof(CreatedBy))]
     public Guid CreatedById { get; set; }
-    public UserEntity CreatedBy { get; set; }
+    public UserEntity? CreatedBy { get; set; }
 }

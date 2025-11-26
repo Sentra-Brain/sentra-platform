@@ -18,6 +18,7 @@ public class KnowledgeSourceEntity : BaseEntity
 
     public KnowledgeSourceStatus Status { get; set; } = KnowledgeSourceStatus.Active;
 
+    [ForeignKey(nameof(CreatedBy))]
     public Guid CreatedById { get; set; }
-    public UserEntity CreatedBy { get; set; }
+    public UserEntity? CreatedBy { get; set; }
 }
