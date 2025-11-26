@@ -44,6 +44,7 @@ var mongoDb = mongo.AddDatabase(dbNameNoSql);
 // ============================================================
 
 var postgres = builder.AddPostgres("postgres", pgUser, pgPass)
+    .WithHostPort(5432)
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataBindMount(source: $"{dataFolder}/postgres", isReadOnly: false)
     .WithPgWeb(pgweb => pgweb.WithHostPort(5050));

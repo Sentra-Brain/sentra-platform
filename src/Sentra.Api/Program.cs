@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
@@ -34,7 +35,26 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
-builder.Services.AddDbContext<SentraDbContext>();
+
+
+
+// ------------------------------------------------------------
+// IMPORTANT: read Aspire-supplied connection string
+// ------------------------------------------------------------
+var connectionString = builder.Configuration.GetConnectionString("Default");
+if (string.IsNullOrWhiteSpace(connectionString))
+    throw new InvalidOperationException("Aspire did not inject ConnectionStrings:Default");
+
+builder.Services.AddDbContext<SentraDbContext>(options =>
+{
+    options.UseNpgsql(connectionString, npg =>
+    {
+        npg.MigrationsAssembly("Sentra.Infrastructure");
+        npg.EnableRetryOnFailure();
+    });
+});
+
+
 
 // Built-in OpenAPI document generation
 builder.Services.AddOpenApi(options =>
@@ -61,6 +81,12 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<SentraDbContext>();
+    db.Database.Migrate();
+}
 
 app.UseExceptionHandler();
 app.UseCors("SentraCors");
