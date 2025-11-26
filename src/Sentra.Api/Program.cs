@@ -1,47 +1,92 @@
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using Scalar.AspNetCore;
+using Sentra.Api.OpenApi;
+using Sentra.Application.Auth;
+using Sentra.Application.Users;
+using Sentra.Domain.Entities;
+using Sentra.Infrastructure.Auth;
+using Sentra.Infrastructure.Sql;
+using Sentra.Infrastructure.Sql.Repositories;
+using System.Text;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add service defaults & Aspire client integrations.
 builder.AddServiceDefaults();
 
-// Add services to the container.
 builder.Services.AddProblemDetails();
+builder.Services.AddControllers();
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
-builder.Services.AddOpenApi();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("SentraCors", p =>
+    {
+        p.WithOrigins("http://localhost:*", "https://localhost:*")
+         .AllowCredentials()
+         .AllowAnyHeader()
+         .AllowAnyMethod();
+    });
+});
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IJwtProvider, JwtProvider>();
+builder.Services.AddScoped<IPasswordHasher<UserEntity>, PasswordHasher<UserEntity>>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddDbContext<SentraDbContext>();
+
+// Built-in OpenAPI document generation
+builder.Services.AddOpenApi(options =>
+{
+    // keep your existing transformer
+    options.AddDocumentTransformer<BearerSecuritySchemeTransformer>();
+});
+
+// JWT setup
+var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
+if (jwtOptions is null) throw new InvalidOperationException("Missing configuration section: JwtOptions");
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+.AddJwtBearer(o =>
+{
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = false,
+        ValidateAudience = false,
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 app.UseExceptionHandler();
+app.UseCors("SentraCors");
 
-if (app.Environment.IsDevelopment())
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapOpenApi();
+
+app.UseSwaggerUI(options =>
 {
-    app.MapOpenApi();
-}
+    options.SwaggerEndpoint("/openapi/v1.json", "Sentra API v1");
+    options.RoutePrefix = "docs";
+});
 
-string[] summaries = ["Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"];
-
-app.MapGet("/", () => "API service is running. Navigate to /weatherforecast to see sample data.");
-
-app.MapGet("/weatherforecast", () =>
+app.UseReDoc(options =>
 {
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast");
+    options.SpecUrl("/openapi/v1.json"); // <- important
+    options.RoutePrefix = "redoc";        // UI at /docs
+    options.DocumentTitle = "Sentra API";
+});
+
+app.MapControllers();
+
+app.MapGet("/", () => Results.Redirect("/docs"));
 
 app.MapDefaultEndpoints();
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}

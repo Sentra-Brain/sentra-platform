@@ -1,24 +1,25 @@
-﻿using Sentra.Application.Users;
-using Sentra.Application.Security;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Identity;
+using Sentra.Application.Users;
+using Sentra.Domain.Entities;
 
 namespace Sentra.Application.Auth;
 
 public sealed class AuthService : IAuthService
 {
     private readonly IUserRepository _users;
-    private readonly IPasswordHasher _hasher;
+    private readonly IPasswordHasher<UserEntity> _passwordHasher;
     private readonly IJwtProvider _jwt;
     private readonly ILogger<AuthService> _log;
 
     public AuthService(
         IUserRepository users,
-        IPasswordHasher hasher,
+        IPasswordHasher<UserEntity> hasher,
         IJwtProvider jwt,
         ILogger<AuthService> log)
     {
         _users = users;
-        _hasher = hasher;
+        _passwordHasher = hasher;
         _jwt = jwt;
         _log = log;
     }
@@ -31,7 +32,13 @@ public sealed class AuthService : IAuthService
         if (user is null || user.Disabled)
             throw new UnauthorizedAccessException("Invalid credentials");
 
-        if (!_hasher.Verify(password, user.HashedPassword))
+        var verification = _passwordHasher.VerifyHashedPassword(
+            user,
+            user.HashedPassword,
+            password
+        );
+
+        if (verification == PasswordVerificationResult.Failed)
             throw new UnauthorizedAccessException("Invalid credentials");
 
         var access = _jwt.CreateAccessToken(user.Username, user.Roles, TimeSpan.FromMinutes(30));

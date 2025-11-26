@@ -15,7 +15,7 @@ public class AuthController : ControllerBase
     [HttpPost("token")]
     public async Task<IActionResult> Login([FromBody] LoginRequest req)
     {
-        var result = await _auth.Login(req.Username, req.Password);
+        var result = await _auth.Login(req.Email, req.Password);
         return Ok(result);
     }
 
