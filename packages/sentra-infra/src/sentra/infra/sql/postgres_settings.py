@@ -1,4 +1,5 @@
 # packages/sentra-infra/src/sentra/infra/sql/postgres_settings.py
+import os
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import Field, ValidationError
@@ -8,7 +9,9 @@ from sentra.shared.logging import get_logger
 logger = get_logger(__name__)
 
 class PostgresSettings(BaseSettings):
-    database_url: str = Field(..., json_schema_extra={"env": "DATABASE_URL"})
+    database_url: str = Field(
+        default_factory=lambda: os.getenv("DATABASE_URL") or os.getenv("ConnectionStrings__sentra-brain-sql", "")
+    )
     initial_admin_username: str = Field(..., json_schema_extra={"env": "INITIAL_ADMIN_USERNAME"})
     initial_admin_email: str = Field(..., json_schema_extra={"env": "INITIAL_ADMIN_EMAIL"})
     initial_admin_password: str = Field(..., json_schema_extra={"env": "INITIAL_ADMIN_PASSWORD"})

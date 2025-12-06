@@ -1,3 +1,4 @@
+import os
 from dotenv import load_dotenv
 from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -11,7 +12,9 @@ load_dotenv()
 
 class Settings(BaseSettings):
     # PostgreSQL (same as sentra-api)
-    database_url: str = Field(..., json_schema_extra={"env": "DATABASE_URL"})
+    database_url: str = Field(
+        default_factory=lambda: os.getenv("DATABASE_URL") or os.getenv("ConnectionStrings__sentra-brain-sql", "")
+    )
 
     # RabbitMQ
     rabbitmq_host: str = Field(default="rabbitmq", json_schema_extra={"env": "RABBITMQ_HOST"})

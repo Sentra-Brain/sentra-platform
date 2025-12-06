@@ -41,9 +41,9 @@ builder.Services.AddScoped<IUserRepository, UserRepository>();
 // ------------------------------------------------------------
 // IMPORTANT: read Aspire-supplied connection string
 // ------------------------------------------------------------
-var connectionString = builder.Configuration.GetConnectionString("Default");
+var connectionString = builder.Configuration.GetConnectionString("sentra-brain-sql");
 if (string.IsNullOrWhiteSpace(connectionString))
-    throw new InvalidOperationException("Aspire did not inject ConnectionStrings:Default");
+    throw new InvalidOperationException("Aspire did not inject ConnectionStrings:sentra-brain-sql");
 
 builder.Services.AddDbContext<SentraDbContext>(options =>
 {

@@ -153,7 +153,6 @@ var worker = builder.AddPythonModule(
 
     // Postgres
     .WithReference(sentraDb)
-    .WithEnvironment("DATABASE_URL",  sentraDb.Resource.ConnectionStringExpression)
     .WithEnvironment("INITIAL_ADMIN_USERNAME", initialAdminUserName)
     .WithEnvironment("INITIAL_ADMIN_EMAIL", initialAdminEmail)
     .WithEnvironment("INITIAL_ADMIN_PASSWORD", initialAdminPassword)
@@ -205,7 +204,6 @@ var sentraRagServer = builder
     .WithVirtualEnvironment("../../.venv")
      // Database
     .WithReference(sentraDb)
-    .WithEnvironment("DATABASE_URL",  sentraDb.Resource.ConnectionStringExpression)
     .WithEnvironment("INITIAL_ADMIN_USERNAME", initialAdminUserName)
     .WithEnvironment("INITIAL_ADMIN_EMAIL", initialAdminEmail)
     .WithEnvironment("INITIAL_ADMIN_PASSWORD", initialAdminPassword)
