@@ -3,7 +3,7 @@
 namespace Sentra.Domain.Entities;
 
 [Table("chat_settings")]
-public class ChatSettingsEntity : BaseEntity
+public class ChatSettings : Base
 {
     public int MaxTokens { get; set; } = 2048;
     public float Temperature { get; set; } = 0.7f;

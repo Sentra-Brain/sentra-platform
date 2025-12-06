@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Sentra.Domain.Entities;
 
 [Table("users")]
-public class UserEntity : BaseEntity
+public class User : Base
 {
     public string Username { get; set; }
     public string Email { get; set; }
@@ -19,9 +19,9 @@ public class UserEntity : BaseEntity
     public string PreferredLanguage { get; set; } = "es";
     public string Timezone { get; set; } = "Europe/Madrid";
 
-    public IList<ConversationEntity> Conversations { get; set; }
-    public IList<DocumentEntity> Documents { get; set; }
-    public IList<KnowledgeSourceEntity> KnowledgeSources { get; set; }
+    public IList<Conversation> Conversations { get; set; }
+    public IList<Document> Documents { get; set; }
+    public IList<KnowledgeSource> KnowledgeSources { get; set; }
 
     public IEnumerable<Role> GetRoles()
     {

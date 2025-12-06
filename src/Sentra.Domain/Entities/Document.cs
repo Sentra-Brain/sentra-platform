@@ -5,7 +5,7 @@ using Sentra.Domain.Enums;
 namespace Sentra.Domain.Entities;
 
 [Table("documents")]
-public class DocumentEntity : BaseEntity
+public class Document : Base
 {
     public string Filename { get; set; }
     public string DisplayName { get; set; }
@@ -26,9 +26,9 @@ public class DocumentEntity : BaseEntity
 
     [ForeignKey(nameof(KnowledgeSource))]
     public Guid KnowledgeSourceId { get; set; }
-    public KnowledgeSourceEntity? KnowledgeSource { get; set; }
+    public KnowledgeSource? KnowledgeSource { get; set; }
 
     [ForeignKey(nameof(CreatedBy))]
     public Guid CreatedById { get; set; }
-    public UserEntity? CreatedBy { get; set; }
+    public User? CreatedBy { get; set; }
 }

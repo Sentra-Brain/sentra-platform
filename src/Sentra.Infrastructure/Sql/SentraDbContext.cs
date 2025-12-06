@@ -6,13 +6,13 @@ namespace Sentra.Infrastructure.Sql;
 
 public class SentraDbContext : DbContext
 {
-    public DbSet<UserEntity> Users => Set<UserEntity>();
-    public DbSet<DocumentEntity> Documents => Set<DocumentEntity>();
-    public DbSet<ConversationEntity> Conversations => Set<ConversationEntity>();
-    public DbSet<KnowledgeSourceEntity> KnowledgeSources => Set<KnowledgeSourceEntity>();
-    public DbSet<OrganizationEntity> Organizations => Set<OrganizationEntity>();
-    public DbSet<SystemSettingsEntity> SystemSettings => Set<SystemSettingsEntity>();
-    public DbSet<ChatSettingsEntity> ChatSettings => Set<ChatSettingsEntity>();
+    public DbSet<User> Users => Set<User>();
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<Conversation> Conversations => Set<Conversation>();
+    public DbSet<KnowledgeSource> KnowledgeSources => Set<KnowledgeSource>();
+    public DbSet<Organization> Organizations => Set<Organization>();
+    public DbSet<SystemSettings> SystemSettings => Set<SystemSettings>();
+    public DbSet<ChatSettings> ChatSettings => Set<ChatSettings>();
 
     public SentraDbContext(DbContextOptions<SentraDbContext> options)
         : base(options) { }
@@ -26,48 +26,48 @@ public class SentraDbContext : DbContext
 
     static void ConfigureEnums(ModelBuilder b)
     {
-        b.Entity<DocumentEntity>()
+        b.Entity<Document>()
             .Property(x => x.Filetype)
             .HasConversion<string>();
 
-        b.Entity<DocumentEntity>()
+        b.Entity<Document>()
             .Property(x => x.Status)
             .HasConversion<string>();
 
-        b.Entity<KnowledgeSourceEntity>()
+        b.Entity<KnowledgeSource>()
             .Property(x => x.Type)
             .HasConversion<string>();
 
-        b.Entity<KnowledgeSourceEntity>()
+        b.Entity<KnowledgeSource>()
             .Property(x => x.Visibility)
             .HasConversion<string>();
 
-        b.Entity<KnowledgeSourceEntity>()
+        b.Entity<KnowledgeSource>()
             .Property(x => x.Status)
             .HasConversion<string>();
     }
 
     static void ConfigureRelationships(ModelBuilder b)
     {
-        b.Entity<UserEntity>()
+        b.Entity<User>()
             .HasMany(u => u.Conversations)
             .WithOne(c => c.CreatedBy)
             .HasForeignKey(c => c.CreatedById)
             .OnDelete(DeleteBehavior.Restrict);
 
-        b.Entity<UserEntity>()
+        b.Entity<User>()
             .HasMany(u => u.Documents)
             .WithOne(d => d.CreatedBy)
             .HasForeignKey(d => d.CreatedById)
             .OnDelete(DeleteBehavior.Restrict);
 
-        b.Entity<UserEntity>()
+        b.Entity<User>()
             .HasMany(u => u.KnowledgeSources)
             .WithOne(k => k.CreatedBy)
             .HasForeignKey(k => k.CreatedById)
             .OnDelete(DeleteBehavior.Restrict);
 
-        b.Entity<DocumentEntity>()
+        b.Entity<Document>()
             .HasOne(d => d.KnowledgeSource)
             .WithMany()
             .HasForeignKey(d => d.KnowledgeSourceId)

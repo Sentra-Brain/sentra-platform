@@ -8,13 +8,13 @@ namespace Sentra.Application.Auth;
 public sealed class AuthService : IAuthService
 {
     private readonly IUserRepository _users;
-    private readonly IPasswordHasher<UserEntity> _passwordHasher;
+    private readonly IPasswordHasher<User> _passwordHasher;
     private readonly IJwtProvider _jwt;
     private readonly ILogger<AuthService> _log;
 
     public AuthService(
         IUserRepository users,
-        IPasswordHasher<UserEntity> hasher,
+        IPasswordHasher<User> hasher,
         IJwtProvider jwt,
         ILogger<AuthService> log)
     {

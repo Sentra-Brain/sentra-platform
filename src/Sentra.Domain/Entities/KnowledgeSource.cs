@@ -5,7 +5,7 @@ using Sentra.Domain.Enums;
 namespace Sentra.Domain.Entities;
 
 [Table("knowledge_sources")]
-public class KnowledgeSourceEntity : BaseEntity
+public class KnowledgeSource : Base
 {
     public string Name { get; set; }
 
@@ -20,5 +20,5 @@ public class KnowledgeSourceEntity : BaseEntity
 
     [ForeignKey(nameof(CreatedBy))]
     public Guid CreatedById { get; set; }
-    public UserEntity? CreatedBy { get; set; }
+    public User? CreatedBy { get; set; }
 }

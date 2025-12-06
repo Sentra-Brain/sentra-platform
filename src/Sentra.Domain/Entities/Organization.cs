@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Sentra.Domain.Entities;
 
 [Table("organizations")]
-public class OrganizationEntity : BaseEntity
+public class Organization : Base
 {
     public string Name { get; set; }
     public string Slug { get; set; }

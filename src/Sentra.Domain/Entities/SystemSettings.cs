@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace Sentra.Domain.Entities;
 
 [Table("system_settings")]
-public class SystemSettingsEntity : BaseEntity
+public class SystemSettings : Base
 {
     public string WorkspaceName { get; set; } = "Sentra Brain";
     public string LicenseType { get; set; } = "community";

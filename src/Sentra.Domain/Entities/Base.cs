@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sentra.Domain.Entities;
 
-public abstract class BaseEntity
+public abstract class Base
 {
     [Key]
     public Guid Id { get; set; } = Guid.NewGuid();
