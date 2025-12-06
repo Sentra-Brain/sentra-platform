@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using Scalar.AspNetCore;
+using Sentra.Api.Extensions;
 using Sentra.Api.OpenApi;
 using Sentra.Application.Auth;
 using Sentra.Application.Users;
@@ -11,6 +12,7 @@ using Sentra.Domain.Entities;
 using Sentra.Infrastructure.Auth;
 using Sentra.Infrastructure.Sql;
 using Sentra.Infrastructure.Sql.Repositories;
+using Sentra.Infrastructure.Sql.Seeding;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -54,7 +56,8 @@ builder.Services.AddDbContext<SentraDbContext>(options =>
     });
 });
 
-
+// Database seeding configuration
+builder.Services.AddDatabaseSeeding(builder.Configuration);
 
 // Built-in OpenAPI document generation
 builder.Services.AddOpenApi(options =>
@@ -82,11 +85,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+// Apply migrations and seed database
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<SentraDbContext>();
     db.Database.Migrate();
 }
+
+// Seed the database with initial data (admin user, etc.)
+await app.SeedDatabaseAsync();
 
 app.UseExceptionHandler();
 app.UseCors("SentraCors");
