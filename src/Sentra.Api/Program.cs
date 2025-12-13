@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Sentra.Api.Extensions;
 using Sentra.Api.Features.Auth;
+using Sentra.Api.Features.Users;
 using Sentra.Api.OpenApi;
 using Sentra.Application.Auth;
 using Sentra.Application.Users;
@@ -117,6 +118,7 @@ app.UseAuthorization();
 
 // Map feature endpoints
 app.MapAuthEndpoints();
+app.MapUserEndpoints();
 
 app.MapOpenApi();
 
