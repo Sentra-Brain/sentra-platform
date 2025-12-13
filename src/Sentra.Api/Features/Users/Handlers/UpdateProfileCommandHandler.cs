@@ -1,7 +1,7 @@
 using Kommand.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Users.Commands;
-using Sentra.Application.Users;
-using Sentra.Contracts.Users;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Users.Handlers;
 
@@ -10,20 +10,23 @@ namespace Sentra.Api.Features.Users.Handlers;
 /// </summary>
 public sealed class UpdateProfileCommandHandler : ICommandHandler<UpdateProfileCommand, UserProfileResponse>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly ILogger<UpdateProfileCommandHandler> _log;
 
     public UpdateProfileCommandHandler(
-        IUserRepository users,
+        SentraDbContext db,
         ILogger<UpdateProfileCommandHandler> log)
     {
-        _users = users;
+        _db = db;
         _log = log;
     }
 
     public async Task<UserProfileResponse> HandleAsync(UpdateProfileCommand command, CancellationToken ct)
     {
-        var user = await _users.GetById(command.UserId);
+        var user = await _db.Users
+            .Where(u => u.DeletedAt == null)
+            .Where(u => u.Id == command.UserId)
+            .FirstOrDefaultAsync(ct);
 
         if (user is null)
         {
@@ -40,22 +43,14 @@ public sealed class UpdateProfileCommandHandler : ICommandHandler<UpdateProfileC
         if (command.PreferredLanguage is not null) user.PreferredLanguage = command.PreferredLanguage;
         if (command.Timezone is not null) user.Timezone = command.Timezone;
 
-        await _users.Update(user);
+        await _db.SaveChangesAsync(ct);
 
         _log.LogInformation("Profile updated for user {Username}", user.Username);
 
-        return new UserProfileResponse(
-            user.Id,
-            user.Username,
-            user.Email,
-            user.FullName,
-            user.JobTitle,
-            user.AvatarUrl,
-            user.PhoneNumber,
-            user.Bio,
-            user.PreferredLanguage ?? "en",
-            user.Timezone ?? "UTC",
-            user.GetRoles().Select(r => r.ToString()).ToList()
-        );
+        // Re-query using projection
+        return await _db.Users
+            .Where(u => u.Id == user.Id)
+            .Select(UserProfileResponse.Projection)
+            .FirstAsync(ct);
     }
 }

@@ -1,7 +1,8 @@
 using Kommand.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Auth.Commands;
 using Sentra.Application.Auth;
-using Sentra.Application.Users;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Auth.Handlers;
 
@@ -10,16 +11,16 @@ namespace Sentra.Api.Features.Auth.Handlers;
 /// </summary>
 public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCommand, RefreshTokenResponse>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly IJwtProvider _jwt;
     private readonly ILogger<RefreshTokenCommandHandler> _log;
 
     public RefreshTokenCommandHandler(
-        IUserRepository users,
+        SentraDbContext db,
         IJwtProvider jwt,
         ILogger<RefreshTokenCommandHandler> log)
     {
-        _users = users;
+        _db = db;
         _jwt = jwt;
         _log = log;
     }
@@ -36,8 +37,11 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
         }
 
         // Find user
-        var user = await _users.GetByUsername(tokenData.Username)
-                   ?? await _users.GetByEmail(tokenData.Username.ToLowerInvariant());
+        var normalizedUsername = tokenData.Username.ToLowerInvariant();
+        var user = await _db.Users
+            .Where(u => u.DeletedAt == null)
+            .Where(u => u.Username.ToLower() == normalizedUsername || u.Email.ToLower() == normalizedUsername)
+            .FirstOrDefaultAsync(ct);
 
         if (user is null || user.Disabled)
         {

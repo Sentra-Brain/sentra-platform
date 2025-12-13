@@ -1,9 +1,9 @@
 using Kommand.Abstractions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Users.Commands;
-using Sentra.Application.Users;
-using Sentra.Contracts.Users;
 using Sentra.Domain.Entities;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Users.Handlers;
 
@@ -12,16 +12,16 @@ namespace Sentra.Api.Features.Users.Handlers;
 /// </summary>
 public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand, UserResponse>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly ILogger<UpdateUserCommandHandler> _log;
 
     public UpdateUserCommandHandler(
-        IUserRepository users,
+        SentraDbContext db,
         IPasswordHasher<User> passwordHasher,
         ILogger<UpdateUserCommandHandler> log)
     {
-        _users = users;
+        _db = db;
         _passwordHasher = passwordHasher;
         _log = log;
     }
@@ -30,7 +30,10 @@ public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand
     {
         // TODO: Add permission check - verify CurrentUserId has Admin role
 
-        var user = await _users.GetById(command.UserToUpdateId);
+        var user = await _db.Users
+            .Where(u => u.DeletedAt == null)
+            .Where(u => u.Id == command.UserToUpdateId)
+            .FirstOrDefaultAsync(ct);
 
         if (user is null)
         {
@@ -44,17 +47,14 @@ public sealed class UpdateUserCommandHandler : ICommandHandler<UpdateUserCommand
             user.HashedPassword = _passwordHasher.HashPassword(user, command.Password);
         }
 
-        await _users.Update(user);
+        await _db.SaveChangesAsync(ct);
 
         _log.LogInformation("User {UserId} updated by {CurrentUserId}", command.UserToUpdateId, command.CurrentUserId);
 
-        return new UserResponse(
-            user.Id,
-            user.Username,
-            user.Email,
-            user.FullName,
-            user.Disabled,
-            user.GetRoles().Select(r => r.ToString()).ToList()
-        );
+        // Re-query using projection
+        return await _db.Users
+            .Where(u => u.Id == user.Id)
+            .Select(UserResponse.Projection)
+            .FirstAsync(ct);
     }
 }

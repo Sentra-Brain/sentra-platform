@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.3.11206.111 d18.3
+VisualStudioVersion = 18.3.11206.111
 MinimumVisualStudioVersion = 17.8.0.0
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentra.AppHost", "Sentra.AppHost\Sentra.AppHost.csproj", "{6C76FAC9-E6B2-420D-85DE-90AB82F407D9}"
 EndProject
@@ -12,8 +12,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Sentra.Tests", "Sentra.Tests\Sentra.Tests.csproj", "{2CF80D21-D449-414B-96BD-B2529BFFDC0C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Domain", "Sentra.Domain\Sentra.Domain.csproj", "{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Contracts", "Sentra.Contracts\Sentra.Contracts.csproj", "{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Sentra.Infrastructure", "Sentra.Infrastructure\Sentra.Infrastructure.csproj", "{28D7AEC6-22A3-6207-B111-211F747D7763}"
 EndProject
@@ -47,10 +45,6 @@ Global
 		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A86E427A-3AF3-BA6B-1D1D-DEC087858F3A}.Release|Any CPU.Build.0 = Release|Any CPU
-		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{5DABE7A0-AE1F-D0EF-3811-AB884FC618FA}.Release|Any CPU.Build.0 = Release|Any CPU
 		{28D7AEC6-22A3-6207-B111-211F747D7763}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{28D7AEC6-22A3-6207-B111-211F747D7763}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{28D7AEC6-22A3-6207-B111-211F747D7763}.Release|Any CPU.ActiveCfg = Release|Any CPU

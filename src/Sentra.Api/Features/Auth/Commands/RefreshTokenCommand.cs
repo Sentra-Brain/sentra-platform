@@ -1,4 +1,5 @@
 using Kommand.Abstractions;
+using Sentra.Api.Features.Auth;
 
 namespace Sentra.Api.Features.Auth.Commands;
 

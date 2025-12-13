@@ -1,5 +1,6 @@
 using Kommand.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Sentra.Api.Features.Auth;
 using Sentra.Api.Features.Auth.Commands;
 
 namespace Sentra.Api.Features.Auth;

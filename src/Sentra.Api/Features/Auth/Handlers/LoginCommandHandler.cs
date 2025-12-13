@@ -1,9 +1,10 @@
 using Kommand.Abstractions;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Auth.Commands;
 using Sentra.Application.Auth;
-using Sentra.Application.Users;
 using Sentra.Domain.Entities;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Auth.Handlers;
 
@@ -12,18 +13,18 @@ namespace Sentra.Api.Features.Auth.Handlers;
 /// </summary>
 public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, LoginResponse>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly IPasswordHasher<User> _passwordHasher;
     private readonly IJwtProvider _jwt;
     private readonly ILogger<LoginCommandHandler> _log;
 
     public LoginCommandHandler(
-        IUserRepository users,
+        SentraDbContext db,
         IPasswordHasher<User> hasher,
         IJwtProvider jwt,
         ILogger<LoginCommandHandler> log)
     {
-        _users = users;
+        _db = db;
         _passwordHasher = hasher;
         _jwt = jwt;
         _log = log;
@@ -32,8 +33,11 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, LoginRes
     public async Task<LoginResponse> HandleAsync(LoginCommand command, CancellationToken ct)
     {
         // Find user by username or email
-        var user = await _users.GetByUsername(command.EmailOrUsername)
-                   ?? await _users.GetByEmail(command.EmailOrUsername.ToLowerInvariant());
+        var normalizedInput = command.EmailOrUsername.ToLowerInvariant();
+        var user = await _db.Users
+            .Where(u => u.DeletedAt == null)
+            .Where(u => u.Username.ToLower() == normalizedInput || u.Email.ToLower() == normalizedInput)
+            .FirstOrDefaultAsync(ct);
 
         if (user is null || user.Disabled)
         {

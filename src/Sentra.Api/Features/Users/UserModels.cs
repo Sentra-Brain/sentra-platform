@@ -1,4 +1,7 @@
-namespace Sentra.Contracts.Users;
+using Sentra.Domain.Enums;
+using System.Linq.Expressions;
+
+namespace Sentra.Api.Features.Users;
 
 /// <summary>
 /// User model for API responses.
@@ -10,7 +13,21 @@ public sealed record UserResponse(
     string? FullName,
     bool Disabled,
     List<string> Roles
-);
+)
+{
+    /// <summary>
+    /// Expression to project from User entity to UserResponse.
+    /// </summary>
+    public static Expression<Func<Domain.Entities.User, UserResponse>> Projection =>
+        u => new UserResponse(
+            u.Id,
+            u.Username,
+            u.Email,
+            u.FullName,
+            u.Disabled,
+            u.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+        );
+}
 
 /// <summary>
 /// Request model for user signup.
@@ -65,4 +82,23 @@ public sealed record UserProfileResponse(
     string PreferredLanguage,
     string Timezone,
     List<string> Roles
-);
+)
+{
+    /// <summary>
+    /// Expression to project from User entity to UserProfileResponse.
+    /// </summary>
+    public static Expression<Func<Domain.Entities.User, UserProfileResponse>> Projection =>
+        u => new UserProfileResponse(
+            u.Id,
+            u.Username,
+            u.Email,
+            u.FullName,
+            u.JobTitle,
+            u.AvatarUrl,
+            u.PhoneNumber,
+            u.Bio,
+            u.PreferredLanguage,
+            u.Timezone,
+            u.Roles.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+        );
+}

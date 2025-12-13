@@ -8,8 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sentra.Application\Sentra.Application.csproj" />
-    <ProjectReference Include="..\Sentra.Contracts\Sentra.Contracts.csproj" />
     <ProjectReference Include="..\Sentra.Infrastructure\Sentra.Infrastructure.csproj" />
     <ProjectReference Include="..\Sentra.ServiceDefaults\Sentra.ServiceDefaults.csproj" />
   </ItemGroup>

@@ -1,6 +1,7 @@
 using Kommand.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Users.Queries;
-using Sentra.Application.Users;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Users.Handlers;
 
@@ -9,27 +10,32 @@ namespace Sentra.Api.Features.Users.Handlers;
 /// </summary>
 public sealed class GetUserDisplayNameQueryHandler : IQueryHandler<GetUserDisplayNameQuery, string>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly ILogger<GetUserDisplayNameQueryHandler> _log;
 
     public GetUserDisplayNameQueryHandler(
-        IUserRepository users,
+        SentraDbContext db,
         ILogger<GetUserDisplayNameQueryHandler> log)
     {
-        _users = users;
+        _db = db;
         _log = log;
     }
 
     public async Task<string> HandleAsync(GetUserDisplayNameQuery query, CancellationToken ct)
     {
-        var user = await _users.GetById(query.UserId);
+        var displayName = await _db.Users
+            .AsNoTracking()
+            .Where(u => u.DeletedAt == null)
+            .Where(u => u.Id == query.UserId)
+            .Select(u => u.FullName ?? u.Username)
+            .FirstOrDefaultAsync(ct);
 
-        if (user is null)
+        if (displayName is null)
         {
             _log.LogWarning("User not found for display name: {UserId}", query.UserId);
             return "Unknown User";
         }
 
-        return user.FullName ?? user.Username;
+        return displayName;
     }
 }

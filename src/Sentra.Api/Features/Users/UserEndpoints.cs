@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sentra.Api.Features.Users.Commands;
 using Sentra.Api.Features.Users.Queries;
-using Sentra.Contracts.Users;
+using Sentra.Api.Features.Users;
 using System.Security.Claims;
 
 namespace Sentra.Api.Features.Users;

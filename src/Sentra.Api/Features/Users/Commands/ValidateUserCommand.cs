@@ -1,5 +1,5 @@
 using Kommand.Abstractions;
-using Sentra.Contracts.Users;
+using Sentra.Api.Features.Users;
 
 namespace Sentra.Api.Features.Users.Commands;
 

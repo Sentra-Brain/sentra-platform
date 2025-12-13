@@ -6,12 +6,12 @@ namespace Sentra.Domain.Entities;
 [Table("users")]
 public class User : Base
 {
-    public string Username { get; set; }
-    public string Email { get; set; }
-    public string FullName { get; set; }
-    public string HashedPassword { get; set; }
+    public required string Username { get; set; }
+    public required string Email { get; set; }
+    public required string FullName { get; set; }
+    public required string HashedPassword { get; set; }
     public bool Disabled { get; set; } = false;
-    public string Roles { get; set; }
+    public required string Roles { get; set; }
     public string? JobTitle { get; set; }
     public string? AvatarUrl { get; set; }
     public string? PhoneNumber { get; set; }
@@ -19,9 +19,9 @@ public class User : Base
     public string PreferredLanguage { get; set; } = "es";
     public string Timezone { get; set; } = "Europe/Madrid";
 
-    public IList<Conversation> Conversations { get; set; }
-    public IList<Document> Documents { get; set; }
-    public IList<KnowledgeSource> KnowledgeSources { get; set; }
+    public IList<Conversation> Conversations { get; set; } = new List<Conversation>();
+    public IList<Document> Documents { get; set; } = new List<Document>();
+    public IList<KnowledgeSource> KnowledgeSources { get; set; } = new List<KnowledgeSource>();
 
     public IEnumerable<Role> GetRoles()
     {

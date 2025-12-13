@@ -1,7 +1,7 @@
 using Kommand.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Users.Queries;
-using Sentra.Application.Users;
-using Sentra.Contracts.Users;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Users.Handlers;
 
@@ -10,20 +10,25 @@ namespace Sentra.Api.Features.Users.Handlers;
 /// </summary>
 public sealed class GetMeQueryHandler : IQueryHandler<GetMeQuery, UserResponse>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly ILogger<GetMeQueryHandler> _log;
 
     public GetMeQueryHandler(
-        IUserRepository users,
+        SentraDbContext db,
         ILogger<GetMeQueryHandler> log)
     {
-        _users = users;
+        _db = db;
         _log = log;
     }
 
     public async Task<UserResponse> HandleAsync(GetMeQuery query, CancellationToken ct)
     {
-        var user = await _users.GetById(query.UserId);
+        var user = await _db.Users
+            .AsNoTracking()
+            .Where(u => u.DeletedAt == null)
+            .Where(u => u.Id == query.UserId)
+            .Select(UserResponse.Projection)
+            .FirstOrDefaultAsync(ct);
 
         if (user is null)
         {
@@ -31,13 +36,6 @@ public sealed class GetMeQueryHandler : IQueryHandler<GetMeQuery, UserResponse>
             throw new InvalidOperationException("User not found");
         }
 
-        return new UserResponse(
-            user.Id,
-            user.Username,
-            user.Email,
-            user.FullName,
-            user.Disabled,
-            user.GetRoles().Select(r => r.ToString()).ToList()
-        );
+        return user;
     }
 }

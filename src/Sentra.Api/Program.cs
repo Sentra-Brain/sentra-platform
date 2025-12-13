@@ -1,17 +1,16 @@
-﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Sentra.Api.Extensions;
 using Sentra.Api.Features.Auth;
+using Sentra.Api.Features.Conversations;
 using Sentra.Api.Features.Users;
 using Sentra.Api.OpenApi;
 using Sentra.Application.Auth;
-using Sentra.Application.Users;
 using Sentra.Domain.Entities;
 using Sentra.Infrastructure.Auth;
 using Sentra.Infrastructure.Sql;
-using Sentra.Infrastructure.Sql.Repositories;
 using Sentra.Infrastructure.Sql.Seeding;
 using System.Text;
 
@@ -46,9 +45,6 @@ builder.Services.AddKommand(config =>
 // Infrastructure services
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-
 
 // ------------------------------------------------------------
 // IMPORTANT: read Aspire-supplied connection string
@@ -119,6 +115,7 @@ app.UseAuthorization();
 // Map feature endpoints
 app.MapAuthEndpoints();
 app.MapUserEndpoints();
+app.MapConversationEndpoints();
 
 app.MapOpenApi();
 

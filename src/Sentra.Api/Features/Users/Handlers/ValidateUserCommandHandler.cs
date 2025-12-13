@@ -1,7 +1,7 @@
 using Kommand.Abstractions;
+using Microsoft.EntityFrameworkCore;
 using Sentra.Api.Features.Users.Commands;
-using Sentra.Application.Users;
-using Sentra.Contracts.Users;
+using Sentra.Infrastructure.Sql;
 
 namespace Sentra.Api.Features.Users.Handlers;
 
@@ -11,14 +11,14 @@ namespace Sentra.Api.Features.Users.Handlers;
 /// </summary>
 public sealed class ValidateUserCommandHandler : ICommandHandler<ValidateUserCommand, UserResponse>
 {
-    private readonly IUserRepository _users;
+    private readonly SentraDbContext _db;
     private readonly ILogger<ValidateUserCommandHandler> _log;
 
     public ValidateUserCommandHandler(
-        IUserRepository users,
+        SentraDbContext db,
         ILogger<ValidateUserCommandHandler> log)
     {
-        _users = users;
+        _db = db;
         _log = log;
     }
 
@@ -32,10 +32,9 @@ public sealed class ValidateUserCommandHandler : ICommandHandler<ValidateUserCom
 
         // Example implementation:
         // var userId = DecodeVerificationToken(command.Token);
-        // var user = await _users.GetById(userId);
+        // var user = await _db.Users.FindAsync(userId, ct);
         // user.Disabled = false;
-        // await _users.Update(user);
-        // await _users.SaveChangesAsync(ct);
-        // return new UserResponse(...);
+        // await _db.SaveChangesAsync(ct);
+        // return await _db.Users.Where(u => u.Id == userId).Select(UserResponse.Projection).FirstAsync(ct);
     }
 }

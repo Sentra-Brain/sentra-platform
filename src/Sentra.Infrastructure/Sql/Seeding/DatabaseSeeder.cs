@@ -87,17 +87,13 @@ public sealed class DatabaseSeeder
             Username = _configuration.InitialAdminUsername,
             Email = _configuration.InitialAdminEmail.ToLowerInvariant(),
             FullName = _configuration.InitialAdminFullName ?? "System Administrator",
+            HashedPassword = _passwordHasher.HashPassword(null!, _configuration.InitialAdminPassword),
+            Roles = string.Join(",", [Role.Admin, Role.User]),
             Disabled = false, // Admin is enabled by default
             PreferredLanguage = "en",
             Timezone = "UTC",
             CreatedAt = DateTime.UtcNow
         };
-
-        // Hash the password
-        adminUser.HashedPassword = _passwordHasher.HashPassword(adminUser, _configuration.InitialAdminPassword);
-
-        // Set admin and user roles
-        adminUser.SetRoles([Role.Admin, Role.User]);
 
         await _context.Users.AddAsync(adminUser, cancellationToken);
         await _context.SaveChangesAsync(cancellationToken);
