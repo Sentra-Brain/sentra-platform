@@ -2,8 +2,6 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi;
-using Scalar.AspNetCore;
 using Sentra.Api.Extensions;
 using Sentra.Api.OpenApi;
 using Sentra.Application.Auth;
@@ -21,6 +19,10 @@ builder.AddServiceDefaults();
 
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
+
+// Add health checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<SentraDbContext>("database");
 
 builder.Services.AddCors(options =>
 {
@@ -103,6 +105,7 @@ app.UseCors("SentraCors");
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapOpenApi();
 
