@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Sentra.Api.Extensions;
+using Sentra.Api.Features.Auth;
 using Sentra.Api.OpenApi;
 using Sentra.Application.Auth;
 using Sentra.Application.Users;
@@ -18,7 +19,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.AddServiceDefaults();
 
 builder.Services.AddProblemDetails();
-builder.Services.AddControllers();
 
 // Add health checks
 builder.Services.AddHealthChecks()
@@ -35,7 +35,14 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddScoped<IAuthService, AuthService>();
+// Kommand CQRS configuration
+builder.Services.AddKommand(config =>
+{
+    config.RegisterHandlersFromAssembly(typeof(Program).Assembly);
+    config.WithValidation(); // Enable automatic validation
+});
+
+// Infrastructure services
 builder.Services.AddScoped<IJwtProvider, JwtProvider>();
 builder.Services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -88,6 +95,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     };
 });
 
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
 
 // Apply migrations and seed database
@@ -106,6 +115,8 @@ app.UseCors("SentraCors");
 app.UseAuthentication();
 app.UseAuthorization();
 
+// Map feature endpoints
+app.MapAuthEndpoints();
 
 app.MapOpenApi();
 
@@ -125,8 +136,6 @@ app.UseReDoc(options =>
     options.RoutePrefix = "redoc";
     options.DocumentTitle = "Sentra API";
 });
-
-app.MapControllers();
 
 app.MapGet("/", () => Results.Redirect("/docs"));
 
