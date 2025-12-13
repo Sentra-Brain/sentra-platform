@@ -70,6 +70,9 @@ builder.Services.AddOpenApi(options =>
 var jwtOptions = builder.Configuration.GetSection("JwtOptions").Get<JwtOptions>();
 if (jwtOptions is null) throw new InvalidOperationException("Missing configuration section: JwtOptions");
 
+// Register JwtOptions for injection into JwtProvider
+builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection("JwtOptions"));
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 .AddJwtBearer(o =>
 {
